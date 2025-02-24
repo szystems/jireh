@@ -8,10 +8,10 @@
         <div class="main-header d-flex align-items-center justify-content-between position-relative">
             <div class="d-flex align-items-center justify-content-center">
                 <div class="page-icon">
-                    <i class="bi bi-rulers"></i>
+                    <i class="bi bi-piggy-bank"></i>
                 </div>
                 <div class="page-title">
-                    <h5>Unidades de Medida</h5>
+                    <h5>Tipos de Comisiones</h5>
                 </div>
             </div>
             <!-- Date range start -->
@@ -34,7 +34,7 @@
                                 <ul class="nav nav-tabs" id="customTab2" role="tablist">
                                     <li class="nav-item" role="presentation">
                                         <a class="nav-link active" id="tab-oneA" data-bs-toggle="tab" href="#oneA" role="tab"
-                                            aria-controls="oneA" aria-selected="true">Crear Unidad de Medida</a>
+                                            aria-controls="oneA" aria-selected="true">Crear Tipo de Comision</a>
                                     </li>
                                 </ul>
                                 <div class="tab-content h-350">
@@ -52,7 +52,7 @@
                                                     </div>
 
                                                 @endif
-                                                <form action="{{ url('insert-unidad') }}" method="POST">
+                                                <form action="{{ url('insert-tipo-comision') }}" method="POST">
                                                     @csrf
                                                     <div class="row gx-3">
 
@@ -60,7 +60,7 @@
                                                             <!-- Form Field Start -->
                                                             <div class="mb-3">
                                                                 <label for="nombre" class="form-label">Nombre</label>
-                                                                <input name="nombre" type="text" class="form-control" placeholder="Nombre de la unidad de medida..." value="{{ old('nombre') }}" />
+                                                                <input name="nombre" type="text" class="form-control" placeholder="Nombre del tipo de comision..." value="{{ old('nombre') }}" />
                                                                 @if ($errors->has('nombre'))
                                                                     <span class="help-block opacity-7">
                                                                             <strong>
@@ -74,12 +74,12 @@
                                                         <div class="col-md-4 mb-3">
                                                             <!-- Form Field Start -->
                                                             <div class="mb-3">
-                                                                <label for="abreviatura" class="form-label">Abreviatura</label>
-                                                                <input name="abreviatura" type="text" class="form-control" placeholder="Abreviatura de la unidad de medida..." value="{{ old('abreviatura') }}" />
-                                                                @if ($errors->has('abreviatura'))
+                                                                <label for="descripcion" class="form-label">Descripción</label>
+                                                                <input name="descripcion" type="text" class="form-control" placeholder="Descripción del tipo de comision..." value="{{ old('abreviatura') }}" />
+                                                                @if ($errors->has('descripcion'))
                                                                     <span class="help-block opacity-7">
                                                                             <strong>
-                                                                                <font color="red">{{ $errors->first('abreviatura') }}</font>
+                                                                                <font color="red">{{ $errors->first('descripcion') }}</font>
                                                                             </strong>
                                                                     </span>
                                                                 @endif
@@ -89,16 +89,12 @@
                                                         <div class="col-md-4 mb-3">
                                                             <!-- Form Field Start -->
                                                             <div class="mb-3">
-                                                                <label for="tipo" class="form-label">Tipo</label>
-                                                                <select name="tipo" class="form-select" aria-label="Default select example">
-                                                                    <option value="">Seleccione tipo</option>
-                                                                    <option value="unidad"{{ old('tipo') == 'unidad' ? ' selected' : '' }}>unidad</option>
-                                                                    <option value="decimal"{{ old('tipo') == 'decimal' ? ' selected' : '' }}>decimal</option>
-                                                                </select>
-                                                                @if ($errors->has('tipo'))
+                                                                <label for="porcentaje" class="form-label">Porcentaje</label>
+                                                                <input name="porcentaje" type="number" step="0.01" class="form-control" placeholder="0.00" value="{{ old('porcentaje') }}" />
+                                                                @if ($errors->has('porcentaje'))
                                                                     <span class="help-block opacity-7">
                                                                             <strong>
-                                                                                <font color="red">{{ $errors->first('tipo') }}</font>
+                                                                                <font color="red">{{ $errors->first('porcentaje') }}</font>
                                                                             </strong>
                                                                     </span>
                                                                 @endif

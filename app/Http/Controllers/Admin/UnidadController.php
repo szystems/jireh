@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UnidadFormRequest;
 use App\Models\Unidad;
+use App\Models\Articulo;
 use Illuminate\Http\Request;
 use DB;
 
@@ -84,5 +85,11 @@ class UnidadController extends Controller
         $unidad->estado = 0;
         $unidad->update();
         return redirect('unidades')->with('status',__('Unidad de medida eliminada correctamente.'));
+    }
+
+    public function getUnidadTipo(Articulo $articulo)
+    {
+        $unidad = $articulo->unidad;
+        return response()->json(['tipo' => $unidad->tipo]);
     }
 }

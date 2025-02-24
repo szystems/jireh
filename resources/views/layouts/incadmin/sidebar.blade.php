@@ -85,22 +85,22 @@
                         </ul>
                         <ul>
                             <li class="{{ Request::is('articulos','show-articulo/*','add-articulo','edit-articulo/*') ? 'active-page-link':''  }}">
-                                <a href="{{ url('articulos') }}"><i class="bi bi-box"></i> Artículos</a>
+                                <a href="{{ url('articulos') }}"><i class="bi bi-boxes"></i> Artículos y Servcios</a>
                             </li>
                         </ul>
-                        <ul>
+                        {{-- <ul>
                             <li class="{{ Request::is('servicios','show-servicio/*','add-servicio','edit-servicio/*') ? 'active-page-link':''  }}">
                                 <a href="{{ url('servicios') }}"><i class="bi bi-boxes"></i> Servicios</a>
                             </li>
-                        </ul>
+                        </ul> --}}
                         <ul>
                             <li class="{{ Request::is('unidades','show-unidad/*','add-unidad','edit-unidad/*') ? 'active-page-link':''  }}">
                                 <a href="{{ url('unidades') }}"><i class="bi bi-rulers"></i> Unidades de Medida </a>
                             </li>
                         </ul>
                         <ul>
-                            <li class="{{ Request::is('comisiones','show-comision/*','add-comision','edit-comision/*') ? 'active-page-link':''  }}">
-                                <a href="{{ url('comisiones') }}"><i class="bi bi-piggy-bank"></i>Tipos de Comisiones </a>
+                            <li class="{{ Request::is('tipo-comisiones','show-tipo-comision/*','add-tipo-comision','edit-tipo-comision/*') ? 'active-page-link':''  }}">
+                                <a href="{{ url('tipo-comisiones') }}"><i class="bi bi-piggy-bank"></i>Tipos de Comisiones </a>
                             </li>
                         </ul>
                     </div>

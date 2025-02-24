@@ -12,6 +12,9 @@ use App\Http\Controllers\Admin\CategoriaController;
 use App\Http\Controllers\Admin\ConfigController;
 use App\Http\Controllers\Admin\ProveedorController;
 use App\Http\Controllers\Admin\UnidadController;
+use App\Http\Controllers\Admin\TipoComisionController;
+use App\Http\Controllers\Admin\ArticuloController;
+use App\Http\Controllers\Admin\IngresoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -98,6 +101,37 @@ Route::middleware(['auth'])->group(function () {
     Route::get('edit-unidad/{id}',[UnidadController::class,'edit']);
     Route::put('update-unidad/{id}', [UnidadController::class, 'update']);
     Route::get('delete-unidad/{id}', [UnidadController::class, 'destroy']);
+    Route::get('/api/articulos/{articulo}/unidad', [UnidadController::class, 'getUnidadTipo']);
+
+    //Tipo comisiones
+    Route::get('tipo-comisiones', [TipoComisionController::class, 'index']);
+    Route::get('show-tipo-comision/{id}', [TipoComisionController::class, 'show']);
+    Route::get('add-tipo-comision', [TipoComisionController::class, 'add']);
+    Route::post('insert-tipo-comision',[TipoComisionController::class,'insert']);
+    Route::get('edit-tipo-comision/{id}',[TipoComisionController::class,'edit']);
+    Route::put('update-tipo-comision/{id}', [TipoComisionController::class, 'update']);
+    Route::get('delete-tipo-comision/{id}', [TipoComisionController::class, 'destroy']);
+
+
+    //Articulos
+    Route::get('articulos', [ArticuloController::class, 'index']);
+    Route::get('add-articulo', [ArticuloController::class, 'add']);
+    Route::post('insert-articulo', [ArticuloController::class, 'insert']);
+    Route::get('show-articulo/{id}', [ArticuloController::class, 'show']);
+    Route::get('edit-articulo/{id}', [ArticuloController::class, 'edit']);
+    Route::put('update-articulo/{id}', [ArticuloController::class, 'update']);
+    Route::get('delete-articulo/{id}', [ArticuloController::class, 'destroy']);
+
+    //Ingresos
+    Route::get('ingresos', [IngresoController::class, 'index']);
+    Route::get('add-ingreso', [IngresoController::class, 'create']);
+    Route::post('insert-ingreso', [IngresoController::class, 'store']);
+    Route::get('show-ingreso/{id}', [IngresoController::class, 'show']);
+    Route::get('edit-ingreso/{id}', [IngresoController::class, 'edit']);
+    Route::put('update-ingreso/{id}', [IngresoController::class, 'update']);
+    Route::get('ingresos/export/pdf', [IngresoController::class, 'exportPdf'])->name('ingresos.export.pdf');
+    Route::get('ingresos/export/excel', [IngresoController::class, 'exportExcel'])->name('ingresos.export.excel');
+    Route::get('ingresos/export/single/pdf/{id}', [IngresoController::class, 'exportSinglePdf'])->name('ingresos.export.single.pdf');
 
     //config
     Route::get('config', [ConfigController::class, 'index']);

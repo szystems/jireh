@@ -166,31 +166,25 @@
                                                 </a>
                                             </li>
                                             <li>
-                                                {{-- <a href="{{ url('vehiculos') }}" class="text-primary">
+                                                <a href="{{ url('articulos') }}" class="text-secondary">
                                                     <i class="bi bi-chevron-compact-right"></i>
-                                                    <i class="bi bi-box"></i>
-                                                    <u>Vehículos</u>
-                                                </a> --}}
+                                                    <i class="bi bi-boxes"></i>
+                                                    <u>Artículos y Servcios</u>
+                                                </a>
                                             </li>
                                         </ul>
                                     </div>
 
                                     <div class="me-3">
                                         <ul>
-                                            <li>
-                                                <a href="{{ url('articulos') }}" class="text-secondary">
-                                                    <i class="bi bi-chevron-compact-right"></i>
-                                                    <i class="bi bi-box"></i>
-                                                    <u>Artículos</u>
-                                                </a>
-                                            </li>
-                                            <li>
+
+                                            {{-- <li>
                                                 <a href="{{ url('servicios') }}" class="text-secondary">
                                                     <i class="bi bi-chevron-compact-right"></i>
                                                     <i class="bi bi-boxes"></i>
                                                     <u>Servicios</u>
                                                 </a>
-                                            </li>
+                                            </li> --}}
                                         </ul>
                                     </div>
 
@@ -204,7 +198,7 @@
                                                 </a>
                                             </li>
                                             <li>
-                                                <a href="{{ url('comisiones') }}" class="text-secondary">
+                                                <a href="{{ url('tipo-comisiones') }}" class="text-secondary">
                                                     <i class="bi bi-chevron-compact-right"></i>
                                                     <i class="bi bi-piggy-bank"></i>
                                                     <u>Tipos de Comisiones</u>
