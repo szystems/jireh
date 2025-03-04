@@ -158,6 +158,27 @@ class IngresoController extends Controller
         return redirect('ingresos')->with('status', __('Ingreso actualizado exitosamente.'));
     }
 
+    public function destroy($id)
+    {
+        $ingreso = Ingreso::with('detalles.articulo')->findOrFail($id);
+
+        foreach ($ingreso->detalles as $detalle) {
+            $articulo = $detalle->articulo;
+            if ($articulo) {
+                // Devolver el stock del artículo
+                $articulo->stock -= $detalle->cantidad;
+                $articulo->save();
+            }
+            // Eliminar el detalle del ingreso
+            $detalle->delete();
+        }
+
+        // Eliminar el ingreso
+        $ingreso->delete();
+
+        return redirect('ingresos')->with('status', __('Ingreso eliminado exitosamente.'));
+    }
+
     public function exportPdf(Request $request)
     {
         $ingresos = $this->getFilteredIngresos($request)->load(['proveedor', 'usuario', 'detalles.articulo']);

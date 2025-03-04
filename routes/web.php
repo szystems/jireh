@@ -129,6 +129,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('show-ingreso/{id}', [IngresoController::class, 'show']);
     Route::get('edit-ingreso/{id}', [IngresoController::class, 'edit']);
     Route::put('update-ingreso/{id}', [IngresoController::class, 'update']);
+    Route::get('delete-ingreso/{id}', [IngresoController::class, 'destroy']);
     Route::get('ingresos/export/pdf', [IngresoController::class, 'exportPdf'])->name('ingresos.export.pdf');
     Route::get('ingresos/export/excel', [IngresoController::class, 'exportExcel'])->name('ingresos.export.excel');
     Route::get('ingresos/export/single/pdf/{id}', [IngresoController::class, 'exportSinglePdf'])->name('ingresos.export.single.pdf');
