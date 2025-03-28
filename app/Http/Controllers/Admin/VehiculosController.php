@@ -17,32 +17,70 @@ class VehiculosController extends Controller
 {
     public function index(Request $request)
 	{
-        if ($request)
-        {
-            $queryVehiculo=$request->input('fvehiculo');
-            $vehiculos = DB::table('vehiculos')
-            ->where('estado', '=', 1)
-            ->where(function ($query) use ($queryVehiculo) {
-            $query->where('marca', 'LIKE', '%' . $queryVehiculo . '%')
-                ->orWhere('modelo', 'LIKE', '%' . $queryVehiculo . '%')
-                ->orWhere('ano', 'LIKE', '%' . $queryVehiculo . '%')
-                ->orWhere('color', 'LIKE', '%' . $queryVehiculo . '%')
-                ->orWhere('placa', 'LIKE', '%' . $queryVehiculo . '%')
-                ->orWhere('vin', 'LIKE', '%' . $queryVehiculo . '%');
-            })
-            ->orderBy('marca','asc')
-            ->paginate(20);
-            $filterVehiculos = Vehiculo::all();
+        // Inicializar variables para los filtros
+        $queryVehiculo = $request->input('fvehiculo');
+        $queryAno = $request->input('fano');
+        $queryCliente = $request->input('fcliente');
 
-            return view('admin.vehiculo.index', compact('vehiculos','queryVehiculo','filterVehiculos'));
+        // Construir la consulta base
+        $query = Vehiculo::where('estado', 1);
+
+        // Aplicar filtro de búsqueda por texto si existe
+        if ($queryVehiculo) {
+            $query->where(function ($q) use ($queryVehiculo) {
+                $q->where('marca', 'LIKE', '%' . $queryVehiculo . '%')
+                  ->orWhere('modelo', 'LIKE', '%' . $queryVehiculo . '%')
+                  ->orWhere('ano', 'LIKE', '%' . $queryVehiculo . '%')
+                  ->orWhere('color', 'LIKE', '%' . $queryVehiculo . '%')
+                  ->orWhere('placa', 'LIKE', '%' . $queryVehiculo . '%')
+                  ->orWhere('vin', 'LIKE', '%' . $queryVehiculo . '%');
+            });
         }
+
+        // Aplicar filtro de año si existe
+        if ($queryAno) {
+            $query->where('ano', $queryAno);
+        }
+
+        // Aplicar filtro de cliente si existe
+        if ($queryCliente) {
+            $query->where('cliente_id', $queryCliente);
+        }
+
+        // Obtener resultados paginados
+        $vehiculos = $query->orderBy('marca', 'asc')
+                           ->paginate(20);
+
+        // Obtener todos los vehículos para los filtros desplegables
+        $filterVehiculos = Vehiculo::all();
+
+        // Obtener los clientes para el filtro de clientes
+        $clientes = Cliente::where('estado', 1)->get();
+
+        // Pasar variables a la vista
+        return view('admin.vehiculo.index', compact(
+            'vehiculos',
+            'queryVehiculo',
+            'queryAno',
+            'queryCliente',
+            'filterVehiculos',
+            'clientes'
+        ));
     }
 
     public function show($id)
     {
         $config = Config::first();
-        $vehiculo = Vehiculo::find($id);
-        return view('admin.vehiculo.show',compact("vehiculo","config"));
+        // Cargar el vehículo con todas sus relaciones necesarias para las pestañas
+        $vehiculo = Vehiculo::with([
+            'cliente',
+            'ventas.cliente',
+            'ventas.detalleVentas',
+            'ventas.pagos',
+            'ventas.usuario'
+        ])->find($id);
+
+        return view('admin.vehiculo.show', compact("vehiculo", "config"));
     }
 
     public function add()
@@ -134,22 +172,66 @@ class VehiculosController extends Controller
     public function printvehiculos(Request $request)
     {
         if ($request) {
-            // Cargar vehículos con clientes, seleccionando solo los campos necesarios
-            $vehiculos = \App\Models\Vehiculo::with('cliente:id,nombre,fecha_nacimiento,telefono,direccion,celular,email,dpi,nit')
-                ->select('id', 'marca', 'modelo', 'ano', 'color', 'placa', 'vin', 'cliente_id')
-                ->where('estado', 1)
-                ->get();
+            // Inicializar variables para los filtros
+            $queryVehiculo = $request->input('fvehiculo');
+            $queryAno = $request->input('fano');
+            $queryCliente = $request->input('fcliente');
 
+            // Construir la consulta base con las relaciones necesarias
+            $query = Vehiculo::with([
+                'cliente:id,nombre,fecha_nacimiento,telefono,direccion,celular,email,dpi,nit',
+                'ventas' => function($query) {
+                    $query->where('estado', 1);
+                },
+                'ventas.detalleVentas',
+                'ventas.pagos'
+            ])
+            ->select('id', 'marca', 'modelo', 'ano', 'color', 'placa', 'vin', 'cliente_id', 'fotografia', 'created_at')
+            ->where('estado', 1);
+
+            // Aplicar filtro de búsqueda por texto si existe
+            if ($queryVehiculo) {
+                $query->where(function ($q) use ($queryVehiculo) {
+                    $q->where('marca', 'LIKE', '%' . $queryVehiculo . '%')
+                      ->orWhere('modelo', 'LIKE', '%' . $queryVehiculo . '%')
+                      ->orWhere('ano', 'LIKE', '%' . $queryVehiculo . '%')
+                      ->orWhere('color', 'LIKE', '%' . $queryVehiculo . '%')
+                      ->orWhere('placa', 'LIKE', '%' . $queryVehiculo . '%')
+                      ->orWhere('vin', 'LIKE', '%' . $queryVehiculo . '%');
+                });
+            }
+
+            // Aplicar filtro de año si existe
+            if ($queryAno) {
+                $query->where('ano', $queryAno);
+            }
+
+            // Aplicar filtro de cliente si existe
+            if ($queryCliente) {
+                $query->where('cliente_id', $queryCliente);
+            }
+
+            // Obtener resultados ordenados
+            $vehiculos = $query->orderBy('marca', 'asc')->get();
+
+            // Datos para el PDF
             $config = Config::first();
             $nompdf = date('m/d/Y g:ia');
             $imagen = $config->logo ? public_path('assets/imgs/logos/' . $config->logo) : null;
 
-            // Recibir detalles de la impresión
-            $pdftamaño = $request->input('pdftamaño');
-            $pdfhorientacion = $request->input('pdfhorientacion');
-            $pdfarchivo = $request->input('pdfarchivo');
+            // Pasar los filtros a la vista para mostrarlos en el PDF
+            $filtros = [
+                'queryVehiculo' => $queryVehiculo,
+                'queryAno' => $queryAno,
+                'queryCliente' => $queryCliente
+            ];
 
-            $pdf = PDF::loadView('admin.vehiculo.pdfvehiculos', compact('imagen', 'vehiculos', 'request', 'config'));
+            // Recibir detalles de la impresión
+            $pdftamaño = $request->input('pdftamaño', 'Letter');
+            $pdfhorientacion = $request->input('pdfhorientacion', 'landscape');
+            $pdfarchivo = $request->input('pdfarchivo', 'stream');
+
+            $pdf = PDF::loadView('admin.vehiculo.pdfvehiculos', compact('imagen', 'vehiculos', 'request', 'config', 'filtros'));
             $pdf->getDomPDF()->set_option("enable_html5_parser", true);
             $pdf->setPaper($pdftamaño, $pdfhorientacion);
 
@@ -157,9 +239,7 @@ class VehiculosController extends Controller
                 return $pdf->download('Listado de Vehiculos-' . $nompdf . '.pdf');
             }
 
-            if ($pdfarchivo == "stream") {
-                return $pdf->stream('Listado de Vehiculos-' . $nompdf . '.pdf');
-            }
+            return $pdf->stream('Listado de Vehiculos-' . $nompdf . '.pdf');
         }
     }
 
@@ -173,8 +253,16 @@ class VehiculosController extends Controller
             'pdfarchivo' => 'required|string|in:download,stream',
         ]);
 
-        // Cargar el vehículo y el cliente
-        $vehiculo = Vehiculo::with('cliente')->find($request->input('vehiculo_id'));
+        // Cargar el vehículo con todas las relaciones necesarias
+        $vehiculo = Vehiculo::with([
+            'cliente',
+            'ventas' => function($query) {
+                $query->where('estado', 1)->orderBy('fecha', 'desc');
+            },
+            'ventas.detalleVentas.articulo',
+            'ventas.pagos',
+            'ventas.usuario'
+        ])->find($request->input('vehiculo_id'));
 
         if (!$vehiculo) {
             return response()->json(['error' => 'Vehículo no encontrado'], 404);
@@ -203,9 +291,9 @@ class VehiculosController extends Controller
 
         // Devolver el PDF
         if ($pdfarchivo == "download") {
-            return $pdf->download('Vehiculo: ' . $vehiculo->vin . '.pdf');
+            return $pdf->download('Vehiculo_' . $vehiculo->marca . '_' . $vehiculo->modelo . '_' . $vehiculo->placa . '.pdf');
         }
 
-        return $pdf->stream('Vehiculo: ' . $vehiculo->vin . '.pdf');
+        return $pdf->stream('Vehiculo_' . $vehiculo->marca . '_' . $vehiculo->modelo . '_' . $vehiculo->placa . '.pdf');
     }
 }

@@ -30,101 +30,86 @@
             <div class="row gx-3">
                 <div class="col-sm-12 col-12">
                     <div class="card">
-
                         <div class="card-header">
                             <div class="card-title">
                                 Listado de proveedores
-                                <br>
-                                <a target="_blank" href="{{ url('pdf-proveedores') }}" type="button" class="btn btn-info btn-sm">
-                                    <i class="bi bi-printer"></i> Imprimir
-                                </a>
-                                <a href="{{ url('add-proveedor') }}" type="button" class="btn btn-success float-end">
-                                    <i class="bi bi-plus-square"></i> Agregar
-                                </a>
-                            </div>
 
+                                <div class="d-flex justify-content-between mt-2">
+                                    <a target="_blank" href="{{ url('pdf-proveedores') }}" type="button" class="btn btn-danger btn-sm">
+                                        <i class="bi bi-file-pdf"></i> PDF
+                                    </a>
+                                    <a href="{{ url('add-proveedor') }}" type="button" class="btn btn-success btn-sm">
+                                        <i class="bi bi-plus-square"></i> Agregar
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                         <div class="card-body">
+                            @if(session('status'))
+                                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                    <strong><i class="bi bi-check-circle"></i> ¡Éxito!</strong> {{ session('status') }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            @endif
+
                             <div class="table-responsive">
                                 <table id="highlightRowColumn" class="table custom-table">
                                     <thead>
                                         <tr>
-                                            <td align="center"><i class="bi bi-list-task"></i></td>
-                                            <td>Proveedor</td>
-                                            <td>NIT</td>
-                                            <td>Contacto</td>
-                                            <td>Banco</td>
+                                            <th width="12%" class="text-center">Acciones</th>
+                                            <th width="23%">Proveedor</th>
+                                            <th width="10%">NIT</th>
+                                            <th width="30%">Contacto</th>
+                                            <th width="25%">Banco</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @foreach ($proveedores as $proveedor)
                                         <tr>
-                                            <td>
-                                                <div class="btn-group dropend">
-                                                    <button type="button" class="btn btn-info btn-sm dropdown-toggle" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
-                                                        <i class="bi bi-list-task"></i>
+                                            <td class="text-center">
+                                                <div class="btn-group" role="group">
+                                                    <a href="{{ url('show-proveedor/'.$proveedor->id) }}" class="btn btn-sm btn-info" title="Ver información">
+                                                        <i class="bi bi-eye-fill"></i>
+                                                    </a>
+                                                    <a href="{{ url('edit-proveedor/'.$proveedor->id) }}" class="btn btn-sm btn-warning" title="Editar">
+                                                        <i class="bi bi-pencil-fill"></i>
+                                                    </a>
+                                                    <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-{{ $proveedor->id }}" title="Eliminar">
+                                                        <i class="bi bi-trash-fill"></i>
                                                     </button>
-                                                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-lg-start">
-                                                        <li>
-                                                            <a class="dropdown-item" href="{{ url('show-proveedor/'.$proveedor->id) }}"><i class="bi bi-eye-fill text-blue"></i> Información</a>
-                                                        </li>
-                                                        <li>
-                                                            <a class="dropdown-item" href="{{ url('edit-proveedor/'.$proveedor->id) }}"><i class="bi bi-pencil-fill text-warning"></i> Editar</a>
-                                                        </li>
-                                                        <li>
-                                                            <a type="button" class="btn bg-gradient-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-{{ $proveedor->id }}">
-                                                                <i class="bi bi-trash-fill text-danger"></i> Eliminar
-                                                            </a>
-                                                        </li>
-                                                    </ul>
                                                 </div>
                                             </td>
 
                                             <td>
                                                 <div class="d-flex align-items-center">
                                                     <p class="m-0">
-                                                        <a class="text-primary" href="{{ url('show-proveedor/'.$proveedor->id) }}"><b>{{ $proveedor->nombre }}</b></a>
+                                                        <a class="text-primary fw-bold" href="{{ url('show-proveedor/'.$proveedor->id) }}">{{ $proveedor->nombre }}</a>
                                                     </p>
                                                 </div>
                                             </td>
-                                            <td><p>{{ $proveedor->nit }}</p></td>
+                                            <td>{{ $proveedor->nit }}</td>
                                             <td>
-                                                <div class="d-flex align-items-center">
-
-                                                    <p class="m-0">
-                                                        <a class="text-primary" href="{{ url('show-proveedor/'.$proveedor->id) }}"><b>{{ $proveedor->contacto }}</b></a>
-                                                        <br>
-                                                        <small>
-                                                            <a class="text-info" href="mailto:{{ $proveedor->email }}">{{ $proveedor->email }}</a>
-                                                            <br>
-                                                            <a class="text-light" href="tel:+502{{ $proveedor->telefono }}">{{ $proveedor->telefono }}</a>
-                                                            @if ($proveedor->celular != null)
-                                                            / <a class="text-light" href="tel:+502{{ $proveedor->celular }}">{{ $proveedor->celular }}</a>
-
-                                                            / <a class="text-success" href="https://wa.me/502{{ $proveedor->celular }}" target="_blank"><i class="bi bi-whatsapp"></i></a>
-                                                            @endif
-                                                            <br>
-                                                            {{$proveedor->direccion}}
-                                                        </small>
-                                                    </p>
-
+                                                <div class="d-flex flex-column">
+                                                    <span class="fw-bold">{{ $proveedor->contacto }}</span>
+                                                    <small>
+                                                        <a class="text-info" href="mailto:{{ $proveedor->email }}">{{ $proveedor->email }}</a>
+                                                    </small>
+                                                    <small>
+                                                        <a class="text-secondary" href="tel:+502{{ $proveedor->telefono }}">{{ $proveedor->telefono }}</a>
+                                                        @if ($proveedor->celular != null)
+                                                        / <a class="text-secondary" href="tel:+502{{ $proveedor->celular }}">{{ $proveedor->celular }}</a>
+                                                        <a class="text-success ms-1" href="https://wa.me/502{{ $proveedor->celular }}" target="_blank"><i class="bi bi-whatsapp"></i></a>
+                                                        @endif
+                                                    </small>
+                                                    <small class="text-muted">{{ $proveedor->direccion }}</small>
                                                 </div>
                                             </td>
                                             <td>
-                                                <div class="d-flex align-items-center">
-
-                                                    <p class="m-0">
-                                                        <a class="text-primary" href="{{ url('show-proveedor/'.$proveedor->id) }}"><b>{{ $proveedor->banco }}</b></a>
-                                                        <br>
-                                                        <small>
-                                                            {{ $proveedor->nombre_cuenta }}
-                                                            <br>
-                                                            {{ $proveedor->tipo_cuenta }}
-                                                            <br>
-                                                            {{ $proveedor->numero_cuenta }}
-                                                        </small>
-                                                    </p>
-
+                                                <div class="d-flex flex-column">
+                                                    <span class="fw-bold">{{ $proveedor->banco }}</span>
+                                                    <small>{{ $proveedor->nombre_cuenta }}</small>
+                                                    <small>{{ $proveedor->tipo_cuenta }}</small>
+                                                    <small class="text-muted">{{ $proveedor->numero_cuenta }}</small>
                                                 </div>
                                             </td>
                                         </tr>
@@ -132,7 +117,9 @@
                                         @endforeach
                                     </tbody>
                                 </table>
-                                {{ $proveedores->links() }}
+                                <div class="d-flex justify-content-center mt-3">
+                                    {{ $proveedores->links() }}
+                                </div>
                             </div>
                         </div>
                     </div>

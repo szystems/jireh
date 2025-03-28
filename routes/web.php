@@ -15,6 +15,12 @@ use App\Http\Controllers\Admin\UnidadController;
 use App\Http\Controllers\Admin\TipoComisionController;
 use App\Http\Controllers\Admin\ArticuloController;
 use App\Http\Controllers\Admin\IngresoController;
+use App\Http\Controllers\Admin\TrabajadorController;
+use App\Http\Controllers\Admin\InventarioController;
+use App\Http\Controllers\Admin\DescuentoController;
+use App\Http\Controllers\Admin\VentaController;
+use App\Http\Controllers\Admin\PagoController;
+use App\Http\Controllers\Admin\ReporteArticuloController;
 
 /*
 |--------------------------------------------------------------------------
@@ -121,6 +127,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('edit-articulo/{id}', [ArticuloController::class, 'edit']);
     Route::put('update-articulo/{id}', [ArticuloController::class, 'update']);
     Route::get('delete-articulo/{id}', [ArticuloController::class, 'destroy']);
+    Route::get('export-articulos-pdf', [ArticuloController::class, 'exportPdf']);
+    Route::get('export-articulo-pdf/{id}', [ArticuloController::class, 'exportPdfSingle']); // Nueva ruta para exportar artículo individual
+
+    // Ruta para guardar la preferencia de visualización
+    Route::post('set-view-preference', [App\Http\Controllers\Admin\ArticuloController::class, 'setViewPreference']);
 
     //Ingresos
     Route::get('ingresos', [IngresoController::class, 'index']);
@@ -133,6 +144,52 @@ Route::middleware(['auth'])->group(function () {
     Route::get('ingresos/export/pdf', [IngresoController::class, 'exportPdf'])->name('ingresos.export.pdf');
     Route::get('ingresos/export/excel', [IngresoController::class, 'exportExcel'])->name('ingresos.export.excel');
     Route::get('ingresos/export/single/pdf/{id}', [IngresoController::class, 'exportSinglePdf'])->name('ingresos.export.single.pdf');
+    Route::get('create-ingreso', [IngresoController::class, 'create']);
+
+    //Trabajadores
+    Route::get('trabajadores', [TrabajadorController::class, 'index']);
+    Route::get('show-trabajador/{id}', [TrabajadorController::class, 'show']);
+    Route::get('add-trabajador', [TrabajadorController::class, 'add']);
+    Route::post('insert-trabajador',[TrabajadorController::class,'insert']);
+    Route::get('edit-trabajador/{id}',[TrabajadorController::class,'edit']);
+    Route::put('update-trabajador/{id}', [TrabajadorController::class, 'update']);
+    Route::get('delete-trabajador/{id}', [TrabajadorController::class, 'destroy']);
+
+    //inventario
+    Route::get('inventario', [InventarioController::class, 'index']);
+    Route::get('print-inventario', [InventarioController::class, 'printinventario']);
+    Route::get('exportinventario', [InventarioController::class, 'exportinventario']);
+    Route::get('api/buscar-articulos', [InventarioController::class, 'buscarArticulos']);
+
+    //Descuentos
+    Route::get('descuentos', [DescuentoController::class, 'index']);
+    Route::get('show-descuento/{id}', [DescuentoController::class, 'show']);
+    Route::get('add-descuento', [DescuentoController::class, 'add']);
+    Route::post('insert-descuento',[DescuentoController::class,'insert']);
+    Route::get('edit-descuento/{id}',[DescuentoController::class,'edit']);
+    Route::put('update-descuento/{id}', [DescuentoController::class, 'update']);
+    Route::get('delete-descuento/{id}', [DescuentoController::class, 'destroy']);
+
+    //Ventas
+    Route::get('ventas', [VentaController::class, 'index']);
+    Route::get('add-venta', [VentaController::class, 'create']);
+    Route::post('insert-venta', [VentaController::class, 'store']);
+    Route::get('show-venta/{id}', [VentaController::class, 'show'])->name('ventas.show');
+    Route::get('edit-venta/{id}', [VentaController::class, 'edit']);
+    Route::put('update-venta/{id}', [VentaController::class, 'update']);
+    Route::get('delete-venta/{id}', [VentaController::class, 'destroy']);
+    Route::get('venta/export/pdf', [VentaController::class, 'exportPdf'])->name('ventas.export.pdf');
+    Route::get('venta/export/excel', [VentaController::class, 'exportExcel'])->name('ventas.export.excel');
+    Route::get('venta/export/single/pdf/{id}', [VentaController::class, 'exportSinglePdf'])->name('ventas.export.single.pdf');
+
+    // Pagos
+    Route::post('pagos', [PagoController::class, 'store']);
+    Route::put('pagos/{id}', [PagoController::class, 'update']);
+    Route::delete('pagos/{id}', [PagoController::class, 'destroy']);
+
+    //Reportes Articulos
+    Route::get('reportearticulos', [ReporteArticuloController::class, 'index']);
+    Route::get('reportearticulos/export/pdf', [ReporteArticuloController::class, 'exportPdf'])->name('reportearticulo.export.pdf');
 
     //config
     Route::get('config', [ConfigController::class, 'index']);

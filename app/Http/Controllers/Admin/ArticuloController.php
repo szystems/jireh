@@ -10,6 +10,8 @@ use App\Models\Unidad;
 use App\Models\TipoComision;
 use Illuminate\Http\Request;
 use App\Models\Config;
+use Illuminate\Support\Str; // Añadir esta importación
+use PDF;
 
 class ArticuloController extends Controller
 {
@@ -20,28 +22,138 @@ class ArticuloController extends Controller
      */
     public function index(Request $request)
     {
-        if ($request)
-        {
-            $queryArticulo = $request->input('farticulo');
+        $queryArticulo = $request->input('farticulo');
+        $queryTipo = $request->input('ftipo');
+        $queryCategoria = $request->input('fcategoria');
+        $queryStock = $request->input('fstock');
+        $queryOrden = $request->input('forden');
 
-            $query = Articulo::where('estado', 1);
+        $query = Articulo::where('estado', 1);
 
-            if ($queryArticulo) {
-                $query->where(function($q) use ($queryArticulo) {
-                    $q->where('nombre', 'LIKE', "%{$queryArticulo}%")
-                    ->orWhere('codigo', 'LIKE', "%{$queryArticulo}%");
-                });
-            }
-
-            $articulos = $query->paginate(20);
-
-            $config = Config::first();
-
-            return view('admin.articulo.index', compact('articulos', 'queryArticulo', 'config'));
+        // Aplicar filtro de búsqueda por nombre o código
+        if ($queryArticulo) {
+            $query->where(function($q) use ($queryArticulo) {
+                $q->where('nombre', 'LIKE', "%{$queryArticulo}%")
+                  ->orWhere('codigo', 'LIKE', "%{$queryArticulo}%");
+            });
         }
+
+        // Filtrar por tipo (artículo o servicio)
+        if ($queryTipo) {
+            $query->where('tipo', $queryTipo);
+        }
+
+        // Filtrar por categoría
+        if ($queryCategoria) {
+            $query->where('categoria_id', $queryCategoria);
+        }
+
+        // Filtrar por estado de stock
+        if ($queryStock) {
+            if ($queryStock == 'disponible') {
+                $query->where('stock', '>', function ($q) {
+                    $q->select('stock_minimo')
+                      ->from('articulos')
+                      ->whereColumn('id', 'articulos.id');
+                });
+            } elseif ($queryStock == 'bajo') {
+                $query->where('stock', '>', 0)
+                     ->where('stock', '<=', function ($q) {
+                         $q->select('stock_minimo')
+                           ->from('articulos')
+                           ->whereColumn('id', 'articulos.id');
+                     });
+            } elseif ($queryStock == 'agotado') {
+                $query->where('stock', '<=', 0);
+            }
+        }
+
+        // Aplicar ordenamiento
+        if ($queryOrden) {
+            switch ($queryOrden) {
+                case 'nombre_asc':
+                    $query->orderBy('nombre', 'asc');
+                    break;
+                case 'nombre_desc':
+                    $query->orderBy('nombre', 'desc');
+                    break;
+                case 'precio_asc':
+                    $query->orderBy('precio_venta', 'asc');
+                    break;
+                case 'precio_desc':
+                    $query->orderBy('precio_venta', 'desc');
+                    break;
+                case 'stock_asc':
+                    $query->orderBy('stock', 'asc');
+                    break;
+                case 'stock_desc':
+                    $query->orderBy('stock', 'desc');
+                    break;
+                default:
+                    $query->orderBy('nombre', 'asc');
+                    break;
+            }
+        } else {
+            // Ordenamiento predeterminado
+            $query->orderBy('nombre', 'asc');
+        }
+
+        $articulos = $query->paginate(20);
+
+        // Obtener estadísticas para el dashboard
+        $estadisticas = [
+            'total_articulos' => Articulo::where('estado', 1)->where('tipo', 'articulo')->count(),
+            'total_servicios' => Articulo::where('estado', 1)->where('tipo', 'servicio')->count(),
+            'stock_bajo' => Articulo::where('estado', 1)
+                                    ->where('tipo', 'articulo')
+                                    ->where('stock', '>', 0)
+                                    ->whereRaw('stock <= stock_minimo')
+                                    ->count(),
+            'sin_stock' => Articulo::where('estado', 1)
+                                  ->where('tipo', 'articulo')
+                                  ->where('stock', '<=', 0)
+                                  ->count(),
+        ];
+
+        $config = Config::first();
+        $categorias = Categoria::where('estado', 1)->get();
+
+        // Preferencia de visualización (tabla/tarjetas)
+        $viewMode = $request->session()->get('articulos_view_mode', 'table');
+
+        // Filtros aplicados para mantenerlos en la vista
+        $filtros = [
+            'ftipo' => $queryTipo,
+            'fcategoria' => $queryCategoria,
+            'fstock' => $queryStock,
+            'forden' => $queryOrden
+        ];
+
+        return view('admin.articulo.index', compact(
+            'articulos',
+            'queryArticulo',
+            'config',
+            'estadisticas',
+            'categorias',
+            'viewMode',
+            'filtros'
+        ));
     }
 
+    /**
+     * Guarda la preferencia de visualización del usuario
+     */
+    public function setViewPreference(Request $request)
+    {
+        $preference = $request->input('preference');
+        $value = $request->input('value');
 
+        if ($preference && $value) {
+            $request->session()->put($preference, $value);
+        }
+
+        return response()->json(['success' => true]);
+    }
 
     /**
      * Show the form for creating a new resource.
@@ -54,7 +166,8 @@ class ArticuloController extends Controller
         $articulos = Articulo::where('estado', 1)->get();
         $unidades = Unidad::where('estado', 1)->get();
         $tipoComisiones = TipoComision::where('estado', 1)->get();
-        return view('admin.articulo.add', compact('articulos','categorias', 'unidades', 'tipoComisiones'));
+        $config = Config::first();
+        return view('admin.articulo.add', compact('articulos','categorias', 'unidades', 'tipoComisiones', 'config'));
     }
 
     /**
@@ -150,8 +263,10 @@ class ArticuloController extends Controller
         $categorias = Categoria::where('estado', 1)->get();
         $unidades = Unidad::where('estado', 1)->get();
         $todosArticulos = Articulo::where('tipo', 'articulo')->get(); // Obtener todos los artículos que no son servicios
+        $tipoComisiones = TipoComision::where('estado', 1)->get();
+        $config = Config::first();
 
-        return view('admin.articulo.edit', compact('articulo', 'categorias', 'unidades', 'todosArticulos'));
+        return view('admin.articulo.edit', compact('articulo', 'categorias', 'unidades', 'todosArticulos', 'tipoComisiones', 'config'));
     }
 
     public function update(Request $request, $id)
@@ -235,5 +350,197 @@ class ArticuloController extends Controller
         $articulo->estado = 0;
         $articulo->update();
         return redirect('articulos')->with('status',__('Artículo eliminado correctamente.'));
+    }
+
+    /**
+     * Exporta los artículos filtrados a PDF
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function exportPdf(Request $request)
+    {
+        $queryArticulo = $request->input('farticulo');
+        $queryTipo = $request->input('ftipo');
+        $queryCategoria = $request->input('fcategoria');
+        $queryStock = $request->input('fstock');
+        $queryOrden = $request->input('forden');
+
+        $query = Articulo::where('estado', 1);
+
+        // Aplicar filtro de búsqueda por nombre o código
+        if ($queryArticulo) {
+            $query->where(function($q) use ($queryArticulo) {
+                $q->where('nombre', 'LIKE', "%{$queryArticulo}%")
+                  ->orWhere('codigo', 'LIKE', "%{$queryArticulo}%");
+            });
+        }
+
+        // Filtrar por tipo (artículo o servicio)
+        if ($queryTipo) {
+            $query->where('tipo', $queryTipo);
+        }
+
+        // Filtrar por categoría
+        if ($queryCategoria) {
+            $query->where('categoria_id', $queryCategoria);
+        }
+
+        // Filtrar por estado de stock
+        if ($queryStock) {
+            if ($queryStock == 'disponible') {
+                $query->where('stock', '>', function ($q) {
+                    $q->select('stock_minimo')
+                      ->from('articulos')
+                      ->whereColumn('id', 'articulos.id');
+                });
+            } elseif ($queryStock == 'bajo') {
+                $query->where('stock', '>', 0)
+                     ->where('stock', '<=', function ($q) {
+                         $q->select('stock_minimo')
+                           ->from('articulos')
+                           ->whereColumn('id', 'articulos.id');
+                     });
+            } elseif ($queryStock == 'agotado') {
+                $query->where('stock', '<=', 0);
+            }
+        }
+
+        // Aplicar ordenamiento
+        if ($queryOrden) {
+            switch ($queryOrden) {
+                case 'nombre_asc':
+                    $query->orderBy('nombre', 'asc');
+                    break;
+                case 'nombre_desc':
+                    $query->orderBy('nombre', 'desc');
+                    break;
+                case 'precio_asc':
+                    $query->orderBy('precio_venta', 'asc');
+                    break;
+                case 'precio_desc':
+                    $query->orderBy('precio_venta', 'desc');
+                    break;
+                case 'stock_asc':
+                    $query->orderBy('stock', 'asc');
+                    break;
+                case 'stock_desc':
+                    $query->orderBy('stock', 'desc');
+                    break;
+                default:
+                    $query->orderBy('nombre', 'asc');
+                    break;
+            }
+        } else {
+            // Ordenamiento predeterminado
+            $query->orderBy('nombre', 'asc');
+        }
+
+        $articulos = $query->get();
+        $config = Config::first();
+
+        // Preparamos los filtros para mostrarlos en el PDF
+        $filtrosAplicados = [];
+        if ($queryArticulo) {
+            $filtrosAplicados[] = "Búsqueda: '{$queryArticulo}'";
+        }
+        if ($queryTipo) {
+            $tipoTexto = $queryTipo == 'articulo' ? 'Artículo' : 'Servicio';
+            $filtrosAplicados[] = "Tipo: {$tipoTexto}";
+        }
+        if ($queryCategoria) {
+            $categoria = Categoria::find($queryCategoria);
+            if ($categoria) {
+                $filtrosAplicados[] = "Categoría: {$categoria->nombre}";
+            }
+        }
+        if ($queryStock) {
+            $stockTexto = '';
+            switch ($queryStock) {
+                case 'disponible':
+                    $stockTexto = 'Disponible';
+                    break;
+                case 'bajo':
+                    $stockTexto = 'Stock bajo';
+                    break;
+                case 'agotado':
+                    $stockTexto = 'Sin stock';
+                    break;
+            }
+            $filtrosAplicados[] = "Stock: {$stockTexto}";
+        }
+
+        $fechaActual = now()->format('d/m/Y H:i:s');
+        $data = [
+            'articulos' => $articulos,
+            'config' => $config,
+            'filtrosAplicados' => $filtrosAplicados,
+            'fechaGeneracion' => $fechaActual,
+            'totalArticulos' => $articulos->count(),
+        ];
+
+        $pdf = PDF::loadView('admin.articulo.pdfarticulos', $data);
+        return $pdf->stream('articulos_' . now()->format('YmdHis') . '.pdf');
+    }
+
+    /**
+     * Exporta un artículo individual a PDF
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function exportPdfSingle($id)
+    {
+        $articulo = Articulo::with(['categoria', 'unidad', 'tipoComisionVendedor', 'tipoComisionTrabajador', 'articulos.categoria', 'articulos.unidad'])
+            ->findOrFail($id);
+        $config = Config::first();
+
+        // Preparar datos para la vista PDF
+        $data = [
+            'articulo' => $articulo,
+            'config' => $config,
+            'fechaGeneracion' => now()->format('d/m/Y H:i:s'),
+        ];
+
+        // Si es un servicio, calcular el costo total de los componentes
+        if ($articulo->tipo == 'servicio') {
+            $totalCosto = 0;
+            foreach ($articulo->articulos as $articuloServicio) {
+                $totalCosto += $articuloServicio->precio_compra * $articuloServicio->pivot->cantidad;
+            }
+            $data['totalCosto'] = $totalCosto;
+        }
+
+        // Cálculo de comisiones e impuestos
+        $comisionVendedor = $articulo->tipoComisionVendedor->porcentaje ?? 0;
+        $comisionTrabajador = $articulo->tipoComisionTrabajador->porcentaje ?? 0;
+        $impuesto = $config->impuesto ?? 0;
+
+        $valorComisionVendedor = $articulo->precio_venta * ($comisionVendedor / 100);
+        $valorComisionTrabajador = $articulo->precio_venta * ($comisionTrabajador / 100);
+        $valorImpuesto = $articulo->precio_venta * ($impuesto / 100);
+
+        $ganancia = $articulo->precio_venta - $articulo->precio_compra;
+        $gananciaReal = $ganancia - $valorComisionVendedor - $valorComisionTrabajador - $valorImpuesto;
+        $margen = $articulo->precio_compra > 0 ? (($gananciaReal) / $articulo->precio_compra) * 100 : 0;
+
+        $data['comisionVendedor'] = $comisionVendedor;
+        $data['comisionTrabajador'] = $comisionTrabajador;
+        $data['impuesto'] = $impuesto;
+        $data['valorComisionVendedor'] = $valorComisionVendedor;
+        $data['valorComisionTrabajador'] = $valorComisionTrabajador;
+        $data['valorImpuesto'] = $valorImpuesto;
+        $data['gananciaReal'] = $gananciaReal;
+        $data['margen'] = $margen;
+
+        $pdf = PDF::loadView('admin.articulo.pdfarticulo', $data);
+
+        // Configurar opciones del PDF
+        $pdf->setPaper('a4');
+
+        // Generar un nombre de archivo descriptivo
+        $filename = 'articulo_' . Str::slug($articulo->nombre) . '_' . $articulo->id . '.pdf';
+
+        return $pdf->stream($filename);
     }
 }

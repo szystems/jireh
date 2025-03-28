@@ -30,4 +30,10 @@ class Vehiculo extends Model
     {
         return $this->belongsTo(Cliente::class);
     }
+
+    // Añadir esta relación para conectar con las ventas
+    public function ventas()
+    {
+        return $this->hasMany(Venta::class);
+    }
 }

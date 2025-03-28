@@ -30,68 +30,66 @@
             <div class="row gx-3">
                 <div class="col-sm-12 col-12">
                     <div class="card">
-
                         <div class="card-header">
-                            <div class="card-title">
-                                Listado de Usuarios
-                                <br>
-                                <a target="_blank" href="{{ url('pdf-users') }}" type="button" class="btn btn-info btn-sm">
-                                    <i class="bi bi-printer"></i> Imprimir
-                                </a>
-                                <a href="{{ url('add-user') }}" type="button" class="btn btn-success float-end">
-                                    <i class="bi bi-plus-square"></i> Agregar
-                                </a>
+                            <div class="card-title d-flex justify-content-between align-items-center">
+                                <div>
+                                    Listado de Usuarios
+                                    <span class="badge bg-secondary">{{ $users->total() }} usuarios</span>
+                                </div>
+                                <div class="d-flex">
+                                    <a target="_blank" href="{{ url('pdf-users') }}{{ $queryUser ? '?fuser='.$queryUser : '' }}{{ isset($role_filter) && $role_filter != '' ? '&role_filter='.$role_filter : '' }}" type="button" class="btn btn-danger me-2">
+                                        <i class="bi bi-file-pdf"></i> PDF
+                                    </a>
+                                    <a href="{{ url('add-user') }}" type="button" class="btn btn-success">
+                                        <i class="bi bi-plus-square"></i> Agregar
+                                    </a>
+                                </div>
                             </div>
-
                         </div>
                         <div class="card-body">
+                            @if($users->count() > 0)
                             <div class="table-responsive">
                                 <table class="table align-middle table-striped flex-column">
                                     <thead>
                                         <tr>
-                                            <td align="center"><i class="bi bi-list-task"></i></td>
-                                            <td>Usuario</td>
-                                            <td align="center">Fecha de Nacimiento</td>
-                                            <td>Dirección</td>
+                                            <td align="center" width="15%">Acciones</td>
+                                            <td width="40%">Usuario</td>
+                                            <td align="center" width="10%">Tipo</td>
+                                            <td align="center" width="15%">Fecha de Nacimiento</td>
+                                            <td width="20%">Dirección</td>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @foreach ($users as $user)
                                         <tr>
                                             <td>
-                                                <div class="btn-group dropend">
-                                                    <button type="button" class="btn btn-info btn-sm dropdown-toggle" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
-                                                        <i class="bi bi-list-task"></i>
-                                                    </button>
-                                                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-lg-start">
-                                                        <li>
-                                                            <a class="dropdown-item" href="{{ url('show-user/'.$user->id) }}"><i class="bi bi-eye-fill text-blue"></i> Información</a>
-                                                        </li>
-                                                        <li>
-                                                            <a class="dropdown-item" href="{{ url('edit-user/'.$user->id) }}"><i class="bi bi-pencil-fill text-warning"></i> Editar</a>
-                                                        </li>
-                                                        <li>
-
-                                                                @if ($user->principal == "1")
-                                                                    <a disabled type="button" class="btn bg-gradient-danger disabled" data-bs-toggle="modal" data-bs-target="#deleteModal-{{ $user->id }}">
-                                                                        <i class="bi bi-trash-fill text-danger"></i> Eliminar
-                                                                    </a>
-                                                                @else
-                                                                    <a type="button" class="btn bg-gradient-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-{{ $user->id }}">
-                                                                        <i class="bi bi-trash-fill text-danger"></i> Eliminar
-                                                                    </a>
-                                                                @endif
-
-                                                        </li>
-                                                    </ul>
+                                                <div class="btn-group btn-group-sm">
+                                                    <a href="{{ url('show-user/'.$user->id) }}" class="btn btn-info">
+                                                        <i class="bi bi-eye-fill"></i>
+                                                    </a>
+                                                    <a href="{{ url('edit-user/'.$user->id) }}" class="btn btn-warning">
+                                                        <i class="bi bi-pencil-fill"></i>
+                                                    </a>
+                                                    @if ($user->principal == "1")
+                                                        <button disabled type="button" class="btn btn-secondary">
+                                                            <i class="bi bi-trash-fill"></i>
+                                                        </button>
+                                                    @else
+                                                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-{{ $user->id }}">
+                                                            <i class="bi bi-trash-fill"></i>
+                                                        </button>
+                                                    @endif
+                                                    <a href="{{ url('pdf-user/'.$user->id) }}" target="_blank" class="btn btn-primary">
+                                                        <i class="bi bi-file-pdf"></i>
+                                                    </a>
                                                 </div>
                                             </td>
                                             <td>
                                                 <div class="d-flex align-items-center">
                                                     @if ($user->fotografia != null)
-                                                        <img src="{{ asset('assets/imgs/users/'.$user->fotografia) }}" class="img-4x rounded-5 me-3" alt="Doctores" />
+                                                        <img src="{{ asset('assets/imgs/users/'.$user->fotografia) }}" class="img-4x rounded-5 me-3" alt="Usuario" />
                                                     @else
-                                                        <img src="{{ asset('assets/imgs/users/usericon4.png') }}" class="img-4x rounded-5 me-3" alt="Doctores" />
+                                                        <img src="{{ asset('assets/imgs/users/usericon4.png') }}" class="img-4x rounded-5 me-3" alt="Usuario" />
                                                     @endif
 
                                                     <p class="m-0">
@@ -108,7 +106,6 @@
                                                                 $annos = $hoy->diff($cumpleanos);
                                                                 $edad = $annos->y;
                                                             }
-
                                                         @endphp
                                                         @if ($edad > 0)
                                                             <small>
@@ -122,14 +119,16 @@
                                                             <a class="text-light" href="tel:+502{{ $user->telefono }}">{{ $user->telefono }}</a>
                                                             @if ($user->celular != null)
                                                             / <a class="text-light" href="tel:+502{{ $user->celular }}">{{ $user->celular }}</a>
-
                                                             / <a class="text-success" href="https://wa.me/502{{ $user->celular }}" target="_blank"><i class="bi bi-whatsapp"></i></a>
                                                             @endif
                                                         </small>
-
                                                     </p>
-
                                                 </div>
+                                            </td>
+                                            <td align="center">
+                                                <span class="badge {{ $user->role_as == 0 ? 'bg-danger' : 'bg-success' }}">
+                                                    {{ $user->role_as == 0 ? 'Administrador' : 'Vendedor' }}
+                                                </span>
                                             </td>
                                             <td align="center">
                                                 <small>
@@ -137,23 +136,27 @@
                                                 </small>
                                             </td>
                                             <td><small>{{ $user->direccion }}</small></td>
-
                                         </tr>
                                         @include('admin.user.deletemodal')
                                         @endforeach
                                     </tbody>
                                 </table>
-                                {{ $users->links() }}
+                                <div class="d-flex justify-content-center mt-3">
+                                    {{ $users->appends(request()->query())->links() }}
+                                </div>
                             </div>
+                            @else
+                            <div class="alert alert-info text-center" role="alert">
+                                <i class="bi bi-info-circle me-2"></i> No se encontraron usuarios con los criterios de búsqueda aplicados.
+                            </div>
+                            @endif
                         </div>
                     </div>
                 </div>
             </div>
             <!-- Row end -->
-
         </div>
         <!-- Content wrapper end -->
-
     </div>
     <!-- Content wrapper scroll end -->
 @endsection

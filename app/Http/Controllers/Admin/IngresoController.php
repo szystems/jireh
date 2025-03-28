@@ -61,12 +61,19 @@ class IngresoController extends Controller
         return view('admin.ingreso.index', compact('ingresos', 'proveedores', 'usuarios', 'config'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $config = Config::first();
         $todosArticulos = Articulo::with('unidad')->get();
         $proveedores = Proveedor::all();
-        return view('admin.ingreso.create', compact('todosArticulos', 'proveedores', 'config'));
+
+        // Verificamos si se proporcionó un ID de artículo
+        $articuloSeleccionado = null;
+        if ($request->has('articulo')) {
+            $articuloSeleccionado = Articulo::with('unidad')->find($request->articulo);
+        }
+
+        return view('admin.ingreso.create', compact('todosArticulos', 'proveedores', 'config', 'articuloSeleccionado'));
     }
 
     public function store(IngresoFormRequest $request)
@@ -194,7 +201,7 @@ class IngresoController extends Controller
             'usuario' => $request->input('usuario'),
         ];
         $pdf = PDF::loadView('admin.ingreso.pdf', compact('ingresos', 'config', 'filters', 'proveedores', 'usuarios'));
-        return $pdf->download('ingresos.pdf');
+        return $pdf->stream('ingresos.pdf');
     }
 
     public function exportExcel(Request $request)
@@ -207,7 +214,7 @@ class IngresoController extends Controller
         $ingreso = Ingreso::with(['detalles.articulo', 'proveedor', 'usuario'])->findOrFail($id);
         $config = Config::first();
         $pdf = PDF::loadView('admin.ingreso.single_pdf', compact('ingreso', 'config'));
-        return $pdf->download('ingreso_' . $ingreso->id . '.pdf');
+        return $pdf->stream('ingreso_' . $ingreso->id . '.pdf');
     }
 
     private function getFilteredIngresos(Request $request)

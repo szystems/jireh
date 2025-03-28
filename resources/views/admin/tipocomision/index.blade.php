@@ -26,6 +26,14 @@
 
             @include('admin.tipocomision.search')
 
+            <!-- Mensajes de estado -->
+            @if(session('status'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ session('status') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+
             <!-- Row start -->
             <div class="row gx-3">
                 <div class="col-sm-12 col-12">
@@ -42,61 +50,50 @@
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
-                                <table class="table align-middle table-striped flex-column">
+                                <table class="table align-middle table-striped">
                                     <thead>
                                         <tr>
-                                            <td align="center"><i class="bi bi-list-task"></i></td>
-                                            <td>Nombre</td>
-                                            <td>Descripción</td>
-                                            <td>Porcentaje</td>
+                                            <th width="15%">Acciones</th>
+                                            <th width="35%">Nombre</th>
+                                            <th width="30%">Descripción</th>
+                                            <th width="20%">Porcentaje</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach ($tipocomisiones as $tipocomision)
+                                        @forelse ($tipocomisiones as $tipocomision)
                                         <tr>
-                                            <td align="center">
-                                                <div class="btn-group dropend">
-                                                    <button type="button" class="btn btn-info btn-sm dropdown-toggle" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
-                                                        <i class="bi bi-list-task"></i>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a href="{{ url('show-tipo-comision/'.$tipocomision->id) }}" class="btn btn-sm btn-info" title="Ver detalles">
+                                                        <i class="bi bi-eye-fill"></i>
+                                                    </a>
+                                                    <a href="{{ url('edit-tipo-comision/'.$tipocomision->id) }}" class="btn btn-sm btn-warning" title="Editar">
+                                                        <i class="bi bi-pencil-fill"></i>
+                                                    </a>
+                                                    <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-{{ $tipocomision->id }}" title="Eliminar">
+                                                        <i class="bi bi-trash-fill"></i>
                                                     </button>
-                                                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-lg-start">
-                                                        <li>
-                                                            <a class="dropdown-item" href="{{ url('show-tipo-comision/'.$tipocomision->id) }}"><i class="bi bi-eye-fill text-blue"></i> Información</a>
-                                                        </li>
-                                                        <li>
-                                                            <a class="dropdown-item" href="{{ url('edit-tipo-comision/'.$tipocomision->id) }}"><i class="bi bi-pencil-fill text-warning"></i> Editar</a>
-                                                        </li>
-                                                        <li>
-                                                            <a type="button" class="btn bg-gradient-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-{{ $tipocomision->id }}">
-                                                                <i class="bi bi-trash-fill text-danger"></i> Eliminar
-                                                            </a>
-                                                        </li>
-                                                    </ul>
                                                 </div>
                                             </td>
                                             <td>
-                                                <div class="d-flex align-items-center">
-                                                    {{-- @if ($user->fotografia != null)
-                                                        <img src="{{ asset('assets/imgs/users/'.$user->fotografia) }}" class="img-4x rounded-5 me-3" alt="Doctores" />
-                                                    @else
-                                                        <img src="{{ asset('assets/imgs/users/doctoricon.png') }}" class="img-4x rounded-5 me-3" alt="Doctores" />
-                                                    @endif --}}
-
-                                                    <p class="m-0">
-                                                        <a class="text-primary" href="{{ url('show-tipo-comision/'.$tipocomision->id) }}"><b>{{ $tipocomision->nombre }}</a>
-                                                    </p>
-                                                    <br>
-                                                </div>
+                                                <a class="text-primary fw-bold" href="{{ url('show-tipo-comision/'.$tipocomision->id) }}">
+                                                    {{ $tipocomision->nombre }}
+                                                </a>
                                             </td>
-                                            <td><small>{{ $tipocomision->descripcion }}</small></td>
-                                            <td><small>{{ $tipocomision->porcentaje }} %</small></td>
-
+                                            <td>{{ $tipocomision->descripcion }}</td>
+                                            <td><span class="badge bg-success">{{ $tipocomision->porcentaje }}%</span></td>
                                         </tr>
                                         @include('admin.tipocomision.deletemodal')
-                                        @endforeach
+                                        @empty
+                                        <tr>
+                                            <td colspan="4" class="text-center">No se encontraron registros</td>
+                                        </tr>
+                                        @endforelse
                                     </tbody>
                                 </table>
-                                {{ $tipocomisiones->links() }}
+                                <div class="d-flex justify-content-center mt-3">
+                                    {{ $tipocomisiones->links() }}
+                                </div>
                             </div>
                         </div>
                     </div>

@@ -34,68 +34,78 @@
                         <div class="card-header">
                             <div class="card-title">
                                 Listado de Unidades de Medida
+                                <span class="badge bg-info ms-2">{{ $unidades->total() }}</span>
                                 <a href="{{ url('add-unidad') }}" type="button" class="btn btn-success float-end">
                                     <i class="bi bi-plus-square"></i> Agregar
                                 </a>
+                                @if($queryUnidad)
+                                    <a href="{{ url('unidades') }}" class="btn btn-outline-secondary float-end me-2">
+                                        <i class="bi bi-x-circle"></i> Limpiar filtros
+                                    </a>
+                                @endif
                             </div>
-
                         </div>
                         <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table align-middle table-striped flex-column">
-                                    <thead>
-                                        <tr>
-                                            <td align="center"><i class="bi bi-list-task"></i></td>
-                                            <td>Nombre</td>
-                                            <td>Tipo</td>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($unidades as $unidad)
-                                        <tr>
-                                            <td align="center">
-                                                <div class="btn-group dropend">
-                                                    <button type="button" class="btn btn-info btn-sm dropdown-toggle" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
-                                                        <i class="bi bi-list-task"></i>
-                                                    </button>
-                                                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-lg-start">
-                                                        <li>
-                                                            <a class="dropdown-item" href="{{ url('show-unidad/'.$unidad->id) }}"><i class="bi bi-eye-fill text-blue"></i> Información</a>
-                                                        </li>
-                                                        <li>
-                                                            <a class="dropdown-item" href="{{ url('edit-unidad/'.$unidad->id) }}"><i class="bi bi-pencil-fill text-warning"></i> Editar</a>
-                                                        </li>
-                                                        <li>
-                                                            <a type="button" class="btn bg-gradient-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-{{ $unidad->id }}">
-                                                                <i class="bi bi-trash-fill text-danger"></i> Eliminar
-                                                            </a>
-                                                        </li>
-                                                    </ul>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    {{-- @if ($user->fotografia != null)
-                                                        <img src="{{ asset('assets/imgs/users/'.$user->fotografia) }}" class="img-4x rounded-5 me-3" alt="Doctores" />
+                            @if($unidades->count() > 0)
+                                <div class="table-responsive">
+                                    <table class="table align-middle table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th width="10%">Acciones</th>
+                                                <th>Nombre</th>
+                                                <th>Abreviatura</th>
+                                                <th>Tipo</th>
+                                                <th>Actualización</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($unidades as $unidad)
+                                            <tr>
+                                                <td>
+                                                    <div class="btn-group" role="group">
+                                                        <a href="{{ url('show-unidad/'.$unidad->id) }}" class="btn btn-sm btn-info" title="Ver detalles">
+                                                            <i class="bi bi-eye-fill"></i>
+                                                        </a>
+                                                        <a href="{{ url('edit-unidad/'.$unidad->id) }}" class="btn btn-sm btn-warning" title="Editar">
+                                                            <i class="bi bi-pencil-fill"></i>
+                                                        </a>
+                                                        <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-{{ $unidad->id }}" title="Eliminar">
+                                                            <i class="bi bi-trash-fill"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <a class="text-primary" href="{{ url('show-unidad/'.$unidad->id) }}">
+                                                        <b>{{ $unidad->nombre }}</b>
+                                                    </a>
+                                                </td>
+                                                <td>{{ $unidad->abreviatura }}</td>
+                                                <td>
+                                                    @if($unidad->tipo == 'unidad')
+                                                        <span class="badge bg-primary">Unidad</span>
                                                     @else
-                                                        <img src="{{ asset('assets/imgs/users/doctoricon.png') }}" class="img-4x rounded-5 me-3" alt="Doctores" />
-                                                    @endif --}}
-
-                                                    <p class="m-0">
-                                                        <a class="text-primary" href="{{ url('show-unidad/'.$unidad->id) }}"><b>{{ $unidad->nombre }} ({{ $unidad->abreviatura }})</b></a>
-                                                    </p>
-
-                                                </div>
-                                            </td>
-                                            <td><small>{{ $unidad->tipo }}</small></td>
-
-                                        </tr>
-                                        @include('admin.unidad.deletemodal')
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                                {{ $unidades->links() }}
-                            </div>
+                                                        <span class="badge bg-success">Decimal</span>
+                                                    @endif
+                                                </td>
+                                                <td><small>{{ date('d/m/Y H:i', strtotime($unidad->updated_at)) }}</small></td>
+                                            </tr>
+                                            @include('admin.unidad.deletemodal')
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                    <div class="pagination justify-content-end mt-3">
+                                        {{ $unidades->links() }}
+                                    </div>
+                                </div>
+                            @else
+                                <div class="alert alert-info text-center">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    No se encontraron unidades de medida
+                                    @if($queryUnidad)
+                                        con el criterio de búsqueda "{{ $queryUnidad }}"
+                                    @endif
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>

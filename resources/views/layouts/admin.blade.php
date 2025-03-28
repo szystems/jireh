@@ -49,6 +49,8 @@
 
         <!-- Select2 CSS -->
         <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+        <!-- Select2 Bootstrap 5 Theme -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
 
         <!-- jQuery (Necesario para JavaScript plugins) -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
@@ -66,8 +68,49 @@
         {{-- <script src="{{ asset('assets/ckeditor5/ckeditor.js') }}"></script> --}}
 
         <style>
+            html, body {
+                height: 100%;
+                margin: 0;
+                padding: 0;
+                overflow-x: hidden;
+            }
+
+            .page-wrapper {
+                display: flex;
+                flex-direction: column;
+                min-height: 100vh;
+                overflow-x: hidden;
+            }
+
+            .main-container {
+                display: flex;
+                flex: 1;
+                flex-direction: column;
+                overflow-x: hidden;
+                position: relative;
+            }
+
+            .content-wrapper {
+                flex: 1 0 auto;
+                width: 100%;
+                padding-bottom: 10px;
+                overflow-y: auto;
+                overflow-x: hidden;
+            }
+
             .custom-bg {
                 background-color: #b6becc; /* Un color gris claro */
+            }
+
+            .app-footer {
+                flex-shrink: 0;
+                width: 100%;
+            }
+
+            /* Ajustes específicos para los contenedores del contenido */
+            .container-fluid,
+            .container {
+                overflow-x: hidden;
             }
         </style>
 
@@ -99,7 +142,10 @@
 
 				@include('layouts.incadmin.sidebar')
 
-				@yield('content')
+                <!-- Content wrapper -->
+                <div class="content-wrapper">
+                    @yield('content')
+                </div>
 
 				@include('layouts.incadmin.footer')
 

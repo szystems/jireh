@@ -30,75 +30,95 @@
                 <div class="row justify-content-center mt-4">
                     <div class="col-lg-12">
                         <!-- Row start -->
-                        <div class="row align-items-end">
-                            <div class="col-auto">
-                                @if ($user->fotografia != null)
-                                    <img src="{{ asset('assets/imgs/users/'.$user->fotografia) }}" class="img-7xx rounded-circle" />
-                                @else
-                                    <img src="{{ asset('assets/imgs/users/usericon4.png') }}" class="img-7xx rounded-circle" />
-                                @endif
-                            </div>
-                            <div class="col">
-                                <h6>Usuario</h6>
-                                <h4 class="m-0">{{ $user->name }}</h4>
-                            </div>
-                            <div class="col-12 col-md-auto">
-                                <div class="btn-group-sm m-3">
-                                    <a target="_blank" href="{{ url('pdf-user/'.$user->id) }}" type="button" class="btn btn-info">
-                                        <i class="bi bi-printer"></i> Imprimir
-                                    </a>
-                                    <a href="{{ url('edit-user/'.$user->id) }}" class="btn btn-warning" aria-current="page"><i class="bi bi-pencil"></i> Editar</a>
-                                    @if ($user->principal == "1")
-										<button disabled type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-{{ $user->id }}">
-                                            <i class="bi bi-trash"></i> Eliminar
-                                        </button>
-                                    @else
-                                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-{{ $user->id }}">
-                                            <i class="bi bi-trash"></i> Eliminar
-                                        </button>
-                                    @endif
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="card">
+                                    <div class="card-body text-center">
+                                        <div class="mb-3">
+                                            @if ($user->fotografia != null)
+                                                <img src="{{ asset('assets/imgs/users/'.$user->fotografia) }}" class="img-fluid rounded-circle shadow border border-3 border-light" style="width: 150px; height: 150px; object-fit: cover;" />
+                                            @else
+                                                <img src="{{ asset('assets/imgs/users/usericon4.png') }}" class="img-fluid rounded-circle shadow border border-3 border-light" style="width: 150px; height: 150px; object-fit: cover;" />
+                                            @endif
+                                        </div>
+                                        <h5 class="mb-0">{{ $user->name }}</h5>
+                                        <div class="mt-2 mb-3">
+                                            <span class="badge {{ $user->role_as == 0 ? 'bg-danger' : 'bg-success' }} px-3 py-2">
+                                                <i class="bi {{ $user->role_as == 0 ? 'bi-shield-lock-fill' : 'bi-person-badge-fill' }} me-1"></i>
+                                                {{ $user->role_as == 0 ? 'Administrador' : 'Vendedor' }}
+                                            </span>
+                                        </div>
 
-                                    @include('admin.user.deletemodal')
+                                        <div class="btn-group btn-group-sm d-flex flex-wrap gap-2 mt-3">
+                                            <a href="{{ url('edit-user/'.$user->id) }}" class="btn btn-primary">
+                                                <i class="bi bi-pencil-fill"></i> Editar
+                                            </a>
+
+                                            <a target="_blank" href="{{ url('pdf-user/'.$user->id) }}" class="btn btn-danger">
+                                                <i class="bi bi-file-pdf"></i> PDF
+                                            </a>
+
+                                            @if ($user->principal != "1")
+                                                <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#deleteModal-{{ $user->id }}">
+                                                    <i class="bi bi-trash-fill"></i> Eliminar
+                                                </button>
+                                            @else
+                                                <button type="button" class="btn btn-secondary" disabled>
+                                                    <i class="bi bi-lock-fill"></i> Eliminar
+                                                </button>
+                                            @endif
+
+                                            <a href="{{ url('users') }}" class="btn btn-info w-100 mt-2">
+                                                <i class="bi bi-arrow-left"></i> Volver al listado
+                                            </a>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <!-- Row end -->
-                    </div>
-                </div>
-                <!-- Row end -->
 
-                <!-- Row start -->
-                <div class="row justify-content-center mt-4">
-                    <div class="col-lg-12">
-                        <div class="card light">
-                            <div class="card-body">
-                                <div class="custom-tabs-container">
-                                    <ul class="nav nav-tabs" id="customTab2" role="tablist">
-                                        <li class="nav-item" role="presentation">
-                                            <a class="nav-link active" id="tab-docInfo" data-bs-toggle="tab" href="#docInfo" role="tab"
-                                                aria-controls="docInfo" aria-selected="true">Información</a>
-                                        </li>
-                                    </ul>
-                                    <div class="tab-content h-350">
-
-                                        <div class="tab-pane fade show active" id="docInfo" role="tabpanel">
-                                            <!-- Row start -->
-                                            <div class="row gx-3">
-                                                <div class="col-sm-12 col-12">
-                                                    <div class="row gx-3">
-
-                                                        <div class="col-md-4 mb-3">
-                                                            <!-- Form Field Start -->
-                                                            <div class="mb-3">
-                                                                <label for="fullName" class="form-label">Nombre</label>
-                                                                <p>{{ $user->name }}</p>
+                            <div class="col-md-9">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <ul class="nav nav-tabs card-header-tabs" id="userInfoTabs" role="tablist">
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link active" id="personal-tab" data-bs-toggle="tab" href="#personal" role="tab" aria-controls="personal" aria-selected="true">
+                                                    <i class="bi bi-person-fill"></i> Información Personal
+                                                </a>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link" id="contact-tab" data-bs-toggle="tab" href="#contact" role="tab" aria-controls="contact" aria-selected="false">
+                                                    <i class="bi bi-telephone-fill"></i> Contacto
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="tab-content" id="userInfoTabsContent">
+                                            <div class="tab-pane fade show active" id="personal" role="tabpanel" aria-labelledby="personal-tab">
+                                                <div class="row g-3">
+                                                    <div class="col-md-6">
+                                                        <div class="d-flex">
+                                                            <div class="flex-shrink-0">
+                                                                <span class="badge bg-light text-dark p-2 rounded-circle">
+                                                                    <i class="bi bi-person-badge-fill fs-5 text-primary"></i>
+                                                                </span>
+                                                            </div>
+                                                            <div class="flex-grow-1 ms-3">
+                                                                <h6 class="mb-0 text-muted">Nombre Completo</h6>
+                                                                <p class="fs-5">{{ $user->name }}</p>
                                                             </div>
                                                         </div>
+                                                    </div>
 
-                                                        <div class="col-md-4 mb-3">
-                                                            <!-- Form Field Start -->
-                                                            <div class="mb-3">
-                                                                <label for="birthDay" class="form-label">Fecha de Nacimiento</label>
+                                                    <div class="col-md-6">
+                                                        <div class="d-flex">
+                                                            <div class="flex-shrink-0">
+                                                                <span class="badge bg-light text-dark p-2 rounded-circle">
+                                                                    <i class="bi bi-calendar-date fs-5 text-primary"></i>
+                                                                </span>
+                                                            </div>
+                                                            <div class="flex-grow-1 ms-3">
+                                                                <h6 class="mb-0 text-muted">Fecha de Nacimiento</h6>
                                                                 @php
                                                                     $fnacimiento = null;
                                                                     $edad = 0;
@@ -111,72 +131,136 @@
                                                                         $annos = $hoy->diff($cumpleanos);
                                                                         $edad = $annos->y;
                                                                     }
-
                                                                 @endphp
-                                                                <p>
-                                                                    <strong class="text-info">{{ $fnacimiento }}</strong>
+                                                                <p class="fs-5">
+                                                                    <span class="text-primary">{{ $fnacimiento }}</span>
                                                                     @if ($edad > 0)
-                                                                        <small>
-                                                                            ({{ $edad }} años)
-                                                                        </small>
+                                                                        <span class="badge bg-light text-dark border ms-1">{{ $edad }} años</span>
                                                                     @endif
                                                                 </p>
                                                             </div>
                                                         </div>
+                                                    </div>
 
-                                                        <div class="col-md-4 mb-3">
-                                                            <!-- Form Field Start -->
-                                                            <div class="mb-3">
-                                                                <label for="emailId" class="form-label">Email</label>
-                                                                <p><a class="link-info" href="mailto:{{ $user->email }}">{{ $user->email }}</a></p>
+                                                    <div class="col-md-6">
+                                                        <div class="d-flex">
+                                                            <div class="flex-shrink-0">
+                                                                <span class="badge bg-light text-dark p-2 rounded-circle">
+                                                                    <i class="bi bi-envelope-fill fs-5 text-primary"></i>
+                                                                </span>
                                                             </div>
-                                                        </div>
-
-                                                        <div class="col-md-4 mb-3">
-                                                            <!-- Form Field Start -->
-                                                            <div class="mb-3">
-                                                                <label for="contactNumber" class="form-label">Teléfono / Celular / Whatsapp</label>
-                                                                <p>
-                                                                    <a class="text-info" href="tel:+502{{ $user->telefono }}">{{ $user->telefono }}</a>
-                                                                    @if ($user->celular != null)
-                                                                        <a class="text-info" href="tel:+502{{ $user->celular }}">/ {{ $user->celular }}</a>
-                                                                        <a class="text-success" href="https://wa.me/502{{ $user->celular }}" target="_blank">/ <i class="bi bi-whatsapp"></i></a>
-                                                                    @endif
+                                                            <div class="flex-grow-1 ms-3">
+                                                                <h6 class="mb-0 text-muted">Correo Electrónico</h6>
+                                                                <p class="fs-5">
+                                                                    <a href="mailto:{{ $user->email }}" class="text-primary text-decoration-none">
+                                                                        {{ $user->email }}
+                                                                    </a>
                                                                 </p>
                                                             </div>
                                                         </div>
+                                                    </div>
 
-
-                                                        <div class="col-md-4 mb-3">
-                                                            <!-- Form Field Start -->
-                                                            <div class="mb-3">
-                                                                <label class="form-label">Dirección</label>
-                                                                <p>{{ $user->direccion }}</p>
+                                                    <div class="col-md-6">
+                                                        <div class="d-flex">
+                                                            <div class="flex-shrink-0">
+                                                                <span class="badge bg-light text-dark p-2 rounded-circle">
+                                                                    <i class="bi bi-shield-check fs-5 text-primary"></i>
+                                                                </span>
+                                                            </div>
+                                                            <div class="flex-grow-1 ms-3">
+                                                                <h6 class="mb-0 text-muted">Rol del Sistema</h6>
+                                                                <p class="fs-5">
+                                                                    <span class="badge {{ $user->role_as == 0 ? 'bg-danger' : 'bg-success' }}">
+                                                                        {{ $user->role_as == 0 ? 'Administrador' : 'Vendedor' }}
+                                                                    </span>
+                                                                </p>
                                                             </div>
                                                         </div>
-
-
-
                                                     </div>
                                                 </div>
                                             </div>
-                                            <!-- Row end -->
+
+                                            <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+                                                <div class="row g-3">
+                                                    <div class="col-md-6">
+                                                        <div class="d-flex">
+                                                            <div class="flex-shrink-0">
+                                                                <span class="badge bg-light text-dark p-2 rounded-circle">
+                                                                    <i class="bi bi-telephone-fill fs-5 text-primary"></i>
+                                                                </span>
+                                                            </div>
+                                                            <div class="flex-grow-1 ms-3">
+                                                                <h6 class="mb-0 text-muted">Teléfono</h6>
+                                                                <p class="fs-5">
+                                                                    <a href="tel:+502{{ $user->telefono }}" class="text-primary text-decoration-none">
+                                                                        {{ $user->telefono }}
+                                                                    </a>
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-6">
+                                                        <div class="d-flex">
+                                                            <div class="flex-shrink-0">
+                                                                <span class="badge bg-light text-dark p-2 rounded-circle">
+                                                                    <i class="bi bi-phone-fill fs-5 text-primary"></i>
+                                                                </span>
+                                                            </div>
+                                                            <div class="flex-grow-1 ms-3">
+                                                                <h6 class="mb-0 text-muted">Celular / WhatsApp</h6>
+                                                                <p class="fs-5">
+                                                                    @if ($user->celular)
+                                                                        <a href="tel:+502{{ $user->celular }}" class="text-primary text-decoration-none">
+                                                                            {{ $user->celular }}
+                                                                        </a>
+                                                                        <a href="https://wa.me/502{{ $user->celular }}" target="_blank" class="btn btn-sm btn-success ms-2">
+                                                                            <i class="bi bi-whatsapp"></i> WhatsApp
+                                                                        </a>
+                                                                    @else
+                                                                        <span class="text-muted">No disponible</span>
+                                                                    @endif
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-12">
+                                                        <div class="d-flex">
+                                                            <div class="flex-shrink-0">
+                                                                <span class="badge bg-light text-dark p-2 rounded-circle">
+                                                                    <i class="bi bi-geo-alt-fill fs-5 text-primary"></i>
+                                                                </span>
+                                                            </div>
+                                                            <div class="flex-grow-1 ms-3">
+                                                                <h6 class="mb-0 text-muted">Dirección</h6>
+                                                                <p class="fs-5">
+                                                                    @if ($user->direccion)
+                                                                        {{ $user->direccion }}
+                                                                        <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($user->direccion) }}" target="_blank" class="btn btn-sm btn-outline-primary ms-2">
+                                                                            <i class="bi bi-map"></i> Ver en mapa
+                                                                        </a>
+                                                                    @else
+                                                                        <span class="text-muted">No disponible</span>
+                                                                    @endif
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-
-
-
                                     </div>
-                                    {{-- <div class="d-flex gap-2 justify-content-end">
-                                        <button type="button" class="btn btn-outline-secondary">
-                                            Cancel
-                                        </button>
-                                        <button type="button" class="btn btn-success">
-                                            Update
-                                        </button>
-                                    </div> --}}
+                                    <div class="card-footer bg-white">
+                                        <div class="d-flex justify-content-between align-items-center small text-muted">
+                                            <div>Usuario registrado en el sistema</div>
+                                            <div>ID: {{ $user->id }}</div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+                        <!-- Row end -->
                     </div>
                 </div>
                 <!-- Row end -->
@@ -185,4 +269,6 @@
         <!-- Content wrapper end -->
     </div>
     <!-- Content wrapper scroll end -->
+
+    @include('admin.user.deletemodal')
 @endsection

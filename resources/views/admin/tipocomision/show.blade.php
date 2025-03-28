@@ -22,81 +22,101 @@
 
         <!-- Content wrapper start -->
         <div class="content-wrapper">
-
-
             <!-- Row start -->
             <div class="row gx-3">
                 <div class="col-sm-12 col-12">
                     <div class="card">
+                        <div class="card-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="card-title mb-0">Información del Tipo de Comisión</h5>
+                                <div class="btn-group">
+                                    <a href="{{ url('tipo-comisiones') }}" class="btn btn-secondary me-2">
+                                        <i class="bi bi-arrow-left"></i> Volver
+                                    </a>
+                                    <a href="{{ url('edit-tipo-comision/'.$tipocomision->id) }}" class="btn btn-warning">
+                                        <i class="bi bi-pencil-fill"></i> Editar
+                                    </a>
+                                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-{{ $tipocomision->id }}">
+                                        <i class="bi bi-trash-fill"></i> Eliminar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                         <div class="card-body">
-                            <div class="custom-tabs-container">
-                                <div class="col-12 col-md-auto float-end">
-                                    <div class="btn-group-sm m-3">
-                                        <a href="{{ url('edit-tipo-comision/'.$tipocomision->id) }}" class="btn btn-warning" aria-current="page"><i class="bi bi-pencil"></i> Editar</a>
-                                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-{{ $tipocomision->id }}">
-                                            <i class="bi bi-trash"></i> Eliminar
-                                        </button>
-                                        @include('admin.tipocomision.deletemodal')
+                            <!-- Mensaje de estado -->
+                            @if(session('status'))
+                                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                    {{ session('status') }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            @endif
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="info-item mb-4">
+                                        <h6 class="text-muted mb-2">Nombre</h6>
+                                        <h5 class="mb-0 text-primary">{{ $tipocomision->nombre }}</h5>
                                     </div>
                                 </div>
-                                <ul class="nav nav-tabs" id="customTab2" role="tablist">
-                                    <li class="nav-item" role="presentation">
-                                        <a class="nav-link active" id="tab-oneA" data-bs-toggle="tab" href="#oneA" role="tab"
-                                            aria-controls="oneA" aria-selected="true">Información</a>
-                                    </li>
-                                </ul>
-                                <div class="tab-content h-350">
-                                    <div class="tab-pane fade show active" id="oneA" role="tabpanel">
-                                        <!-- Row start -->
-                                        <div class="row gx-3">
-                                            <div class="col-sm-12 col-12">
-                                                <div class="row gx-3">
+                                <div class="col-md-6">
+                                    <div class="info-item mb-4">
+                                        <h6 class="text-muted mb-2">Porcentaje</h6>
+                                        <h5 class="mb-0">
+                                            <span class="badge bg-success fs-6">{{ $tipocomision->porcentaje }}%</span>
+                                        </h5>
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="info-item">
+                                        <h6 class="text-muted mb-2">Descripción</h6>
+                                        <p class="mb-0">{{ $tipocomision->descripcion ?: 'Sin descripción' }}</p>
+                                    </div>
+                                </div>
+                            </div>
 
-                                                    <div class="col-md-6 mb-3">
-                                                        <!-- Form Field Start -->
-                                                        <div class="mb-3">
-                                                            <label for="fullName" class="form-label">Nombre</label>
-                                                            <p>{{ $tipocomision->nombre }}</p>
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="col-md-6 mb-3">
-                                                        <!-- Form Field Start -->
-                                                        <div class="mb-3">
-                                                            <label for="descripcion" class="form-label">Descripción</label>
-                                                            <p>{{ $tipocomision->descripcion }}</p>
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="col-md-6 mb-3">
-                                                        <!-- Form Field Start -->
-                                                        <div class="mb-3">
-                                                            <label class="form-label">Porcentaje</label>
-                                                            <p>{{ $tipocomision->porcentaje }} %</p>
-                                                        </div>
-                                                    </div>
-
+                            <div class="row mt-4">
+                                <div class="col-md-12">
+                                    <div class="card bg-light">
+                                        <div class="card-body">
+                                            <h6 class="text-muted mb-2">Información adicional</h6>
+                                            <div class="row">
+                                                {{-- <div class="col-md-6">
+                                                    <small class="text-muted">ID:</small>
+                                                    <p class="mb-0">{{ $tipocomision->id }}</p>
+                                                </div> --}}
+                                                <div class="col-md-6">
+                                                    <small class="text-muted">Estado:</small>
+                                                    <p class="mb-0">
+                                                        @if($tipocomision->estado)
+                                                            <span class="badge bg-success">Activo</span>
+                                                        @else
+                                                            <span class="badge bg-danger">Inactivo</span>
+                                                        @endif
+                                                    </p>
                                                 </div>
+                                                {{-- <div class="col-md-6">
+                                                    <small class="text-muted">Fecha de creación:</small>
+                                                    <p class="mb-0">
+                                                        {{ $tipocomision->created_at ? $tipocomision->created_at->format('d/m/Y H:i') : 'No disponible' }}
+                                                    </p>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <small class="text-muted">Última modificación:</small>
+                                                    <p class="mb-0">
+                                                        {{ $tipocomision->updated_at ? $tipocomision->updated_at->format('d/m/Y H:i') : 'No disponible' }}
+                                                    </p>
+                                                </div> --}}
                                             </div>
                                         </div>
-                                        <!-- Row end -->
                                     </div>
-
                                 </div>
-                                {{-- <div class="d-flex gap-2 justify-content-end">
-                                    <button type="button" class="btn btn-outline-secondary">
-                                        Cancel
-                                    </button>
-                                    <button type="button" class="btn btn-success">
-                                        Update
-                                    </button>
-                                </div> --}}
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
             <!-- Row end -->
+            @include('admin.tipocomision.deletemodal')
         </div>
         <!-- Content wrapper end -->
     </div>

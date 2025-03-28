@@ -8,15 +8,11 @@
         <div class="main-header d-flex align-items-center justify-content-between position-relative">
             <div class="d-flex align-items-center justify-content-center">
                 <div class="page-icon">
-                    <i class="bi bi-box"></i>
+                    <i class="bi bi-cart-plus"></i>
                 </div>
                 <div class="page-title">
-                    <h5>Editar Ingreso</h5>
+                    <h5>Editar Ingreso #{{ $ingreso->id }}</h5>
                 </div>
-            </div>
-            <!-- Date range start -->
-            <div class="d-flex align-items-end d-none d-sm-block">
-                <h6 class="float-end text-light" id="reloj"></h6>
             </div>
         </div>
         <!-- Main header ends -->
@@ -28,75 +24,62 @@
             <div class="row gx-3">
                 <div class="col-sm-12 col-12">
                     <div class="card">
-                        <div class="card-header">
-                            <h5>Formulario de Edición de Ingreso</h5>
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="bi bi-info-circle"></i> Información del Ingreso</h5>
                         </div>
                         <div class="card-body">
                             @if (count($errors)>0)
-                                <div class="alert alert-danger text-white" role="alert">
-                                    <ul>
+                                <div class="alert alert-danger" role="alert">
+                                    <h5 class="alert-heading"><i class="bi bi-exclamation-triangle-fill me-1"></i> Error en el formulario</h5>
+                                    <ul class="mb-0">
                                         @foreach ($errors->all() as $error)
                                             <li>{{$error}}</li>
                                         @endforeach
                                     </ul>
                                 </div>
-
                             @endif
-                            <form action="{{ url('update-ingreso/'.$ingreso->id) }} }}" method="POST" enctype="multipart/form-data">
+
+                            <form action="{{ url('update-ingreso/'.$ingreso->id) }}" method="POST" enctype="multipart/form-data">
                                 @csrf
                                 @method('PUT')
-                                <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <label for="numero_factura" class="form-label">Número de Factura</label>
-                                        <input type="text" name="numero_factura" class="form-control" value="{{ old('numero_factura', $ingreso->numero_factura) }}">
-                                        @if ($errors->has('numero_factura'))
-                                            <span class="help-block text-danger">
-                                                <strong>{{ $errors->first('numero_factura') }}</strong>
-                                            </span>
-                                        @endif
+
+                                <!-- Datos básicos del ingreso -->
+                                <div class="row gx-3">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="numero_factura" class="form-label"><i class="bi bi-receipt me-1"></i> Número de Factura</label>
+                                        <input type="text" name="numero_factura" class="form-control" value="{{ old('numero_factura', $ingreso->numero_factura) }}" placeholder="Número de factura">
                                     </div>
-                                    <div class="col-md-6">
-                                        <label for="fecha" class="form-label">Fecha</label>
-                                        <input type="date" name="fecha" class="form-control" value="{{ old('fecha', $ingreso->fecha) }}">
-                                        @if ($errors->has('fecha'))
-                                            <span class="help-block text-danger">
-                                                <strong>{{ $errors->first('fecha') }}</strong>
-                                            </span>
-                                        @endif
+                                    <div class="col-md-6 mb-3">
+                                        <label for="fecha" class="form-label"><i class="bi bi-calendar-date me-1"></i> Fecha</label>
+                                        <input type="date" name="fecha" class="form-control" value="{{ old('fecha', $ingreso->fecha) }}" required>
                                     </div>
-                                    <div class="col-md-6">
-                                        <label for="proveedor_id" class="form-label">Proveedor</label>
-                                        <select name="proveedor_id" class="form-control select2">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="proveedor_id" class="form-label"><i class="bi bi-shop me-1"></i> Proveedor</label>
+                                        <select name="proveedor_id" class="form-control select2" data-placeholder="Seleccione un proveedor">
                                             @foreach($proveedores as $proveedor)
                                                 <option value="{{ $proveedor->id }}" {{ old('proveedor_id', $ingreso->proveedor_id) == $proveedor->id ? 'selected' : '' }}>{{ $proveedor->nombre }}</option>
                                             @endforeach
                                         </select>
-                                        @if ($errors->has('proveedor_id'))
-                                            <span class="help-block text-danger">
-                                                <strong>{{ $errors->first('proveedor_id') }}</strong>
-                                            </span>
-                                        @endif
                                     </div>
-                                    <div class="col-md-6">
-                                        <label for="tipo_compra" class="form-label">Tipo de Compra</label>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="tipo_compra" class="form-label"><i class="bi bi-tag me-1"></i> Tipo de Compra</label>
                                         <select name="tipo_compra" class="form-control">
                                             <option value="CDS" {{ old('tipo_compra', $ingreso->tipo_compra) == 'CDS' ? 'selected' : '' }}>CDS</option>
                                             <option value="Car Wash" {{ old('tipo_compra', $ingreso->tipo_compra) == 'Car Wash' ? 'selected' : '' }}>Car Wash</option>
                                         </select>
-                                        @if ($errors->has('tipo_compra'))
-                                            <span class="help-block text-danger">
-                                                <strong>{{ $errors->first('tipo_compra') }}</strong>
-                                            </span>
-                                        @endif
                                     </div>
                                 </div>
-                                <div class="row mb-3">
-                                    <div class="col-md-12">
-                                        <h5>Agregar Nuevo Artículo</h5>
+
+                                <!-- Sección para agregar artículos -->
+                                <div class="card mt-4 mb-4 border-info">
+                                    <div class="card-header bg-info text-white">
+                                        <h5 class="mb-0"><i class="bi bi-boxes me-1"></i> Agregar Nuevo Artículo</h5>
+                                    </div>
+                                    <div class="card-body">
                                         <div class="row mb-3">
                                             <div class="col-md-4">
-                                                <label for="articulo" class="form-label">Artículo</label>
-                                                <select class="form-control select2" id="articulo">
+                                                <label for="articulo" class="form-label"><i class="bi bi-box me-1"></i> Artículo</label>
+                                                <select class="form-control select2" id="articulo" data-placeholder="Seleccione un artículo">
                                                     <option value="">Seleccione un artículo</option>
                                                     @foreach($todosArticulos as $articulo)
                                                         <option value="{{ $articulo->id }}"
@@ -111,120 +94,146 @@
                                                 </select>
                                             </div>
                                             <div class="col-md-2">
-                                                <label for="cantidad" class="form-label">Cantidad</label>
+                                                <label for="cantidad" class="form-label"><i class="bi bi-123 me-1"></i> Cantidad</label>
                                                 <div class="input-group">
                                                     <input type="number" class="form-control" id="cantidad" min="1" step="1">
                                                     <span class="input-group-text" id="unidad-abreviatura"></span>
                                                 </div>
                                             </div>
                                             <div class="col-md-2">
-                                                <label for="precio_compra" class="form-label">Precio Compra</label>
+                                                <label for="precio_compra" class="form-label"><i class="bi bi-currency-dollar me-1"></i> Precio Compra</label>
                                                 <div class="input-group">
                                                     <span class="input-group-text">{{ $config->currency_simbol }}</span>
                                                     <input type="number" step="0.01" class="form-control" id="precio_compra">
                                                 </div>
                                             </div>
                                             <div class="col-md-2">
-                                                <label for="precio_venta" class="form-label">Precio Venta</label>
+                                                <label for="precio_venta" class="form-label"><i class="bi bi-tag-fill me-1"></i> Precio Venta</label>
                                                 <div class="input-group">
                                                     <span class="input-group-text">{{ $config->currency_simbol }}</span>
                                                     <input type="number" step="0.01" class="form-control" id="precio_venta">
                                                 </div>
                                             </div>
-
                                             <div class="col-md-2 d-flex align-items-end">
-                                                <button type="button" class="btn btn-primary" id="add-detalle"><i class="bi bi-plus-square"></i> Agregar Artículo</button>
+                                                <button type="button" class="btn btn-primary w-100" id="add-detalle">
+                                                    <i class="bi bi-plus-square me-1"></i> Agregar
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="row mb-3">
-                                    <div class="col-md-12">
-                                        <label for="detalles" class="form-label">Detalles del Ingreso</label>
-                                        <table class="table table-bordered">
-                                            <thead>
-                                                <tr>
-                                                    <th>Artículo</th>
-                                                    <th>Cantidad</th>
-                                                    <th>Precio de Compra</th>
-                                                    <th>Precio de Venta</th>
-                                                    <th>Acciones</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="detalles-body">
-                                                @if(old('detalles'))
-                                                    @foreach(old('detalles') as $index => $detalle)
-                                                        <tr>
-                                                            <td>
-                                                                {{ is_array($detalle) ? $detalle['articulo_id'] : $detalle }}
-                                                                <input type="hidden" name="detalles[{{ $index }}][articulo_id]" value="{{ is_array($detalle) ? $detalle['articulo_id'] : $detalle }}">
-                                                            </td>
-                                                            <td>
-                                                                <div class="input-group">
-                                                                    <input type="number" name="detalles[{{ $index }}][cantidad]" class="form-control cantidad-input" value="{{ is_array($detalle) ? $detalle['cantidad'] : '' }}" data-tipo="{{ is_array($detalle) ? $detalle['unidad_tipo'] ?? '' : '' }}">
-                                                                    <span class="input-group-text">{{ is_array($detalle) ? $detalle['unidad_abreviatura'] ?? '' : '' }}</span>
-                                                                </div>
-                                                            </td>
-                                                            <td>
-                                                                <div class="input-group">
-                                                                    <span class="input-group-text">{{ $config->currency_simbol }}</span>
-                                                                    <input type="number" step="0.01" name="detalles[{{ $index }}][precio_compra]" class="form-control" value="{{ is_array($detalle) ? $detalle['precio_compra'] : '' }}">
-                                                                </div>
-                                                            </td>
-                                                            <td>
-                                                                <div class="input-group">
-                                                                    <span class="input-group-text">{{ $config->currency_simbol }}</span>
-                                                                    <input type="number" step="0.01" name="detalles[{{ $index }}][precio_venta]" class="form-control" value="{{ is_array($detalle) ? $detalle['precio_venta'] : '' }}">
-                                                                </div>
-                                                            </td>
-                                                            <td>
-                                                                <button type="button" class="btn btn-danger btn-sm remove-detalle"><i class="bi bi-trash-fill"></i></button>
-                                                                <input type="hidden" name="detalles[{{ $index }}][eliminar]" class="detalle-eliminar" value="0">
-                                                            </td>
-                                                        </tr>
-                                                    @endforeach
-                                                @else
-                                                    @foreach($ingreso->detalles as $detalle)
-                                                        <tr>
-                                                            <td>
-                                                                <input type="hidden" name="detalles[{{ $detalle->id }}][articulo_id]" value="{{ $detalle->articulo_id }}">
-                                                                {{ $detalle->articulo->codigo }} {{ $detalle->articulo->nombre }}
-                                                            </td>
-                                                            <td>
-                                                                <div class="input-group">
-                                                                    <input type="number" name="detalles[{{ $detalle->id }}][cantidad]" class="form-control cantidad-input" value="{{ $detalle->cantidad }}" data-tipo="{{ $detalle->articulo->unidad->tipo }}">
-                                                                    <span class="input-group-text">{{ $detalle->articulo->unidad->abreviatura }}</span>
-                                                                </div>
-                                                            </td>
-                                                            <td>
-                                                                <div class="input-group">
-                                                                    <span class="input-group-text">{{ $config->currency_simbol }}</span>
-                                                                    <input type="number" step="0.01" name="detalles[{{ $detalle->id }}][precio_compra]" class="form-control" value="{{ $detalle->precio_compra }}">
-                                                                </div>
-                                                            </td>
-                                                            <td>
-                                                                <div class="input-group">
-                                                                    <span class="input-group-text">{{ $config->currency_simbol }}</span>
-                                                                    <input type="number" step="0.01" name="detalles[{{ $detalle->id }}][precio_venta]" class="form-control" value="{{ $detalle->precio_venta }}">
-                                                                </div>
-                                                            </td>
-                                                            <td>
-                                                                <button type="button" class="btn btn-danger btn-sm remove-detalle"><i class="bi bi-trash-fill"></i></button>
-                                                                <input type="hidden" name="detalles[{{ $detalle->id }}][eliminar]" class="detalle-eliminar" value="0">
-                                                            </td>
-                                                        </tr>
-                                                    @endforeach
-                                                @endif
-                                            </tbody>
-                                        </table>
+
+                                <!-- Tabla de artículos existentes -->
+                                <div class="card mb-4">
+                                    <div class="card-header bg-primary text-white">
+                                        <h5 class="mb-0"><i class="bi bi-list-check me-1"></i> Artículos del Ingreso</h5>
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <div class="table-responsive">
+                                            <table class="table table-hover table-striped mb-0">
+                                                <thead class="bg-light">
+                                                    <tr>
+                                                        <th>Artículo</th>
+                                                        <th>Cantidad</th>
+                                                        <th>Precio de Compra</th>
+                                                        <th>Precio de Venta</th>
+                                                        <th>Subtotal</th>
+                                                        <th width="90">Acciones</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="detalles-body">
+                                                    @if(old('detalles'))
+                                                        @foreach(old('detalles') as $index => $detalle)
+                                                            <tr>
+                                                                <td>
+                                                                    {{ is_array($detalle) ? $detalle['articulo_id'] : $detalle }}
+                                                                    <input type="hidden" name="detalles[{{ $index }}][articulo_id]" value="{{ is_array($detalle) ? $detalle['articulo_id'] : $detalle }}">
+                                                                </td>
+                                                                <td>
+                                                                    <div class="input-group">
+                                                                        <input type="number" name="detalles[{{ $index }}][cantidad]" class="form-control cantidad-input" value="{{ is_array($detalle) ? $detalle['cantidad'] : '' }}" data-tipo="{{ is_array($detalle) ? $detalle['unidad_tipo'] ?? '' : '' }}">
+                                                                        <span class="input-group-text">{{ is_array($detalle) ? $detalle['unidad_abreviatura'] ?? '' : '' }}</span>
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="input-group">
+                                                                        <span class="input-group-text">{{ $config->currency_simbol }}</span>
+                                                                        <input type="number" step="0.01" name="detalles[{{ $index }}][precio_compra]" class="form-control precio-compra" value="{{ is_array($detalle) ? $detalle['precio_compra'] : '' }}">
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="input-group">
+                                                                        <span class="input-group-text">{{ $config->currency_simbol }}</span>
+                                                                        <input type="number" step="0.01" name="detalles[{{ $index }}][precio_venta]" class="form-control" value="{{ is_array($detalle) ? $detalle['precio_venta'] : '' }}">
+                                                                    </div>
+                                                                </td>
+                                                                <td class="subtotal">
+                                                                    {{ $config->currency_simbol }}.{{ number_format(is_array($detalle) ? $detalle['precio_compra'] * $detalle['cantidad'] : 0, 2, '.', ',') }}
+                                                                </td>
+                                                                <td>
+                                                                    <button type="button" class="btn btn-danger btn-sm remove-detalle"><i class="bi bi-trash-fill"></i></button>
+                                                                    <input type="hidden" name="detalles[{{ $index }}][eliminar]" class="detalle-eliminar" value="0">
+                                                                </td>
+                                                            </tr>
+                                                        @endforeach
+                                                    @else
+                                                        @foreach($ingreso->detalles as $detalle)
+                                                            <tr>
+                                                                <td>
+                                                                    <input type="hidden" name="detalles[{{ $detalle->id }}][articulo_id]" value="{{ $detalle->articulo_id }}">
+                                                                    <strong class="text-primary">{{ $detalle->articulo->codigo }}</strong> {{ $detalle->articulo->nombre }}
+                                                                </td>
+                                                                <td>
+                                                                    <div class="input-group">
+                                                                        <input type="number" name="detalles[{{ $detalle->id }}][cantidad]" class="form-control cantidad-input" value="{{ $detalle->cantidad }}" data-tipo="{{ $detalle->articulo->unidad->tipo }}">
+                                                                        <span class="input-group-text">{{ $detalle->articulo->unidad->abreviatura }}</span>
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="input-group">
+                                                                        <span class="input-group-text">{{ $config->currency_simbol }}</span>
+                                                                        <input type="number" step="0.01" name="detalles[{{ $detalle->id }}][precio_compra]" class="form-control precio-compra" value="{{ $detalle->precio_compra }}">
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="input-group">
+                                                                        <span class="input-group-text">{{ $config->currency_simbol }}</span>
+                                                                        <input type="number" step="0.01" name="detalles[{{ $detalle->id }}][precio_venta]" class="form-control" value="{{ $detalle->precio_venta }}">
+                                                                    </div>
+                                                                </td>
+                                                                <td class="subtotal">
+                                                                    {{ $config->currency_simbol }}.{{ number_format($detalle->precio_compra * $detalle->cantidad, 2, '.', ',') }}
+                                                                </td>
+                                                                <td>
+                                                                    <button type="button" class="btn btn-danger btn-sm remove-detalle"><i class="bi bi-trash-fill"></i></button>
+                                                                    <input type="hidden" name="detalles[{{ $detalle->id }}][eliminar]" class="detalle-eliminar" value="0">
+                                                                </td>
+                                                            </tr>
+                                                        @endforeach
+                                                    @endif
+                                                </tbody>
+                                                <tfoot class="bg-light">
+                                                    <tr>
+                                                        <td colspan="4" class="text-end fw-bold">Total:</td>
+                                                        <td class="text-primary fw-bold" id="total-compra"><strong></strong></td>
+                                                        <td></td>
+                                                    </tr>
+                                                </tfoot>
+                                            </table>
+                                        </div>
+                                        <div id="no-articulos" class="alert alert-info m-3 d-none">
+                                            <i class="bi bi-info-circle me-2"></i> No hay artículos en este ingreso. Agregue al menos un artículo.
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="d-flex gap-2 justify-content-center">
-                                    <a href="{{ url('ingresos')  }}" type="button" class="btn btn-danger">
-                                        <i class="bi bi-x-circle"></i> Cancelar
+
+                                <!-- Botones de acción -->
+                                <div class="d-flex justify-content-center gap-3 mt-4">
+                                    <a href="{{ url('ingresos') }}" class="btn btn-danger">
+                                        <i class="bi bi-x-circle me-1"></i> Cancelar
                                     </a>
-                                    <button type="submit" class="btn btn-success">
-                                        <i class="bi bi-check2-square"></i> Grabar
+                                    <button type="submit" class="btn btn-success" id="btn-guardar">
+                                        <i class="bi bi-check2-square me-1"></i> Actualizar Ingreso
                                     </button>
                                 </div>
                             </form>
@@ -242,8 +251,10 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        // Inicializar Select2
         $('.select2').select2();
 
+        // Referencias a elementos del DOM
         const articuloSelect = document.getElementById('articulo');
         const precioCompraInput = document.getElementById('precio_compra');
         const precioVentaInput = document.getElementById('precio_venta');
@@ -253,29 +264,40 @@
         const detallesBody = document.getElementById('detalles-body');
         const currencySymbol = @json($config->currency_simbol);
 
-        $(articuloSelect).on('select2:select', function (e) {
-            const selectedOption = e.params.data;
-            const precioCompra = selectedOption.element.getAttribute('data-precio-compra');
-            const precioVenta = selectedOption.element.getAttribute('data-precio-venta');
-            const unidadAbreviatura = selectedOption.element.getAttribute('data-unidad-abreviatura');
-            const unidadTipo = selectedOption.element.getAttribute('data-unidad-tipo');
+        // Contador para nuevos artículos
+        let newItemCounter = 0;
 
-            precioCompraInput.value = precioCompra;
-            precioVentaInput.value = precioVenta;
-            unidadAbreviaturaSpan.textContent = unidadAbreviatura;
+        // Evento para cuando se selecciona un artículo con Select2
+        $('#articulo').on('select2:select', function(e) {
+            const selectedOption = articuloSelect.options[articuloSelect.selectedIndex];
 
-            if (unidadTipo === 'decimal') {
-                cantidadInput.step = "0.01";
-                cantidadInput.min = "0.01";
-            } else {
-                cantidadInput.step = "1";
-                cantidadInput.min = "1";
+            if (selectedOption) {
+                const precioCompra = selectedOption.getAttribute('data-precio-compra');
+                const precioVenta = selectedOption.getAttribute('data-precio-venta');
+                const unidadAbreviatura = selectedOption.getAttribute('data-unidad-abreviatura');
+                const unidadTipo = selectedOption.getAttribute('data-unidad-tipo');
+
+                precioCompraInput.value = precioCompra;
+                precioVentaInput.value = precioVenta;
+                unidadAbreviaturaSpan.textContent = unidadAbreviatura;
+
+                if (unidadTipo === 'decimal') {
+                    cantidadInput.step = "0.01";
+                    cantidadInput.min = "0.01";
+                } else {
+                    cantidadInput.step = "1";
+                    cantidadInput.min = "1";
+                }
+                cantidadInput.value = "";
             }
-            cantidadInput.value = "";
         });
 
+        // Validación de entrada para cantidad
         cantidadInput.addEventListener('input', function (event) {
-            const unidadTipo = articuloSelect.options[articuloSelect.selectedIndex].getAttribute('data-unidad-tipo');
+            const selectedOption = articuloSelect.options[articuloSelect.selectedIndex];
+            if (!selectedOption) return;
+
+            const unidadTipo = selectedOption.getAttribute('data-unidad-tipo');
             const value = event.target.value;
             const cursorPosition = event.target.selectionStart;
 
@@ -289,6 +311,7 @@
             event.target.setSelectionRange(cursorPosition, cursorPosition);
         });
 
+        // Evento para agregar un artículo a la tabla
         addDetalleBtn.addEventListener('click', function () {
             const articuloId = articuloSelect.value;
             if (!articuloId) {
@@ -303,49 +326,56 @@
                 return;
             }
 
-            const articuloText = articuloSelect.options[articuloSelect.selectedIndex].text;
+            const selectedOption = articuloSelect.options[articuloSelect.selectedIndex];
+            const articuloText = selectedOption.text;
             const precioCompra = parseFloat(precioCompraInput.value);
             const precioVenta = parseFloat(precioVentaInput.value);
             const cantidad = parseFloat(cantidadInput.value);
             const unidadAbreviatura = unidadAbreviaturaSpan.textContent;
-            const unidadTipo = articuloSelect.options[articuloSelect.selectedIndex].getAttribute('data-unidad-tipo');
+            const unidadTipo = selectedOption.getAttribute('data-unidad-tipo');
 
             if (isNaN(precioCompra) || isNaN(precioVenta) || isNaN(cantidad) ||
-                cantidad < (cantidadInput.step === "1" ? 1 : 0.01)) {
+                cantidad < (unidadTipo === 'unidad' ? 1 : 0.01)) {
                 alert('Por favor, complete todos los campos correctamente.');
                 return;
             }
 
-            const subtotal = precioCompra * cantidad;
+            // Usar un identificador único para cada nuevo artículo
+            const newIndex = 'new' + newItemCounter++;
+
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>
                     ${articuloText}
-                    <input type="hidden" name="detalles[new][articulo_id]" value="${articuloId}">
+                    <input type="hidden" name="detalles[${newIndex}][articulo_id]" value="${articuloId}">
                 </td>
                 <td>
                     <div class="input-group">
-                        <input type="number" name="detalles[new][cantidad]" class="form-control cantidad-input" value="${cantidad}" data-tipo="${unidadTipo}">
+                        <input type="number" name="detalles[${newIndex}][cantidad]" class="form-control cantidad-input" value="${cantidad}" data-tipo="${unidadTipo}">
                         <span class="input-group-text unidad-abreviatura">${unidadAbreviatura}</span>
+                        <input type="hidden" name="detalles[${newIndex}][unidad_tipo]" value="${unidadTipo}">
+                        <input type="hidden" name="detalles[${newIndex}][unidad_abreviatura]" value="${unidadAbreviatura}">
                     </div>
                 </td>
                 <td>
                     <div class="input-group">
                         <span class="input-group-text">${currencySymbol}</span>
-                        <input type="number" step="0.01" name="detalles[new][precio_compra]" class="form-control" value="${precioCompra.toFixed(2)}">
+                        <input type="number" step="0.01" name="detalles[${newIndex}][precio_compra]" class="form-control" value="${precioCompra.toFixed(2)}">
                     </div>
                 </td>
                 <td>
                     <div class="input-group">
                         <span class="input-group-text">${currencySymbol}</span>
-                        <input type="number" step="0.01" name="detalles[new][precio_venta]" class="form-control" value="${precioVenta.toFixed(2)}">
+                        <input type="number" step="0.01" name="detalles[${newIndex}][precio_venta]" class="form-control" value="${precioVenta.toFixed(2)}">
                     </div>
+                </td>
+                <td class="subtotal">
+                    ${currencySymbol}.${(cantidad * precioCompra).toFixed(2)}
                 </td>
                 <td>
                     <button type="button" class="btn btn-danger btn-sm remove-detalle"><i class="bi bi-trash-fill"></i></button>
                 </td>`;
             detallesBody.appendChild(row);
-            $('.select2').select2();
 
             // Reiniciar campos
             articuloSelect.value = '';
@@ -353,27 +383,31 @@
             precioVentaInput.value = '';
             cantidadInput.value = '';
             unidadAbreviaturaSpan.textContent = '';
-            $('.select2').select2();
+            $('#articulo').val('').trigger('change');
 
             // Aplicar validación de cantidad al nuevo input
             const newCantidadInput = row.querySelector('.cantidad-input');
             newCantidadInput.addEventListener('input', function (event) {
                 const value = event.target.value;
                 const cursorPosition = event.target.selectionStart;
+                const tipo = this.getAttribute('data-tipo');
 
-                if (unidadTipo === 'unidad') {
+                if (tipo === 'unidad') {
                     event.target.value = value.replace(/[^0-9]/g, '');
-                } else if (unidadTipo === 'decimal') {
+                } else if (tipo === 'decimal') {
                     const decimalValue = value.replace(/[^0-9.]/g, '');
                     const parts = decimalValue.split('.');
                     event.target.value = parts.length > 2 ? parts[0] + '.' + parts.slice(1).join('') : decimalValue;
                 }
                 event.target.setSelectionRange(cursorPosition, cursorPosition);
             });
+
+            setTimeout(actualizarTotal, 10);
         });
 
+        // Eliminar artículo de la tabla
         detallesBody.addEventListener('click', function (e) {
-            if (e.target.classList.contains('remove-detalle')) {
+            if (e.target.classList.contains('remove-detalle') || e.target.closest('.remove-detalle')) {
                 const row = e.target.closest('tr');
                 const eliminarInput = row.querySelector('.detalle-eliminar');
                 if (eliminarInput) {
@@ -382,27 +416,11 @@
                 } else {
                     row.remove();
                 }
+                setTimeout(actualizarTotal, 10); // Pequeño retraso para asegurar que la fila se ha ocultado
             }
         });
 
-        detallesBody.addEventListener('change', function (e) {
-            if (e.target.classList.contains('articulo-select')) {
-                const tipo = e.target.selectedOptions[0].getAttribute('data-tipo');
-                const abreviatura = e.target.selectedOptions[0].getAttribute('data-abreviatura');
-                const cantidadInput = e.target.closest('tr').querySelector('.cantidad-input');
-                const unidadAbreviaturaSpan = e.target.closest('tr').querySelector('.unidad-abreviatura');
-                unidadAbreviaturaSpan.textContent = abreviatura;
-                if (tipo === 'unidad') {
-                    cantidadInput.setAttribute('step', '1');
-                    cantidadInput.setAttribute('min', '1');
-                    cantidadInput.value = Math.floor(cantidadInput.value);
-                } else {
-                    cantidadInput.setAttribute('step', '0.01');
-                    cantidadInput.setAttribute('min', '0.01');
-                }
-            }
-        });
-
+        // Configurar campos de cantidad existentes
         document.querySelectorAll('.cantidad-input').forEach(function (input) {
             const tipo = input.getAttribute('data-tipo');
             if (tipo === 'unidad') {
@@ -432,12 +450,142 @@
         // Validar que al menos exista un artículo en los detalles al enviar el formulario
         const form = document.querySelector('form');
         form.addEventListener('submit', function(e) {
-            const detallesBody = document.getElementById('detalles-body');
-            if (detallesBody.children.length === 0) {
+            // Contar filas visibles (no ocultas)
+            const visibleRows = Array.from(detallesBody.children).filter(row => row.style.display !== 'none');
+            if (visibleRows.length === 0) {
                 alert("Debe haber al menos un artículo en los detalles.");
                 e.preventDefault();
             }
         });
+
+        // Función para actualizar el subtotal de una fila específica
+        function actualizarSubtotal(fila) {
+            const cantidadInput = fila.querySelector('.cantidad-input');
+            const precioInput = fila.querySelector('input[name*="precio_compra"]');
+            const subtotalCell = fila.querySelector('.subtotal');
+
+            if (cantidadInput && precioInput && subtotalCell) {
+                const cantidad = parseFloat(cantidadInput.value);
+                const precio = parseFloat(precioInput.value);
+
+                if (!isNaN(cantidad) && !isNaN(precio)) {
+                    const subtotal = cantidad * precio;
+                    subtotalCell.textContent = `${currencySymbol}.${subtotal.toFixed(2)}`;
+                }
+            }
+        }
+
+        // Agregar función para actualizar el total
+        function actualizarTotal() {
+            let total = 0;
+            const filas = document.querySelectorAll('#detalles-body tr:not([style*="display: none"])');
+
+            filas.forEach(function(fila) {
+                // Actualizar el subtotal de la fila primero
+                actualizarSubtotal(fila);
+
+                const subtotalCell = fila.querySelector('.subtotal');
+                if (subtotalCell) {
+                    // Extraer el valor numérico del subtotal
+                    const subtotalText = subtotalCell.textContent.trim();
+
+                    // Procesar el texto para extraer el número correctamente
+                    let numeroStr = subtotalText;
+                    if (numeroStr.startsWith(currencySymbol)) {
+                        numeroStr = numeroStr.substring(currencySymbol.length);
+                    }
+
+                    if (numeroStr.startsWith('.')) {
+                        numeroStr = numeroStr.substring(1);
+                    }
+
+                    numeroStr = numeroStr.replace(/,/g, '');
+                    const valorNumerico = parseFloat(numeroStr);
+
+                    if (!isNaN(valorNumerico)) {
+                        total += valorNumerico;
+                    }
+                }
+            });
+
+            const totalElement = document.getElementById('total-compra');
+            if (totalElement) {
+                totalElement.querySelector('strong').textContent = `${currencySymbol}.${total.toFixed(2)}`;
+            }
+        }
+
+        // Evento input para cantidad y precio - actualización en vivo
+        document.addEventListener('input', function(e) {
+            if (e.target.classList.contains('cantidad-input') || e.target.classList.contains('precio-compra')) {
+                // Actualizar el subtotal de la fila inmediatamente
+                const fila = e.target.closest('tr');
+                if (fila) {
+                    actualizarSubtotal(fila);
+                    actualizarTotal();
+                }
+            }
+        });
+
+        // Eventos para inputs dinamicamente generados (delegación de eventos)
+        detallesBody.addEventListener('change', function(e) {
+            if (e.target.classList.contains('cantidad-input') || e.target.name && e.target.name.includes('precio_compra')) {
+                actualizarTotal();
+            }
+        });
+
+        // Calcular total inicial al cargar la página
+        setTimeout(actualizarTotal, 100);
+
+        // Mostrar/ocultar mensaje de "no hay artículos"
+        function actualizarEstadoTabla() {
+            const visibleRows = Array.from(detallesBody.children).filter(row => row.style.display !== 'none');
+            document.getElementById('no-articulos').classList.toggle('d-none', visibleRows.length > 0);
+
+            // Habilitar/deshabilitar botón guardar
+            document.getElementById('btn-guardar').disabled = visibleRows.length === 0;
+        }
+
+        // Aplicar los mismos atajos de teclado de la vista de creación
+        document.addEventListener('keydown', function(e) {
+            // ALT + A = Agregar artículo (si todos los campos están completos)
+            if (e.altKey && e.key.toLowerCase() === 'a') {
+                e.preventDefault();
+                if (addDetalleBtn && !addDetalleBtn.disabled) {
+                    addDetalleBtn.click();
+                }
+            }
+
+            // ALT + S = Submit/Guardar el formulario
+            if (e.altKey && e.key.toLowerCase() === 's') {
+                e.preventDefault();
+                const btnGuardar = document.getElementById('btn-guardar');
+                if (btnGuardar && !btnGuardar.disabled) {
+                    btnGuardar.click();
+                }
+            }
+        });
+
+        // Actualizar evento para eliminar detalles
+        detallesBody.addEventListener('click', function (e) {
+            if (e.target.classList.contains('remove-detalle') || e.target.closest('.remove-detalle')) {
+                const row = e.target.closest('tr');
+                const eliminarInput = row.querySelector('.detalle-eliminar');
+                if (eliminarInput) {
+                    eliminarInput.value = 1;
+                    row.style.display = 'none';
+                } else {
+                    row.remove();
+                }
+                setTimeout(actualizarTotal, 10);
+                actualizarEstadoTabla();
+            }
+        });
+
+        // Calcular total inicial y verificar estado de la tabla
+        setTimeout(function() {
+            actualizarTotal();
+            actualizarEstadoTabla();
+        }, 100);
     });
 </script>
 @endsection

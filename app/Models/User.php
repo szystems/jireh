@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Carbon\Carbon; // Importación correcta de Carbon
 
 class User extends Authenticatable
 {
@@ -50,9 +51,9 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public function getTimeZoneAttribute ($value): string
+    public function getTimeZoneAttribute($value): string
     {
-    return $value == config('app.timezone') || empty($value) ? config('app.timezone') : $value;
+        return $value == config('app.timezone') || empty($value) ? config('app.timezone') : $value;
     }
 
     public function setTimeZoneAttribute($value)
@@ -60,12 +61,14 @@ class User extends Authenticatable
         $this->attributes['timezone'] = $value == config('app.timezone') || is_null($value) ? null : $value;
     }
 
-    public function getCreatedAtAttribute($value): Carbon
+    // Corregidos los métodos para las fechas
+    public function getCreatedAtAttribute($value)
     {
-        return Carbon::parse($value)->timezone(Helpers::getUserTimeZone());
+        return Carbon::parse($value);
     }
-    public function getUpdatedAtAttribute($value): Carbon
+
+    public function getUpdatedAtAttribute($value)
     {
-        return Carbon::parse($value)->timezone(Helpers::getUserTimeZone());
+        return Carbon::parse($value);
     }
 }

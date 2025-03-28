@@ -8,104 +8,88 @@
     <!-- Sidebar brand starts -->
     <div class="brand">
         <a href="{{ url('dashboard') }}" class="logo mb-3 mt-1 align-self-center d-flex justify-content-center">
-            <div class="border border-primary custom-bg p-2 rounded" style="width: 100%;">
-                <img src="{{ asset('img/logo.png') }}" class="d-none d-md-block me-4" alt="Jireh" />
-                <img src="{{ asset('img/logo.png') }}" class="d-block d-md-none me-4" alt="Jireh" />
+            <div class="border border-primary rounded p-2" style="background-color: #f8f9fa; width: 100%;">
+                <img src="{{ asset('img/logo.png') }}" class="d-none d-md-block img-fluid" alt="Jireh" />
+                <img src="{{ asset('img/jireh 2.png') }}" class="d-block d-md-none mx-auto" style="height: 36px;" alt="Jireh" />
             </div>
         </a>
     </div>
     <!-- Sidebar brand ends -->
 
-    <!-- Header actions ccontainer start -->
+    <!-- Header actions container start -->
     <div class="header-actions-container">
 
-        <!-- Search container start -->
-        {{-- <div class="search-container me-4 d-xl-block d-lg-none">
-
-            <input type="text" class="form-control" placeholder="Search" />
-
-        </div> --}}
-        <!-- Search container end -->
-
         <!-- Header actions start -->
-        <div class="header-actions d-xl-flex d-lg-none gap-4">
-            {{-- <div class="dropdown">
-                <a class="dropdown-toggle" href="#!" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="bi bi-envelope-open fs-5 lh-1"></i>
-                    <span class="count-label"></span>
-                </a>
-                <div class="dropdown-menu dropdown-menu-end shadow-lg">
-                    <div class="dropdown-item">
-                        <div class="d-flex py-2 border-bottom">
-                            <img src="dashboardtemplate/design/assets/images/user.png" class="img-3x me-3 rounded-3" alt="Admin Dashboards" />
-                            <div class="m-0">
-
-                                <h6 class="mb-1 fw-semibold">Jehovah Roy</h6>
-                                <p class="mb-1">Membership has been ended.</p>
-                                <p class="small m-0 text-secondary">Today, 07:30pm</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="dropdown-item">
-                        <div class="d-flex py-2 border-bottom">
-                            <img src="dashboardtemplate/design/assets/images/user2.png" class="img-3x me-3 rounded-3" alt="Admin Dashboards" />
-                            <div class="m-0">
-                                <h6 class="mb-1 fw-semibold">Benjamin Michiels</h6>
-                                <p class="mb-1">Congratulate, James for new job.</p>
-                                <p class="small m-0 text-secondary">Today, 08:00pm</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="dropdown-item">
-                        <div class="d-flex py-2">
-                            <img src="dashboardtemplate/design/assets/images/user1.png" class="img-3x me-3 rounded-3" alt="Admin Dashboards" />
-                            <div class="m-0">
-                                <h6 class="mb-1 fw-semibold">Jehovah Roy</h6>
-                                <p class="mb-1">Lewis added new schedule release.</p>
-                                <p class="small m-0 text-secondary">Today, 09:30pm</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="d-grid mx-3 my-1">
-                        <a href="javascript:void(0)" class="btn btn-primary">View all</a>
-                    </div>
-                </div>
-            </div> --}}
-            <a href="{{ url('configs') }}" data-bs-toggle="tooltip" data-bs-placement="bottom"
-                data-bs-custom-class="custom-tooltip-blue" data-bs-title="Configuración">
+        <div class="header-actions d-flex gap-3">
+            <a href="{{ url('configs') }}" class="header-action-link" data-bs-toggle="tooltip" data-bs-placement="bottom"
+                data-bs-title="Configuración">
                 <i class="bi bi-gear fs-5"></i>
             </a>
+
+            <a href="{{ url('ventas') }}" class="header-action-link" data-bs-toggle="tooltip" data-bs-placement="bottom"
+                data-bs-title="Ventas">
+                <i class="bi bi-cash-stack fs-5"></i>
+            </a>
+
+            <a href="{{ url('inventario') }}" class="header-action-link" data-bs-toggle="tooltip" data-bs-placement="bottom"
+                data-bs-title="Inventario">
+                <i class="bi bi-box-seam fs-5"></i>
+            </a>
         </div>
-        <!-- Header actions start -->
+        <!-- Header actions end -->
 
         <!-- Header profile start -->
         <div class="header-profile d-flex align-items-center">
             <div class="dropdown">
-                <a href="#" id="userSettings" class="user-settings" data-toggle="dropdown" aria-haspopup="true">
+                <a href="#" id="userSettings" class="user-settings" data-bs-toggle="dropdown" aria-haspopup="true">
                     @php
                         $usuario = Auth::user()->name;
                         $nombre = explode(' ', trim($usuario));
+                        $rolUsuario = Auth::user()->role_as == 1 ? 'Administrador' : 'Usuario';
                     @endphp
-                    <span class="user-name d-none d-md-block">{{ ucwords($nombre[0]) }}</span>
+                    <span class="user-name d-none d-md-block">{{ ucwords($nombre[0]) }} <small class="text-muted">({{ $rolUsuario }})</small></span>
                     <span class="avatar">
                         @if (Auth::user()->fotografia != null)
-                            <img src="{{ asset('assets/imgs/users/'.Auth::user()->fotografia) }}" alt="Doctores" />
+                            <img src="{{ asset('assets/imgs/users/'.Auth::user()->fotografia) }}" alt="Usuario" class="img-fluid rounded-circle" />
                         @else
-                            <img src="{{ asset('assets/imgs/users/usericon4.png') }}" alt="Doctores" />
+                            <img src="{{ asset('assets/imgs/users/usericon4.png') }}" alt="Usuario" class="img-fluid rounded-circle" />
                         @endif
                         <span class="status online"></span>
                     </span>
                 </a>
-                <div class="dropdown-menu dropdown-menu-end" aria-labelledby="userSettings">
+                <div class="dropdown-menu dropdown-menu-end shadow-lg" aria-labelledby="userSettings">
+                    <div class="dropdown-header d-flex align-items-center">
+                        <div class="user-avatar me-3">
+                            @if (Auth::user()->fotografia != null)
+                                <img src="{{ asset('assets/imgs/users/'.Auth::user()->fotografia) }}" alt="Usuario" class="img-fluid rounded-circle" width="40" />
+                            @else
+                                <img src="{{ asset('assets/imgs/users/usericon4.png') }}" alt="Usuario" class="img-fluid rounded-circle" width="40" />
+                            @endif
+                        </div>
+                        <div>
+                            <h6 class="mb-0">{{ Auth::user()->name }}</h6>
+                            <p class="mb-0 small text-muted">{{ Auth::user()->email }}</p>
+                        </div>
+                    </div>
+                    <div class="dropdown-divider"></div>
                     <div class="header-profile-actions">
-                        <a href="{{ url('show-user/' . Auth::id()) }}"><i class="bi bi-person-lines-fill"></i>&ensp;Perfil</a>
-                        {{-- <a href="account-settings.html">Settings</a> --}}
-                        <a class="nav-link text-danger" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                <i class="bi bi-box-arrow-right"></i>&ensp;Salir
-                            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-                                @csrf
-                            </form>
+                        <a href="{{ url('show-user/' . Auth::id()) }}" class="dropdown-item">
+                            <i class="bi bi-person-lines-fill"></i>&ensp;Mi Perfil
                         </a>
+                        <a href="{{ url('edit-user/' . Auth::id()) }}" class="dropdown-item">
+                            <i class="bi bi-pencil-square"></i>&ensp;Editar Perfil
+                        </a>
+                        <a href="{{ url('config') }}" class="dropdown-item">
+                            <i class="bi bi-gear"></i>&ensp;Configuración
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item text-danger" href="{{ route('logout') }}"
+                           onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                            <i class="bi bi-box-arrow-right"></i>&ensp;Cerrar Sesión
+                        </a>
+                        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                            @csrf
+                        </form>
                     </div>
                 </div>
             </div>
@@ -113,7 +97,65 @@
         <!-- Header profile end -->
 
     </div>
-    <!-- Header actions ccontainer end -->
+    <!-- Header actions container end -->
 
 </div>
 <!-- Page header ends -->
+
+<style>
+.header-action-link {
+    color: #495057;
+    padding: 0.5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.header-action-link:hover {
+    background-color: #e9ecef;
+    color: #0d6efd;
+}
+
+.header-profile-actions .dropdown-item {
+    padding: 0.5rem 1rem;
+}
+
+.header-profile-actions .dropdown-item:hover {
+    background-color: #f8f9fa;
+}
+
+.dropdown-header {
+    padding: 1rem;
+}
+
+.user-settings:hover {
+    text-decoration: none;
+}
+
+.user-name {
+    margin-right: 0.5rem;
+}
+
+/* Corrección para dispositivos móviles */
+@media (max-width: 767.98px) {
+    .header-actions {
+        gap: 0.5rem !important;
+    }
+
+    .header-action-link {
+        padding: 0.25rem;
+    }
+}
+</style>
+
+<!-- Initialize tooltips -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+</script>

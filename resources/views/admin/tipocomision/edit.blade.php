@@ -1,9 +1,7 @@
 @extends('layouts.admin')
 @section('content')
-
     <!-- Content wrapper scroll start -->
     <div class="content-wrapper-scroll">
-
         <!-- Main header starts -->
         <div class="main-header d-flex align-items-center justify-content-between position-relative">
             <div class="d-flex align-items-center justify-content-center">
@@ -23,110 +21,87 @@
 
         <!-- Content wrapper start -->
         <div class="content-wrapper">
-
-
             <!-- Row start -->
             <div class="row gx-3">
                 <div class="col-sm-12 col-12">
                     <div class="card">
+                        <div class="card-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="card-title mb-0">Editar Tipo de Comisión</h5>
+                                <div class="btn-group">
+                                    <a href="{{ url('show-tipo-comision/'.$tipocomision->id) }}" class="btn btn-info me-2">
+                                        <i class="bi bi-arrow-left"></i> Volver a detalles
+                                    </a>
+                                    <a href="{{ url('tipo-comisiones') }}" class="btn btn-secondary">
+                                        <i class="bi bi-list-ul"></i> Ir al listado
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
                         <div class="card-body">
-                            <div class="custom-tabs-container">
-                                <ul class="nav nav-tabs" id="customTab2" role="tablist">
-                                    <li class="nav-item" role="presentation">
-                                        <a class="nav-link active" id="tab-oneA" data-bs-toggle="tab" href="#oneA" role="tab"
-                                            aria-controls="oneA" aria-selected="true">Editar Información</a>
-                                    </li>
-                                </ul>
-                                <div class="tab-content h-350">
-                                    <div class="tab-pane fade show active" id="oneA" role="tabpanel">
-                                        <!-- Row start -->
-                                        <div class="row gx-3">
-                                            <div class="col-sm-12 col-12">
-                                                @if (count($errors)>0)
-                                                    <div class="alert alert-danger text-white" role="alert">
-                                                        <ul>
-                                                            @foreach ($errors->all() as $error)
-                                                                <li>{{$error}}</li>
-                                                            @endforeach
-                                                        </ul>
-                                                    </div>
+                            @if (count($errors)>0)
+                                <div class="alert alert-danger" role="alert">
+                                    <ul class="mb-0">
+                                        @foreach ($errors->all() as $error)
+                                            <li>{{$error}}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
 
-                                                @endif
-                                                <form action="{{ url('update-tipo-comision/'.$tipocomision->id) }}" method="POST">
-                                                    @csrf
-                                                    @method('PUT')
-                                                    <div class="row gx-3">
-
-                                                        <div class="col-md-4 mb-3">
-                                                            <!-- Form Field Start -->
-                                                            <div class="mb-3">
-                                                                <label for="nombre" class="form-label">Nombre</label>
-                                                                <input name="nombre" type="text" class="form-control" placeholder="Nombre de la tipo de comision..." value="{{ $tipocomision->nombre }}" />
-                                                                @if ($errors->has('nombre'))
-                                                                    <span class="help-block opacity-7">
-                                                                            <strong>
-                                                                                <font color="red">{{ $errors->first('nombre') }}</font>
-                                                                            </strong>
-                                                                    </span>
-                                                                @endif
-                                                            </div>
-                                                        </div>
-
-                                                        <div class="col-md-4 mb-3">
-                                                            <!-- Form Field Start -->
-                                                            <div class="mb-3">
-                                                                <label for="descripcion" class="form-label">Descripción</label>
-                                                                <input name="descripcion" type="text" class="form-control" placeholder="Descripción de la tipo de comision..." value="{{ $tipocomision->descripcion }}" />
-                                                                @if ($errors->has('descripcion'))
-                                                                    <span class="help-block opacity-7">
-                                                                            <strong>
-                                                                                <font color="red">{{ $errors->first('descripcion') }}</font>
-                                                                            </strong>
-                                                                    </span>
-                                                                @endif
-                                                            </div>
-                                                        </div>
-
-                                                        <div class="col-md-4 mb-3">
-                                                            <!-- Form Field Start -->
-                                                            <div class="mb-3">
-                                                                <label for="porcentaje" class="form-label">Porcentaje</label>
-                                                                <input name="porcentaje" type="number" step="0.01" class="form-control" placeholder="0.00" value="{{ $tipocomision->porcentaje }}" />
-                                                                @if ($errors->has('porcentaje'))
-                                                                    <span class="help-block opacity-7">
-                                                                            <strong>
-                                                                                <font color="red">{{ $errors->first('porcentaje') }}</font>
-                                                                            </strong>
-                                                                    </span>
-                                                                @endif
-                                                            </div>
-                                                        </div>
-
-                                                    </div>
-                                                    <div class="d-flex gap-2 justify-content-center">
-                                                        <a href="{{ url('unidads') }}" type="button" class="btn btn-danger">
-                                                            <i class="bi bi-x-circle"></i> Cancelar
-                                                        </a>
-                                                        <button type="submit" class="btn btn-success">
-                                                            <i class="bi bi-check2-square"></i> Grabar
-                                                        </button>
-                                                    </div>
-                                                </form>
-                                            </div>
+                            <form action="{{ url('update-tipo-comision/'.$tipocomision->id) }}" method="POST">
+                                @csrf
+                                @method('PUT')
+                                <div class="row gx-3">
+                                    <div class="col-md-6 mb-3">
+                                        <div class="form-group">
+                                            <label for="nombre" class="form-label">Nombre <span class="text-danger">*</span></label>
+                                            <input name="nombre" type="text" class="form-control" placeholder="Nombre del tipo de comisión..." value="{{ $tipocomision->nombre }}" required />
+                                            @if ($errors->has('nombre'))
+                                                <div class="text-danger mt-1">
+                                                    {{ $errors->first('nombre') }}
+                                                </div>
+                                            @endif
                                         </div>
-                                        <!-- Row end -->
                                     </div>
 
+                                    <div class="col-md-6 mb-3">
+                                        <div class="form-group">
+                                            <label for="porcentaje" class="form-label">Porcentaje <span class="text-danger">*</span></label>
+                                            <div class="input-group">
+                                                <input name="porcentaje" type="number" step="0.01" class="form-control" placeholder="0.00" value="{{ $tipocomision->porcentaje }}" required />
+                                                <span class="input-group-text">%</span>
+                                            </div>
+                                            @if ($errors->has('porcentaje'))
+                                                <div class="text-danger mt-1">
+                                                    {{ $errors->first('porcentaje') }}
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-12 mb-3">
+                                        <div class="form-group">
+                                            <label for="descripcion" class="form-label">Descripción</label>
+                                            <textarea name="descripcion" class="form-control" rows="3" placeholder="Descripción del tipo de comisión...">{{ $tipocomision->descripcion }}</textarea>
+                                            @if ($errors->has('descripcion'))
+                                                <div class="text-danger mt-1">
+                                                    {{ $errors->first('descripcion') }}
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </div>
                                 </div>
-                                {{-- <div class="d-flex gap-2 justify-content-center">
-                                    <a href="{{ url('edit-user/'.$user->id) }}" type="button" class="btn btn-outline-secondary">
-                                        Cancelar
+
+                                <div class="d-flex gap-2 justify-content-center mt-3">
+                                    <a href="{{ url('show-tipo-comision/'.$tipocomision->id) }}" class="btn btn-danger">
+                                        <i class="bi bi-x-circle"></i> Cancelar
                                     </a>
-                                    <button type="button" class="btn btn-success">
-                                        Update
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="bi bi-check2-square"></i> Actualizar
                                     </button>
-                                </div> --}}
-                            </div>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -136,5 +111,4 @@
         <!-- Content wrapper end -->
     </div>
     <!-- Content wrapper scroll end -->
-
 @endsection

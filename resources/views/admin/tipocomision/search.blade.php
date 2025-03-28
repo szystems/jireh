@@ -2,11 +2,8 @@
 <div class="row gx-3">
     <div class="col-xl-12">
         <div class="card card-background-mask-info">
-            {{-- <div class="card-header">
-                <div class="card-title"><u>Doctores</u></div>
-            </div> --}}
             <div class="card-body">
-                <form action="{{ url('unidades') }}" method="GET">
+                <form action="{{ url('tipo-comisiones') }}" method="GET">
                     @csrf
                     <div class="input-group">
                         <input class="form-control" placeholder="Buscar tipo de comision ..." name="ftipocomision" value="{{ $queryTipoComision }}"/>

@@ -42,8 +42,8 @@
                             <div class="mb-3">
                                 <label for="pdfarchivo" class="form-label">Archivo</label>
                                 <select name="pdfarchivo" class="form-select" aria-label="Default select example">
-                                    <option value="download "{{ request('pdfarchivo') == 'download' ? ' selected' : '' }}>download</option>
                                     <option value="stream"{{ request('pdfarchivo') == 'stream' ? ' selected' : '' }}>stream</option>
+                                    <option value="download "{{ request('pdfarchivo') == 'download' ? ' selected' : '' }}>download</option>
                                 </select>
                             </div>
                         </div>

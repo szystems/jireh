@@ -14,17 +14,17 @@ class UnidadController extends Controller
 
     public function index(Request $request)
     {
-        if ($request)
-        {
-            $queryUnidad=$request->input('funidad');
-            $unidades = DB::table('unidads')
-            ->where('estado', '=', 1)
-            ->where('nombre', 'LIKE', '%' . $queryUnidad . '%')
-            ->orderBy('nombre' , 'asc')
-            ->paginate(20);
-            return view('admin.unidad.index', compact('unidades','queryUnidad'));
-        }
+        $queryUnidad = $request->input('funidad', '');
 
+        $unidades = Unidad::where('estado', 1)
+            ->where(function($query) use ($queryUnidad) {
+                $query->where('nombre', 'LIKE', '%' . $queryUnidad . '%')
+                      ->orWhere('abreviatura', 'LIKE', '%' . $queryUnidad . '%');
+            })
+            ->orderBy('nombre', 'asc')
+            ->paginate(20);
+
+        return view('admin.unidad.index', compact('unidades','queryUnidad'));
     }
 
     public function add()
@@ -87,9 +87,25 @@ class UnidadController extends Controller
         return redirect('unidades')->with('status',__('Unidad de medida eliminada correctamente.'));
     }
 
-    public function getUnidadTipo(Articulo $articulo)
+    /**
+     * Devuelve información sobre la unidad de medida de un artículo
+     *
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getUnidadTipo($id)
     {
-        $unidad = $articulo->unidad;
-        return response()->json(['tipo' => $unidad->tipo]);
+        $articulo = \App\Models\Articulo::with('unidad')->find($id);
+
+        if (!$articulo) {
+            return response()->json(['success' => false, 'message' => 'Artículo no encontrado'], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'tipo' => $articulo->unidad->tipo ?? 'decimal',
+            'abreviatura' => $articulo->unidad->abreviatura ?? '',
+            'nombre' => $articulo->unidad->nombre ?? '',
+        ]);
     }
 }

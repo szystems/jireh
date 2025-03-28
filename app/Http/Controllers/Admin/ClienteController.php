@@ -44,8 +44,15 @@ class ClienteController extends Controller
     {
         $cliente = Cliente::find($id);
         $vehiculos = Vehiculo::where('cliente_id',$id)->where('estado', 1)->orderBy('marca', 'desc')->get();
-        // dd($historia);
-        return view('admin.cliente.show', compact('cliente','vehiculos'));
+
+        // Obtener ventas del cliente usando el modelo Eloquent con relaciones
+        $ventas = \App\Models\Venta::with(['vehiculo', 'detalleVentas', 'usuario', 'pagos'])
+            ->where('cliente_id', $id)
+            ->where('estado', '!=', 0)
+            ->orderBy('fecha', 'desc')
+            ->paginate(10);
+
+        return view('admin.cliente.show', compact('cliente', 'vehiculos', 'ventas'));
     }
 
     public function add()
@@ -178,8 +185,17 @@ class ClienteController extends Controller
 
     public function pdfcliente($id)
     {
-
         $cliente = Cliente::find($id);
+        $vehiculos = Vehiculo::where('cliente_id', $id)->where('estado', 1)->orderBy('marca', 'desc')->get();
+
+        // Cargar las ventas del cliente con sus relaciones
+        $ventas = \App\Models\Venta::with(['vehiculo', 'detalleVentas', 'pagos'])
+            ->where('cliente_id', $id)
+            ->where('estado', '!=', 0)
+            ->orderBy('fecha', 'desc')
+            ->take(10)  // Limitar a 10 ventas para el PDF
+            ->get();
+
         $verpdf = "Browser";
         $nompdf = date('m/d/Y g:ia');
         $path = public_path('assets/imgs/');
@@ -196,24 +212,39 @@ class ClienteController extends Controller
         }
         else
         {
-                $logo = $config->logo;
-                $imagen = public_path('assets/imgs/logos/'.$logo);
+            $logo = $config->logo;
+            $imagen = public_path('assets/imgs/logos/'.$logo);
         }
-
-
-        $config = Config::first();
 
         if ( $verpdf == "Download" )
         {
-            $pdf = PDF::loadView('admin.cliente.pdfcliente',['cliente'=>$cliente,'path'=>$path,'config'=>$config,'imagen'=>$imagen,'currency'=>$currency,'pathcliente'=>$pathcliente]);
+            $pdf = PDF::loadView('admin.cliente.pdfcliente', [
+                'cliente' => $cliente,
+                'path' => $path,
+                'config' => $config,
+                'imagen' => $imagen,
+                'currency' => $currency,
+                'pathcliente' => $pathcliente,
+                'vehiculos' => $vehiculos,
+                'ventas' => $ventas
+            ]);
 
-            return $pdf->download ('Cliente: '.$cliente->nombre.'-'.$nompdf.'.pdf');
+            return $pdf->download('Cliente: '.$cliente->nombre.'-'.$nompdf.'.pdf');
         }
         if ( $verpdf == "Browser" )
         {
-            $pdf = PDF::loadView('admin.cliente.pdfcliente',['cliente'=>$cliente,'path'=>$path,'config'=>$config,'imagen'=>$imagen,'currency'=>$currency,'pathcliente'=>$pathcliente]);
+            $pdf = PDF::loadView('admin.cliente.pdfcliente', [
+                'cliente' => $cliente,
+                'path' => $path,
+                'config' => $config,
+                'imagen' => $imagen,
+                'currency' => $currency,
+                'pathcliente' => $pathcliente,
+                'vehiculos' => $vehiculos,
+                'ventas' => $ventas
+            ]);
 
-            return $pdf->stream ('Cliente: '.$cliente->nombre.'-'.$nompdf.'.pdf');
+            return $pdf->stream('Cliente: '.$cliente->nombre.'-'.$nompdf.'.pdf');
         }
     }
 }

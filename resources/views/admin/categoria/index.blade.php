@@ -24,78 +24,129 @@
         <!-- Content wrapper start -->
         <div class="content-wrapper">
 
-            @include('admin.categoria.search')
+            <!-- Búsqueda y filtros -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="bi bi-search me-2"></i>Buscar Categorías
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form action="{{ url('categorias') }}" method="GET">
+                        @csrf
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="searchInput" class="form-label">Nombre de categoría</label>
+                                <input id="searchInput" class="form-control" placeholder="Buscar..."
+                                    name="fcategoria" value="{{ $queryCategoria ?? '' }}"/>
+                            </div>
+                            <div class="col-md-3 mb-3 d-flex align-items-end">
+                                <button class="btn btn-primary w-100" type="submit">
+                                    <i class="bi bi-search me-1"></i> Buscar
+                                </button>
+                            </div>
+                            <div class="col-md-3 mb-3 d-flex align-items-end">
+                                @if($queryCategoria ?? false)
+                                <a href="{{ url('categorias') }}" class="btn btn-outline-secondary w-100">
+                                    <i class="bi bi-x-circle me-1"></i> Limpiar
+                                </a>
+                                @endif
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
 
             <!-- Row start -->
             <div class="row gx-3">
                 <div class="col-sm-12 col-12">
                     <div class="card">
-
                         <div class="card-header">
                             <div class="card-title">
                                 Listado de Categorías
+                                <span class="badge bg-info ms-2">{{ $categorias->total() }}</span>
                                 <a href="{{ url('add-categoria') }}" type="button" class="btn btn-success float-end">
                                     <i class="bi bi-plus-square"></i> Agregar
                                 </a>
-                            </div>
 
+                                {{-- <a href="{{ url('export-categorias-pdf') }}" target="_blank" class="btn btn-danger float-end me-2">
+                                    <i class="bi bi-file-pdf me-1"></i> PDF
+                                </a> --}}
+                            </div>
                         </div>
                         <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table align-middle table-striped flex-column">
-                                    <thead>
-                                        <tr>
-                                            <td align="center"><i class="bi bi-list-task"></i></td>
-                                            <td>Categoría</td>
-                                            <td>Descripción</td>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($categorias as $categoria)
-                                        <tr>
-                                            <td align="center">
-                                                <div class="btn-group dropend">
-                                                    <button type="button" class="btn btn-info btn-sm dropdown-toggle" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
-                                                        <i class="bi bi-list-task"></i>
-                                                    </button>
-                                                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-lg-start">
-                                                        <li>
-                                                            <a class="dropdown-item" href="{{ url('show-categoria/'.$categoria->id) }}"><i class="bi bi-eye-fill text-blue"></i> Información</a>
-                                                        </li>
-                                                        <li>
-                                                            <a class="dropdown-item" href="{{ url('edit-categoria/'.$categoria->id) }}"><i class="bi bi-pencil-fill text-warning"></i> Editar</a>
-                                                        </li>
-                                                        <li>
-                                                            <a type="button" class="btn bg-gradient-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-{{ $categoria->id }}">
-                                                                <i class="bi bi-trash-fill text-danger"></i> Eliminar
-                                                            </a>
-                                                        </li>
-                                                    </ul>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    {{-- @if ($user->fotografia != null)
-                                                        <img src="{{ asset('assets/imgs/users/'.$user->fotografia) }}" class="img-4x rounded-5 me-3" alt="Doctores" />
-                                                    @else
-                                                        <img src="{{ asset('assets/imgs/users/doctoricon.png') }}" class="img-4x rounded-5 me-3" alt="Doctores" />
-                                                    @endif --}}
+                            @if(session('status'))
+                                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                    <strong><i class="bi bi-check-circle"></i> ¡Éxito!</strong> {{ session('status') }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            @endif
 
-                                                    <p class="m-0">
-                                                        <a class="text-primary" href="{{ url('show-categoria/'.$categoria->id) }}"><b>{{ $categoria->nombre }}</b></a>
-                                                    </p>
-
-                                                </div>
-                                            </td>
-                                            <td><small>{{ $categoria->descripcion }}</small></td>
-
-                                        </tr>
-                                        @include('admin.categoria.deletemodal')
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                                {{ $categorias->links() }}
-                            </div>
+                            @if($categorias->count() > 0)
+                                <div class="table-responsive">
+                                    <table class="table align-middle table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th width="10%">Acciones</th>
+                                                <th>Nombre</th>
+                                                <th>Descripción</th>
+                                                <th>Artículos</th>
+                                                <th>Estado</th>
+                                                <th>Actualización</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($categorias as $categoria)
+                                            <tr>
+                                                <td>
+                                                    <div class="btn-group" role="group">
+                                                        <a href="{{ url('show-categoria/'.$categoria->id) }}" class="btn btn-sm btn-info" title="Ver detalles">
+                                                            <i class="bi bi-eye-fill"></i>
+                                                        </a>
+                                                        <a href="{{ url('edit-categoria/'.$categoria->id) }}" class="btn btn-sm btn-warning" title="Editar">
+                                                            <i class="bi bi-pencil-fill"></i>
+                                                        </a>
+                                                        <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-{{ $categoria->id }}" title="Eliminar">
+                                                            <i class="bi bi-trash-fill"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <a class="text-primary" href="{{ url('show-categoria/'.$categoria->id) }}">
+                                                        <b>{{ $categoria->nombre }}</b>
+                                                    </a>
+                                                </td>
+                                                <td>{{ \Illuminate\Support\Str::limit($categoria->descripcion, 50) }}</td>
+                                                <td>
+                                                    @php
+                                                        $cantidadArticulos = \App\Models\Articulo::where('categoria_id', $categoria->id)->count();
+                                                    @endphp
+                                                    <span class="badge bg-info">{{ $cantidadArticulos }}</span>
+                                                </td>
+                                                <td>
+                                                    <span class="badge {{ $categoria->estado ? 'bg-success' : 'bg-danger' }}">
+                                                        {{ $categoria->estado ? 'Activa' : 'Inactiva' }}
+                                                    </span>
+                                                </td>
+                                                <td><small>{{ date('d/m/Y H:i', strtotime($categoria->updated_at)) }}</small></td>
+                                            </tr>
+                                            @include('admin.categoria.deletemodal')
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                    <div class="pagination justify-content-end mt-3">
+                                        {{ $categorias->links() }}
+                                    </div>
+                                </div>
+                            @else
+                                <div class="alert alert-info text-center">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    No se encontraron categorías
+                                    @if($queryCategoria ?? false)
+                                        con el criterio de búsqueda "{{ $queryCategoria }}"
+                                    @endif
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -107,5 +158,28 @@
 
     </div>
     <!-- Content wrapper scroll end -->
+
+    <script>
+        // Función para mostrar el reloj
+        function actualizarReloj() {
+            const ahora = new Date();
+            const opciones = {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            };
+            document.getElementById('reloj').textContent = ahora.toLocaleString('es-ES', opciones);
+        }
+
+        // Iniciar reloj
+        document.addEventListener('DOMContentLoaded', function() {
+            actualizarReloj();
+            setInterval(actualizarReloj, 1000);
+        });
+    </script>
 @endsection
 

@@ -22,5 +22,6 @@ class DatabaseSeeder extends Seeder
         $this->call(UnidadsTableSeeder::class);
         $this->call(TipoComisionSeeder::class); // Registrar el seeder de tipo_comisions
         $this->call(ArticuloSeeder::class);
+        $this->call(TrabajadorSeeder::class);
     }
 }

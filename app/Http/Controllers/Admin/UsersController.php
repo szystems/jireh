@@ -19,23 +19,31 @@ class UsersController extends Controller
 {
     public function users(Request $request)
     {
-        if ($request)
-        {
-            $queryUser=$request->input('fuser');
-            $users = DB::table('users')
-            ->where('estado', '=', 1)
-            ->where('role_as', '=', 0)
-            ->where(function ($query) use ($queryUser) {
-            $query->where('name', 'LIKE', '%' . $queryUser . '%')
-                ->orWhere('email', 'LIKE', '%' . $queryUser . '%')
-                ->orWhere('telefono', 'LIKE', '%' . $queryUser . '%')
-                ->orWhere('celular', 'LIKE', '%' . $queryUser . '%');
-            })
-            ->orderBy('name','asc')
-            ->paginate(20);
-            $filterUsers = User::all();
-            return view('admin.user.index', compact('users','queryUser','filterUsers'));
+        $queryUser = $request->input('fuser');
+        $role_filter = $request->input('role_filter');
+
+        $usersQuery = DB::table('users')
+            ->where('estado', '=', 1);
+
+        // Aplicar filtro de búsqueda por nombre, email, teléfono o celular
+        if($queryUser) {
+            $usersQuery->where(function ($query) use ($queryUser) {
+                $query->where('name', 'LIKE', '%' . $queryUser . '%')
+                    ->orWhere('email', 'LIKE', '%' . $queryUser . '%')
+                    ->orWhere('telefono', 'LIKE', '%' . $queryUser . '%')
+                    ->orWhere('celular', 'LIKE', '%' . $queryUser . '%');
+            });
         }
+
+        // Aplicar filtro por rol si está definido
+        if($role_filter !== null && $role_filter !== '') {
+            $usersQuery->where('role_as', '=', $role_filter);
+        }
+
+        $users = $usersQuery->orderBy('name', 'asc')->paginate(20);
+        $filterUsers = User::all();
+
+        return view('admin.user.index', compact('users', 'queryUser', 'filterUsers', 'role_filter'));
     }
 
     public function showuser(Request $request, $id)
@@ -51,7 +59,9 @@ class UsersController extends Controller
 
     public function adduser()
     {
-        return view('admin.user.add');
+        // Verificar si el usuario autenticado es administrador
+        $isAdmin = Auth::user()->role_as == 0;
+        return view('admin.user.add', compact('isAdmin'));
     }
 
     public function insertuser(UserFormRequest $request)
@@ -66,7 +76,14 @@ class UsersController extends Controller
             $file->move('assets/imgs/users',$filename);
             $user->fotografia = $filename;
         }
-        $user->role_as = 0;
+
+        // Asignar role_as solo si el usuario autenticado es administrador
+        if (Auth::user()->role_as == 0 && $request->has('role_as')) {
+            $user->role_as = $request->input('role_as');
+        } else {
+            $user->role_as = 1; // Por defecto, asignar como Vendedor
+        }
+
         $user->estado = 1;
         $user->principal = 0;
         $user->name = $request->input('name');
@@ -86,7 +103,9 @@ class UsersController extends Controller
     public function edituser($id)
     {
         $user = User::find($id);
-        return view('admin.user.edit', \compact('user'));
+        // Verificar si el usuario autenticado es administrador
+        $isAdmin = Auth::user()->role_as == 0;
+        return view('admin.user.edit', compact('user', 'isAdmin'));
     }
 
     public function updateuser(UserFormRequest $request, $id)
@@ -107,6 +126,12 @@ class UsersController extends Controller
             $file->move('assets/imgs/users',$filename);
             $user->fotografia = $filename;
         }
+
+        // Actualizar role_as solo si el usuario autenticado es administrador
+        if (Auth::user()->role_as == 0 && $request->has('role_as')) {
+            $user->role_as = $request->input('role_as');
+        }
+
         $user->name = $request->input('name');
         $user->email = $request->input('email');
         $user->telefono = $request->input('telefono');
@@ -116,7 +141,6 @@ class UsersController extends Controller
         $user->update();
 
         return redirect('show-user/'.$id)->with('status',__('Usuario actualizado correctamente.'));
-
     }
 
     public function destroyuser($id)
@@ -128,7 +152,6 @@ class UsersController extends Controller
             if (File::exists($path))
             {
                 File::delete($path);
-
             }
         }
         $user->estado = 0;
@@ -139,85 +162,124 @@ class UsersController extends Controller
 
     public function pdf(Request $request)
     {
-        if ($request)
-        {
+        $queryUser = $request->input('fuser');
+        $role_filter = $request->input('role_filter');
 
-            $usuarios = User::where('estado',1)->orderBy('name','asc')->get();
-            $verpdf = "Browser";
-            $nompdf = date('m/d/Y g:ia');
-            $path = public_path('assets/imgs/');
+        $usuariosQuery = User::where('estado', 1);
 
-            $config = Config::first();
+        // Aplicar filtros
+        if($queryUser) {
+            $usuariosQuery->where(function ($query) use ($queryUser) {
+                $query->where('name', 'LIKE', '%' . $queryUser . '%')
+                    ->orWhere('email', 'LIKE', '%' . $queryUser . '%')
+                    ->orWhere('telefono', 'LIKE', '%' . $queryUser . '%')
+                    ->orWhere('celular', 'LIKE', '%' . $queryUser . '%');
+            });
+        }
 
-            $currency = $config->currency_simbol;
+        if($role_filter !== null && $role_filter !== '') {
+            $usuariosQuery->where('role_as', '=', $role_filter);
+        }
 
-            if ($config->logo == null)
-            {
-                $logo = null;
-                $imagen = null;
-            }
-            else
-            {
-                    $logo = $config->logo;
-                    $imagen = public_path('assets/imgs/logos/'.$logo);
-            }
+        $usuarios = $usuariosQuery->orderBy('name', 'asc')->get();
+        $verpdf = "Browser";
+        $nompdf = date('m/d/Y g:ia');
+        $path = public_path('assets/imgs/');
 
+        $config = Config::first();
+        $currency = $config->currency_simbol;
 
-            $config = Config::first();
+        if ($config->logo == null) {
+            $logo = null;
+            $imagen = null;
+        } else {
+            $logo = $config->logo;
+            $imagen = public_path('assets/imgs/logos/'.$logo);
+        }
 
-            if ( $verpdf == "Download" )
-            {
-                $pdf = PDF::loadView('admin.user.pdf',['usuarios'=>$usuarios,'path'=>$path,'config'=>$config,'imagen'=>$imagen,'currency'=>$currency]);
+        // Título del PDF
+        $titulo = 'Listado de Usuarios';
+        if($queryUser) {
+            $titulo .= ' (Filtro: '.$queryUser.')';
+        }
+        if($role_filter !== null && $role_filter !== '') {
+            $rolName = $role_filter == '0' ? 'Administradores' : 'Vendedores';
+            $titulo .= ' - '.$rolName;
+        }
 
-                return $pdf->download ('Listado Usuarios '.$nompdf.'.pdf');
-            }
-            if ( $verpdf == "Browser" )
-            {
-                $pdf = PDF::loadView('admin.user.pdf',['usuarios'=>$usuarios,'path'=>$path,'config'=>$config,'imagen'=>$imagen,'currency'=>$currency]);
+        if ($verpdf == "Download") {
+            $pdf = PDF::loadView('admin.user.pdf', [
+                'usuarios' => $usuarios,
+                'path' => $path,
+                'config' => $config,
+                'imagen' => $imagen,
+                'currency' => $currency,
+                'titulo' => $titulo
+            ]);
+            return $pdf->download($titulo.' '.$nompdf.'.pdf');
+        }
 
-                return $pdf->stream ('Listado Usuarios '.$nompdf.'.pdf');
-            }
+        if ($verpdf == "Browser") {
+            $pdf = PDF::loadView('admin.user.pdf', [
+                'usuarios' => $usuarios,
+                'path' => $path,
+                'config' => $config,
+                'imagen' => $imagen,
+                'currency' => $currency,
+                'titulo' => $titulo
+            ]);
+            return $pdf->stream($titulo.' '.$nompdf.'.pdf');
         }
     }
 
     public function pdfuser($id)
     {
-
         $usuario = User::find($id);
         $verpdf = "Browser";
         $nompdf = date('m/d/Y g:ia');
-        $path = public_path('assets/imgs/');
-        $pathusuario = public_path('assets/imgs/users/');
 
+        // Configuración
         $config = Config::first();
-
         $currency = $config->currency_simbol;
 
-        if ($config->logo == null)
-        {
-            $logo = null;
-            $imagen = null;
+        // Obtener rutas absolutas para las imágenes
+        $pathuser = public_path('assets/imgs/users/');
+        $defaultImagePath = public_path('assets/imgs/users/usericon4.png');
+
+        // Imagen del logo
+        $imagen = null;
+        if ($config->logo && file_exists(public_path('assets/imgs/logos/'.$config->logo))) {
+            $imagen = public_path('assets/imgs/logos/'.$config->logo);
         }
-        else
-        {
-                $logo = $config->logo;
-                $imagen = public_path('assets/imgs/logos/'.$logo);
+
+        // Establecer tamaño de papel y orientación
+        $pdftamaño = 'Letter';
+        $pdfhorientacion = 'portrait';
+
+        if ($verpdf == "Download") {
+            $pdf = PDF::loadView('admin.user.pdfuser', compact('usuario', 'pathuser', 'defaultImagePath', 'config', 'imagen', 'currency'));
+
+            // Configuración adicional para DOMPDF
+            $pdf->getDomPDF()->set_option("enable_html5_parser", true);
+            $pdf->getDomPDF()->set_option("isHtml5ParserEnabled", true);
+            $pdf->getDomPDF()->set_option("isRemoteEnabled", true);
+
+            $pdf->setPaper($pdftamaño, $pdfhorientacion);
+
+            return $pdf->download('Usuario_'.$usuario->name.'_'.$nompdf.'.pdf');
         }
 
+        if ($verpdf == "Browser") {
+            $pdf = PDF::loadView('admin.user.pdfuser', compact('usuario', 'pathuser', 'defaultImagePath', 'config', 'imagen', 'currency'));
 
-        $config = Config::first();
+            // Configuración adicional para DOMPDF
+            $pdf->getDomPDF()->set_option("enable_html5_parser", true);
+            $pdf->getDomPDF()->set_option("isHtml5ParserEnabled", true);
+            $pdf->getDomPDF()->set_option("isRemoteEnabled", true);
 
-        if ( $verpdf == "Download" )
-        {
-            $pdf = PDF::loadView('admin.user.pdfuser',['usuario'=>$usuario,'path'=>$path,'config'=>$config,'imagen'=>$imagen,'currency'=>$currency,'pathusuario'=>$pathusuario]);
+            $pdf->setPaper($pdftamaño, $pdfhorientacion);
 
-            return $pdf->download ('Usuario: '.$usuario->name.'-'.$nompdf.'.pdf');
-        }
-        if ( $verpdf == "Browser" )
-        {
-            $pdf = PDF::loadView('admin.user.pdfuser',['usuario'=>$usuario,'path'=>$path,'config'=>$config,'imagen'=>$imagen,'currency'=>$currency,'pathusuario'=>$pathusuario]);
-
-            return $pdf->stream ('Usuario: '.$usuario->name.'-'.$nompdf.'.pdf');
+            return $pdf->stream('Usuario_'.$usuario->name.'_'.$nompdf.'.pdf');
         }
     }
 }
