@@ -217,70 +217,73 @@
                 </div>
             </div>
         </div>
-
-        <div class="section-title">INFORMACIÓN DE PRECIOS</div>
-        <div class="section-box-body" style="padding: 10px;">
-            <div style="display: flex; flex-wrap: wrap;">
-                <div class="price-card compra">
-                    <div style="font-size: 10px; color: #7f8c8d;">Precio de Compra</div>
-                    <div style="font-size: 14px; font-weight: bold; color: #e74c3c;">
-                        {{ $config->currency_simbol }}.{{ number_format($articulo->precio_compra, 2, '.', ',') }}
+        @if (Auth::user()->role_as != 1)
+            <div class="section-title">INFORMACIÓN DE PRECIOS</div>
+            <div class="section-box-body" style="padding: 10px;">
+                <div style="display: flex; flex-wrap: wrap;">
+                    @if (Auth::user()->role_as != 1)
+                    <div class="price-card compra">
+                        <div style="font-size: 10px; color: #7f8c8d;">Precio de Compra</div>
+                        <div style="font-size: 14px; font-weight: bold; color: #e74c3c;">
+                            {{ $config->currency_simbol }}.{{ number_format($articulo->precio_compra, 2, '.', ',') }}
+                        </div>
+                    </div>
+                    @endif
+                    <div class="price-card venta">
+                        <div style="font-size: 10px; color: #7f8c8d;">Precio de Venta</div>
+                        <div style="font-size: 14px; font-weight: bold; color: #27ae60;">
+                            {{ $config->currency_simbol }}.{{ number_format($articulo->precio_venta, 2, '.', ',') }}
+                        </div>
                     </div>
                 </div>
-                <div class="price-card venta">
-                    <div style="font-size: 10px; color: #7f8c8d;">Precio de Venta</div>
-                    <div style="font-size: 14px; font-weight: bold; color: #27ae60;">
-                        {{ $config->currency_simbol }}.{{ number_format($articulo->precio_venta, 2, '.', ',') }}
+
+                <table>
+                    <tbody>
+                        <tr>
+                            <td width="40%">Precio de Venta</td>
+                            <td class="text-right text-success">{{ $config->currency_simbol }}.{{ number_format($articulo->precio_venta, 2, '.', ',') }}</td>
+                        </tr>
+                        <tr>
+                            <td>Precio de Compra</td>
+                            <td class="text-right text-danger">- {{ $config->currency_simbol }}.{{ number_format($articulo->precio_compra, 2, '.', ',') }}</td>
+                        </tr>
+                        <tr>
+                            <td>Comisión Vendedor ({{ number_format($comisionVendedor, 2) }}%)</td>
+                            <td class="text-right text-danger">- {{ $config->currency_simbol }}.{{ number_format($valorComisionVendedor, 2, '.', ',') }}</td>
+                        </tr>
+                        <tr>
+                            <td>Comisión Trabajador ({{ number_format($comisionTrabajador, 2) }}%)</td>
+                            <td class="text-right text-danger">- {{ $config->currency_simbol }}.{{ number_format($valorComisionTrabajador, 2, '.', ',') }}</td>
+                        </tr>
+                        <tr>
+                            <td>Impuesto ({{ number_format($impuesto, 2) }}%)</td>
+                            <td class="text-right text-danger">- {{ $config->currency_simbol }}.{{ number_format($valorImpuesto, 2, '.', ',') }}</td>
+                        </tr>
+                        <tr style="font-weight: bold; background-color: #f9f9f9;">
+                            <td>Ganancia Real</td>
+                            <td class="text-right {{ $gananciaReal > 0 ? 'text-success' : 'text-danger' }}">
+                                {{ $config->currency_simbol }}.{{ number_format($gananciaReal, 2, '.', ',') }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <span>Margen Real:</span>
+                        <span style="font-weight: bold;" class="{{ $margen < 10 ? 'text-danger' : ($margen < 20 ? 'text-warning' : 'text-success') }}">
+                            {{ number_format($margen, 2) }}%
+                        </span>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar {{ $margen < 10 ? 'progress-danger' : ($margen < 20 ? 'progress-warning' : 'progress-success') }}"
+                            style="width: {{ min($margen, 100) }}%">
+                            {{ number_format($margen, 0) }}%
+                        </div>
                     </div>
                 </div>
             </div>
-
-            <table>
-                <tbody>
-                    <tr>
-                        <td width="40%">Precio de Venta</td>
-                        <td class="text-right text-success">{{ $config->currency_simbol }}.{{ number_format($articulo->precio_venta, 2, '.', ',') }}</td>
-                    </tr>
-                    <tr>
-                        <td>Precio de Compra</td>
-                        <td class="text-right text-danger">- {{ $config->currency_simbol }}.{{ number_format($articulo->precio_compra, 2, '.', ',') }}</td>
-                    </tr>
-                    <tr>
-                        <td>Comisión Vendedor ({{ number_format($comisionVendedor, 2) }}%)</td>
-                        <td class="text-right text-danger">- {{ $config->currency_simbol }}.{{ number_format($valorComisionVendedor, 2, '.', ',') }}</td>
-                    </tr>
-                    <tr>
-                        <td>Comisión Trabajador ({{ number_format($comisionTrabajador, 2) }}%)</td>
-                        <td class="text-right text-danger">- {{ $config->currency_simbol }}.{{ number_format($valorComisionTrabajador, 2, '.', ',') }}</td>
-                    </tr>
-                    <tr>
-                        <td>Impuesto ({{ number_format($impuesto, 2) }}%)</td>
-                        <td class="text-right text-danger">- {{ $config->currency_simbol }}.{{ number_format($valorImpuesto, 2, '.', ',') }}</td>
-                    </tr>
-                    <tr style="font-weight: bold; background-color: #f9f9f9;">
-                        <td>Ganancia Real</td>
-                        <td class="text-right {{ $gananciaReal > 0 ? 'text-success' : 'text-danger' }}">
-                            {{ $config->currency_simbol }}.{{ number_format($gananciaReal, 2, '.', ',') }}
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                    <span>Margen Real:</span>
-                    <span style="font-weight: bold;" class="{{ $margen < 10 ? 'text-danger' : ($margen < 20 ? 'text-warning' : 'text-success') }}">
-                        {{ number_format($margen, 2) }}%
-                    </span>
-                </div>
-                <div class="progress-container">
-                    <div class="progress-bar {{ $margen < 10 ? 'progress-danger' : ($margen < 20 ? 'progress-warning' : 'progress-success') }}"
-                         style="width: {{ min($margen, 100) }}%">
-                        {{ number_format($margen, 0) }}%
-                    </div>
-                </div>
-            </div>
-        </div>
+        @endif
 
         <div class="section-title">INFORMACIÓN DE INVENTARIO</div>
         <div class="section-box-body" style="padding: 10px;">
@@ -354,29 +357,31 @@
                     </tr>
                 @endforeach
             </tbody>
-            <tfoot>
-                <tr>
-                    <th colspan="3" class="text-right">Total Costo:</th>
-                    <th class="text-right">{{ $config->currency_simbol }}.{{ number_format($totalCosto, 2, '.', ',') }}</th>
-                </tr>
-                <tr>
-                    <th colspan="3" class="text-right">Precio de Venta:</th>
-                    <th class="text-right text-success">{{ $config->currency_simbol }}.{{ number_format($articulo->precio_venta, 2, '.', ',') }}</th>
-                </tr>
-                <tr>
-                    <th colspan="3" class="text-right">Comisiones e Impuestos:</th>
-                    <th class="text-right text-danger">- {{ $config->currency_simbol }}.{{ number_format($valorComisionVendedor + $valorComisionTrabajador + $valorImpuesto, 2, '.', ',') }}</th>
-                </tr>
-                <tr>
-                    <th colspan="3" class="text-right">Ganancia Real:</th>
-                    <th class="text-right {{ $gananciaReal > 0 ? 'text-success' : 'text-danger' }}">
-                        {{ $config->currency_simbol }}.{{ number_format($gananciaReal, 2, '.', ',') }}
-                        @if(isset($totalCosto) && $totalCosto > 0)
-                            ({{ number_format(($gananciaReal / $totalCosto) * 100, 2) }}%)
-                        @endif
-                    </th>
-                </tr>
-            </tfoot>
+            @if (Auth::user()->role_as != 1)
+                <tfoot>
+                    <tr>
+                        <th colspan="3" class="text-right">Total Costo:</th>
+                        <th class="text-right">{{ $config->currency_simbol }}.{{ number_format($totalCosto, 2, '.', ',') }}</th>
+                    </tr>
+                    <tr>
+                        <th colspan="3" class="text-right">Precio de Venta:</th>
+                        <th class="text-right text-success">{{ $config->currency_simbol }}.{{ number_format($articulo->precio_venta, 2, '.', ',') }}</th>
+                    </tr>
+                    <tr>
+                        <th colspan="3" class="text-right">Comisiones e Impuestos:</th>
+                        <th class="text-right text-danger">- {{ $config->currency_simbol }}.{{ number_format($valorComisionVendedor + $valorComisionTrabajador + $valorImpuesto, 2, '.', ',') }}</th>
+                    </tr>
+                    <tr>
+                        <th colspan="3" class="text-right">Ganancia Real:</th>
+                        <th class="text-right {{ $gananciaReal > 0 ? 'text-success' : 'text-danger' }}">
+                            {{ $config->currency_simbol }}.{{ number_format($gananciaReal, 2, '.', ',') }}
+                            @if(isset($totalCosto) && $totalCosto > 0)
+                                ({{ number_format(($gananciaReal / $totalCosto) * 100, 2) }}%)
+                            @endif
+                        </th>
+                    </tr>
+                </tfoot>
+            @endif
         </table>
         @endif
 

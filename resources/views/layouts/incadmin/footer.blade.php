@@ -15,9 +15,11 @@
                 <a href="{{ url('dashboard') }}">
                     <i class="bi bi-house-door"></i> Inicio
                 </a>
+                @if (Auth::user()->role_as != 1)
                 <a href="{{ url('config') }}">
                     <i class="bi bi-gear"></i> Configuración
                 </a>
+                @endif
                 <a href="{{ url('ventas') }}">
                     <i class="bi bi-cash-stack"></i> Ventas
                 </a>

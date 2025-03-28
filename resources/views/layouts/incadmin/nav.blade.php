@@ -21,10 +21,12 @@
 
         <!-- Header actions start -->
         <div class="header-actions d-flex gap-3">
+            @if(Auth::user()->role_as != 1)
             <a href="{{ url('configs') }}" class="header-action-link" data-bs-toggle="tooltip" data-bs-placement="bottom"
                 data-bs-title="Configuración">
                 <i class="bi bi-gear fs-5"></i>
             </a>
+            @endif
 
             <a href="{{ url('ventas') }}" class="header-action-link" data-bs-toggle="tooltip" data-bs-placement="bottom"
                 data-bs-title="Ventas">
@@ -79,9 +81,11 @@
                         <a href="{{ url('edit-user/' . Auth::id()) }}" class="dropdown-item">
                             <i class="bi bi-pencil-square"></i>&ensp;Editar Perfil
                         </a>
+                        @if(Auth::user()->role_as != 1)
                         <a href="{{ url('config') }}" class="dropdown-item">
                             <i class="bi bi-gear"></i>&ensp;Configuración
                         </a>
+                        @endif
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item text-danger" href="{{ route('logout') }}"
                            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">

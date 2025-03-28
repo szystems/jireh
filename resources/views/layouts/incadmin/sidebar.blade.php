@@ -66,50 +66,53 @@
                 </li>
 
                 <!-- Almacén -->
-                <li class="menu-category">Inventario y Catálogos</li>
-                <li class="sidebar-dropdown">
-                    <a href="#" class="{{ Request::is('categorias','articulos','unidades','tipo-comisiones', 'show-categoria/*', 'show-articulo/*', 'show-unidad/*', 'show-tipo-comision/*') ? 'active-dropdown':''  }}">
-                        <i class="bi bi-boxes"></i>
-                        <span class="menu-text">Almacén</span>
-                        <i class="bi bi-chevron-down menu-arrow"></i>
-                    </a>
-                    <div class="sidebar-submenu">
-                        <ul>
-                            <li class="{{ Request::is('categorias','show-categoria/*','add-categoria','edit-categoria/*') ? 'active-page-link':''  }}">
-                                <a href="{{ url('categorias') }}"><i class="bi bi-diagram-3"></i> Categorías </a>
-                            </li>
-                            <li class="{{ Request::is('articulos','show-articulo/*','add-articulo','edit-articulo/*') ? 'active-page-link':''  }}">
-                                <a href="{{ url('articulos') }}"><i class="bi bi-boxes"></i> Artículos y Servicios</a>
-                            </li>
-                            <li class="{{ Request::is('unidades','show-unidad/*','add-unidad','edit-unidad/*') ? 'active-page-link':''  }}">
-                                <a href="{{ url('unidades') }}"><i class="bi bi-rulers"></i> Unidades de Medida </a>
-                            </li>
-                            <li class="{{ Request::is('tipo-comisiones','show-tipo-comision/*','add-tipo-comision','edit-tipo-comision/*') ? 'active-page-link':''  }}">
-                                <a href="{{ url('tipo-comisiones') }}"><i class="bi bi-piggy-bank"></i> Tipos de Comisiones </a>
-                            </li>
-                        </ul>
-                    </div>
-                </li>
-
+                @if(Auth::user()->role_as != 1)
+                    <li class="menu-category">Inventario y Catálogos</li>
+                    <li class="sidebar-dropdown">
+                        <a href="#" class="{{ Request::is('categorias','articulos','unidades','tipo-comisiones', 'show-categoria/*', 'show-articulo/*', 'show-unidad/*', 'show-tipo-comision/*') ? 'active-dropdown':''  }}">
+                            <i class="bi bi-boxes"></i>
+                            <span class="menu-text">Almacén</span>
+                            <i class="bi bi-chevron-down menu-arrow"></i>
+                        </a>
+                        <div class="sidebar-submenu">
+                            <ul>
+                                <li class="{{ Request::is('categorias','show-categoria/*','add-categoria','edit-categoria/*') ? 'active-page-link':''  }}">
+                                    <a href="{{ url('categorias') }}"><i class="bi bi-diagram-3"></i> Categorías </a>
+                                </li>
+                                <li class="{{ Request::is('articulos','show-articulo/*','add-articulo','edit-articulo/*') ? 'active-page-link':''  }}">
+                                    <a href="{{ url('articulos') }}"><i class="bi bi-boxes"></i> Artículos y Servicios</a>
+                                </li>
+                                <li class="{{ Request::is('unidades','show-unidad/*','add-unidad','edit-unidad/*') ? 'active-page-link':''  }}">
+                                    <a href="{{ url('unidades') }}"><i class="bi bi-rulers"></i> Unidades de Medida </a>
+                                </li>
+                                <li class="{{ Request::is('tipo-comisiones','show-tipo-comision/*','add-tipo-comision','edit-tipo-comision/*') ? 'active-page-link':''  }}">
+                                    <a href="{{ url('tipo-comisiones') }}"><i class="bi bi-piggy-bank"></i> Tipos de Comisiones </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                @endif
                 <!-- Compras -->
-                <li class="menu-category">Operaciones</li>
-                <li class="sidebar-dropdown">
-                    <a href="#" class="{{ Request::is('ingresos','proveedores','show-ingreso/*','show-proveedor/*') ? 'active-dropdown':''  }}">
-                        <i class="bi bi-cart4"></i>
-                        <span class="menu-text">Compras</span>
-                        <i class="bi bi-chevron-down menu-arrow"></i>
-                    </a>
-                    <div class="sidebar-submenu">
-                        <ul>
-                            <li class="{{ Request::is('ingresos','show-ingreso/*','add-ingreso','edit-ingreso/*') ? 'active-page-link':''  }}">
-                                <a href="{{ url('ingresos') }}"><i class="bi bi-cart-plus"></i> Ingresos</a>
-                            </li>
-                            <li class="{{ Request::is('proveedores','show-proveedor/*','add-proveedor','edit-proveedor/*') ? 'active-page-link':''  }}">
-                                <a href="{{ url('proveedores') }}"><i class="bi bi-person-badge-fill"></i> Proveedores</a>
-                            </li>
-                        </ul>
-                    </div>
-                </li>
+                @if(Auth::user()->role_as != 1)
+                    <li class="menu-category">Operaciones</li>
+                    <li class="sidebar-dropdown">
+                        <a href="#" class="{{ Request::is('ingresos','proveedores','show-ingreso/*','show-proveedor/*') ? 'active-dropdown':''  }}">
+                            <i class="bi bi-cart4"></i>
+                            <span class="menu-text">Compras</span>
+                            <i class="bi bi-chevron-down menu-arrow"></i>
+                        </a>
+                        <div class="sidebar-submenu">
+                            <ul>
+                                <li class="{{ Request::is('ingresos','show-ingreso/*','add-ingreso','edit-ingreso/*') ? 'active-page-link':''  }}">
+                                    <a href="{{ url('ingresos') }}"><i class="bi bi-cart-plus"></i> Ingresos</a>
+                                </li>
+                                <li class="{{ Request::is('proveedores','show-proveedor/*','add-proveedor','edit-proveedor/*') ? 'active-page-link':''  }}">
+                                    <a href="{{ url('proveedores') }}"><i class="bi bi-person-badge-fill"></i> Proveedores</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                @endif
 
                 <!-- Ventas -->
                 <li class="sidebar-dropdown">
@@ -123,23 +126,30 @@
                             <li class="{{ Request::is('ventas','show-venta/*','add-venta','edit-venta/*') ? 'active-page-link':''  }}">
                                 <a href="{{ url('ventas') }}"><i class="bi bi-cash-stack"></i> Ventas</a>
                             </li>
-                            <li class="{{ Request::is('reportearticulos') ? 'active-page-link':''  }}">
-                                <a href="{{ url('reportearticulos') }}"><i class="bi bi-bar-chart-line"></i> Artículos Vendidos</a>
-                            </li>
+                            @if(Auth::user()->role_as != 1)
+                                <li class="{{ Request::is('reportearticulos') ? 'active-page-link':''  }}">
+                                    <a href="{{ url('reportearticulos') }}"><i class="bi bi-bar-chart-line"></i> Artículos Vendidos</a>
+                                </li>
+                            @endif
+                            @if(Auth::user()->role_as != 1)
                             <li class="{{ Request::is('trabajadores','show-trabajador/*','add-trabajador','edit-trabajador/*') ? 'active-page-link':''  }}">
                                 <a href="{{ url('trabajadores') }}"><i class="bi bi-people"></i> Trabajadores</a>
                             </li>
+                            @endif
                             <li class="{{ Request::is('inventario') ? 'active-page-link':''  }}">
                                 <a href="{{ url('inventario') }}"><i class="bi bi-inboxes"></i> Inventario</a>
                             </li>
+                            @if(Auth::user()->role_as != 1)
                             <li class="{{ Request::is('descuentos','show-descuento/*','add-descuento','edit-descuento/*') ? 'active-page-link':''  }}">
                                 <a href="{{ url('descuentos') }}"><i class="bi bi-piggy-bank"></i> Descuentos</a>
                             </li>
+                            @endif
                         </ul>
                     </div>
                 </li>
 
                 <!-- Administración -->
+                @if(Auth::user()->role_as != 1)
                 <li class="menu-category">Administración</li>
                 <li class="sidebar-dropdown">
                     <a href="#" class="{{ Request::is('users','show-user/*','add-user','edit-user/*') ? 'active-dropdown':''  }}">
@@ -161,6 +171,7 @@
                         <span class="menu-text">Configuración</span>
                     </a>
                 </li>
+                @endif
             </ul>
         </div>
     </div>

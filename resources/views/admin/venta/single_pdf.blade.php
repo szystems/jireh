@@ -288,7 +288,9 @@
                     <th width="35%">Artículo</th>
                     <th class="text-center" width="10%">Cantidad</th>
                     <th class="text-right" width="10%">Precio</th>
-                    <th class="text-right" width="10%">Costo</th>
+                    @if (Auth::user()->role_as != 1)
+                        <th class="text-right" width="10%">Costo</th>
+                    @endif
                     <th class="text-right" width="10%">Descuento</th>
                     <th class="text-center" width="15%">Trabajador</th>
                     <th class="text-right" width="10%">Subtotal</th>
@@ -333,7 +335,9 @@
                             @endif
                         </td>
                         <td class="text-right moneda">{{ $config->currency_simbol }}.{{ number_format($precioUnitario, 2, '.', ',') }}</td>
-                        <td class="text-right moneda">{{ $config->currency_simbol }}.{{ number_format($detalle->precio_costo, 2, '.', ',') }}</td>
+                        @if (Auth::user()->role_as != 1)
+                            <td class="text-right moneda">{{ $config->currency_simbol }}.{{ number_format($detalle->precio_costo, 2, '.', ',') }}</td>
+                        @endif
                         <td class="text-right">
                             @if($montoDescuento > 0)
                                 <span class="text-danger moneda">
@@ -441,75 +445,77 @@
         @endif
 
         <!-- Sección de resumen financiero -->
-        <div class="section-box">
-            <div class="section-box-header">
-                <h3 class="section-box-title">RESUMEN FINANCIERO</h3>
-            </div>
-            <div class="section-box-body">
-                <div class="info-columns">
-                    <div class="info-column">
-                        <table style="border: none; width: 100%;">
-                            <tr>
-                                <td style="border: none; text-align: right; font-weight: bold; width: 60%;">Valor de Venta:</td>
-                                <td style="border: none; text-align: right; width: 40%;">
-                                    <span class="text-success moneda">{{ $config->currency_simbol }}.{{ number_format($totalVenta, 2, '.', ',') }}</span>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td style="border: none; text-align: right; font-weight: bold;">Costo de Artículos:</td>
-                                <td style="border: none; text-align: right;">
-                                    <span class="text-danger moneda">{{ $config->currency_simbol }}.{{ number_format($totalCostos, 2, '.', ',') }}</span>
-                                </td>
-                            </tr>
-                        </table>
-                    </div>
-                    <div class="info-column">
-                        <table style="border: none; width: 100%;">
-                            <tr>
-                                <td style="border: none; text-align: right; font-weight: bold; width: 60%;">Margen Bruto:</td>
-                                <td style="border: none; text-align: right; width: 40%;">
-                                    @php
-                                        $margenBruto = $totalVenta > 0 ? (($totalVenta - $totalCostos) / $totalVenta) * 100 : 0;
-                                    @endphp
-                                    <span class="{{ $margenBruto >= 20 ? 'text-success' : ($margenBruto >= 10 ? 'text-warning' : 'text-danger') }}">
-                                        {{ number_format($margenBruto, 2) }}%
-                                    </span>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td style="border: none; text-align: right; font-weight: bold;">Ganancia Bruta:</td>
-                                <td style="border: none; text-align: right;">
-                                    <span class="text-success moneda">{{ $config->currency_simbol }}.{{ number_format($totalVenta - $totalCostos, 2, '.', ',') }}</span>
-                                </td>
-                            </tr>
-                        </table>
-                    </div>
-                    <div class="info-column">
-                        <table style="border: none; width: 100%;">
-                            <tr>
-                                <td style="border: none; text-align: right; font-weight: bold; width: 60%;">Estado de Pago:</td>
-                                <td style="border: none; text-align: right; width: 40%;">
-                                    @php
-                                        $porcentajePagado = $totalVenta > 0 ? ($totalPagado / $totalVenta) * 100 : 0;
-                                    @endphp
-                                    <span class="{{ $porcentajePagado >= 100 ? 'text-success' : ($porcentajePagado > 0 ? 'text-warning' : 'text-danger') }}">
-                                        {{ number_format($porcentajePagado, 0) }}%
-                                    </span>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td style="border: none; text-align: right; font-weight: bold;">Estado Venta:</td>
-                                <td style="border: none; text-align: right;">
-                                    <span class="badge {{ $venta->estado == 1 ? 'badge-success' : 'badge-danger' }}">
-                                        {{ $venta->estado == 1 ? 'Activa' : 'Cancelada' }}
-                                    </span>
-                                </td>
-                            </tr>
-                        </table>
+        @if (Auth::user()->role_as != 1)
+            <div class="section-box">
+                <div class="section-box-header">
+                    <h3 class="section-box-title">RESUMEN FINANCIERO</h3>
+                </div>
+                <div class="section-box-body">
+                    <div class="info-columns">
+                        <div class="info-column">
+                            <table style="border: none; width: 100%;">
+                                <tr>
+                                    <td style="border: none; text-align: right; font-weight: bold; width: 60%;">Valor de Venta:</td>
+                                    <td style="border: none; text-align: right; width: 40%;">
+                                        <span class="text-success moneda">{{ $config->currency_simbol }}.{{ number_format($totalVenta, 2, '.', ',') }}</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="border: none; text-align: right; font-weight: bold;">Costo de Artículos:</td>
+                                    <td style="border: none; text-align: right;">
+                                        <span class="text-danger moneda">{{ $config->currency_simbol }}.{{ number_format($totalCostos, 2, '.', ',') }}</span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="info-column">
+                            <table style="border: none; width: 100%;">
+                                <tr>
+                                    <td style="border: none; text-align: right; font-weight: bold; width: 60%;">Margen Bruto:</td>
+                                    <td style="border: none; text-align: right; width: 40%;">
+                                        @php
+                                            $margenBruto = $totalVenta > 0 ? (($totalVenta - $totalCostos) / $totalVenta) * 100 : 0;
+                                        @endphp
+                                        <span class="{{ $margenBruto >= 20 ? 'text-success' : ($margenBruto >= 10 ? 'text-warning' : 'text-danger') }}">
+                                            {{ number_format($margenBruto, 2) }}%
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="border: none; text-align: right; font-weight: bold;">Ganancia Bruta:</td>
+                                    <td style="border: none; text-align: right;">
+                                        <span class="text-success moneda">{{ $config->currency_simbol }}.{{ number_format($totalVenta - $totalCostos, 2, '.', ',') }}</span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="info-column">
+                            <table style="border: none; width: 100%;">
+                                <tr>
+                                    <td style="border: none; text-align: right; font-weight: bold; width: 60%;">Estado de Pago:</td>
+                                    <td style="border: none; text-align: right; width: 40%;">
+                                        @php
+                                            $porcentajePagado = $totalVenta > 0 ? ($totalPagado / $totalVenta) * 100 : 0;
+                                        @endphp
+                                        <span class="{{ $porcentajePagado >= 100 ? 'text-success' : ($porcentajePagado > 0 ? 'text-warning' : 'text-danger') }}">
+                                            {{ number_format($porcentajePagado, 0) }}%
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="border: none; text-align: right; font-weight: bold;">Estado Venta:</td>
+                                    <td style="border: none; text-align: right;">
+                                        <span class="badge {{ $venta->estado == 1 ? 'badge-success' : 'badge-danger' }}">
+                                            {{ $venta->estado == 1 ? 'Activa' : 'Cancelada' }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        @endif
     </div>
 
     <div class="footer">

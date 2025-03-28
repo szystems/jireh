@@ -181,7 +181,8 @@ class VentaController extends Controller
             }
 
             DB::commit();
-            return redirect('ventas')->with('status', 'Venta registrada exitosamente.');
+            // return redirect('ventas')->with('status', 'Venta registrada exitosamente.');
+            return redirect('show-venta/'.$venta->id)->with('status',__('Usuario actualizado correctamente.'));
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->with('error', 'Error al registrar la venta: ' . $e->getMessage());

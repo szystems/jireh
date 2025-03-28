@@ -207,6 +207,7 @@
                     </td>
                     <td width="20%" class="text-center">
                         <div class="text-secondary text-bold">Estado Pagos</div>
+                        <br>
                         <div>
                             <span class="badge badge-success">{{ $ventasPagadas }} Pagadas</span>
                             <span class="badge badge-info">{{ $ventasParciales }} Parciales</span>

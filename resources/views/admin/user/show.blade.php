@@ -58,7 +58,7 @@
                                                 <i class="bi bi-file-pdf"></i> PDF
                                             </a>
 
-                                            @if ($user->principal != "1")
+                                            @if (Auth::user()->role_as != 1)
                                                 <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#deleteModal-{{ $user->id }}">
                                                     <i class="bi bi-trash-fill"></i> Eliminar
                                                 </button>
@@ -67,10 +67,11 @@
                                                     <i class="bi bi-lock-fill"></i> Eliminar
                                                 </button>
                                             @endif
-
+                                            @if(Auth::user()->role_as != 1)
                                             <a href="{{ url('users') }}" class="btn btn-info w-100 mt-2">
                                                 <i class="bi bi-arrow-left"></i> Volver al listado
                                             </a>
+                                            @endif
                                         </div>
                                     </div>
                                 </div>

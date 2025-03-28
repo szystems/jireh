@@ -146,11 +146,13 @@
                         <i class="bi bi-list-ul"></i> Listado de Ventas
                     </button>
                 </li>
+                @if (Auth::user()->role_as != 1)
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="estadisticas-tab" data-bs-toggle="tab" data-bs-target="#estadisticas-tab-pane" type="button" role="tab" aria-controls="estadisticas-tab-pane" aria-selected="false">
                         <i class="bi bi-bar-chart-line"></i> Estadísticas y Gráficos
                     </button>
                 </li>
+                @endif
             </ul>
 
             <!-- Contenido de las pestañas -->
@@ -175,7 +177,7 @@
                                 {{-- <a href="{{ route('ventas.export.excel') }}?{{ http_build_query(request()->all()) }}" class="btn btn-success btn-sm">
                                     <i class="bi bi-file-earmark-excel"></i> Excel
                                 </a> --}}
-                                <a href="{{ route('ventas.export.pdf') }}?{{ http_build_query(request()->all()) }}" class="btn btn-danger btn-sm">
+                                <a target="blank_" href="{{ route('ventas.export.pdf') }}?{{ http_build_query(request()->all()) }}" class="btn btn-danger btn-sm">
                                     <i class="bi bi-file-earmark-pdf"></i> PDF
                                 </a>
                             </div>
@@ -274,8 +276,10 @@
                                                                             <th class="text-center">Cantidad</th>
                                                                             <th>Descuento</th>
                                                                             <th class="text-end">Impuestos</th>
-                                                                            <th class="text-end">Com. Trab.</th>
-                                                                            <th class="text-end">Com. Vend.</th>
+                                                                            @if (Auth::user()->role_as != 1)
+                                                                                <th class="text-end">Com. Trab.</th>
+                                                                                <th class="text-end">Com. Vend.</th>
+                                                                            @endif
                                                                             <th class="text-end">Subtotal</th>
                                                                         </tr>
                                                                     </thead>
@@ -356,22 +360,24 @@
                                                                                     {{ $config->currency_simbol }}.{{ number_format($impuestoDetalle, 2, '.', ',') }}
                                                                                     ({{ number_format($detalle->porcentaje_impuestos ?? 0, 2) }}%)
                                                                                 </td>
-                                                                                <td class="text-end">
-                                                                                    @if ($detalle->tipo_comision_trabajador_id)
-                                                                                        {{ $config->currency_simbol }}.{{ number_format($comisionTrabajador, 2, '.', ',') }}
-                                                                                        ({{ number_format($porcentajeComisionTrabajador, 2) }}%)
-                                                                                    @else
-                                                                                        -
-                                                                                    @endif
-                                                                                </td>
-                                                                                <td class="text-end">
-                                                                                    @if ($detalle->tipo_comision_usuario_id)
-                                                                                        {{ $config->currency_simbol }}.{{ number_format($comisionUsuario, 2, '.', ',') }}
-                                                                                        ({{ number_format($porcentajeComisionUsuario, 2) }}%)
-                                                                                    @else
-                                                                                        -
-                                                                                    @endif
-                                                                                </td>
+                                                                                @if (Auth::user()->role_as != 1)
+                                                                                    <td class="text-end">
+                                                                                        @if ($detalle->tipo_comision_trabajador_id)
+                                                                                            {{ $config->currency_simbol }}.{{ number_format($comisionTrabajador, 2, '.', ',') }}
+                                                                                            ({{ number_format($porcentajeComisionTrabajador, 2) }}%)
+                                                                                        @else
+                                                                                            -
+                                                                                        @endif
+                                                                                    </td>
+                                                                                    <td class="text-end">
+                                                                                        @if ($detalle->tipo_comision_usuario_id)
+                                                                                            {{ $config->currency_simbol }}.{{ number_format($comisionUsuario, 2, '.', ',') }}
+                                                                                            ({{ number_format($porcentajeComisionUsuario, 2) }}%)
+                                                                                        @else
+                                                                                            -
+                                                                                        @endif
+                                                                                    </td>
+                                                                                @endif
                                                                                 <td class="text-end">
                                                                                     {{ $config->currency_simbol }}.{{ number_format($subtotalConDescuento, 2, '.', ',') }}
                                                                                 </td>
@@ -413,12 +419,14 @@
                                                                             <td class="text-end text-info">
                                                                                 <strong>{{ $config->currency_simbol }}.{{ number_format($totalImpuestosVenta, 2, '.', ',') }}</strong>
                                                                             </td>
-                                                                            <td class="text-end text-success">
-                                                                                <strong>{{ $config->currency_simbol }}.{{ number_format($totalComisionTrabajadorVenta, 2, '.', ',') }}</strong>
-                                                                            </td>
-                                                                            <td class="text-end text-primary">
-                                                                                <strong>{{ $config->currency_simbol }}.{{ number_format($totalComisionUsuarioVenta, 2, '.', ',') }}</strong>
-                                                                            </td>
+                                                                            @if (Auth::user()->role_as != 1)
+                                                                                <td class="text-end text-success">
+                                                                                    <strong>{{ $config->currency_simbol }}.{{ number_format($totalComisionTrabajadorVenta, 2, '.', ',') }}</strong>
+                                                                                </td>
+                                                                                <td class="text-end text-primary">
+                                                                                    <strong>{{ $config->currency_simbol }}.{{ number_format($totalComisionUsuarioVenta, 2, '.', ',') }}</strong>
+                                                                                </td>
+                                                                            @endif
                                                                             <td class="text-end">
                                                                                 <strong>Total: {{ $config->currency_simbol }}.{{ number_format($totalVenta, 2, '.', ',') }}</strong>
                                                                             </td>
@@ -516,6 +524,7 @@
                                                     </tr>
 
                                                     <!-- SECCIÓN DE COSTOS Y GASTOS -->
+                                                    @if (Auth::user()->role_as != 1)
                                                     <tr class="table-danger">
                                                         <td colspan="7" class="text-center"><strong>COSTOS Y GASTOS</strong></td>
                                                     </tr>
@@ -650,14 +659,17 @@
                                                             </strong>
                                                         </td>
                                                     </tr>
+                                                    @endif
 
                                                     <!-- SECCIÓN DE RESULTADOS -->
+                                                    @if (Auth::user()->role_as != 1)
                                                     <tr class="table-success">
                                                         <td colspan="7" class="text-center"><strong>RESULTADOS</strong></td>
                                                     </tr>
                                                     <tr class="table-success">
                                                         <td colspan="6" class="text-end"><strong>GANANCIA NETA:</strong></td>
                                                         <td class="text-end">
+                                                    @endif
                                                             @php
                                                                 // Calcular total de ventas
                                                                 $totalVentas = $ventas->where('estado', true)->sum(function($venta) {
@@ -759,11 +771,14 @@
                                                                 // Calcular ganancia neta
                                                                 $gananciaNeta = $totalVentas - $totalComisionesVendedor - $totalComisionesTrabajador - $totalImpuestos - $totalCostos;
                                                             @endphp
+                                                    @if (Auth::user()->role_as != 1)
                                                             <strong class="text-success">
                                                                 {{ $config->currency_simbol }}.{{ number_format($gananciaNeta, 2, '.', ',') }}
                                                             </strong>
                                                         </td>
                                                     </tr>
+                                                    @endif
+
                                                 </tfoot>
                                             </table>
                                         </div>

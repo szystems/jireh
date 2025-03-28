@@ -44,19 +44,23 @@
                                 </div>
                             </div>
                             <div class="btn-group">
+                                @if (Auth::user()->role_as != 1)
                                 <a href="{{ url('articulos') }}" class="btn btn-outline-secondary">
                                     <i class="bi bi-arrow-left"></i> Volver
                                 </a>
+                                @endif
                                 <a href="{{ url('export-articulo-pdf/'.$articulo->id) }}" class="btn btn-outline-danger" target="_blank">
                                     <i class="bi bi-file-pdf"></i> PDF
                                 </a>
-                                <a href="{{ url('edit-articulo/'.$articulo->id) }}" class="btn btn-warning">
-                                    <i class="bi bi-pencil"></i> Editar
-                                </a>
-                                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-{{ $articulo->id }}">
-                                    <i class="bi bi-trash"></i> Eliminar
-                                </button>
-                                @include('admin.articulo.deletemodal')
+                                @if (Auth::user()->role_as != 1)
+                                    <a href="{{ url('edit-articulo/'.$articulo->id) }}" class="btn btn-warning">
+                                        <i class="bi bi-pencil"></i> Editar
+                                    </a>
+                                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-{{ $articulo->id }}">
+                                        <i class="bi bi-trash"></i> Eliminar
+                                    </button>
+                                    @include('admin.articulo.deletemodal')
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -201,14 +205,16 @@
                                                 </div>
                                                 <div class="card-body">
                                                     <div class="row mb-3">
-                                                        <div class="col-md-6">
-                                                            <div class="card bg-light">
-                                                                <div class="card-body text-center">
-                                                                    <h6 class="text-muted mb-1">Precio de Compra</h6>
-                                                                    <h3 class="text-danger mb-0">{{ $config->currency_simbol }}.{{ number_format($articulo->precio_compra, 2, '.', ',') }}</h3>
+                                                        @if (Auth::user()->role_as != 1)
+                                                            <div class="col-md-6">
+                                                                <div class="card bg-light">
+                                                                    <div class="card-body text-center">
+                                                                        <h6 class="text-muted mb-1">Precio de Compra</h6>
+                                                                        <h3 class="text-danger mb-0">{{ $config->currency_simbol }}.{{ number_format($articulo->precio_compra, 2, '.', ',') }}</h3>
+                                                                    </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
+                                                        @endif
                                                         <div class="col-md-6">
                                                             <div class="card bg-light">
                                                                 <div class="card-body text-center">
@@ -219,93 +225,96 @@
                                                         </div>
                                                     </div>
 
-                                                    <div class="card mb-3">
-                                                        <div class="card-body">
-                                                            @php
-                                                                // Obtener porcentajes de comisión e impuesto
-                                                                $comisionVendedor = $articulo->tipoComisionVendedor->porcentaje ?? 0;
-                                                                $comisionTrabajador = $articulo->tipoComisionTrabajador->porcentaje ?? 0;
-                                                                $impuesto = $config->impuesto ?? 0;
+                                                    @if (Auth::user()->role_as != 1)
 
-                                                                // Cálculo de costos adicionales
-                                                                $valorComisionVendedor = $articulo->precio_venta * ($comisionVendedor / 100);
-                                                                $valorComisionTrabajador = $articulo->precio_venta * ($comisionTrabajador / 100);
-                                                                $valorImpuesto = $articulo->precio_venta * ($impuesto / 100);
+                                                        <div class="card mb-3">
+                                                            <div class="card-body">
+                                                                @php
+                                                                    // Obtener porcentajes de comisión e impuesto
+                                                                    $comisionVendedor = $articulo->tipoComisionVendedor->porcentaje ?? 0;
+                                                                    $comisionTrabajador = $articulo->tipoComisionTrabajador->porcentaje ?? 0;
+                                                                    $impuesto = $config->impuesto ?? 0;
 
-                                                                // Cálculo del margen real
-                                                                $ganancia = $articulo->precio_venta - $articulo->precio_compra;
-                                                                $gananciaReal = $ganancia - $valorComisionVendedor - $valorComisionTrabajador - $valorImpuesto;
+                                                                    // Cálculo de costos adicionales
+                                                                    $valorComisionVendedor = $articulo->precio_venta * ($comisionVendedor / 100);
+                                                                    $valorComisionTrabajador = $articulo->precio_venta * ($comisionTrabajador / 100);
+                                                                    $valorImpuesto = $articulo->precio_venta * ($impuesto / 100);
 
-                                                                $margen = $articulo->precio_compra > 0 ?
-                                                                    (($gananciaReal) / $articulo->precio_compra) * 100 : 0;
+                                                                    // Cálculo del margen real
+                                                                    $ganancia = $articulo->precio_venta - $articulo->precio_compra;
+                                                                    $gananciaReal = $ganancia - $valorComisionVendedor - $valorComisionTrabajador - $valorImpuesto;
 
-                                                                $margenClass = 'bg-success';
-                                                                if ($margen < 10) {
-                                                                    $margenClass = 'bg-danger';
-                                                                } elseif ($margen < 20) {
-                                                                    $margenClass = 'bg-warning';
-                                                                }
-                                                            @endphp
+                                                                    $margen = $articulo->precio_compra > 0 ?
+                                                                        (($gananciaReal) / $articulo->precio_compra) * 100 : 0;
 
-                                                            <h6 class="mb-3">Margen de Ganancia (incluyendo comisiones e impuestos)</h6>
-                                                            <div class="table-responsive mb-3">
-                                                                <table class="table table-sm table-bordered">
-                                                                    <tbody>
-                                                                        <tr>
-                                                                            <td width="40%">Precio de Venta</td>
-                                                                            <td class="text-end text-success">{{ $config->currency_simbol }}.{{ number_format($articulo->precio_venta, 2, '.', ',') }}</td>
-                                                                        </tr>
-                                                                        <tr>
-                                                                            <td>Precio de Compra</td>
-                                                                            <td class="text-end text-danger">- {{ $config->currency_simbol }}.{{ number_format($articulo->precio_compra, 2, '.', ',') }}</td>
-                                                                        </tr>
-                                                                        <tr>
-                                                                            <td>Comisión Vendedor ({{ number_format($comisionVendedor, 2) }}%)</td>
-                                                                            <td class="text-end text-danger">- {{ $config->currency_simbol }}.{{ number_format($valorComisionVendedor, 2, '.', ',') }}</td>
-                                                                        </tr>
-                                                                        <tr>
-                                                                            <td>Comisión Trabajador ({{ number_format($comisionTrabajador, 2) }}%)</td>
-                                                                            <td class="text-end text-danger">- {{ $config->currency_simbol }}.{{ number_format($valorComisionTrabajador, 2, '.', ',') }}</td>
-                                                                        </tr>
-                                                                        <tr>
-                                                                            <td>Impuesto ({{ number_format($impuesto, 2) }}%)</td>
-                                                                            <td class="text-end text-danger">- {{ $config->currency_simbol }}.{{ number_format($valorImpuesto, 2, '.', ',') }}</td>
-                                                                        </tr>
-                                                                        <tr class="table-active">
-                                                                            <th>Ganancia Real</th>
-                                                                            <th class="text-end {{ $gananciaReal > 0 ? 'text-success' : 'text-danger' }}">
-                                                                                {{ $config->currency_simbol }}.{{ number_format($gananciaReal, 2, '.', ',') }}
-                                                                            </th>
-                                                                        </tr>
-                                                                    </tbody>
-                                                                </table>
-                                                            </div>
+                                                                    $margenClass = 'bg-success';
+                                                                    if ($margen < 10) {
+                                                                        $margenClass = 'bg-danger';
+                                                                    } elseif ($margen < 20) {
+                                                                        $margenClass = 'bg-warning';
+                                                                    }
+                                                                @endphp
 
-                                                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                                                <span>Margen Real:</span>
-                                                                <span class="badge fs-6 {{ $margenClass }}">{{ number_format($margen, 2) }}%</span>
-                                                            </div>
-                                                            <div class="progress" style="height: 10px;">
-                                                                <div class="progress-bar {{ $margenClass }}" role="progressbar" style="width: {{ min($margen, 100) }}%"></div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="card">
-                                                        <div class="card-body">
-                                                            <h6 class="mb-3">Información de Comisiones</h6>
-                                                            <div class="row">
-                                                                <div class="col-md-6 mb-2">
-                                                                    <span class="d-block text-muted small">Comisión para Vendedor</span>
-                                                                    <span class="badge bg-info">{{ $articulo->tipoComisionVendedor->nombre }} ({{ number_format($comisionVendedor, 2) }}%)</span>
+                                                                <h6 class="mb-3">Margen de Ganancia (incluyendo comisiones e impuestos)</h6>
+                                                                <div class="table-responsive mb-3">
+                                                                    <table class="table table-sm table-bordered">
+                                                                        <tbody>
+                                                                            <tr>
+                                                                                <td width="40%">Precio de Venta</td>
+                                                                                <td class="text-end text-success">{{ $config->currency_simbol }}.{{ number_format($articulo->precio_venta, 2, '.', ',') }}</td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td>Precio de Compra</td>
+                                                                                <td class="text-end text-danger">- {{ $config->currency_simbol }}.{{ number_format($articulo->precio_compra, 2, '.', ',') }}</td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td>Comisión Vendedor ({{ number_format($comisionVendedor, 2) }}%)</td>
+                                                                                <td class="text-end text-danger">- {{ $config->currency_simbol }}.{{ number_format($valorComisionVendedor, 2, '.', ',') }}</td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td>Comisión Trabajador ({{ number_format($comisionTrabajador, 2) }}%)</td>
+                                                                                <td class="text-end text-danger">- {{ $config->currency_simbol }}.{{ number_format($valorComisionTrabajador, 2, '.', ',') }}</td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td>Impuesto ({{ number_format($impuesto, 2) }}%)</td>
+                                                                                <td class="text-end text-danger">- {{ $config->currency_simbol }}.{{ number_format($valorImpuesto, 2, '.', ',') }}</td>
+                                                                            </tr>
+                                                                            <tr class="table-active">
+                                                                                <th>Ganancia Real</th>
+                                                                                <th class="text-end {{ $gananciaReal > 0 ? 'text-success' : 'text-danger' }}">
+                                                                                    {{ $config->currency_simbol }}.{{ number_format($gananciaReal, 2, '.', ',') }}
+                                                                                </th>
+                                                                            </tr>
+                                                                        </tbody>
+                                                                    </table>
                                                                 </div>
-                                                                <div class="col-md-6 mb-2">
-                                                                    <span class="d-block text-muted small">Comisión para Trabajador</span>
-                                                                    <span class="badge bg-info">{{ $articulo->tipoComisionTrabajador->nombre }} ({{ number_format($comisionTrabajador, 2) }}%)</span>
+
+                                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                                    <span>Margen Real:</span>
+                                                                    <span class="badge fs-6 {{ $margenClass }}">{{ number_format($margen, 2) }}%</span>
+                                                                </div>
+                                                                <div class="progress" style="height: 10px;">
+                                                                    <div class="progress-bar {{ $margenClass }}" role="progressbar" style="width: {{ min($margen, 100) }}%"></div>
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                    </div>
+
+                                                        <div class="card">
+                                                            <div class="card-body">
+                                                                <h6 class="mb-3">Información de Comisiones</h6>
+                                                                <div class="row">
+                                                                    <div class="col-md-6 mb-2">
+                                                                        <span class="d-block text-muted small">Comisión para Vendedor</span>
+                                                                        <span class="badge bg-info">{{ $articulo->tipoComisionVendedor->nombre }} ({{ number_format($comisionVendedor, 2) }}%)</span>
+                                                                    </div>
+                                                                    <div class="col-md-6 mb-2">
+                                                                        <span class="d-block text-muted small">Comisión para Trabajador</span>
+                                                                        <span class="badge bg-info">{{ $articulo->tipoComisionTrabajador->nombre }} ({{ number_format($comisionTrabajador, 2) }}%)</span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    @endif
                                                 </div>
                                             </div>
                                         </div>
@@ -464,41 +473,43 @@
                                                             </tr>
                                                         @endforelse
                                                     </tbody>
-                                                    <tfoot class="table-group-divider">
-                                                        <tr class="table-light">
-                                                            <th colspan="3" class="text-end">Total Costo:</th>
-                                                            <th class="text-end">{{ $config->currency_simbol }}.{{ number_format($totalCosto, 2, '.', ',') }}</th>
-                                                        </tr>
-                                                        <tr class="table-light">
-                                                            <th colspan="3" class="text-end">Precio de Venta:</th>
-                                                            <th class="text-end text-success">{{ $config->currency_simbol }}.{{ number_format($articulo->precio_venta, 2, '.', ',') }}</th>
-                                                        </tr>
-                                                        <tr class="table-secondary">
-                                                            <th colspan="3" class="text-end">Comisión Vendedor ({{ number_format($comisionVendedor, 2) }}%):</th>
-                                                            <th class="text-end text-danger">- {{ $config->currency_simbol }}.{{ number_format($valorComisionVendedor, 2, '.', ',') }}</th>
-                                                        </tr>
-                                                        <tr class="table-secondary">
-                                                            <th colspan="3" class="text-end">Comisión Trabajador ({{ number_format($comisionTrabajador, 2) }}%):</th>
-                                                            <th class="text-end text-danger">- {{ $config->currency_simbol }}.{{ number_format($valorComisionTrabajador, 2, '.', ',') }}</th>
-                                                        </tr>
-                                                        <tr class="table-secondary">
-                                                            <th colspan="3" class="text-end">Impuesto ({{ number_format($impuesto, 2) }}%):</th>
-                                                            <th class="text-end text-danger">- {{ $config->currency_simbol }}.{{ number_format($valorImpuesto, 2, '.', ',') }}</th>
-                                                        </tr>
-                                                        @php
-                                                            $gananciaReal = $articulo->precio_venta - $totalCosto - $valorComisionVendedor - $valorComisionTrabajador - $valorImpuesto;
-                                                            $porcentajeGananciaReal = $totalCosto > 0 ? (($gananciaReal / $totalCosto) * 100) : 0;
-                                                        @endphp
-                                                        <tr class="table-active">
-                                                            <th colspan="3" class="text-end">Ganancia Real:</th>
-                                                            <th class="text-end {{ $gananciaReal > 0 ? 'text-success' : 'text-danger' }}">
-                                                                {{ $config->currency_simbol }}.{{ number_format($gananciaReal, 2, '.', ',') }}
-                                                                @if($totalCosto > 0)
-                                                                    ({{ number_format($porcentajeGananciaReal, 2) }}%)
-                                                                @endif
-                                                            </th>
-                                                        </tr>
-                                                    </tfoot>
+                                                    @if (Auth::user()->role_as != 1)
+                                                        <tfoot class="table-group-divider">
+                                                            <tr class="table-light">
+                                                                <th colspan="3" class="text-end">Total Costo:</th>
+                                                                <th class="text-end">{{ $config->currency_simbol }}.{{ number_format($totalCosto, 2, '.', ',') }}</th>
+                                                            </tr>
+                                                            <tr class="table-light">
+                                                                <th colspan="3" class="text-end">Precio de Venta:</th>
+                                                                <th class="text-end text-success">{{ $config->currency_simbol }}.{{ number_format($articulo->precio_venta, 2, '.', ',') }}</th>
+                                                            </tr>
+                                                            <tr class="table-secondary">
+                                                                <th colspan="3" class="text-end">Comisión Vendedor ({{ number_format($comisionVendedor, 2) }}%):</th>
+                                                                <th class="text-end text-danger">- {{ $config->currency_simbol }}.{{ number_format($valorComisionVendedor, 2, '.', ',') }}</th>
+                                                            </tr>
+                                                            <tr class="table-secondary">
+                                                                <th colspan="3" class="text-end">Comisión Trabajador ({{ number_format($comisionTrabajador, 2) }}%):</th>
+                                                                <th class="text-end text-danger">- {{ $config->currency_simbol }}.{{ number_format($valorComisionTrabajador, 2, '.', ',') }}</th>
+                                                            </tr>
+                                                            <tr class="table-secondary">
+                                                                <th colspan="3" class="text-end">Impuesto ({{ number_format($impuesto, 2) }}%):</th>
+                                                                <th class="text-end text-danger">- {{ $config->currency_simbol }}.{{ number_format($valorImpuesto, 2, '.', ',') }}</th>
+                                                            </tr>
+                                                            @php
+                                                                $gananciaReal = $articulo->precio_venta - $totalCosto - $valorComisionVendedor - $valorComisionTrabajador - $valorImpuesto;
+                                                                $porcentajeGananciaReal = $totalCosto > 0 ? (($gananciaReal / $totalCosto) * 100) : 0;
+                                                            @endphp
+                                                            <tr class="table-active">
+                                                                <th colspan="3" class="text-end">Ganancia Real:</th>
+                                                                <th class="text-end {{ $gananciaReal > 0 ? 'text-success' : 'text-danger' }}">
+                                                                    {{ $config->currency_simbol }}.{{ number_format($gananciaReal, 2, '.', ',') }}
+                                                                    @if($totalCosto > 0)
+                                                                        ({{ number_format($porcentajeGananciaReal, 2) }}%)
+                                                                    @endif
+                                                                </th>
+                                                            </tr>
+                                                        </tfoot>
+                                                    @endif
                                                 </table>
                                             </div>
                                         </div>
