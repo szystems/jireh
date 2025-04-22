@@ -27,8 +27,6 @@ class ArticuloSeeder extends Seeder
                 'stock_minimo' => rand(1, 10),
                 'categoria_id' => 1, // Asegúrate de tener una categoría con ID 1
                 'unidad_id' => 1, // Asegúrate de tener una unidad con ID 1
-                'tipo_comision_vendedor_id' => 1, // Asegúrate de tener un tipo de comisión con ID 1
-                'tipo_comision_trabajador_id' => 1, // Asegúrate de tener un tipo de comisión con ID 1
                 'tipo' => 'articulo',
                 'estado' => true,
             ]);

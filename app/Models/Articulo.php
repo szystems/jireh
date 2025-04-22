@@ -21,8 +21,6 @@ class Articulo extends Model
         'stock_minimo',
         'categoria_id',
         'unidad_id',
-        'tipo_comision_vendedor_id',
-        'tipo_comision_trabajador_id',
         'tipo',
         'estado',
     ];
@@ -37,19 +35,11 @@ class Articulo extends Model
         return $this->belongsTo(Unidad::class);
     }
 
-    public function tipoComisionVendedor()
-    {
-        return $this->belongsTo(TipoComision::class, 'tipo_comision_vendedor_id');
-    }
-
-    public function tipoComisionTrabajador()
-    {
-        return $this->belongsTo(TipoComision::class, 'tipo_comision_trabajador_id');
-    }
-
     public function articulos()
     {
-        return $this->belongsToMany(Articulo::class, 'servicio_articulo', 'servicio_id', 'articulo_id')->withPivot('cantidad');
+        return $this->belongsToMany(Articulo::class, 'servicio_articulo', 'servicio_id', 'articulo_id')
+                    ->withPivot('cantidad')
+                    ->withTimestamps();
     }
 
     public function detalleVentas()

@@ -20,8 +20,6 @@ class DetalleVenta extends Model
         'usuario_id',
         'sub_total',
         'porcentaje_impuestos',
-        'tipo_comision_trabajador_id',
-        'tipo_comision_usuario_id'
     ];
 
     public function venta()

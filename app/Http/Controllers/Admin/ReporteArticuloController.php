@@ -8,13 +8,12 @@ use App\Models\DetalleVenta;
 use App\Models\Articulo;
 use App\Models\Categoria;
 use App\Models\Venta;
-use App\Models\Trabajador;
 use App\Models\User;
 use App\Models\Config;
-use App\Models\Cliente; // Añadir importación de Cliente
+use App\Models\Cliente;
 use PDF;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB; // Corregido: "." cambiado a "\"
+use Illuminate\Support\Facades\DB;
 
 class ReporteArticuloController extends Controller
 {
@@ -27,7 +26,6 @@ class ReporteArticuloController extends Controller
                 'articulo.unidad',
                 'venta.cliente',
                 'venta.usuario',
-                'trabajador',
                 'usuario',
                 'descuento'
             ])
@@ -56,11 +54,6 @@ class ReporteArticuloController extends Controller
         // Filtro por categoría de artículo
         if ($request->filled('categoria')) {
             $query->where('articulos.categoria_id', $request->categoria);
-        }
-
-        // Filtro por trabajador (comisiones)
-        if ($request->filled('trabajador')) {
-            $query->where('detalle_ventas.trabajador_id', $request->trabajador);
         }
 
         // Filtro por usuario/vendedor
@@ -101,10 +94,9 @@ class ReporteArticuloController extends Controller
         // Cargar datos para los filtros
         $articulos = Articulo::orderBy('nombre')->get();
         $categorias = Categoria::orderBy('nombre')->get();
-        $trabajadores = Trabajador::where('estado', 'activo')->orderBy('nombre')->get();
         $usuarios = User::orderBy('name')->get();
         $config = Config::first();
-        $clientes = Cliente::orderBy('nombre')->get(); // Añadir carga de clientes
+        $clientes = Cliente::orderBy('nombre')->get();
 
         // Calcular estadísticas
         $totalArticulosVendidos = $detallesVenta->sum('cantidad');
@@ -147,50 +139,6 @@ class ReporteArticuloController extends Controller
 
             // Calcular impuesto usando el porcentaje específico de este detalle
             return $subtotalConDescuento * ($detalle->porcentaje_impuestos ?? 0) / 100;
-        });
-
-        $totalComisionesTrabajador = $detallesVenta->sum(function ($detalle) {
-            $precioUnitario = $detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad);
-            $subtotalSinDescuento = $precioUnitario * $detalle->cantidad;
-
-            $montoDescuento = 0;
-            if ($detalle->descuento_id && $detalle->descuento) {
-                $montoDescuento = $subtotalSinDescuento * ($detalle->descuento->porcentaje_descuento / 100);
-            }
-
-            $subtotalConDescuento = $subtotalSinDescuento - $montoDescuento;
-            $comision = 0;
-
-            if ($detalle->tipo_comision_trabajador_id) {
-                $tipoComision = \App\Models\TipoComision::find($detalle->tipo_comision_trabajador_id);
-                if ($tipoComision) {
-                    $comision = $subtotalConDescuento * ($tipoComision->porcentaje / 100);
-                }
-            }
-
-            return $comision;
-        });
-
-        $totalComisionesVendedor = $detallesVenta->sum(function ($detalle) {
-            $precioUnitario = $detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad);
-            $subtotalSinDescuento = $precioUnitario * $detalle->cantidad;
-
-            $montoDescuento = 0;
-            if ($detalle->descuento_id && $detalle->descuento) {
-                $montoDescuento = $subtotalSinDescuento * ($detalle->descuento->porcentaje_descuento / 100);
-            }
-
-            $subtotalConDescuento = $subtotalSinDescuento - $montoDescuento;
-            $comision = 0;
-
-            if ($detalle->tipo_comision_usuario_id) {
-                $tipoComision = \App\Models\TipoComision::find($detalle->tipo_comision_usuario_id);
-                if ($tipoComision) {
-                    $comision = $subtotalConDescuento * ($tipoComision->porcentaje / 100);
-                }
-            }
-
-            return $comision;
         });
 
         $totalCostos = $detallesVenta->sum(function ($detalle) {
@@ -254,20 +202,17 @@ class ReporteArticuloController extends Controller
             'detallesVenta',
             'articulos',
             'categorias',
-            'trabajadores',
             'usuarios',
             'config',
             'totalArticulosVendidos',
             'totalVentas',
             'totalDescuentos',
-            'totalComisionesTrabajador',
-            'totalComisionesVendedor',
             'totalCostos',
             'totalImpuestos',
             'topArticulos',
             'ventasPorCategoria',
             'request',
-            'clientes' // Esta variable es necesaria para el filtro de clientes en search.blade.php
+            'clientes'
         ));
     }
 
@@ -280,7 +225,6 @@ class ReporteArticuloController extends Controller
                 'articulo.unidad',
                 'venta.cliente',
                 'venta.usuario',
-                'trabajador',
                 'usuario',
                 'descuento'
             ])
@@ -306,10 +250,6 @@ class ReporteArticuloController extends Controller
 
         if ($request->filled('categoria')) {
             $query->where('articulos.categoria_id', $request->categoria);
-        }
-
-        if ($request->filled('trabajador')) {
-            $query->where('detalle_ventas.trabajador_id', $request->trabajador);
         }
 
         if ($request->filled('usuario')) {
@@ -341,8 +281,7 @@ class ReporteArticuloController extends Controller
         $detallesVenta = $query->get();
         $config = Config::first();
 
-        // Agregar importación de Cliente igual que en el método index
-        $clientes = Cliente::all(); // Añadir esta línea
+        $clientes = Cliente::all();
 
         // Preparar filtros para mostrar en el PDF
         $filtros = [
@@ -350,11 +289,10 @@ class ReporteArticuloController extends Controller
             'fecha_hasta' => $request->input('fecha_hasta', Carbon::now()->format('Y-m-d')),
             'articulo' => $request->filled('articulo') ? Articulo::find($request->articulo)->nombre : null,
             'categoria' => $request->filled('categoria') ? Categoria::find($request->categoria)->nombre : null,
-            'trabajador' => $request->filled('trabajador') ? Trabajador::find($request->trabajador)->nombre : null,
             'usuario' => $request->filled('usuario') ? User::find($request->usuario)->name : null,
             'estado' => $request->filled('estado') ? ($request->estado == '1' ? 'Activa' : 'Cancelada') : 'Activa',
             'tipo_venta' => $request->input('tipo_venta'),
-            'cliente' => $request->filled('cliente') ? $clientes->find($request->cliente)->nombre ?? 'No encontrado' : null, // Actualizado
+            'cliente' => $request->filled('cliente') ? $clientes->find($request->cliente)->nombre ?? 'No encontrado' : null,
             'codigo' => $request->input('codigo'),
         ];
 
@@ -384,50 +322,6 @@ class ReporteArticuloController extends Controller
             return $montoDescuento;
         });
 
-        $totalComisionesTrabajador = $detallesVenta->sum(function ($detalle) {
-            $precioUnitario = $detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad);
-            $subtotalSinDescuento = $precioUnitario * $detalle->cantidad;
-
-            $montoDescuento = 0;
-            if ($detalle->descuento_id && $detalle->descuento) {
-                $montoDescuento = $subtotalSinDescuento * ($detalle->descuento->porcentaje_descuento / 100);
-            }
-
-            $subtotalConDescuento = $subtotalSinDescuento - $montoDescuento;
-            $comision = 0;
-
-            if ($detalle->tipo_comision_trabajador_id) {
-                $tipoComision = \App\Models\TipoComision::find($detalle->tipo_comision_trabajador_id);
-                if ($tipoComision) {
-                    $comision = $subtotalConDescuento * ($tipoComision->porcentaje / 100);
-                }
-            }
-
-            return $comision;
-        });
-
-        $totalComisionesVendedor = $detallesVenta->sum(function ($detalle) {
-            $precioUnitario = $detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad);
-            $subtotalSinDescuento = $precioUnitario * $detalle->cantidad;
-
-            $montoDescuento = 0;
-            if ($detalle->descuento_id && $detalle->descuento) {
-                $montoDescuento = $subtotalSinDescuento * ($detalle->descuento->porcentaje_descuento / 100);
-            }
-
-            $subtotalConDescuento = $subtotalSinDescuento - $montoDescuento;
-            $comision = 0;
-
-            if ($detalle->tipo_comision_usuario_id) {
-                $tipoComision = \App\Models\TipoComision::find($detalle->tipo_comision_usuario_id);
-                if ($tipoComision) {
-                    $comision = $subtotalConDescuento * ($tipoComision->porcentaje / 100);
-                }
-            }
-
-            return $comision;
-        });
-
         $totalCostos = $detallesVenta->sum(function ($detalle) {
             return $detalle->precio_costo * $detalle->cantidad;
         });
@@ -454,8 +348,6 @@ class ReporteArticuloController extends Controller
             'totalArticulosVendidos',
             'totalVentas',
             'totalDescuentos',
-            'totalComisionesTrabajador',
-            'totalComisionesVendedor',
             'totalCostos'
         );
 

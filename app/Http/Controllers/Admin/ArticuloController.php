@@ -7,7 +7,6 @@ use App\Http\Requests\ArticuloFormRequest;
 use App\Models\Articulo;
 use App\Models\Categoria;
 use App\Models\Unidad;
-use App\Models\TipoComision;
 use Illuminate\Http\Request;
 use App\Models\Config;
 use Illuminate\Support\Str; // Añadir esta importación
@@ -165,9 +164,8 @@ class ArticuloController extends Controller
         $categorias = Categoria::where('estado', 1)->get();
         $articulos = Articulo::where('estado', 1)->get();
         $unidades = Unidad::where('estado', 1)->get();
-        $tipoComisiones = TipoComision::where('estado', 1)->get();
         $config = Config::first();
-        return view('admin.articulo.add', compact('articulos','categorias', 'unidades', 'tipoComisiones', 'config'));
+        return view('admin.articulo.add', compact('articulos','categorias', 'unidades', 'config'));
     }
 
     /**
@@ -200,8 +198,6 @@ class ArticuloController extends Controller
             'stock_minimo' => 'required|numeric|min:0',
             'categoria_id' => 'required|exists:categorias,id',
             'unidad_id' => 'required|exists:unidads,id',
-            'tipo_comision_vendedor_id' => 'required|exists:tipo_comisions,id',
-            'tipo_comision_trabajador_id' => 'required|exists:tipo_comisions,id',
             'tipo' => 'required|in:articulo,servicio',
             'estado' => 'boolean',
             'cantidades.*' => 'required|numeric|min:0',
@@ -245,9 +241,32 @@ class ArticuloController extends Controller
     // }
     public function show($id)
     {
-        $articulo = Articulo::find($id);
-        $config = Config::first();
-        return view('admin.articulo.show', compact('articulo', 'config'));
+        try {
+            // Cargamos el artículo con todas las relaciones necesarias de manera explícita
+            $articulo = Articulo::with([
+                'categoria',
+                'unidad',
+                'articulos.categoria',
+                'articulos.unidad'
+            ])->findOrFail($id);
+
+            $config = Config::first();
+
+            // Depuración avanzada
+            if ($articulo->tipo == 'servicio') {
+                \Log::info('Servicio encontrado: ' . $articulo->id . ' - ' . $articulo->nombre);
+                \Log::info('Cantidad de componentes: ' . count($articulo->articulos));
+
+                foreach($articulo->articulos as $componente) {
+                    \Log::info('Componente: ' . $componente->id . ' - ' . $componente->nombre . ', Cantidad: ' . $componente->pivot->cantidad);
+                }
+            }
+
+            return view('admin.articulo.show', compact('articulo', 'config'));
+        } catch (\Exception $e) {
+            \Log::error('Error al mostrar artículo: ' . $e->getMessage());
+            return redirect('articulos')->with('error', 'Error al mostrar el artículo: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -263,10 +282,9 @@ class ArticuloController extends Controller
         $categorias = Categoria::where('estado', 1)->get();
         $unidades = Unidad::where('estado', 1)->get();
         $todosArticulos = Articulo::where('tipo', 'articulo')->get(); // Obtener todos los artículos que no son servicios
-        $tipoComisiones = TipoComision::where('estado', 1)->get();
         $config = Config::first();
 
-        return view('admin.articulo.edit', compact('articulo', 'categorias', 'unidades', 'todosArticulos', 'tipoComisiones', 'config'));
+        return view('admin.articulo.edit', compact('articulo', 'categorias', 'unidades', 'todosArticulos', 'config'));
     }
 
     public function update(Request $request, $id)
@@ -491,7 +509,7 @@ class ArticuloController extends Controller
      */
     public function exportPdfSingle($id)
     {
-        $articulo = Articulo::with(['categoria', 'unidad', 'tipoComisionVendedor', 'tipoComisionTrabajador', 'articulos.categoria', 'articulos.unidad'])
+        $articulo = Articulo::with(['categoria', 'unidad', 'articulos.categoria', 'articulos.unidad'])
             ->findOrFail($id);
         $config = Config::first();
 
@@ -511,24 +529,15 @@ class ArticuloController extends Controller
             $data['totalCosto'] = $totalCosto;
         }
 
-        // Cálculo de comisiones e impuestos
-        $comisionVendedor = $articulo->tipoComisionVendedor->porcentaje ?? 0;
-        $comisionTrabajador = $articulo->tipoComisionTrabajador->porcentaje ?? 0;
+        // Cálculo de impuestos
         $impuesto = $config->impuesto ?? 0;
-
-        $valorComisionVendedor = $articulo->precio_venta * ($comisionVendedor / 100);
-        $valorComisionTrabajador = $articulo->precio_venta * ($comisionTrabajador / 100);
         $valorImpuesto = $articulo->precio_venta * ($impuesto / 100);
 
         $ganancia = $articulo->precio_venta - $articulo->precio_compra;
-        $gananciaReal = $ganancia - $valorComisionVendedor - $valorComisionTrabajador - $valorImpuesto;
+        $gananciaReal = $ganancia - $valorImpuesto;
         $margen = $articulo->precio_compra > 0 ? (($gananciaReal) / $articulo->precio_compra) * 100 : 0;
 
-        $data['comisionVendedor'] = $comisionVendedor;
-        $data['comisionTrabajador'] = $comisionTrabajador;
         $data['impuesto'] = $impuesto;
-        $data['valorComisionVendedor'] = $valorComisionVendedor;
-        $data['valorComisionTrabajador'] = $valorComisionTrabajador;
         $data['valorImpuesto'] = $valorImpuesto;
         $data['gananciaReal'] = $gananciaReal;
         $data['margen'] = $margen;

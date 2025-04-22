@@ -133,7 +133,7 @@
                                     <!-- Pestaña de Precios y Stock -->
                                     <div class="tab-pane fade" id="precios-tab-pane" role="tabpanel" aria-labelledby="precios-tab" tabindex="0">
                                         <div class="row gx-3">
-                                            <!-- Precios y comisiones -->
+                                            <!-- Precios -->
                                             <div class="col-md-6">
                                                 <div class="card mb-3">
                                                     <div class="card-header bg-light">
@@ -167,7 +167,7 @@
 
                                                         <!-- Tabla de margen de ganancia detallada -->
                                                         <div id="margen-detalle" class="alert alert-info mb-3">
-                                                            <h6 class="mb-3">Margen de Ganancia (incluyendo comisiones e impuestos)</h6>
+                                                            <h6 class="mb-3">Margen de Ganancia</h6>
                                                             <div class="table-responsive mb-3">
                                                                 <table class="table table-sm table-bordered">
                                                                     <tbody>
@@ -179,15 +179,7 @@
                                                                             <td>Precio de Compra</td>
                                                                             <td class="text-end text-danger" id="td-precio-compra">- {{ $config->currency_simbol ?? '$' }}.0.00</td>
                                                                         </tr>
-                                                                        <tr>
-                                                                            <td id="td-label-comision-vendedor">Comisión Vendedor (0.00%)</td>
-                                                                            <td class="text-end text-danger" id="td-comision-vendedor">- $0.00</td>
-                                                                        </tr>
-                                                                        <tr>
-                                                                            <td id="td-label-comision-trabajador">Comisión Trabajador (0.00%)</td>
-                                                                            <td class="text-end text-danger" id="td-comision-trabajador">- $0.00</td>
-                                                                        </tr>
-                                                                        <tr>
+                                                                        <tr id="tr-impuesto">
                                                                             <td id="td-label-impuesto">Impuesto ({{ number_format($config->impuesto ?? 0, 2) }}%)</td>
                                                                             <td class="text-end text-danger" id="td-impuesto">- $0.00</td>
                                                                         </tr>
@@ -206,45 +198,6 @@
                                                             <div class="progress" style="height: 10px;">
                                                                 <div class="progress-bar" id="margen-barra" role="progressbar" style="width: 0%"></div>
                                                             </div>
-                                                        </div>
-
-                                                        <div class="mb-3">
-                                                            <label for="tipo_comision_vendedor_id" class="form-label">Comisión para Vendedor</label>
-                                                            <div class="input-group">
-                                                                <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
-                                                                <select class="form-select" id="tipo_comision_vendedor_id" name="tipo_comision_vendedor_id" required onchange="calcularMargen()">
-                                                                    <option value="">Seleccione</option>
-                                                                    @foreach($tipoComisiones as $tipoComision)
-                                                                        <option value="{{ $tipoComision->id }}" data-porcentaje="{{ $tipoComision->porcentaje }}" {{ old('tipo_comision_vendedor_id') == $tipoComision->id ? 'selected' : '' }}>
-                                                                            {{ $tipoComision->nombre }} ({{ number_format($tipoComision->porcentaje, 2) }}%)
-                                                                        </option>
-                                                                    @endforeach
-                                                                </select>
-                                                            </div>
-                                                            @if ($errors->has('tipo_comision_vendedor_id'))
-                                                                <div class="invalid-feedback d-block">
-                                                                    <strong>{{ $errors->first('tipo_comision_vendedor_id') }}</strong>
-                                                                </div>
-                                                            @endif
-                                                        </div>
-                                                        <div class="mb-0">
-                                                            <label for="tipo_comision_trabajador_id" class="form-label">Comisión para Trabajador</label>
-                                                            <div class="input-group">
-                                                                <span class="input-group-text"><i class="bi bi-person-gear"></i></span>
-                                                                <select class="form-select" id="tipo_comision_trabajador_id" name="tipo_comision_trabajador_id" required onchange="calcularMargen()">
-                                                                    <option value="">Seleccione</option>
-                                                                    @foreach($tipoComisiones as $tipoComision)
-                                                                        <option value="{{ $tipoComision->id }}" data-porcentaje="{{ $tipoComision->porcentaje }}" {{ old('tipo_comision_trabajador_id') == $tipoComision->id ? 'selected' : '' }}>
-                                                                            {{ $tipoComision->nombre }} ({{ number_format($tipoComision->porcentaje, 2) }}%)
-                                                                        </option>
-                                                                    @endforeach
-                                                                </select>
-                                                            </div>
-                                                            @if ($errors->has('tipo_comision_trabajador_id'))
-                                                                <div class="invalid-feedback d-block">
-                                                                    <strong>{{ $errors->first('tipo_comision_trabajador_id') }}</strong>
-                                                                </div>
-                                                            @endif
                                                         </div>
 
                                                         <!-- Información de Impuesto -->
@@ -729,6 +682,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         costoTotalElement.value = costoTotal.toFixed(2);
+
         // Si es servicio, sugerir precio de venta basado en los costos
         if (tipoSelect.value === 'servicio') {
             const sugerido = costoTotal * 1.3; // 30% de ganancia
@@ -737,7 +691,6 @@ document.addEventListener('DOMContentLoaded', function () {
             if (parseFloat(precioVentaInput.value) == 0 || parseFloat(precioVentaInput.value) < costoTotal) {
                 precioVentaInput.value = sugerido.toFixed(2);
             }
-
             calcularMargen();
         }
     }
@@ -780,7 +733,6 @@ document.addEventListener('DOMContentLoaded', function () {
             input.setAttribute('step', '1');
             input.setAttribute('min', '1');
             input.value = Math.floor(parseFloat(input.value) || 1);
-
             // Agregar evento para validar enteros
             input.addEventListener('input', soloPermitirEnteros);
         } else {
@@ -801,41 +753,17 @@ function calcularMargen() {
     const impuestoPorcentaje = parseFloat(document.getElementById('impuesto_porcentaje').value) || 0;
     const simboloMoneda = document.getElementById('currency_simbol').value || '$';
 
-    // Obtener porcentajes de comisión
-    const comisionVendedorSelect = document.getElementById('tipo_comision_vendedor_id');
-    const comisionTrabajadorSelect = document.getElementById('tipo_comision_trabajador_id');
-
-    let comisionVendedorPorcentaje = 0;
-    let comisionTrabajadorPorcentaje = 0;
-
-    // Verificar si hay opciones seleccionadas
-    if (comisionVendedorSelect.selectedIndex > 0) {
-        comisionVendedorPorcentaje = parseFloat(comisionVendedorSelect.options[comisionVendedorSelect.selectedIndex].getAttribute('data-porcentaje')) || 0;
-    }
-
-    if (comisionTrabajadorSelect.selectedIndex > 0) {
-        comisionTrabajadorPorcentaje = parseFloat(comisionTrabajadorSelect.options[comisionTrabajadorSelect.selectedIndex].getAttribute('data-porcentaje')) || 0;
-    }
-
     // Calcular costos adicionales
-    const comisionVendedorValor = precioVenta * (comisionVendedorPorcentaje / 100);
-    const comisionTrabajadorValor = precioVenta * (comisionTrabajadorPorcentaje / 100);
     const impuestoValor = precioVenta * (impuestoPorcentaje / 100);
 
     // Calcular ganancia y margen
     const ganancia = precioVenta - precioCompra;
-    const gananciaReal = ganancia - comisionVendedorValor - comisionTrabajadorValor - impuestoValor;
+    const gananciaReal = ganancia - impuestoValor;
     const margenReal = precioCompra > 0 ? (gananciaReal / precioCompra) * 100 : 0;
 
     // Actualizar etiquetas en la tabla
     document.getElementById('td-precio-venta').textContent = `${simboloMoneda}.${formatNumber(precioVenta)}`;
     document.getElementById('td-precio-compra').textContent = `- ${simboloMoneda}.${formatNumber(precioCompra)}`;
-
-    document.getElementById('td-label-comision-vendedor').textContent = `Comisión Vendedor (${formatNumber(comisionVendedorPorcentaje)}%)`;
-    document.getElementById('td-comision-vendedor').textContent = `- ${simboloMoneda}.${formatNumber(comisionVendedorValor)}`;
-
-    document.getElementById('td-label-comision-trabajador').textContent = `Comisión Trabajador (${formatNumber(comisionTrabajadorPorcentaje)}%)`;
-    document.getElementById('td-comision-trabajador').textContent = `- ${simboloMoneda}.${formatNumber(comisionTrabajadorValor)}`;
 
     document.getElementById('td-label-impuesto').textContent = `Impuesto (${formatNumber(impuestoPorcentaje)}%)`;
     document.getElementById('td-impuesto').textContent = `- ${simboloMoneda}.${formatNumber(impuestoValor)}`;

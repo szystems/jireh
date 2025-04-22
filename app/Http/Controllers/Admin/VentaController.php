@@ -12,7 +12,6 @@ use App\Models\Cliente;
 use App\Models\Vehiculo;
 use App\Models\DetalleVenta;
 use App\Models\Descuento;
-use App\Models\Trabajador;
 use App\Models\Config;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -83,7 +82,6 @@ class VentaController extends Controller
     {
         $config = Config::first();
         $todosArticulos = Articulo::with('unidad')->get();
-        $trabajadores = Trabajador::where('estado', '=', 'activo')->get();
         $clientes = Cliente::all();
         $descuentos = Descuento::where('estado', 1)->get();
 
@@ -99,7 +97,6 @@ class VentaController extends Controller
             'todosArticulos',
             'clientes',
             'config',
-            'trabajadores',
             'descuentos',
             'cliente_id',
             'cliente_seleccionado'
@@ -203,8 +200,7 @@ class VentaController extends Controller
         $clientes = Cliente::all();
         $config = Config::first();
         $descuentos = Descuento::where('estado', 1)->get();
-        $trabajadores = Trabajador::where('estado', '=', 'activo')->get();
-        return view('admin.venta.edit', compact('venta', 'todosArticulos', 'clientes', 'config', 'descuentos', 'trabajadores'));
+        return view('admin.venta.edit', compact('venta', 'todosArticulos', 'clientes', 'config', 'descuentos'));
     }
 
     public function update(VentaEditFormRequest $request, $id)
@@ -325,7 +321,6 @@ class VentaController extends Controller
             'usuario',
             'detalleVentas.articulo.unidad',
             'detalleVentas.descuento',
-            'detalleVentas.trabajador',
             'pagos.usuario'
         ]);
 
@@ -358,7 +353,6 @@ class VentaController extends Controller
         $venta = Venta::with([
             'detalleVentas.articulo.unidad',
             'detalleVentas.descuento',
-            'detalleVentas.trabajador',
             'cliente',
             'vehiculo',
             'usuario',
@@ -439,8 +433,6 @@ class VentaController extends Controller
         $totalVenta = 0;
         $subtotalSinDescuentoTotal = 0;
         $totalImpuestos = 0;
-        $totalComisionTrabajador = 0;
-        $totalComisionVendedor = 0;
         $totalCostoCompra = 0;
         $totalPagado = 0;
 
@@ -468,23 +460,6 @@ class VentaController extends Controller
             $impuestoDetalle = $subtotalConDescuento * ($detalle->porcentaje_impuestos ?? 0) / 100;
             $totalImpuestos += $impuestoDetalle;
 
-            // Comisiones
-            if ($detalle->tipo_comision_trabajador_id) {
-                $tipoComision = \App\Models\TipoComision::find($detalle->tipo_comision_trabajador_id);
-                if ($tipoComision) {
-                    $comisionTrabajador = $subtotalConDescuento * ($tipoComision->porcentaje / 100);
-                    $totalComisionTrabajador += $comisionTrabajador;
-                }
-            }
-
-            if ($detalle->tipo_comision_usuario_id) {
-                $tipoComision = \App\Models\TipoComision::find($detalle->tipo_comision_usuario_id);
-                if ($tipoComision) {
-                    $comisionUsuario = $subtotalConDescuento * ($tipoComision->porcentaje / 100);
-                    $totalComisionVendedor += $comisionUsuario;
-                }
-            }
-
             // Costo de compra
             $costoCompra = $detalle->precio_costo * $detalle->cantidad;
             $totalCostoCompra += $costoCompra;
@@ -496,15 +471,13 @@ class VentaController extends Controller
         }
 
         // Ganancia neta
-        $gananciaNeta = $totalVenta - $totalComisionTrabajador - $totalComisionVendedor - $totalImpuestos - $totalCostoCompra;
+        $gananciaNeta = $totalVenta - $totalImpuestos - $totalCostoCompra;
 
         return compact(
             'totalDescuentos',
             'totalVenta',
             'subtotalSinDescuentoTotal',
             'totalImpuestos',
-            'totalComisionTrabajador',
-            'totalComisionVendedor',
             'totalCostoCompra',
             'totalPagado',
             'gananciaNeta'

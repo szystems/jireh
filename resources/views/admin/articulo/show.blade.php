@@ -230,19 +230,15 @@
                                                         <div class="card mb-3">
                                                             <div class="card-body">
                                                                 @php
-                                                                    // Obtener porcentajes de comisión e impuesto
-                                                                    $comisionVendedor = $articulo->tipoComisionVendedor->porcentaje ?? 0;
-                                                                    $comisionTrabajador = $articulo->tipoComisionTrabajador->porcentaje ?? 0;
+                                                                    // Obtener impuesto
                                                                     $impuesto = $config->impuesto ?? 0;
 
                                                                     // Cálculo de costos adicionales
-                                                                    $valorComisionVendedor = $articulo->precio_venta * ($comisionVendedor / 100);
-                                                                    $valorComisionTrabajador = $articulo->precio_venta * ($comisionTrabajador / 100);
                                                                     $valorImpuesto = $articulo->precio_venta * ($impuesto / 100);
 
                                                                     // Cálculo del margen real
                                                                     $ganancia = $articulo->precio_venta - $articulo->precio_compra;
-                                                                    $gananciaReal = $ganancia - $valorComisionVendedor - $valorComisionTrabajador - $valorImpuesto;
+                                                                    $gananciaReal = $ganancia - $valorImpuesto;
 
                                                                     $margen = $articulo->precio_compra > 0 ?
                                                                         (($gananciaReal) / $articulo->precio_compra) * 100 : 0;
@@ -255,7 +251,7 @@
                                                                     }
                                                                 @endphp
 
-                                                                <h6 class="mb-3">Margen de Ganancia (incluyendo comisiones e impuestos)</h6>
+                                                                <h6 class="mb-3">Margen de Ganancia</h6>
                                                                 <div class="table-responsive mb-3">
                                                                     <table class="table table-sm table-bordered">
                                                                         <tbody>
@@ -266,14 +262,6 @@
                                                                             <tr>
                                                                                 <td>Precio de Compra</td>
                                                                                 <td class="text-end text-danger">- {{ $config->currency_simbol }}.{{ number_format($articulo->precio_compra, 2, '.', ',') }}</td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <td>Comisión Vendedor ({{ number_format($comisionVendedor, 2) }}%)</td>
-                                                                                <td class="text-end text-danger">- {{ $config->currency_simbol }}.{{ number_format($valorComisionVendedor, 2, '.', ',') }}</td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <td>Comisión Trabajador ({{ number_format($comisionTrabajador, 2) }}%)</td>
-                                                                                <td class="text-end text-danger">- {{ $config->currency_simbol }}.{{ number_format($valorComisionTrabajador, 2, '.', ',') }}</td>
                                                                             </tr>
                                                                             <tr>
                                                                                 <td>Impuesto ({{ number_format($impuesto, 2) }}%)</td>
@@ -295,22 +283,6 @@
                                                                 </div>
                                                                 <div class="progress" style="height: 10px;">
                                                                     <div class="progress-bar {{ $margenClass }}" role="progressbar" style="width: {{ min($margen, 100) }}%"></div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-
-                                                        <div class="card">
-                                                            <div class="card-body">
-                                                                <h6 class="mb-3">Información de Comisiones</h6>
-                                                                <div class="row">
-                                                                    <div class="col-md-6 mb-2">
-                                                                        <span class="d-block text-muted small">Comisión para Vendedor</span>
-                                                                        <span class="badge bg-info">{{ $articulo->tipoComisionVendedor->nombre }} ({{ number_format($comisionVendedor, 2) }}%)</span>
-                                                                    </div>
-                                                                    <div class="col-md-6 mb-2">
-                                                                        <span class="d-block text-muted small">Comisión para Trabajador</span>
-                                                                        <span class="badge bg-info">{{ $articulo->tipoComisionTrabajador->nombre }} ({{ number_format($comisionTrabajador, 2) }}%)</span>
-                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -406,19 +378,20 @@
                                     @php
                                         $totalCosto = 0;
 
-                                        // Reutilizamos las variables de comisiones e impuestos definidas en la otra pestaña
-                                        $comisionVendedor = $articulo->tipoComisionVendedor->porcentaje ?? 0;
-                                        $comisionTrabajador = $articulo->tipoComisionTrabajador->porcentaje ?? 0;
+                                        // Reutilizamos la variable de impuesto definida anteriormente
                                         $impuesto = $config->impuesto ?? 0;
-
-                                        $valorComisionVendedor = $articulo->precio_venta * ($comisionVendedor / 100);
-                                        $valorComisionTrabajador = $articulo->precio_venta * ($comisionTrabajador / 100);
                                         $valorImpuesto = $articulo->precio_venta * ($impuesto / 100);
+
+                                        // Verificar si hay componentes y depuración
+                                        $tieneComponentes = $articulo->articulos && $articulo->articulos->count() > 0;
                                     @endphp
 
                                     <div class="card">
-                                        <div class="card-header bg-light">
+                                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
                                             <h6 class="mb-0"><i class="bi bi-list-check"></i> Artículos que componen el servicio</h6>
+                                            <span class="badge bg-{{ $tieneComponentes ? 'primary' : 'warning' }}">
+                                                {{ $tieneComponentes ? $articulo->articulos->count() : '0' }} componentes
+                                            </span>
                                         </div>
                                         <div class="card-body">
                                             <div class="table-responsive">
@@ -473,7 +446,7 @@
                                                             </tr>
                                                         @endforelse
                                                     </tbody>
-                                                    @if (Auth::user()->role_as != 1)
+                                                    @if ($tieneComponentes && Auth::user()->role_as != 1)
                                                         <tfoot class="table-group-divider">
                                                             <tr class="table-light">
                                                                 <th colspan="3" class="text-end">Total Costo:</th>
@@ -484,19 +457,11 @@
                                                                 <th class="text-end text-success">{{ $config->currency_simbol }}.{{ number_format($articulo->precio_venta, 2, '.', ',') }}</th>
                                                             </tr>
                                                             <tr class="table-secondary">
-                                                                <th colspan="3" class="text-end">Comisión Vendedor ({{ number_format($comisionVendedor, 2) }}%):</th>
-                                                                <th class="text-end text-danger">- {{ $config->currency_simbol }}.{{ number_format($valorComisionVendedor, 2, '.', ',') }}</th>
-                                                            </tr>
-                                                            <tr class="table-secondary">
-                                                                <th colspan="3" class="text-end">Comisión Trabajador ({{ number_format($comisionTrabajador, 2) }}%):</th>
-                                                                <th class="text-end text-danger">- {{ $config->currency_simbol }}.{{ number_format($valorComisionTrabajador, 2, '.', ',') }}</th>
-                                                            </tr>
-                                                            <tr class="table-secondary">
                                                                 <th colspan="3" class="text-end">Impuesto ({{ number_format($impuesto, 2) }}%):</th>
                                                                 <th class="text-end text-danger">- {{ $config->currency_simbol }}.{{ number_format($valorImpuesto, 2, '.', ',') }}</th>
                                                             </tr>
                                                             @php
-                                                                $gananciaReal = $articulo->precio_venta - $totalCosto - $valorComisionVendedor - $valorComisionTrabajador - $valorImpuesto;
+                                                                $gananciaReal = $articulo->precio_venta - $totalCosto - $valorImpuesto;
                                                                 $porcentajeGananciaReal = $totalCosto > 0 ? (($gananciaReal / $totalCosto) * 100) : 0;
                                                             @endphp
                                                             <tr class="table-active">

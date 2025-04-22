@@ -139,10 +139,6 @@
                                             <th>Precio Costo</th>
                                             <th>Descuento</th>
                                             <th class="text-end">Impuestos</th>
-                                            @if (Auth::user()->role_as != 1)
-                                                <th class="text-end">Com. Trab.</th>
-                                                <th class="text-end">Com. Vend.</th>
-                                            @endif
                                             <th class="text-end">Subtotal</th>
                                         </tr>
                                     </thead>
@@ -152,8 +148,6 @@
                                             $totalVenta = 0;
                                             $subtotalSinDescuentoTotal = 0;
                                             $totalImpuestos = 0;
-                                            $totalComisionTrabajador = 0;
-                                            $totalComisionVendedor = 0;
                                             $totalCostoCompra = 0;
                                         @endphp
                                         @foreach($venta->detalleVentas as $detalle)
@@ -182,30 +176,6 @@
                                                 // Calcular impuesto
                                                 $impuestoDetalle = $subtotalConDescuento * ($detalle->porcentaje_impuestos ?? 0) / 100;
                                                 $totalImpuestos += $impuestoDetalle;
-
-                                                // Calcular comisión del trabajador
-                                                $comisionTrabajador = 0;
-                                                $porcentajeComisionTrabajador = 0;
-                                                if ($detalle->tipo_comision_trabajador_id) {
-                                                    $tipoComisionTrabajador = \App\Models\TipoComision::find($detalle->tipo_comision_trabajador_id);
-                                                    if ($tipoComisionTrabajador) {
-                                                        $porcentajeComisionTrabajador = $tipoComisionTrabajador->porcentaje;
-                                                        $comisionTrabajador = $subtotalConDescuento * ($porcentajeComisionTrabajador / 100);
-                                                        $totalComisionTrabajador += $comisionTrabajador;
-                                                    }
-                                                }
-
-                                                // Calcular comisión del usuario (vendedor)
-                                                $comisionUsuario = 0;
-                                                $porcentajeComisionUsuario = 0;
-                                                if ($detalle->tipo_comision_usuario_id) {
-                                                    $tipoComisionUsuario = \App\Models\TipoComision::find($detalle->tipo_comision_usuario_id);
-                                                    if ($tipoComisionUsuario) {
-                                                        $porcentajeComisionUsuario = $tipoComisionUsuario->porcentaje;
-                                                        $comisionUsuario = $subtotalConDescuento * ($porcentajeComisionUsuario / 100);
-                                                        $totalComisionVendedor += $comisionUsuario;
-                                                    }
-                                                }
 
                                                 // Calcular costo de compra total
                                                 $costoCompraArticulo = $detalle->precio_costo * $detalle->cantidad;
@@ -250,34 +220,6 @@
                                                     {{ $config->currency_simbol }}.{{ number_format($impuestoDetalle, 2, '.', ',') }}
                                                     ({{ number_format($detalle->porcentaje_impuestos ?? 0, 2) }}%)
                                                 </td>
-                                                @if (Auth::user()->role_as != 1)
-                                                    <td class="text-end">
-                                                        @if ($detalle->tipo_comision_trabajador_id)
-                                                            {{ $config->currency_simbol }}.{{ number_format($comisionTrabajador, 2, '.', ',') }}
-                                                            ({{ number_format($porcentajeComisionTrabajador, 2) }}%)<br>
-                                                            <small class="text-muted">
-                                                                @if($detalle->trabajador)
-                                                                    {{ $detalle->trabajador->nombre }}
-                                                                @else
-                                                                    No asignado
-                                                                @endif
-                                                            </small>
-                                                        @else
-                                                            -
-                                                        @endif
-                                                    </td>
-                                                    <td class="text-end">
-                                                        @if ($detalle->tipo_comision_usuario_id)
-                                                            {{ $config->currency_simbol }}.{{ number_format($comisionUsuario, 2, '.', ',') }}
-                                                            ({{ number_format($porcentajeComisionUsuario, 2) }}%)<br>
-                                                            <small class="text-muted">
-                                                                {{ optional($detalle->usuario)->name ?: 'Usuario no disponible' }}
-                                                            </small>
-                                                        @else
-                                                            -
-                                                        @endif
-                                                    </td>
-                                                @endif
                                                 <td class="text-end"><strong>{{ $config->currency_simbol }}.{{ number_format($subtotalConDescuento, 2, '.', ',') }}</strong></td>
                                             </tr>
                                         @endforeach
@@ -285,43 +227,35 @@
                                     <tfoot>
                                         <!-- SECCIÓN DE VENTAS -->
                                         <tr class="table-primary">
-                                            <td colspan="9" class="text-center"><strong>RESUMEN DE VENTA</strong></td>
+                                            <td colspan="7" class="text-center"><strong>RESUMEN DE VENTA</strong></td>
                                         </tr>
                                         <tr class="table-secondary">
-                                            <td colspan="7" class="text-end"><strong>Subtotal sin descuento:</strong></td>
-                                            <td colspan="2" class="text-end">{{ $config->currency_simbol }}.{{ number_format($subtotalSinDescuentoTotal, 2, '.', ',') }}</td>
+                                            <td colspan="6" class="text-end"><strong>Subtotal sin descuento:</strong></td>
+                                            <td class="text-end">{{ $config->currency_simbol }}.{{ number_format($subtotalSinDescuentoTotal, 2, '.', ',') }}</td>
                                         </tr>
                                         <tr class="table-secondary">
-                                            <td colspan="7" class="text-end"><strong>Total Descuentos:</strong></td>
-                                            <td colspan="2" class="text-end text-danger">{{ $config->currency_simbol }}.{{ number_format($totalDescuentos, 2, '.', ',') }}</td>
+                                            <td colspan="6" class="text-end"><strong>Total Descuentos:</strong></td>
+                                            <td class="text-end text-danger">{{ $config->currency_simbol }}.{{ number_format($totalDescuentos, 2, '.', ',') }}</td>
                                         </tr>
                                         <tr class="table-secondary">
-                                            <td colspan="7" class="text-end"><strong>Total Impuestos:</strong></td>
-                                            <td colspan="2" class="text-end text-info">{{ $config->currency_simbol }}.{{ number_format($totalImpuestos, 2, '.', ',') }}</td>
+                                            <td colspan="6" class="text-end"><strong>Total Impuestos:</strong></td>
+                                            <td class="text-end text-info">{{ $config->currency_simbol }}.{{ number_format($totalImpuestos, 2, '.', ',') }}</td>
                                         </tr>
                                         @if (Auth::user()->role_as != 1)
                                             <tr class="table-secondary">
-                                                <td colspan="7" class="text-end"><strong>Total Comisiones Trabajador:</strong></td>
-                                                <td colspan="2" class="text-end text-success">{{ $config->currency_simbol }}.{{ number_format($totalComisionTrabajador, 2, '.', ',') }}</td>
-                                            </tr>
-                                            <tr class="table-secondary">
-                                                <td colspan="7" class="text-end"><strong>Total Comisiones Vendedor:</strong></td>
-                                                <td colspan="2" class="text-end text-primary">{{ $config->currency_simbol }}.{{ number_format($totalComisionVendedor, 2, '.', ',') }}</td>
-                                            </tr>
-                                            <tr class="table-secondary">
-                                                <td colspan="7" class="text-end"><strong>Total Costo de Compra:</strong></td>
-                                                <td colspan="2" class="text-end text-danger">{{ $config->currency_simbol }}.{{ number_format($totalCostoCompra, 2, '.', ',') }}</td>
+                                                <td colspan="6" class="text-end"><strong>Total Costo de Compra:</strong></td>
+                                                <td class="text-end text-danger">{{ $config->currency_simbol }}.{{ number_format($totalCostoCompra, 2, '.', ',') }}</td>
                                             </tr>
                                         @endif
                                         <tr class="table-secondary">
-                                            <td colspan="7" class="text-end"><strong>Total Venta:</strong></td>
-                                            <td colspan="2" class="text-end text-primary"><h5>{{ $config->currency_simbol }}.{{ number_format($totalVenta, 2, '.', ',') }}</h5></td>
+                                            <td colspan="6" class="text-end"><strong>Total Venta:</strong></td>
+                                            <td class="text-end text-primary"><h5>{{ $config->currency_simbol }}.{{ number_format($totalVenta, 2, '.', ',') }}</h5></td>
                                         </tr>
                                         @if (Auth::user()->role_as != 1)
                                             <tr class="table-success">
-                                                <td colspan="7" class="text-end"><strong>GANANCIA NETA:</strong></td>
-                                                <td colspan="2" class="text-end">
-                                                    <h5 class="text-success">{{ $config->currency_simbol }}.{{ number_format($totalVenta - $totalComisionTrabajador - $totalComisionVendedor - $totalImpuestos - $totalCostoCompra, 2, '.', ',') }}</h5>
+                                                <td colspan="6" class="text-end"><strong>GANANCIA NETA:</strong></td>
+                                                <td class="text-end">
+                                                    <h5 class="text-success">{{ $config->currency_simbol }}.{{ number_format($totalVenta - $totalImpuestos - $totalCostoCompra, 2, '.', ',') }}</h5>
                                                 </td>
                                             </tr>
                                         @endif

@@ -91,7 +91,6 @@
                                                             <th>Cantidad</th>
                                                             <th>Precio</th>
                                                             <th>Descuento</th>
-                                                            <th>Trabajador</th>
                                                             <th>Subtotal</th>
                                                             <th>Acciones</th>
                                                         </tr>
@@ -157,21 +156,10 @@
                                                                         @endforeach
                                                                     </select>
                                                                 </td>
-                                                                <td>
-                                                                    <select class="form-control select2" name="detalles[{{ $detalle->id }}][trabajador_id]">
-                                                                        @foreach($trabajadores as $trabajador)
-                                                                            <option value="{{ $trabajador->id }}" {{ $detalle->trabajador_id == $trabajador->id ? 'selected' : '' }}>
-                                                                                {{ $trabajador->nombre }}
-                                                                            </option>
-                                                                        @endforeach
-                                                                    </select>
-                                                                    <input type="hidden" name="detalles[{{ $detalle->id }}][usuario_id]" value="{{ $detalle->usuario_id }}">
-                                                                    <input type="hidden" name="detalles[{{ $detalle->id }}][tipo_comision_trabajador_id]" value="{{ $detalle->tipo_comision_trabajador_id }}">
-                                                                    <input type="hidden" name="detalles[{{ $detalle->id }}][tipo_comision_usuario_id]" value="{{ $detalle->tipo_comision_usuario_id }}">
-                                                                </td>
                                                                 <td class="subtotal-cell" id="subtotal-{{ $detalle->id }}">
                                                                     {{ $config->currency_simbol }}.{{ number_format($subtotalFinal, 2) }}
                                                                     <input type="hidden" name="detalles[{{ $detalle->id }}][sub_total]" value="{{ $subtotalFinal }}" class="subtotal-input">
+                                                                    <input type="hidden" name="detalles[{{ $detalle->id }}][usuario_id]" value="{{ $detalle->usuario_id }}">
                                                                 </td>
                                                                 <td>
                                                                     <button type="button" class="btn btn-danger btn-sm eliminar-detalle" data-detalle-id="{{ $detalle->id }}">
@@ -190,7 +178,7 @@
                                         <div class="card bg-light p-3 mb-3">
                                             <h6>Agregar Nuevo Detalle</h6>
                                             <div class="row">
-                                                <div class="col-md-4 mb-2">
+                                                <div class="col-md-5 mb-2">
                                                     <label for="articulo">Artículo</label>
                                                     <select id="articulo" class="form-control select2">
                                                         <option value="">Seleccione un artículo</option>
@@ -199,9 +187,7 @@
                                                                 data-precio="{{ $articulo->precio_venta }}"
                                                                 data-stock="{{ $articulo->stock }}"
                                                                 data-unidad="{{ $articulo->unidad->abreviatura ?? '' }}"
-                                                                data-unidad-tipo="{{ $articulo->unidad->tipo ?? 'decimal' }}" {{-- Añadimos el tipo de unidad --}}
-                                                                data-tipo-comision-trabajador="{{ $articulo->tipo_comision_trabajador_id }}"
-                                                                data-tipo-comision-vendedor="{{ $articulo->tipo_comision_vendedor_id }}">
+                                                                data-unidad-tipo="{{ $articulo->unidad->tipo ?? 'decimal' }}">
                                                                 {{ $articulo->codigo }} - {{ $articulo->nombre }}
                                                             </option>
                                                         @endforeach
@@ -218,24 +204,13 @@
                                                     <label for="cantidad-nuevo">Cantidad</label>
                                                     <input type="number" id="cantidad-nuevo" class="form-control" min="0.01" step="0.01">
                                                 </div>
-                                                <div class="col-md-2 mb-2">
+                                                <div class="col-md-3 mb-2">
                                                     <label for="descuento-nuevo">Descuento</label>
                                                     <select id="descuento-nuevo" class="form-control select2">
                                                         <option value="">Sin descuento</option>
                                                         @foreach($descuentos as $descuento)
                                                             <option value="{{ $descuento->id }}" data-porcentaje="{{ $descuento->porcentaje_descuento }}">
                                                                 {{ $descuento->nombre }} ({{ $descuento->porcentaje_descuento }}%)
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-2 mb-2">
-                                                    <label for="trabajador-nuevo">Trabajador</label>
-                                                    <select id="trabajador-nuevo" class="form-control select2">
-                                                        <option value="">Seleccione</option>
-                                                        @foreach($trabajadores as $trabajador)
-                                                            <option value="{{ $trabajador->id }}">
-                                                                {{ $trabajador->nombre }}
                                                             </option>
                                                         @endforeach
                                                     </select>
@@ -259,7 +234,6 @@
                                                             <th>Cantidad</th>
                                                             <th>Precio</th>
                                                             <th>Descuento</th>
-                                                            <th>Trabajador</th>
                                                             <th>Subtotal</th>
                                                             <th>Acciones</th>
                                                         </tr>
@@ -539,18 +513,10 @@
                     return;
                 }
 
-                const trabajadorId = $('#trabajador-nuevo').val();
-                if (!trabajadorId) {
-                    alert('Debe seleccionar un trabajador');
-                    return;
-                }
-
                 // Obtener datos del artículo
                 const articuloOption = $('#articulo option:selected');
                 const articuloNombre = articuloOption.text();
                 const precioUnitario = parseFloat(articuloOption.data('precio'));
-                const tipoComisionTrabajador = articuloOption.data('tipo-comision-trabajador');
-                const tipoComisionVendedor = articuloOption.data('tipo-comision-vendedor');
 
                 // Calcular subtotal sin descuento (precio unitario × cantidad)
                 let subtotalSinDescuento = precioUnitario * cantidad;
@@ -567,9 +533,6 @@
                     subtotal = subtotalSinDescuento - montoDescuento;
                     descuentoTexto = `${descuentoOption.text()} - ${currencySymbol}.${montoDescuento.toFixed(2)}`;
                 }
-
-                // Trabajador
-                const trabajadorNombre = $('#trabajador-nuevo option:selected').text();
 
                 // Crear fila en la tabla con nombres de campo actualizados
                 const newRow = `
@@ -588,15 +551,9 @@
                         <input type="hidden" name="nuevos_detalles[${nuevoDetalleCount}][descuento_id]" value="${descuentoId || ''}">
                     </td>
                     <td>
-                        ${trabajadorNombre}
-                        <input type="hidden" name="nuevos_detalles[${nuevoDetalleCount}][trabajador_id]" value="${trabajadorId}">
-                        <input type="hidden" name="nuevos_detalles[${nuevoDetalleCount}][usuario_id]" value="{{ Auth::id() }}">
-                        <input type="hidden" name="nuevos_detalles[${nuevoDetalleCount}][tipo_comision_trabajador_id]" value="${tipoComisionTrabajador || ''}">
-                        <input type="hidden" name="nuevos_detalles[${nuevoDetalleCount}][tipo_comision_usuario_id]" value="${tipoComisionVendedor || ''}">
-                    </td>
-                    <td>
                         ${currencySymbol}.${subtotal.toFixed(2)}
                         <input type="hidden" name="nuevos_detalles[${nuevoDetalleCount}][sub_total]" value="${subtotal}" class="subtotal-input">
+                        <input type="hidden" name="nuevos_detalles[${nuevoDetalleCount}][usuario_id]" value="{{ Auth::id() }}">
                     </td>
                     <td>
                         <button type="button" class="btn btn-danger btn-sm eliminar-nuevo-detalle">
@@ -611,7 +568,7 @@
 
                 // Incrementar contador y limpiar campos
                 nuevoDetalleCount++;
-                $('#articulo, #descuento-nuevo, #trabajador-nuevo').val('').trigger('change');
+                $('#articulo, #descuento-nuevo').val('').trigger('change');
                 $('#cantidad-nuevo, #stock').val('');
                 $('#unidad-abreviatura').text('');
 

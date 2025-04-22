@@ -276,18 +276,12 @@
                                                                             <th class="text-center">Cantidad</th>
                                                                             <th>Descuento</th>
                                                                             <th class="text-end">Impuestos</th>
-                                                                            @if (Auth::user()->role_as != 1)
-                                                                                <th class="text-end">Com. Trab.</th>
-                                                                                <th class="text-end">Com. Vend.</th>
-                                                                            @endif
                                                                             <th class="text-end">Subtotal</th>
                                                                         </tr>
                                                                     </thead>
                                                                     <tbody>
                                                                         @php
                                                                             $totalImpuestosVenta = 0;
-                                                                            $totalComisionTrabajadorVenta = 0;
-                                                                            $totalComisionUsuarioVenta = 0;
                                                                         @endphp
                                                                         @foreach($venta->detalleVentas as $detalle)
                                                                             <tr>
@@ -330,54 +324,12 @@
                                                                                         // Calcular impuesto
                                                                                         $impuestoDetalle = $subtotalConDescuento * ($detalle->porcentaje_impuestos ?? 0) / 100;
                                                                                         $totalImpuestosVenta += $impuestoDetalle;
-
-                                                                                        // Calcular comisión del trabajador
-                                                                                        $comisionTrabajador = 0;
-                                                                                        $porcentajeComisionTrabajador = 0;
-                                                                                        if ($detalle->tipo_comision_trabajador_id) {
-                                                                                            $tipoComisionTrabajador = \App\Models\TipoComision::find($detalle->tipo_comision_trabajador_id);
-                                                                                            if ($tipoComisionTrabajador) {
-                                                                                                $porcentajeComisionTrabajador = $tipoComisionTrabajador->porcentaje;
-                                                                                                $comisionTrabajador = $subtotalConDescuento * ($porcentajeComisionTrabajador / 100);
-                                                                                                $totalComisionTrabajadorVenta += $comisionTrabajador;
-                                                                                            }
-                                                                                        }
-
-                                                                                        // Calcular comisión del usuario (vendedor)
-                                                                                        $comisionUsuario = 0;
-                                                                                        $porcentajeComisionUsuario = 0;
-                                                                                        if ($detalle->tipo_comision_usuario_id) {
-                                                                                            $tipoComisionUsuario = \App\Models\TipoComision::find($detalle->tipo_comision_usuario_id);
-                                                                                            if ($tipoComisionUsuario) {
-                                                                                                $porcentajeComisionUsuario = $tipoComisionUsuario->porcentaje;
-                                                                                                $comisionUsuario = $subtotalConDescuento * ($porcentajeComisionUsuario / 100);
-                                                                                                $totalComisionUsuarioVenta += $comisionUsuario;
-                                                                                            }
-                                                                                        }
                                                                                     @endphp
                                                                                 </td>
                                                                                 <td class="text-end">
                                                                                     {{ $config->currency_simbol }}.{{ number_format($impuestoDetalle, 2, '.', ',') }}
                                                                                     ({{ number_format($detalle->porcentaje_impuestos ?? 0, 2) }}%)
                                                                                 </td>
-                                                                                @if (Auth::user()->role_as != 1)
-                                                                                    <td class="text-end">
-                                                                                        @if ($detalle->tipo_comision_trabajador_id)
-                                                                                            {{ $config->currency_simbol }}.{{ number_format($comisionTrabajador, 2, '.', ',') }}
-                                                                                            ({{ number_format($porcentajeComisionTrabajador, 2) }}%)
-                                                                                        @else
-                                                                                            -
-                                                                                        @endif
-                                                                                    </td>
-                                                                                    <td class="text-end">
-                                                                                        @if ($detalle->tipo_comision_usuario_id)
-                                                                                            {{ $config->currency_simbol }}.{{ number_format($comisionUsuario, 2, '.', ',') }}
-                                                                                            ({{ number_format($porcentajeComisionUsuario, 2) }}%)
-                                                                                        @else
-                                                                                            -
-                                                                                        @endif
-                                                                                    </td>
-                                                                                @endif
                                                                                 <td class="text-end">
                                                                                     {{ $config->currency_simbol }}.{{ number_format($subtotalConDescuento, 2, '.', ',') }}
                                                                                 </td>
@@ -419,14 +371,6 @@
                                                                             <td class="text-end text-info">
                                                                                 <strong>{{ $config->currency_simbol }}.{{ number_format($totalImpuestosVenta, 2, '.', ',') }}</strong>
                                                                             </td>
-                                                                            @if (Auth::user()->role_as != 1)
-                                                                                <td class="text-end text-success">
-                                                                                    <strong>{{ $config->currency_simbol }}.{{ number_format($totalComisionTrabajadorVenta, 2, '.', ',') }}</strong>
-                                                                                </td>
-                                                                                <td class="text-end text-primary">
-                                                                                    <strong>{{ $config->currency_simbol }}.{{ number_format($totalComisionUsuarioVenta, 2, '.', ',') }}</strong>
-                                                                                </td>
-                                                                            @endif
                                                                             <td class="text-end">
                                                                                 <strong>Total: {{ $config->currency_simbol }}.{{ number_format($totalVenta, 2, '.', ',') }}</strong>
                                                                             </td>
@@ -583,82 +527,6 @@
                                                             </strong>
                                                         </td>
                                                     </tr>
-                                                    <tr>
-                                                        <td colspan="6" class="text-end"><strong>Total comisiones trabajador:</strong></td>
-                                                        <td class="text-end text-success">
-                                                            <strong>
-                                                                {{ $config->currency_simbol }}.{{
-                                                                    number_format(
-                                                                        $ventas->where('estado', true)->sum(function($venta) {
-                                                                            $comisionTrabajadorTotal = 0;
-                                                                            foreach($venta->detalleVentas as $detalle) {
-                                                                                // Calcular subtotal después de descuento
-                                                                                $precioUnitario = $detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad);
-                                                                                $subtotalSinDescuento = $precioUnitario * $detalle->cantidad;
-
-                                                                                // Aplicar descuento
-                                                                                $montoDescuento = 0;
-                                                                                if($detalle->descuento_id) {
-                                                                                    $descuento = \App\Models\Descuento::find($detalle->descuento_id);
-                                                                                    if($descuento) {
-                                                                                        $montoDescuento = $subtotalSinDescuento * ($descuento->porcentaje_descuento / 100);
-                                                                                    }
-                                                                                }
-                                                                                $subtotalConDescuento = $subtotalSinDescuento - $montoDescuento;
-
-                                                                                // Calcular comisión del trabajador
-                                                                                if($detalle->tipo_comision_trabajador_id) {
-                                                                                    $tipoComision = \App\Models\TipoComision::find($detalle->tipo_comision_trabajador_id);
-                                                                                    if($tipoComision) {
-                                                                                        $comisionTrabajadorTotal += $subtotalConDescuento * ($tipoComision->porcentaje / 100);
-                                                                                    }
-                                                                                }
-                                                                            }
-                                                                            return $comisionTrabajadorTotal;
-                                                                        }), 2, '.', ','
-                                                                    )
-                                                                }}
-                                                            </strong>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td colspan="6" class="text-end"><strong>Total comisiones vendedor:</strong></td>
-                                                        <td class="text-end text-primary">
-                                                            <strong>
-                                                                {{ $config->currency_simbol }}.{{
-                                                                    number_format(
-                                                                        $ventas->where('estado', true)->sum(function($venta) {
-                                                                            $comisionUsuarioTotal = 0;
-                                                                            foreach($venta->detalleVentas as $detalle) {
-                                                                                // Calcular subtotal después de descuento
-                                                                                $precioUnitario = $detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad);
-                                                                                $subtotalSinDescuento = $precioUnitario * $detalle->cantidad;
-
-                                                                                // Aplicar descuento
-                                                                                $montoDescuento = 0;
-                                                                                if($detalle->descuento_id) {
-                                                                                    $descuento = \App\Models\Descuento::find($detalle->descuento_id);
-                                                                                    if($descuento) {
-                                                                                        $montoDescuento = $subtotalSinDescuento * ($descuento->porcentaje_descuento / 100);
-                                                                                    }
-                                                                                }
-                                                                                $subtotalConDescuento = $subtotalSinDescuento - $montoDescuento;
-
-                                                                                // Calcular comisión del usuario (vendedor)
-                                                                                if($detalle->tipo_comision_usuario_id) {
-                                                                                    $tipoComision = \App\Models\TipoComision::find($detalle->tipo_comision_usuario_id);
-                                                                                    if($tipoComision) {
-                                                                                        $comisionUsuarioTotal += $subtotalConDescuento * ($tipoComision->porcentaje / 100);
-                                                                                    }
-                                                                                }
-                                                                            }
-                                                                            return $comisionUsuarioTotal;
-                                                                        }), 2, '.', ','
-                                                                    )
-                                                                }}
-                                                            </strong>
-                                                        </td>
-                                                    </tr>
                                                     @endif
 
                                                     <!-- SECCIÓN DE RESULTADOS -->
@@ -688,54 +556,6 @@
                                                                         $totalVenta += ($subtotalSinDescuento - $montoDescuento);
                                                                     }
                                                                     return $totalVenta;
-                                                                });
-
-                                                                // Calcular total comisiones trabajador
-                                                                $totalComisionesTrabajador = $ventas->where('estado', true)->sum(function($venta) {
-                                                                    $comisionTrabajadorTotal = 0;
-                                                                    foreach($venta->detalleVentas as $detalle) {
-                                                                        $precioUnitario = $detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad);
-                                                                        $subtotalSinDescuento = $precioUnitario * $detalle->cantidad;
-                                                                        $montoDescuento = 0;
-                                                                        if($detalle->descuento_id) {
-                                                                            $descuento = \App\Models\Descuento::find($detalle->descuento_id);
-                                                                            if($descuento) {
-                                                                                $montoDescuento = $subtotalSinDescuento * ($descuento->porcentaje_descuento / 100);
-                                                                            }
-                                                                        }
-                                                                        $subtotalConDescuento = $subtotalSinDescuento - $montoDescuento;
-                                                                        if($detalle->tipo_comision_trabajador_id) {
-                                                                            $tipoComision = \App\Models\TipoComision::find($detalle->tipo_comision_trabajador_id);
-                                                                            if($tipoComision) {
-                                                                                $comisionTrabajadorTotal += $subtotalConDescuento * ($tipoComision->porcentaje / 100);
-                                                                            }
-                                                                        }
-                                                                    }
-                                                                    return $comisionTrabajadorTotal;
-                                                                });
-
-                                                                // Calcular total comisiones vendedor
-                                                                $totalComisionesVendedor = $ventas->where('estado', true)->sum(function($venta) {
-                                                                    $comisionUsuarioTotal = 0;
-                                                                    foreach($venta->detalleVentas as $detalle) {
-                                                                        $precioUnitario = $detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad);
-                                                                        $subtotalSinDescuento = $precioUnitario * $detalle->cantidad;
-                                                                        $montoDescuento = 0;
-                                                                        if($detalle->descuento_id) {
-                                                                            $descuento = \App\Models\Descuento::find($detalle->descuento_id);
-                                                                            if($descuento) {
-                                                                                $montoDescuento = $subtotalSinDescuento * ($descuento->porcentaje_descuento / 100);
-                                                                            }
-                                                                        }
-                                                                        $subtotalConDescuento = $subtotalSinDescuento - $montoDescuento;
-                                                                        if($detalle->tipo_comision_usuario_id) {
-                                                                            $tipoComision = \App\Models\TipoComision::find($detalle->tipo_comision_usuario_id);
-                                                                            if($tipoComision) {
-                                                                                $comisionUsuarioTotal += $subtotalConDescuento * ($tipoComision->porcentaje / 100);
-                                                                            }
-                                                                        }
-                                                                    }
-                                                                    return $comisionUsuarioTotal;
                                                                 });
 
                                                                 // Calcular total impuestos
@@ -769,7 +589,7 @@
                                                                 });
 
                                                                 // Calcular ganancia neta
-                                                                $gananciaNeta = $totalVentas - $totalComisionesVendedor - $totalComisionesTrabajador - $totalImpuestos - $totalCostos;
+                                                                $gananciaNeta = $totalVentas - $totalImpuestos - $totalCostos;
                                                             @endphp
                                                     @if (Auth::user()->role_as != 1)
                                                             <strong class="text-success">
@@ -892,14 +712,6 @@
                                                         <div class="d-flex justify-content-between align-items-center">
                                                             <div>Costo de productos:</div>
                                                             <div><strong>{{ $config->currency_simbol }}.{{ number_format($totalCostos, 2) }}</strong></div>
-                                                        </div>
-                                                        <div class="d-flex justify-content-between align-items-center">
-                                                            <div>Comisiones trabajadores:</div>
-                                                            <div><strong>{{ $config->currency_simbol }}.{{ number_format($totalComisionesTrabajador, 2) }}</strong></div>
-                                                        </div>
-                                                        <div class="d-flex justify-content-between align-items-center">
-                                                            <div>Comisiones vendedores:</div>
-                                                            <div><strong>{{ $config->currency_simbol }}.{{ number_format($totalComisionesVendedor, 2) }}</strong></div>
                                                         </div>
                                                     </div>
                                                 </div>

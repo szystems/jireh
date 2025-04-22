@@ -248,14 +248,6 @@
                             <td class="text-right text-danger">- {{ $config->currency_simbol }}.{{ number_format($articulo->precio_compra, 2, '.', ',') }}</td>
                         </tr>
                         <tr>
-                            <td>Comisión Vendedor ({{ number_format($comisionVendedor, 2) }}%)</td>
-                            <td class="text-right text-danger">- {{ $config->currency_simbol }}.{{ number_format($valorComisionVendedor, 2, '.', ',') }}</td>
-                        </tr>
-                        <tr>
-                            <td>Comisión Trabajador ({{ number_format($comisionTrabajador, 2) }}%)</td>
-                            <td class="text-right text-danger">- {{ $config->currency_simbol }}.{{ number_format($valorComisionTrabajador, 2, '.', ',') }}</td>
-                        </tr>
-                        <tr>
                             <td>Impuesto ({{ number_format($impuesto, 2) }}%)</td>
                             <td class="text-right text-danger">- {{ $config->currency_simbol }}.{{ number_format($valorImpuesto, 2, '.', ',') }}</td>
                         </tr>
@@ -368,8 +360,8 @@
                         <th class="text-right text-success">{{ $config->currency_simbol }}.{{ number_format($articulo->precio_venta, 2, '.', ',') }}</th>
                     </tr>
                     <tr>
-                        <th colspan="3" class="text-right">Comisiones e Impuestos:</th>
-                        <th class="text-right text-danger">- {{ $config->currency_simbol }}.{{ number_format($valorComisionVendedor + $valorComisionTrabajador + $valorImpuesto, 2, '.', ',') }}</th>
+                        <th colspan="3" class="text-right">Impuesto ({{ number_format($impuesto, 2) }}%):</th>
+                        <th class="text-right text-danger">- {{ $config->currency_simbol }}.{{ number_format($valorImpuesto, 2, '.', ',') }}</th>
                     </tr>
                     <tr>
                         <th colspan="3" class="text-right">Ganancia Real:</th>

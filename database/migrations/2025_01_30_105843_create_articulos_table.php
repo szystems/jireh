@@ -25,8 +25,6 @@ class CreateArticulosTable extends Migration
             $table->decimal('stock_minimo', 10, 2);
             $table->foreignId('categoria_id')->constrained('categorias');
             $table->foreignId('unidad_id')->constrained('unidads');
-            $table->foreignId('tipo_comision_vendedor_id')->constrained('tipo_comisions');
-            $table->foreignId('tipo_comision_trabajador_id')->constrained('tipo_comisions');
             $table->enum('tipo', ['articulo', 'servicio']);
             $table->boolean('estado')->default(true);
             $table->timestamps();

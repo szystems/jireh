@@ -36,13 +36,8 @@ class VentaFormRequest extends FormRequest
             'detalles.*.articulo_id' => 'required|exists:articulos,id',
             'detalles.*.cantidad' => 'required|numeric|min:0.01',
             'detalles.*.descuento_id' => 'nullable|exists:descuentos,id',
-            'detalles.*.trabajador_id' => 'required|exists:trabajadors,id',
             'detalles.*.usuario_id' => 'required|exists:users,id',
             'detalles.*.sub_total' => 'required|numeric|min:0',
-            'detalles.*.tipo_comision_trabajador' => 'nullable|in:porcentaje,fijo,ninguno',
-            'detalles.*.tipo_comision_usuario' => 'nullable|in:porcentaje,fijo,ninguno',
-            'detalles.*.tipo_comision_trabajador_id' => 'nullable|exists:tipo_comisions,id',
-            'detalles.*.tipo_comision_usuario_id' => 'nullable|exists:tipo_comisions,id',
         ];
     }
 }

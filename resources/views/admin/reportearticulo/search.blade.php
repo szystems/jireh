@@ -47,15 +47,6 @@
                                             </select>
                                         </div>
                                         <div class="col-md-3">
-                                            <label for="trabajador" class="form-label">Trabajador (comisiones)</label>
-                                            <select name="trabajador" class="form-control select2">
-                                                <option value=""{{ request('trabajador') == null ? 'selected' : '' }}>Todos los trabajadores</option>
-                                                @foreach($trabajadores as $trabajador)
-                                                    <option value="{{ $trabajador->id }}" {{ request('trabajador') == $trabajador->id ? 'selected' : '' }}>{{ $trabajador->nombre }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                        <div class="col-md-3">
                                             <label for="usuario" class="form-label">Vendedor</label>
                                             <select name="usuario" class="form-control select2">
                                                 <option value=""{{ request('usuario') == null ? 'selected' : '' }}>Todos los vendedores</option>

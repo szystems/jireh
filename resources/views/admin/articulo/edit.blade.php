@@ -173,37 +173,13 @@
                                                             @endif
                                                         </div>
 
-                                                        <!-- Comisiones -->
-                                                        <div class="mb-3">
-                                                            <label for="tipo_comision_vendedor_id" class="form-label">Comisión para Vendedor</label>
-                                                            <div class="input-group">
-                                                                <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
-                                                                <select class="form-select" id="tipo_comision_vendedor_id" name="tipo_comision_vendedor_id" required onchange="calcularMargen()">
-                                                                    @foreach($tipoComisiones as $tipoComision)
-                                                                        <option value="{{ $tipoComision->id }}" data-porcentaje="{{ $tipoComision->porcentaje }}" {{ $articulo->tipo_comision_vendedor_id == $tipoComision->id ? 'selected' : '' }}>{{ $tipoComision->nombre }} ({{ number_format($tipoComision->porcentaje, 2) }}%)</option>
-                                                                    @endforeach
-                                                                </select>
-                                                            </div>
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <label for="tipo_comision_trabajador_id" class="form-label">Comisión para Trabajador</label>
-                                                            <div class="input-group">
-                                                                <span class="input-group-text"><i class="bi bi-person-gear"></i></span>
-                                                                <select class="form-select" id="tipo_comision_trabajador_id" name="tipo_comision_trabajador_id" required onchange="calcularMargen()">
-                                                                    @foreach($tipoComisiones as $tipoComision)
-                                                                        <option value="{{ $tipoComision->id }}" data-porcentaje="{{ $tipoComision->porcentaje }}" {{ $articulo->tipo_comision_trabajador_id == $tipoComision->id ? 'selected' : '' }}>{{ $tipoComision->nombre }} ({{ number_format($tipoComision->porcentaje, 2) }}%)</option>
-                                                                    @endforeach
-                                                                </select>
-                                                            </div>
-                                                        </div>
-
                                                         <!-- Información de Impuesto -->
                                                         <input type="hidden" id="impuesto_porcentaje" value="{{ $config->impuesto ?? 0 }}">
                                                         <input type="hidden" id="currency_simbol" value="{{ $config->currency_simbol ?? '$' }}">
 
                                                         <!-- Tabla de margen de ganancia detallada -->
                                                         <div id="margen-detalle" class="alert alert-info mb-0">
-                                                            <h6 class="mb-3">Margen de Ganancia (incluyendo comisiones e impuestos)</h6>
+                                                            <h6 class="mb-3">Margen de Ganancia</h6>
                                                             <div class="table-responsive mb-3">
                                                                 <table class="table table-sm table-bordered">
                                                                     <tbody>
@@ -214,14 +190,6 @@
                                                                         <tr>
                                                                             <td>Precio de Compra</td>
                                                                             <td class="text-end text-danger" id="td-precio-compra">- {{ $config->currency_simbol ?? '$' }}.{{ number_format($articulo->precio_compra, 2, '.', ',') }}</td>
-                                                                        </tr>
-                                                                        <tr>
-                                                                            <td id="td-label-comision-vendedor">Comisión Vendedor (0.00%)</td>
-                                                                            <td class="text-end text-danger" id="td-comision-vendedor">- $0.00</td>
-                                                                        </tr>
-                                                                        <tr>
-                                                                            <td id="td-label-comision-trabajador">Comisión Trabajador (0.00%)</td>
-                                                                            <td class="text-end text-danger" id="td-comision-trabajador">- $0.00</td>
                                                                         </tr>
                                                                         <tr>
                                                                             <td id="td-label-impuesto">Impuesto ({{ number_format($config->impuesto ?? 0, 2) }}%)</td>
@@ -885,32 +853,17 @@ function calcularMargen() {
     const impuestoPorcentaje = parseFloat(document.getElementById('impuesto_porcentaje').value) || 0;
     const simboloMoneda = document.getElementById('currency_simbol').value || '$';
 
-    // Obtener porcentajes de comisión
-    const comisionVendedorSelect = document.getElementById('tipo_comision_vendedor_id');
-    const comisionTrabajadorSelect = document.getElementById('tipo_comision_trabajador_id');
-
-    const comisionVendedorPorcentaje = parseFloat(comisionVendedorSelect.options[comisionVendedorSelect.selectedIndex].getAttribute('data-porcentaje')) || 0;
-    const comisionTrabajadorPorcentaje = parseFloat(comisionTrabajadorSelect.options[comisionTrabajadorSelect.selectedIndex].getAttribute('data-porcentaje')) || 0;
-
     // Calcular costos adicionales
-    const comisionVendedorValor = precioVenta * (comisionVendedorPorcentaje / 100);
-    const comisionTrabajadorValor = precioVenta * (comisionTrabajadorPorcentaje / 100);
     const impuestoValor = precioVenta * (impuestoPorcentaje / 100);
 
     // Calcular ganancia y margen
     const ganancia = precioVenta - precioCompra;
-    const gananciaReal = ganancia - comisionVendedorValor - comisionTrabajadorValor - impuestoValor;
+    const gananciaReal = ganancia - impuestoValor;
     const margenReal = precioCompra > 0 ? (gananciaReal / precioCompra) * 100 : 0;
 
     // Actualizar etiquetas en la tabla
     document.getElementById('td-precio-venta').textContent = `${simboloMoneda}.${formatNumber(precioVenta)}`;
     document.getElementById('td-precio-compra').textContent = `- ${simboloMoneda}.${formatNumber(precioCompra)}`;
-
-    document.getElementById('td-label-comision-vendedor').textContent = `Comisión Vendedor (${formatNumber(comisionVendedorPorcentaje)}%)`;
-    document.getElementById('td-comision-vendedor').textContent = `- ${simboloMoneda}.${formatNumber(comisionVendedorValor)}`;
-
-    document.getElementById('td-label-comision-trabajador').textContent = `Comisión Trabajador (${formatNumber(comisionTrabajadorPorcentaje)}%)`;
-    document.getElementById('td-comision-trabajador').textContent = `- ${simboloMoneda}.${formatNumber(comisionTrabajadorValor)}`;
 
     document.getElementById('td-label-impuesto').textContent = `Impuesto (${formatNumber(impuestoPorcentaje)}%)`;
     document.getElementById('td-impuesto').textContent = `- ${simboloMoneda}.${formatNumber(impuestoValor)}`;

@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Detalle de Venta #{{ $venta->id }}</title>
+    <title>Venta #{{ $venta->id }}</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -292,7 +292,6 @@
                         <th class="text-right" width="10%">Costo</th>
                     @endif
                     <th class="text-right" width="10%">Descuento</th>
-                    <th class="text-center" width="15%">Trabajador</th>
                     <th class="text-right" width="10%">Subtotal</th>
                 </tr>
             </thead>
@@ -350,35 +349,34 @@
                                 -
                             @endif
                         </td>
-                        <td class="text-center">
-                            @if($detalle->trabajador)
-                                {{ $detalle->trabajador->nombre }}
-                            @else
-                                -
-                            @endif
-                        </td>
                         <td class="text-right text-bold moneda">
                             {{ $config->currency_simbol }}.{{ number_format($subtotalSinDescuento - $montoDescuento, 2, '.', ',') }}
                         </td>
                     </tr>
                 @endforeach
             </tbody>
-        </table>
-
-        <!-- Tabla de totales y resumen -->
-        <table class="totales-table">
-            <tr>
-                <td class="label">Subtotal:</td>
-                <td class="value moneda">{{ $config->currency_simbol }}.{{ number_format($totalVenta + $totalDescuentos, 2, '.', ',') }}</td>
-            </tr>
-            <tr>
-                <td class="label">Descuentos:</td>
-                <td class="value text-danger moneda">-{{ $config->currency_simbol }}.{{ number_format($totalDescuentos, 2, '.', ',') }}</td>
-            </tr>
-            <tr class="total">
-                <td class="label">TOTAL VENTA:</td>
-                <td class="value text-success moneda">{{ $config->currency_simbol }}.{{ number_format($totalVenta, 2, '.', ',') }}</td>
-            </tr>
+            <tfoot>
+                <tr>
+                    <th colspan="{{ Auth::user()->role_as != 1 ? '5' : '4' }}" class="text-right">Total Descuentos:</th>
+                    <td class="text-right moneda">{{ number_format($totalDescuentos, 2, '.', ',') }}</td>
+                </tr>
+                @if (Auth::user()->role_as != 1)
+                    <tr>
+                        <th colspan="5" class="text-right">Total Costo:</th>
+                        <td class="text-right moneda">{{ number_format($totalCostos, 2, '.', ',') }}</td>
+                    </tr>
+                @endif
+                <tr class="total-row">
+                    <th colspan="{{ Auth::user()->role_as != 1 ? '5' : '4' }}" class="text-right">TOTAL VENTA:</th>
+                    <td class="text-right moneda">{{ number_format($totalVenta, 2, '.', ',') }}</td>
+                </tr>
+                @if (Auth::user()->role_as != 1)
+                    <tr class="total-row">
+                        <th colspan="5" class="text-right">GANANCIA NETA:</th>
+                        <td class="text-right moneda">{{ number_format($totalVenta - $totalCostos, 2, '.', ',') }}</td>
+                    </tr>
+                @endif
+            </tfoot>
         </table>
 
         <!-- Sección de pagos -->

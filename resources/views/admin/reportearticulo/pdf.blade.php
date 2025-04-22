@@ -186,11 +186,11 @@
             <strong>Filtros:</strong>
             {{ \Carbon\Carbon::parse($filtros['fecha_desde'])->format('d/m/Y') }} al
             {{ \Carbon\Carbon::parse($filtros['fecha_hasta'])->format('d/m/Y') }}
-            @if($filtros['codigo']) | <strong>Código:</strong> {{ $filtros['codigo'] }} @endif
-            @if($filtros['articulo']) | <strong>Artículo:</strong> {{ $filtros['articulo'] }} @endif
-            @if($filtros['categoria']) | <strong>Categoría:</strong> {{ $filtros['categoria'] }} @endif
-            @if($filtros['trabajador']) | <strong>Trabajador:</strong> {{ $filtros['trabajador'] }} @endif
-            @if($filtros['usuario']) | <strong>Usuario:</strong> {{ $filtros['usuario'] }} @endif
+            @if(isset($filtros['codigo']) && $filtros['codigo']) | <strong>Código:</strong> {{ $filtros['codigo'] }} @endif
+            @if(isset($filtros['articulo']) && $filtros['articulo']) | <strong>Artículo:</strong> {{ $filtros['articulo'] }} @endif
+            @if(isset($filtros['categoria']) && $filtros['categoria']) | <strong>Categoría:</strong> {{ $filtros['categoria'] }} @endif
+            @if(isset($filtros['trabajador']) && $filtros['trabajador']) | <strong>Trabajador:</strong> {{ $filtros['trabajador'] }} @endif
+            @if(isset($filtros['usuario']) && $filtros['usuario']) | <strong>Usuario:</strong> {{ $filtros['usuario'] }} @endif
         </div>
 
         <!-- Resumen estadístico -->
@@ -211,7 +211,7 @@
                     </td>
                     <td width="25%" class="text-center">
                         <div class="text-info text-bold">Ganancia Neta</div>
-                        <div>{{ $config->currency_simbol }}.{{ number_format($totales['totalVentas'] - $totales['totalCostos'] - $totales['totalComisionesVendedor'] - $totales['totalComisionesTrabajador'] - ($totales['totalImpuestos'] ?? 0), 2, '.', ',') }}</div>
+                        <div>{{ $config->currency_simbol }}.{{ number_format($totales['totalVentas'] - $totales['totalCostos'] - ($totales['totalImpuestos'] ?? 0), 2, '.', ',') }}</div>
                     </td>
                 </tr>
             </table>
@@ -255,8 +255,6 @@
                         <th width="7%" class="text-right">P.Costo</th>
                         <th width="7%" class="text-right">Desc</th>
                         <th width="7%" class="text-right">Imp.</th>
-                        <th width="7%" class="text-right">Com.Trab</th>
-                        <th width="7%" class="text-right">Com.Vend</th>
                         <th width="9%" class="text-right">Ganancia</th>
                     </tr>
                 </thead>
@@ -282,25 +280,8 @@
                             // Calcular costo total
                             $costoTotal = $detalle->precio_costo * $detalle->cantidad;
 
-                            // Calcular comisiones
-                            $comisionTrabajador = 0;
-                            if ($detalle->tipo_comision_trabajador_id) {
-                                $tipoComision = \App\Models\TipoComision::find($detalle->tipo_comision_trabajador_id);
-                                if ($tipoComision) {
-                                    $comisionTrabajador = $subtotalConDescuento * ($tipoComision->porcentaje / 100);
-                                }
-                            }
-
-                            $comisionVendedor = 0;
-                            if ($detalle->tipo_comision_usuario_id) {
-                                $tipoComision = \App\Models\TipoComision::find($detalle->tipo_comision_usuario_id);
-                                if ($tipoComision) {
-                                    $comisionVendedor = $subtotalConDescuento * ($tipoComision->porcentaje / 100);
-                                }
-                            }
-
                             // Calcular ganancia neta
-                            $ganancia = $subtotalConDescuento - $costoTotal - $comisionTrabajador - $comisionVendedor - $impuestoDetalle;
+                            $ganancia = $subtotalConDescuento - $costoTotal - $impuestoDetalle;
                         @endphp
                         <tr class="compact-cell">
                             <td>{{ \Carbon\Carbon::parse($detalle->venta->fecha)->format('d/m/Y') }}</td>
@@ -343,20 +324,6 @@
                                     -
                                 @endif
                             </td>
-                            <td class="text-right">
-                                @if($comisionTrabajador > 0)
-                                    <span class="text-info moneda">{{ $config->currency_simbol }}.{{ number_format($comisionTrabajador, 2, '.', ',') }}</span>
-                                @else
-                                    -
-                                @endif
-                            </td>
-                            <td class="text-right">
-                                @if($comisionVendedor > 0)
-                                    <span class="text-primary moneda">{{ $config->currency_simbol }}.{{ number_format($comisionVendedor, 2, '.', ',') }}</span>
-                                @else
-                                    -
-                                @endif
-                            </td>
                             <td class="text-right text-bold">
                                 <span class="{{ $ganancia > 0 ? 'text-success' : 'text-danger' }} moneda">
                                     {{ $config->currency_simbol }}.{{ number_format($ganancia, 2, '.', ',') }}
@@ -374,9 +341,7 @@
                         </td>
                         <td class="text-right text-bold">{{ $config->currency_simbol }}.{{ number_format($totales['totalDescuentos'], 2, '.', ',') }}</td>
                         <td class="text-right text-bold">{{ $config->currency_simbol }}.{{ number_format($totales['totalImpuestos'], 2, '.', ',') }}</td>
-                        <td class="text-right text-bold">{{ $config->currency_simbol }}.{{ number_format($totales['totalComisionesTrabajador'], 2, '.', ',') }}</td>
-                        <td class="text-right text-bold">{{ $config->currency_simbol }}.{{ number_format($totales['totalComisionesVendedor'], 2, '.', ',') }}</td>
-                        <td class="text-right text-bold">{{ $config->currency_simbol }}.{{ number_format($totales['totalVentas'] - $totales['totalCostos'] - $totales['totalComisionesVendedor'] - $totales['totalComisionesTrabajador'] - $totales['totalImpuestos'], 2, '.', ',') }}</td>
+                        <td class="text-right text-bold">{{ $config->currency_simbol }}.{{ number_format($totales['totalVentas'] - $totales['totalCostos'] - $totales['totalImpuestos'], 2, '.', ',') }}</td>
                     </tr>
                 </tfoot>
             </table>
@@ -413,7 +378,7 @@
                                 @php
                                     $rentabilidadNeta = 0;
                                     if ($totales['totalVentas'] > 0) {
-                                        $gananciaNeta = $totales['totalVentas'] - $totales['totalCostos'] - $totales['totalComisionesVendedor'] - $totales['totalComisionesTrabajador'] - $totales['totalImpuestos'];
+                                        $gananciaNeta = $totales['totalVentas'] - $totales['totalCostos'] - $totales['totalImpuestos'];
                                         $rentabilidadNeta = ($gananciaNeta / $totales['totalVentas']) * 100;
                                     }
                                 @endphp

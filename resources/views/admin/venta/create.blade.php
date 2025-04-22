@@ -80,29 +80,27 @@
                                                                     data-stock="{{ $articulo->stock }}"
                                                                     data-unidad="{{ $articulo->unidad->nombre }}"
                                                                     data-unidad-tipo="{{ $articulo->unidad->tipo }}"
-                                                                    data-unidad-abreviatura="{{ $articulo->unidad->abreviatura }}"
-                                                                    data-tipo-comision-trabajador="{{ $articulo->tipo_comision_trabajador_id }}"
-                                                                    data-tipo-comision-vendedor="{{ $articulo->tipo_comision_vendedor_id }}">
+                                                                    data-unidad-abreviatura="{{ $articulo->unidad->abreviatura }}">
                                                                 {{ $articulo->codigo }} {{ $articulo->nombre }}
                                                             </option>
                                                         @endforeach
                                                     </select>
                                                 </div>
-                                                <div class="col-md-2">
+                                                <div class="col-md-3">
                                                     <label for="stock" class="form-label">Stock</label>
                                                     <div class="input-group">
                                                         <input type="text" class="form-control" id="stock" readonly>
                                                         <span class="input-group-text" id="stock-unidad-abreviatura"></span>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-2">
+                                                <div class="col-md-3">
                                                     <label for="cantidad" class="form-label">Cantidad</label>
                                                     <div class="input-group">
                                                         <input type="number" class="form-control" id="cantidad" min="1" step="1">
                                                         <span class="input-group-text" id="unidad-abreviatura"></span>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-2">
+                                                <div class="col-md-3">
                                                     <label for="precio_venta" class="form-label">Precio Venta</label>
                                                     <div class="input-group">
                                                         <span class="input-group-text">{{ $config->currency_simbol }}</span>
@@ -122,21 +120,7 @@
                                                         @endforeach
                                                     </select>
                                                 </div>
-                                                <div class="col-md-3">
-                                                    <label for="trabajador_id" class="form-label">Trabajador</label>
-                                                    <br>
-                                                    <select class="form-control select2" id="trabajador_id">
-                                                        <option value="">Seleccione un trabajador</option>
-                                                        @foreach($trabajadores as $trabajador)
-                                                            <option value="{{ $trabajador->id }}">
-                                                                {{ $trabajador->nombre }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
                                                 <input type="hidden" name="usuario_id" value="{{ Auth::id() }}">
-                                                <input type="hidden" id="tipo_comision_trabajador_id">
-                                                <input type="hidden" id="tipo_comision_usuario_id">
                                                 <div class="col-md-12 mt-3 d-flex justify-content-end">
                                                     <button type="button" class="btn btn-primary" id="add-detalle"><i class="bi bi-plus-square"></i> Agregar Artículo</button>
                                                 </div>
@@ -145,10 +129,9 @@
                                                 <thead>
                                                     <tr>
                                                         <th>Artículo</th>
-                                                        <th>Cantidad</th>
+                                                        <th class="text-center">Cantidad</th>
                                                         <th>Precio</th>
                                                         <th>Descuento</th>
-                                                        <th>Trabajador</th>
                                                         <th>Subtotal</th>
                                                         <th>Acciones</th>
                                                     </tr>
@@ -161,7 +144,7 @@
                                                                     Artículo ID: {{ $detalle['articulo_id'] }}
                                                                     <input type="hidden" name="detalles[{{ $index }}][articulo_id]" value="{{ $detalle['articulo_id'] }}">
                                                                 </td>
-                                                                <td>
+                                                                <td class="text-center">
                                                                     {{ $detalle['cantidad'] }}
                                                                     <input type="hidden" name="detalles[{{ $index }}][cantidad]" value="{{ $detalle['cantidad'] }}">
                                                                 </td>
@@ -189,16 +172,10 @@
                                                                     @endif
                                                                     <input type="hidden" name="detalles[{{ $index }}][descuento_id]" value="{{ $detalle['descuento_id'] ?? '' }}">
                                                                 </td>
-                                                                <td>
-                                                                    {{ $detalle['trabajador_id'] }}
-                                                                    <input type="hidden" name="detalles[{{ $index }}][trabajador_id]" value="{{ $detalle['trabajador_id'] }}">
-                                                                    <input type="hidden" name="detalles[{{ $index }}][usuario_id]" value="{{ $detalle['usuario_id'] }}">
-                                                                    <input type="hidden" name="detalles[{{ $index }}][tipo_comision_trabajador_id]" value="{{ $detalle['tipo_comision_trabajador_id'] }}">
-                                                                    <input type="hidden" name="detalles[{{ $index }}][tipo_comision_usuario_id]" value="{{ $detalle['tipo_comision_usuario_id'] }}">
-                                                                </td>
                                                                 <td class="subtotal">
                                                                     {{ $config->currency_simbol }}{{ number_format($detalle['sub_total'], 2) }}
                                                                     <input type="hidden" name="detalles[{{ $index }}][sub_total]" value="{{ $detalle['sub_total'] }}">
+                                                                    <input type="hidden" name="detalles[{{ $index }}][usuario_id]" value="{{ Auth::id() }}">
                                                                 </td>
                                                                 <td>
                                                                     <button type="button" class="btn btn-danger btn-sm remove-detalle"><i class="bi bi-trash-fill"></i></button>
@@ -231,9 +208,6 @@
             const stockInput = document.getElementById('stock');
             const precioVentaInput = document.getElementById('precio_venta');
             const cantidadInput = document.getElementById('cantidad');
-            const trabajadorSelect = document.getElementById('trabajador_id');
-            const tipoComisionTrabajadorInput = document.getElementById('tipo_comision_trabajador_id');
-            const tipoComisionUsuarioInput = document.getElementById('tipo_comision_usuario_id');
             const unidadAbreviaturaSpan = document.getElementById('unidad-abreviatura');
             const stockUnidadAbreviaturaSpan = document.getElementById('stock-unidad-abreviatura');
             const addDetalleBtn = document.getElementById('add-detalle');
@@ -304,15 +278,11 @@
                 const precioVenta = selectedOption.element.getAttribute('data-precio-venta');
                 const unidadAbreviatura = selectedOption.element.getAttribute('data-unidad-abreviatura');
                 const unidadTipo = selectedOption.element.getAttribute('data-unidad-tipo');
-                const tipoComisionTrabajador = selectedOption.element.getAttribute('data-tipo-comision-trabajador');
-                const tipoComisionVendedor = selectedOption.element.getAttribute('data-tipo-comision-vendedor');
 
                 stockInput.value = stock;
                 precioVentaInput.value = precioVenta;
                 unidadAbreviaturaSpan.textContent = unidadAbreviatura;
                 stockUnidadAbreviaturaSpan.textContent = unidadAbreviatura;
-                tipoComisionTrabajadorInput.value = tipoComisionTrabajador;
-                tipoComisionUsuarioInput.value = tipoComisionVendedor;
 
                 if (unidadTipo === 'decimal') {
                     cantidadInput.step = "0.01";
@@ -356,7 +326,6 @@
             // Agregar detalle con botón
             addDetalleBtn.addEventListener('click', function () {
                 const articuloId = articuloSelect.value;
-                const trabajadorId = trabajadorSelect.value;
                 const descuentoId = descuentoSelect.value;
 
                 // Verificar si el artículo ya está en la tabla de detalles
@@ -367,18 +336,15 @@
                     return;
                 }
 
-                if (!articuloId || !trabajadorId) {
-                    alert('Por favor, seleccione un artículo y un trabajador.');
+                if (!articuloId) {
+                    alert('Por favor, seleccione un artículo.');
                     return;
                 }
 
                 const articuloText = articuloSelect.options[articuloSelect.selectedIndex].text;
-                const trabajadorText = trabajadorSelect.options[trabajadorSelect.selectedIndex].text;
                 const precioVenta = parseFloat(precioVentaInput.value);
                 const cantidad = parseFloat(cantidadInput.value);
                 const unidadAbreviatura = unidadAbreviaturaSpan.textContent;
-                const tipoComisionTrabajadorId = tipoComisionTrabajadorInput.value;
-                const tipoComisionUsuarioId = tipoComisionUsuarioInput.value;
 
                 if (isNaN(precioVenta) || isNaN(cantidad) ||
                     cantidad < (cantidadInput.step === "1" ? 1 : 0.01)) {
@@ -421,7 +387,7 @@
                         ${articuloText}
                         <input type="hidden" name="detalles[${detalleIndex}][articulo_id]" value="${articuloId}">
                     </td>
-                    <td>
+                    <td class="text-center">
                         ${cantidad} ${unidadAbreviatura}
                         <input type="hidden" name="detalles[${detalleIndex}][cantidad]" value="${cantidad}">
                     </td>
@@ -432,16 +398,10 @@
                         ${descuentoText}
                         <input type="hidden" name="detalles[${detalleIndex}][descuento_id]" value="${descuentoId || ''}">
                     </td>
-                    <td>
-                        ${trabajadorText}
-                        <input type="hidden" name="detalles[${detalleIndex}][trabajador_id]" value="${trabajadorId}">
-                        <input type="hidden" name="detalles[${detalleIndex}][usuario_id]" value="${usuarioId}">
-                        <input type="hidden" name="detalles[${detalleIndex}][tipo_comision_trabajador_id]" value="${tipoComisionTrabajadorId}">
-                        <input type="hidden" name="detalles[${detalleIndex}][tipo_comision_usuario_id]" value="${tipoComisionUsuarioId}">
-                    </td>
                     <td class="subtotal">
                         ${currencySymbol}.${subtotal.toFixed(2)}
                         <input type="hidden" name="detalles[${detalleIndex}][sub_total]" value="${subtotal}">
+                        <input type="hidden" name="detalles[${detalleIndex}][usuario_id]" value="${usuarioId}">
                     </td>
                     <td>
                         <button type="button" class="btn btn-danger btn-sm remove-detalle"><i class="bi bi-trash-fill"></i></button>
@@ -451,15 +411,12 @@
 
                 // Reiniciar campos
                 articuloSelect.value = '';
-                trabajadorSelect.value = '';
                 descuentoSelect.value = '';
                 stockInput.value = '';
                 precioVentaInput.value = '';
                 cantidadInput.value = '';
                 unidadAbreviaturaSpan.textContent = '';
                 stockUnidadAbreviaturaSpan.textContent = '';
-                tipoComisionTrabajadorInput.value = '';
-                tipoComisionUsuarioInput.value = '';
                 $('.select2').trigger('change');
                 actualizarTotal();
             });

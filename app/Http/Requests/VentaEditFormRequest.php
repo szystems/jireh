@@ -37,7 +37,6 @@ class VentaEditFormRequest extends FormRequest
             'detalles_a_mantener.*.articulo_id' => 'sometimes|exists:articulos,id',
             'detalles_a_mantener.*.cantidad' => 'sometimes|numeric|min:0.01',
             'detalles_a_mantener.*.descuento_id' => 'nullable|exists:descuentos,id',
-            'detalles_a_mantener.*.trabajador_id' => 'sometimes|exists:trabajadors,id',
             'detalles_a_mantener.*.usuario_id' => 'sometimes|exists:users,id',
             'detalles_a_mantener.*.sub_total' => 'sometimes|numeric|min:0',
 
@@ -50,7 +49,6 @@ class VentaEditFormRequest extends FormRequest
             'nuevos_detalles.*.articulo_id' => 'sometimes|exists:articulos,id',
             'nuevos_detalles.*.cantidad' => 'sometimes|numeric|min:0.01',
             'nuevos_detalles.*.descuento_id' => 'nullable|exists:descuentos,id',
-            'nuevos_detalles.*.trabajador_id' => 'sometimes|exists:trabajadors,id',
             'nuevos_detalles.*.usuario_id' => 'sometimes|exists:users,id',
             'nuevos_detalles.*.sub_total' => 'sometimes|numeric|min:0'
         ];

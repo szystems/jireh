@@ -31,9 +31,6 @@
                 @if(request('categoria') && $categorias->find(request('categoria')))
                     , <span>Categoría: {{ $categorias->find(request('categoria'))->nombre }}</span>
                 @endif
-                @if(request('trabajador') && $trabajadores->find(request('trabajador')))
-                    , <span>Trabajador: {{ $trabajadores->find(request('trabajador'))->nombre }}</span>
-                @endif
                 @if(request('usuario') && $usuarios->find(request('usuario')))
                     , <span>Usuario: {{ $usuarios->find(request('usuario'))->name }}</span>
                 @endif
@@ -50,7 +47,7 @@
 
             <!-- Estadísticas en cards -->
             <div class="row mb-4">
-                <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">
+                <div class="col-xl-4 col-lg-4 col-md-6 col-12">
                     <div class="card mb-3">
                         <div class="card-body text-center">
                             <div class="fs-5 text-primary">
@@ -62,7 +59,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">
+                <div class="col-xl-4 col-lg-4 col-md-6 col-12">
                     <div class="card mb-3">
                         <div class="card-body text-center">
                             <div class="fs-5 text-success">
@@ -74,7 +71,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">
+                <div class="col-xl-4 col-lg-4 col-md-6 col-12">
                     <div class="card mb-3">
                         <div class="card-body text-center">
                             <div class="fs-5 text-warning">
@@ -86,7 +83,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">
+                <div class="col-xl-6 col-lg-6 col-md-6 col-12">
                     <div class="card mb-3">
                         <div class="card-body text-center">
                             <div class="fs-5 text-warning">
@@ -98,38 +95,14 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
-                    <div class="card mb-3">
-                        <div class="card-body text-center">
-                            <div class="fs-5 text-info">
-                                <i class="bi bi-people-fill"></i>
-                            </div>
-                            <div class="fs-6 fw-bold">Comisiones Trab.</div>
-                            <div class="fs-4 text-info">{{ $config->currency_simbol }}.{{ number_format($totalComisionesTrabajador, 2, '.', ',') }}</div>
-                            <div class="small text-muted">total</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
-                    <div class="card mb-3">
-                        <div class="card-body text-center">
-                            <div class="fs-5 text-primary">
-                                <i class="bi bi-person-badge-fill"></i>
-                            </div>
-                            <div class="fs-6 fw-bold">Comisiones Vend.</div>
-                            <div class="fs-4 text-primary">{{ $config->currency_simbol }}.{{ number_format($totalComisionesVendedor, 2, '.', ',') }}</div>
-                            <div class="small text-muted">total</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
+                <div class="col-xl-6 col-lg-6 col-md-6 col-12">
                     <div class="card mb-3">
                         <div class="card-body text-center">
                             <div class="fs-5 text-success">
                                 <i class="bi bi-graph-up"></i>
                             </div>
                             <div class="fs-6 fw-bold">Ganancia</div>
-                            <div class="fs-4 text-success">{{ $config->currency_simbol }}.{{ number_format($totalVentas - $totalCostos - $totalComisionesVendedor - $totalComisionesTrabajador - ($totalImpuestos ?? 0), 2, '.', ',') }}</div>
+                            <div class="fs-4 text-success">{{ $config->currency_simbol }}.{{ number_format($totalVentas - $totalCostos - ($totalImpuestos ?? 0), 2, '.', ',') }}</div>
                             <div class="small text-muted">neta</div>
                         </div>
                     </div>
@@ -172,7 +145,7 @@
                 <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-3 text-white">Detalles de Artículos Vendidos</h5>
                     <div>
-                        <a href="{{ route('reportearticulo.export.pdf', request()->query()) }}" class="btn btn-danger btn-sm">
+                        <a target="_blank" href="{{ route('reportearticulo.export.pdf', request()->query()) }}" class="btn btn-danger btn-sm">
                             <i class="bi bi-file-earmark-pdf"></i> Exportar PDF
                         </a>
                     </div>
@@ -192,8 +165,6 @@
                                         <th>Precio Costo</th>
                                         <th>Descuento</th>
                                         <th>Impuestos</th>
-                                        <th>Com. Trab.</th>
-                                        <th>Com. Vend.</th>
                                         <th>Ganancia</th>
                                     </tr>
                                 </thead>
@@ -219,25 +190,8 @@
                                             // Calcular costo total
                                             $costoTotal = $detalle->precio_costo * $detalle->cantidad;
 
-                                            // Calcular comisiones
-                                            $comisionTrabajador = 0;
-                                            if ($detalle->tipo_comision_trabajador_id) {
-                                                $tipoComision = \App\Models\TipoComision::find($detalle->tipo_comision_trabajador_id);
-                                                if ($tipoComision) {
-                                                    $comisionTrabajador = $subtotalConDescuento * ($tipoComision->porcentaje / 100);
-                                                }
-                                            }
-
-                                            $comisionVendedor = 0;
-                                            if ($detalle->tipo_comision_usuario_id) {
-                                                $tipoComision = \App\Models\TipoComision::find($detalle->tipo_comision_usuario_id);
-                                                if ($tipoComision) {
-                                                    $comisionVendedor = $subtotalConDescuento * ($tipoComision->porcentaje / 100);
-                                                }
-                                            }
-
-                                            // Calcular ganancia neta (ahora restando impuestos también)
-                                            $ganancia = $subtotalConDescuento - $costoTotal - $comisionTrabajador - $comisionVendedor - $impuestoDetalle;
+                                            // Calcular ganancia neta
+                                            $ganancia = $subtotalConDescuento - $costoTotal - $impuestoDetalle;
                                         @endphp
                                         <tr>
                                             <td>{{ \Carbon\Carbon::parse($detalle->venta->fecha)->format('d/m/Y') }}</td>
@@ -284,32 +238,6 @@
                                                     {{ $config->currency_simbol }}.{{ number_format($impuestoDetalle, 2, '.', ',') }}
                                                     <br>
                                                     <small>({{ $detalle->porcentaje_impuestos ?? 0 }}%)</small>
-                                                @else
-                                                    --
-                                                @endif
-                                            </td>
-                                            <td class="text-end">
-                                                @if($comisionTrabajador > 0)
-                                                    {{ $config->currency_simbol }}.{{ number_format($comisionTrabajador, 2, '.', ',') }}
-                                                    <br>
-                                                    <small>
-                                                        @if($detalle->trabajador)
-                                                            {{ $detalle->trabajador->nombre }}
-                                                        @else
-                                                            No asignado
-                                                        @endif
-                                                    </small>
-                                                @else
-                                                    --
-                                                @endif
-                                            </td>
-                                            <td class="text-end">
-                                                @if($comisionVendedor > 0)
-                                                    {{ $config->currency_simbol }}.{{ number_format($comisionVendedor, 2, '.', ',') }}
-                                                    <br>
-                                                    <small>
-                                                        {{ optional($detalle->venta->usuario)->name ?: 'No disponible' }}
-                                                    </small>
                                                 @else
                                                     --
                                                 @endif
