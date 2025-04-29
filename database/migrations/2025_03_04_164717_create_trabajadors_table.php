@@ -13,15 +13,32 @@ class CreateTrabajadorsTable extends Migration
      */
     public function up()
     {
+        // Primero creamos la tabla tipo_trabajadors si no existe
+        if (!Schema::hasTable('tipo_trabajadors')) {
+            Schema::create('tipo_trabajadors', function (Blueprint $table) {
+                $table->id();
+                $table->string('nombre')->unique();
+                $table->text('descripcion')->nullable();
+                $table->boolean('aplica_comision')->default(false);
+                $table->boolean('requiere_asignacion')->default(false);
+                $table->enum('estado', ['activo', 'inactivo'])->default('activo');
+                $table->timestamps();
+            });
+        }
+
+        // Luego creamos la tabla trabajadors con la relación ya incluida
         Schema::create('trabajadors', function (Blueprint $table) {
             $table->id();
             $table->string('nombre');
+            $table->string('apellido');
+            $table->string('telefono', 20);
+            $table->string('direccion');
             $table->string('email')->nullable();
-            $table->string('telefono')->nullable();
-            $table->string('direccion')->nullable();
-            $table->string('no_documento')->nullable();
-            $table->date('fecha_nacimiento')->nullable();
-            $table->string('estado')->default('activo'); // Campo estado
+            $table->string('nit')->nullable();
+            $table->string('dpi')->nullable();
+            $table->string('tipo')->nullable(); // Campo tipo como string para compatibilidad
+            $table->foreignId('tipo_trabajador_id')->nullable()->constrained('tipo_trabajadors')->nullOnDelete();
+            $table->boolean('estado')->default(1);
             $table->timestamps();
         });
     }
@@ -34,5 +51,6 @@ class CreateTrabajadorsTable extends Migration
     public function down()
     {
         Schema::dropIfExists('trabajadors');
+        Schema::dropIfExists('tipo_trabajadors');
     }
 }

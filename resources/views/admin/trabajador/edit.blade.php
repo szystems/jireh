@@ -11,7 +11,7 @@
                     <i class="bi bi-people-fill"></i>
                 </div>
                 <div class="page-title">
-                    <h5>Trabajadores</h5>
+                    <h5>Editar Trabajador</h5>
                 </div>
             </div>
             <!-- Date range start -->
@@ -38,15 +38,7 @@
                                 </div>
                             </div>
                             <div class="col">
-                                <h6>Trabajador</h6>
-                                <h4 class="m-0 d-flex align-items-center">
-                                    {{ $trabajador->nombre }}
-                                    @if($trabajador->estado !== 'activo')
-                                        <span class="badge bg-danger ms-2">Inactivo</span>
-                                    @else
-                                        <span class="badge bg-success ms-2">Activo</span>
-                                    @endif
-                                </h4>
+                                <h6>Editar Trabajador</h6>
                             </div>
                         </div>
                         <!-- Row end -->
@@ -63,7 +55,7 @@
                                     <ul class="nav nav-tabs" id="customTab2" role="tablist">
                                         <li class="nav-item" role="presentation">
                                             <a class="nav-link active" id="tab-oneA" data-bs-toggle="tab" href="#oneA" role="tab"
-                                                aria-controls="oneA" aria-selected="true">Editar Información</a>
+                                                aria-controls="oneA" aria-selected="true">Editar Trabajador</a>
                                         </li>
                                     </ul>
                                     <div class="tab-content">
@@ -80,7 +72,7 @@
                                                             </ul>
                                                         </div>
                                                     @endif
-                                                    <form action="{{ url('update-trabajador/'.$trabajador->id) }}" method="POST" id="trabajadorEditForm" class="needs-validation" novalidate>
+                                                    <form action="{{ url('update-trabajador/'.$trabajador->id) }}" method="POST" id="trabajadorForm" class="needs-validation" novalidate>
                                                         @csrf
                                                         @method('PUT')
 
@@ -115,6 +107,55 @@
                                                                         @if ($errors->has('fecha_nacimiento'))
                                                                             <span class="text-danger small">{{ $errors->first('fecha_nacimiento') }}</span>
                                                                         @endif
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Tipo de Trabajador -->
+                                                        <div class="card mb-3">
+                                                            <div class="card-header bg-light">
+                                                                <h6 class="mb-0"><i class="bi bi-tags me-2"></i>Tipo de Trabajador</h6>
+                                                            </div>
+                                                            <div class="card-body">
+                                                                <div class="row gx-3">
+                                                                    <div class="col-md-6 mb-3">
+                                                                        <label for="tipo" class="form-label">Tipo de Trabajador <span class="text-danger">*</span></label>
+                                                                        <div class="input-group">
+                                                                            <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
+                                                                            <select name="tipo" id="tipo" class="form-control" required>
+                                                                                <option value="">Seleccione un tipo</option>
+                                                                                <option value="mecanico" {{ $trabajador->tipo == 'mecanico' ? 'selected' : '' }}>Mecánico</option>
+                                                                                <option value="carwash" {{ $trabajador->tipo == 'carwash' ? 'selected' : '' }}>Lavador Car Wash</option>
+                                                                                <option value="general" {{ $trabajador->tipo == 'general' || !$trabajador->tipo ? 'selected' : '' }}>General</option>
+                                                                            </select>
+                                                                            <div class="invalid-feedback">
+                                                                                Por favor seleccione el tipo de trabajador.
+                                                                            </div>
+                                                                        </div>
+                                                                        @if ($errors->has('tipo'))
+                                                                            <span class="text-danger small">{{ $errors->first('tipo') }}</span>
+                                                                        @endif
+                                                                    </div>
+                                                                    <div class="col-md-6 mb-3">
+                                                                        <label for="tipo_trabajador_id" class="form-label">Categoría Específica</label>
+                                                                        <div class="input-group">
+                                                                            <span class="input-group-text"><i class="bi bi-tag"></i></span>
+                                                                            <select name="tipo_trabajador_id" id="tipo_trabajador_id" class="form-control">
+                                                                                <option value="">Seleccione una categoría</option>
+                                                                                @foreach(App\Models\TipoTrabajador::activos() as $tipoTrabajador)
+                                                                                    <option value="{{ $tipoTrabajador->id }}" {{ $trabajador->tipo_trabajador_id == $tipoTrabajador->id ? 'selected' : '' }}>
+                                                                                        {{ $tipoTrabajador->nombre }}
+                                                                                    </option>
+                                                                                @endforeach
+                                                                            </select>
+                                                                        </div>
+                                                                        @if ($errors->has('tipo_trabajador_id'))
+                                                                            <span class="text-danger small">{{ $errors->first('tipo_trabajador_id') }}</span>
+                                                                        @endif
+                                                                        <small class="text-muted">
+                                                                            La categoría permite una clasificación más detallada que el tipo básico.
+                                                                        </small>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -180,46 +221,8 @@
                                                             </div>
                                                         </div>
 
-                                                        <div class="card mb-3">
-                                                            <div class="card-header bg-light">
-                                                                <h6 class="mb-0"><i class="bi bi-toggle-on me-2"></i>Estado del Trabajador</h6>
-                                                            </div>
-                                                            <div class="card-body">
-                                                                <div class="row">
-                                                                    <div class="col-md-6">
-                                                                        <label class="form-label">Estado <span class="text-danger">*</span></label>
-                                                                        <div class="d-flex align-items-center">
-                                                                            <div class="form-check form-check-inline">
-                                                                                <input class="form-check-input" type="radio" name="estado" id="estadoActivo"
-                                                                                    value="activo" {{ $trabajador->estado === 'activo' ? 'checked' : '' }} required>
-                                                                                <label class="form-check-label" for="estadoActivo">
-                                                                                    <span class="badge bg-success">Activo</span>
-                                                                                </label>
-                                                                            </div>
-                                                                            <div class="form-check form-check-inline">
-                                                                                <input class="form-check-input" type="radio" name="estado" id="estadoInactivo"
-                                                                                    value="inactivo" {{ $trabajador->estado === 'inactivo' ? 'checked' : '' }} required>
-                                                                                <label class="form-check-label" for="estadoInactivo">
-                                                                                    <span class="badge bg-danger">Inactivo</span>
-                                                                                </label>
-                                                                            </div>
-                                                                        </div>
-                                                                        @if ($errors->has('estado'))
-                                                                            <span class="text-danger small">{{ $errors->first('estado') }}</span>
-                                                                        @endif
-
-                                                                        <div class="alert alert-info mt-2 small">
-                                                                            <i class="bi bi-info-circle me-1"></i>
-                                                                            Los trabajadores inactivos no aparecerán en las listas por defecto.
-                                                                            Si desactiva un trabajador, podrá reactivarlo posteriormente.
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-
                                                         <div class="d-flex gap-2 justify-content-center mt-4">
-                                                            <a href="{{ url('show-trabajador/'.$trabajador->id) }}" class="btn btn-danger">
+                                                            <a href="{{ url('trabajadores') }}" class="btn btn-danger">
                                                                 <i class="bi bi-x-circle me-1"></i> Cancelar
                                                             </a>
                                                             <button type="submit" class="btn btn-success">
@@ -264,7 +267,7 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Validación del lado del cliente
-        var form = document.getElementById('trabajadorEditForm');
+        var form = document.getElementById('trabajadorForm');
 
         form.addEventListener('submit', function(event) {
             if (!form.checkValidity()) {

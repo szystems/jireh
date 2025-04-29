@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use Carbon\Carbon; // Importación correcta de Carbon
 
 class User extends Authenticatable
 {
@@ -23,13 +22,6 @@ class User extends Authenticatable
         'email',
         'password',
         'role_as',
-        'fotografia',
-        'estado',
-        'principal',
-        'fecha_nacimiento',
-        'telefono',
-        'celular',
-        'direccion',
     ];
 
     /**
@@ -51,24 +43,73 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public function getTimeZoneAttribute($value): string
+    /**
+     * Relación polimórfica para comisiones
+     */
+    public function comisiones()
     {
-        return $value == config('app.timezone') || empty($value) ? config('app.timezone') : $value;
+        return $this->morphMany(Comision::class, 'commissionable');
     }
 
-    public function setTimeZoneAttribute($value)
+    /**
+     * Obtiene las comisiones pendientes por pagar
+     */
+    public function comisionesPendientes()
     {
-        $this->attributes['timezone'] = $value == config('app.timezone') || is_null($value) ? null : $value;
+        return $this->comisiones()->where('estado', 'pendiente');
     }
 
-    // Corregidos los métodos para las fechas
-    public function getCreatedAtAttribute($value)
+    /**
+     * Calcula el total de comisiones pendientes
+     */
+    public function totalComisionesPendientes()
     {
-        return Carbon::parse($value);
+        return $this->comisionesPendientes()->sum('monto');
     }
 
-    public function getUpdatedAtAttribute($value)
+    /**
+     * Obtiene las comisiones pagadas
+     */
+    public function comisionesPagadas()
     {
-        return Carbon::parse($value);
+        return $this->comisiones()->where('estado', 'pagado');
+    }
+
+    /**
+     * Calcula el total de comisiones pagadas
+     */
+    public function totalComisionesPagadas()
+    {
+        return $this->comisionesPagadas()->sum('monto');
+    }
+
+    /**
+     * Relación con las metas de ventas
+     */
+    public function metasVentas()
+    {
+        return $this->hasMany(MetaVenta::class, 'usuario_id');
+    }
+
+    /**
+     * Obtiene las metas actuales del usuario
+     */
+    public function metasActuales()
+    {
+        return $this->metasVentas()
+                   ->where('estado', true)
+                   ->where('fecha_inicio', '<=', now())
+                   ->where(function($query) {
+                       $query->where('fecha_fin', '>=', now())
+                             ->orWhereNull('fecha_fin');
+                   });
+    }
+
+    /**
+     * Relación con ventas
+     */
+    public function ventas()
+    {
+        return $this->hasMany(Venta::class);
     }
 }

@@ -3,100 +3,162 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\TrabajadorFormRequest;
 use App\Models\Trabajador;
+use App\Models\TipoTrabajador;
 use Illuminate\Http\Request;
 
 class TrabajadorController extends Controller
 {
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
     public function index(Request $request)
     {
-        $query = Trabajador::query();
+        // Iniciar la consulta
+        $query = Trabajador::with('tipoTrabajador');
 
-        // Aplicar búsqueda si se proporciona
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where(function($q) use ($search) {
-                $q->where('nombre', 'like', '%' . $search . '%')
-                  ->orWhere('no_documento', 'like', '%' . $search . '%')
-                  ->orWhere('telefono', 'like', '%' . $search . '%')
-                  ->orWhere('email', 'like', '%' . $search . '%');
+        // Filtro por texto de búsqueda
+        if ($request->has('buscar') && $request->buscar != '') {
+            $buscar = $request->buscar;
+            $query->where(function($q) use ($buscar) {
+                $q->where('nombre', 'LIKE', "%{$buscar}%")
+                  ->orWhere('apellido', 'LIKE', "%{$buscar}%")
+                  ->orWhere('telefono', 'LIKE', "%{$buscar}%");
             });
         }
 
-        // Filtrar por estado activo a menos que se solicite mostrar inactivos
-        if (!$request->has('mostrar_inactivos')) {
-            $query->where('estado', 'activo');
+        // Filtro por tipo de trabajador
+        if ($request->has('tipo_trabajador') && $request->tipo_trabajador != '') {
+            $query->where('tipo_trabajador_id', $request->tipo_trabajador);
         }
 
-        // Ordenamiento
-        $sort = $request->input('sort', 'nombre');
-        $direction = $request->input('direction', 'asc');
-        $allowedSorts = ['nombre', 'fecha_nacimiento', 'no_documento'];
-
-        if (in_array($sort, $allowedSorts)) {
-            $query->orderBy($sort, $direction);
+        // Filtro para mostrar inactivos o solo activos
+        if ($request->has('mostrar_inactivos') && $request->mostrar_inactivos == '1') {
+            // No aplicar filtro de estado para mostrar todos
+        } else {
+            $query->where('estado', 1); // Solo activos por defecto
         }
 
-        // Número fijo de 20 elementos por página
-        $trabajadores = $query->paginate(20);
+        // Ordenar y paginar resultados
+        $trabajadores = $query->orderBy('nombre', 'asc')->paginate(10);
 
-        // Mantener los parámetros en la paginación
-        $trabajadores->appends($request->except('page'));
+        // Obtener todos los tipos de trabajador para el filtro
+        $tipoTrabajadores = \App\Models\TipoTrabajador::activos()->get();
 
-        return view('admin.trabajador.index', compact('trabajadores'));
-    }
-
-    public function show($id)
-    {
-        $trabajador = Trabajador::findOrFail($id);
-        return view('admin.trabajador.show', compact('trabajador'));
+        return view('admin.trabajador.index', compact('trabajadores', 'tipoTrabajadores'));
     }
 
     public function add()
     {
-        return view('admin.trabajador.add');
+        $tipoTrabajadores = TipoTrabajador::where('estado', 'activo')->get();
+        return view('admin.trabajador.add', compact('tipoTrabajadores'));
     }
 
-    public function insert(TrabajadorFormRequest $request)
+    public function insert(Request $request)
     {
-        $validated = $request->validated();
-        Trabajador::create($validated);
-        return redirect('trabajadores')->with('status', __('Trabajador agregado exitosamente.'));
+        $validatedData = $request->validate([
+            'nombre' => 'required|string|max:255',
+            'apellido' => 'required|string|max:255',
+            'telefono' => 'required|string|max:20',
+            'direccion' => 'required|string|max:255',
+            'email' => 'nullable|email|max:255',
+            'nit' => 'nullable|string|max:20',
+            'dpi' => 'nullable|string|max:20',
+            'tipo_trabajador_id' => 'nullable|exists:tipo_trabajadors,id',
+            'estado' => 'required|in:1,0',
+        ]);
+
+        $trabajador = Trabajador::create($validatedData);
+
+        return redirect('trabajadores')->with('status', 'Trabajador añadido correctamente');
     }
 
     public function edit($id)
     {
-        $trabajador = Trabajador::findOrFail($id);
-        return view('admin.trabajador.edit', compact('trabajador'));
+        $trabajador = Trabajador::find($id);
+        $tipoTrabajadores = TipoTrabajador::where('estado', 'activo')->get();
+        return view('admin.trabajador.edit', compact('trabajador', 'tipoTrabajadores'));
     }
 
-    public function update(TrabajadorFormRequest $request, $id)
+    public function update(Request $request, $id)
     {
-        $validated = $request->validated();
-        $trabajador = Trabajador::findOrFail($id);
+        $validatedData = $request->validate([
+            'nombre' => 'required|string|max:255',
+            'apellido' => 'required|string|max:255',
+            'telefono' => 'required|string|max:20',
+            'direccion' => 'required|string|max:255',
+            'email' => 'nullable|email|max:255',
+            'nit' => 'nullable|string|max:20',
+            'dpi' => 'nullable|string|max:20',
+            'tipo_trabajador_id' => 'nullable|exists:tipo_trabajadors,id',
+            'estado' => 'required|in:1,0',
+        ]);
 
-        // Si está reactivando un trabajador, verificar si necesitamos restaurar el email
-        if ($trabajador->estado === 'inactivo' && $validated['estado'] === 'activo' && empty($validated['email'])) {
-            // No hagas nada con el email si no se proporcionó uno nuevo
-            unset($validated['email']);
+        $trabajador = Trabajador::find($id);
+        $trabajador->update($validatedData);
+
+        return redirect('trabajadores')->with('status', 'Trabajador actualizado correctamente');
+    }
+
+    public function show($id)
+    {
+        $trabajador = Trabajador::with('tipoTrabajador')->find($id);
+        return view('admin.trabajador.show', compact('trabajador'));
+    }
+
+    /**
+     * Cambia el estado del trabajador (activa/desactiva)
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function toggleStatus($id)
+    {
+        $trabajador = Trabajador::find($id);
+
+        if (!$trabajador) {
+            return redirect('trabajadores')->with('error', 'Trabajador no encontrado.');
         }
 
-        $trabajador->update($validated);
-        return redirect('trabajadores')->with('status', __('Trabajador actualizado exitosamente.'));
+        // Si está activo (1), lo desactivamos (0). Si está inactivo (0), lo activamos (1)
+        $trabajador->estado = $trabajador->estado == 1 ? 0 : 1;
+        $trabajador->save();
+
+        $statusMessage = $trabajador->estado == 1
+            ? 'Trabajador activado correctamente.'
+            : 'Trabajador desactivado correctamente.';
+
+        return redirect('trabajadores')->with('status', $statusMessage);
     }
 
+    /**
+     * Remove the specified resource from storage.
+     * Esta función ahora se utiliza para cambiar el estado del trabajador (activar/desactivar)
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
     public function destroy($id)
     {
-        $trabajador = Trabajador::findOrFail($id);
+        $trabajador = Trabajador::find($id);
 
-        // Almacenar el email en algún lugar temporal si es necesario restaurarlo después
-        // Podrías crear un campo email_backup en la base de datos
+        if (!$trabajador) {
+            return redirect('trabajadores')->with('error', 'Trabajador no encontrado.');
+        }
 
-        $trabajador->update([
-            'estado' => 'inactivo',
-            'email' => null, // Eliminar el email para que pueda ser usado por otro trabajador
-        ]);
-        return redirect('trabajadores')->with('status', __('Trabajador eliminado exitosamente.'));
+        // Cambiar el estado: Si está activo (1), desactivarlo (0), y viceversa
+        if ($trabajador->estado == 1) {
+            $trabajador->estado = 0;
+            $mensaje = 'Trabajador desactivado correctamente.';
+        } else {
+            $trabajador->estado = 1;
+            $mensaje = 'Trabajador activado correctamente.';
+        }
+
+        $trabajador->save();
+
+        return redirect('trabajadores')->with('status', $mensaje);
     }
 }

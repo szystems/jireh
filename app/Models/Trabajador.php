@@ -11,18 +11,31 @@ class Trabajador extends Model
 
     protected $table = 'trabajadors';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
     protected $fillable = [
         'nombre',
-        'email',
+        'apellido',
         'telefono',
         'direccion',
-        'no_documento',
-        'fecha_nacimiento',
+        'email',
+        'nit',
+        'dpi',
+        'tipo_trabajador_id',
         'estado',
     ];
+
+    /**
+     * Relación con el tipo de trabajador
+     */
+    public function tipoTrabajador()
+    {
+        return $this->belongsTo(TipoTrabajador::class, 'tipo_trabajador_id');
+    }
+
+    /**
+     * Obtener el nombre completo del trabajador
+     */
+    public function getNombreCompletoAttribute()
+    {
+        return "{$this->nombre} {$this->apellido}";
+    }
 }

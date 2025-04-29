@@ -114,6 +114,51 @@
 
                                                         <div class="card mb-3">
                                                             <div class="card-header bg-light">
+                                                                <h6 class="mb-0"><i class="bi bi-tags me-2"></i>Tipo de Trabajador</h6>
+                                                            </div>
+                                                            <div class="card-body">
+                                                                <div class="row gx-3">
+                                                                    <div class="col-md-6 mb-3">
+                                                                        <label for="tipo" class="form-label">Tipo de Trabajador <span class="text-danger">*</span></label>
+                                                                        <div class="input-group">
+                                                                            <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
+                                                                            <select name="tipo" id="tipo" class="form-control" required>
+                                                                                <option value="">Seleccione un tipo</option>
+                                                                                <option value="mecanico">Mecánico</option>
+                                                                                <option value="carwash">Lavador Car Wash</option>
+                                                                                <option value="general">General</option>
+                                                                            </select>
+                                                                            <div class="invalid-feedback">
+                                                                                Por favor seleccione el tipo de trabajador.
+                                                                            </div>
+                                                                        </div>
+                                                                        @if ($errors->has('tipo'))
+                                                                            <span class="text-danger small">{{ $errors->first('tipo') }}</span>
+                                                                        @endif
+                                                                    </div>
+                                                                    <div class="col-md-6 mb-3">
+                                                                        <label for="tipo_trabajador_id" class="form-label">Tipo de Trabajador</label>
+                                                                        <div class="input-group">
+                                                                            <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
+                                                                            <select class="form-select" id="tipo_trabajador_id" name="tipo_trabajador_id">
+                                                                                <option value="">Seleccione un tipo</option>
+                                                                                @foreach($tipoTrabajadores as $tipo)
+                                                                                    <option value="{{ $tipo->id }}" {{ old('tipo_trabajador_id') == $tipo->id ? 'selected' : '' }}>
+                                                                                        {{ $tipo->nombre }}
+                                                                                    </option>
+                                                                                @endforeach
+                                                                            </select>
+                                                                        </div>
+                                                                        @error('tipo_trabajador_id')
+                                                                            <span class="text-danger">{{ $message }}</span>
+                                                                        @enderror
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="card mb-3">
+                                                            <div class="card-header bg-light">
                                                                 <h6 class="mb-0"><i class="bi bi-info-circle me-2"></i>Información de Contacto</h6>
                                                             </div>
                                                             <div class="card-body">

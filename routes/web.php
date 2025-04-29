@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\TipoComisionController;
 use App\Http\Controllers\Admin\ArticuloController;
 use App\Http\Controllers\Admin\IngresoController;
 use App\Http\Controllers\Admin\TrabajadorController;
+use App\Http\Controllers\Admin\TipoTrabajadorController; // Añadir esta importación
 use App\Http\Controllers\Admin\InventarioController;
 use App\Http\Controllers\Admin\DescuentoController;
 use App\Http\Controllers\Admin\VentaController;
@@ -155,6 +156,15 @@ Route::middleware(['auth'])->group(function () {
     Route::put('update-trabajador/{id}', [TrabajadorController::class, 'update']);
     Route::get('delete-trabajador/{id}', [TrabajadorController::class, 'destroy']);
 
+    //Tipos de Trabajador (rutas estilo convencional)
+    Route::get('tipo-trabajador', [TipoTrabajadorController::class, 'index']);
+    Route::get('show-tipo-trabajador/{id}', [TipoTrabajadorController::class, 'show']);
+    Route::get('add-tipo-trabajador', [TipoTrabajadorController::class, 'create']);
+    Route::post('insert-tipo-trabajador', [TipoTrabajadorController::class, 'store']);
+    Route::get('edit-tipo-trabajador/{id}', [TipoTrabajadorController::class, 'edit']);
+    Route::put('update-tipo-trabajador/{id}', [TipoTrabajadorController::class, 'update']);
+    Route::get('delete-tipo-trabajador/{id}', [TipoTrabajadorController::class, 'destroy']); // Cambiado de DELETE a GET
+
     //inventario
     Route::get('inventario', [InventarioController::class, 'index']);
     Route::get('print-inventario', [InventarioController::class, 'printinventario']);
@@ -194,4 +204,11 @@ Route::middleware(['auth'])->group(function () {
     //config
     Route::get('config', [ConfigController::class, 'index']);
     Route::put('update-config', [ConfigController::class, 'update']);
+});
+
+// Rutas para trabajadores
+Route::middleware(['auth', 'isAdmin'])->group(function () {
+    // ...existing routes...
+    Route::get('/toggle-status-trabajador/{id}', [App\Http\Controllers\Admin\TrabajadorController::class, 'toggleStatus']);
+    // ...existing routes...
 });

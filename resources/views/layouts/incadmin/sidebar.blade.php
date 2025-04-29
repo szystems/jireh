@@ -92,6 +92,29 @@
                         </div>
                     </li>
                 @endif
+
+                <!-- Trabajadores -->
+                @if(Auth::user()->role_as != 1)
+                <li class="menu-category">Gestión de Personal</li>
+                <li class="sidebar-dropdown">
+                    <a href="#" class="{{ Request::is('trabajadores','tipotrabajador','show-trabajador/*','edit-trabajador/*','add-trabajador') ? 'active-dropdown':''  }}">
+                        <i class="bi bi-people-fill"></i>
+                        <span class="menu-text">Trabajadores</span>
+                        <i class="bi bi-chevron-down menu-arrow"></i>
+                    </a>
+                    <div class="sidebar-submenu">
+                        <ul>
+                            <li class="{{ Request::is('trabajadores','show-trabajador/*','add-trabajador','edit-trabajador/*') ? 'active-page-link':''  }}">
+                                <a href="{{ url('trabajadores') }}"><i class="bi bi-person-badge"></i> Trabajadores</a>
+                            </li>
+                            <li class="{{ Request::is('tipo-trabajador','show-tipo-trabajador/*','add-tipo-trabajador','edit-tipo-trabajador/*') ? 'active-page-link':''  }}">
+                                <a href="{{ url('tipo-trabajador') }}"><i class="bi bi-tags"></i> Tipos</a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+                @endif
+
                 <!-- Compras -->
                 @if(Auth::user()->role_as != 1)
                     <li class="menu-category">Operaciones</li>
@@ -116,7 +139,7 @@
 
                 <!-- Ventas -->
                 <li class="sidebar-dropdown">
-                    <a href="#" class="{{ Request::is('ventas','reportearticulos','trabajadores','inventario','descuentos','show-venta/*','show-trabajador/*','show-descuento/*') ? 'active-dropdown':''  }}">
+                    <a href="#" class="{{ Request::is('ventas','reportearticulos','inventario','descuentos','show-venta/*','show-descuento/*') ? 'active-dropdown':''  }}">
                         <i class="bi bi-cash-stack"></i>
                         <span class="menu-text">Ventas</span>
                         <i class="bi bi-chevron-down menu-arrow"></i>
@@ -130,11 +153,6 @@
                                 <li class="{{ Request::is('reportearticulos') ? 'active-page-link':''  }}">
                                     <a href="{{ url('reportearticulos') }}"><i class="bi bi-bar-chart-line"></i> Artículos Vendidos</a>
                                 </li>
-                            @endif
-                            @if(Auth::user()->role_as != 1)
-                            <li class="{{ Request::is('trabajadores','show-trabajador/*','add-trabajador','edit-trabajador/*') ? 'active-page-link':''  }}">
-                                <a href="{{ url('trabajadores') }}"><i class="bi bi-people"></i> Trabajadores</a>
-                            </li>
                             @endif
                             <li class="{{ Request::is('inventario') ? 'active-page-link':''  }}">
                                 <a href="{{ url('inventario') }}"><i class="bi bi-inboxes"></i> Inventario</a>

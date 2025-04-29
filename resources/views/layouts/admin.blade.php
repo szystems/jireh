@@ -5,6 +5,7 @@
 		<!-- Required meta tags -->
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="csrf-token" content="{{ csrf_token() }}">
 
 		<!-- Meta -->
 		<meta name="description" content="" />
@@ -20,14 +21,16 @@
 		<!-- Title -->
 		<title>{{ config('app.name', 'JIREH') }}</title>
 
-		<!-- *************
-			************ Common Css Files *************
-		************ -->
+		<!-- Primero cargamos jQuery para evitar conflictos -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+        <!-- Agregamos Moment.js directamente desde CDN ANTES de cualquier script que lo use -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+
 		<!-- Bootstrap css -->
         <link rel="stylesheet" href="{{ asset('dashboardtemplate/design/assets/css/bootstrap.min.css') }}" />
 
         <!-- Bootstrap font icons css -->
-        {{-- <link rel="stylesheet" href="{{ asset('dashboardtemplate/design/assets/fonts/bootstrap/bootstrap-icons.css') }}" /> --}}
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
         <!-- Main css -->
@@ -52,11 +55,8 @@
         <!-- Select2 Bootstrap 5 Theme -->
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
 
-        <!-- jQuery (Necesario para JavaScript plugins) -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-
-        <!-- Bootstrap Bundle JS -->
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- OverlayScrollbars JS - Cargado tempranamente para garantizar disponibilidad -->
+        <script src="{{ asset('dashboardtemplate/design/assets/vendor/overlay-scroll/jquery.overlayScrollbars.min.js') }}"></script>
 
         <!-- Datepicker JS -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
@@ -156,19 +156,26 @@
 		<!-- Page wrapper end -->
 
 		<!-- Required JavaScript Files -->
-        <!-- Bootstrap Bundle JS -->
-        <script src="{{ asset('dashboardtemplate/design/assets/js/bootstrap.bundle.min.js') }}"></script>
-        <script src="{{ asset('dashboardtemplate/design/assets/js/modernizr.js') }}"></script>
-        <script src="{{ asset('dashboardtemplate/design/assets/js/moment.js') }}"></script>
+        <!-- No cargar jQuery de nuevo aquí, ya se cargó en el head -->
 
-        <!-- Vendor Js Files -->
-        <!-- Overlay Scroll JS -->
-        <script src="{{ asset('dashboardtemplate/design/assets/vendor/overlay-scroll/jquery.overlayScrollbars.min.js') }}"></script>
+        <!-- Cargar la versión completa de Bootstrap (no minificada) para facilitar depuración -->
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.js"></script>
+
+        <!-- Ya no cargar Moment.js aquí (ya está cargado en el head) -->
+        <!-- <script src="{{ asset('dashboardtemplate/design/assets/js/moment.js') }}"></script> -->
+
+        <!-- Modernizr -->
+        <script src="{{ asset('dashboardtemplate/design/assets/js/modernizr.js') }}"></script>
+
+        <!-- Cargar custom-scrollbar.js después de que OverlayScrollbars ya está disponible -->
         <script src="{{ asset('dashboardtemplate/design/assets/vendor/overlay-scroll/custom-scrollbar.js') }}"></script>
 
         <!-- News ticker -->
         <script src="{{ asset('dashboardtemplate/design/assets/vendor/newsticker/newsTicker.min.js') }}"></script>
         <script src="{{ asset('dashboardtemplate/design/assets/vendor/newsticker/custom-newsTicker.js') }}"></script>
+
+        <!-- Eliminar el script de verificación existente ya que ahora aseguramos carga correcta -->
 
         <!-- Dropzone JS -->
         <script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
@@ -232,6 +239,7 @@
             // Actualiza la hora y la fecha cada segundo
             setInterval(actualizarReloj, 1000);
         </script>
+
 	</body>
 
 </html>
