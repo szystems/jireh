@@ -44,10 +44,10 @@
                             </div>
 
                             <div class="row">
-                                <div class="col-md-6">
+                                <div class="col-md-6 mb-4">
                                     <div class="card bg-light">
                                         <div class="card-body">
-                                            <h6 class="card-title">Configuración de Comisiones</h6>
+                                            <h6 class="card-title">Configuración General</h6>
                                             <ul class="list-group list-group-flush">
                                                 <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent border-0">
                                                     <span>Aplica para comisiones:</span>
@@ -65,10 +65,56 @@
                                                         <span class="badge bg-secondary">No</span>
                                                     @endif
                                                 </li>
+                                                <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent border-0">
+                                                    <span>Múltiples trabajadores por servicio:</span>
+                                                    @if($tipoTrabajador->permite_multiples_trabajadores)
+                                                        <span class="badge bg-primary">Sí</span>
+                                                    @else
+                                                        <span class="badge bg-secondary">No</span>
+                                                    @endif
+                                                </li>
                                             </ul>
                                         </div>
                                     </div>
                                 </div>
+
+                                @if($tipoTrabajador->aplica_comision)
+                                <div class="col-md-6 mb-4">
+                                    <div class="card border-success">
+                                        <div class="card-header bg-success bg-opacity-25">
+                                            <h6 class="card-title mb-0">Configuración de Comisiones</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <ul class="list-group list-group-flush">
+                                                <li class="list-group-item d-flex justify-content-between align-items-center border-0">
+                                                    <span>Tipo de comisión:</span>
+                                                    <span class="badge bg-dark">
+                                                        @if($tipoTrabajador->tipo_comision)
+                                                            {{ $tiposComision[$tipoTrabajador->tipo_comision] ?? $tipoTrabajador->tipo_comision }}
+                                                        @else
+                                                            No definido
+                                                        @endif
+                                                    </span>
+                                                </li>
+
+                                                @if(in_array($tipoTrabajador->tipo_comision, ['fijo', 'por_servicio', 'personalizado']))
+                                                <li class="list-group-item d-flex justify-content-between align-items-center border-0">
+                                                    <span>Monto por comisión:</span>
+                                                    <span class="badge bg-success">Q {{ number_format($tipoTrabajador->valor_comision, 2) }}</span>
+                                                </li>
+                                                @endif
+
+                                                @if(in_array($tipoTrabajador->tipo_comision, ['porcentaje_venta', 'porcentaje_ganancia', 'personalizado']))
+                                                <li class="list-group-item d-flex justify-content-between align-items-center border-0">
+                                                    <span>Porcentaje de comisión:</span>
+                                                    <span class="badge bg-info">{{ number_format($tipoTrabajador->porcentaje_comision, 2) }}%</span>
+                                                </li>
+                                                @endif
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                @endif
 
                                 <div class="col-md-6">
                                     <div class="card bg-light">

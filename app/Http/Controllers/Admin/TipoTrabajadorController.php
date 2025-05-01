@@ -28,7 +28,8 @@ class TipoTrabajadorController extends Controller
      */
     public function create()
     {
-        return view('admin.tipotrabajador.create');
+        $tiposComision = TipoTrabajador::getTiposComision();
+        return view('admin.tipotrabajador.create', compact('tiposComision'));
     }
 
     /**
@@ -44,16 +45,34 @@ class TipoTrabajadorController extends Controller
             'descripcion' => 'nullable|string',
             'aplica_comision' => 'boolean',
             'requiere_asignacion' => 'boolean',
+            'tipo_comision' => 'nullable|string',
+            'valor_comision' => 'nullable|numeric|min:0',
+            'porcentaje_comision' => 'nullable|numeric|min:0|max:100',
+            'permite_multiples_trabajadores' => 'boolean',
             'estado' => 'required|in:activo,inactivo'
         ]);
 
-        $tipoTrabajador = TipoTrabajador::create([
-            'nombre' => $request->nombre,
-            'descripcion' => $request->descripcion,
-            'aplica_comision' => $request->has('aplica_comision'),
-            'requiere_asignacion' => $request->has('requiere_asignacion'),
-            'estado' => $request->estado
-        ]);
+        $tipoTrabajador = new TipoTrabajador();
+        $tipoTrabajador->nombre = $request->nombre;
+        $tipoTrabajador->descripcion = $request->descripcion;
+        $tipoTrabajador->aplica_comision = $request->has('aplica_comision');
+        $tipoTrabajador->requiere_asignacion = $request->has('requiere_asignacion');
+        $tipoTrabajador->estado = $request->estado;
+
+        // Campos de comisión solo si aplica comisión
+        if ($request->has('aplica_comision')) {
+            $tipoTrabajador->tipo_comision = $request->tipo_comision;
+            $tipoTrabajador->valor_comision = $request->valor_comision;
+            $tipoTrabajador->porcentaje_comision = $request->porcentaje_comision;
+            $tipoTrabajador->permite_multiples_trabajadores = $request->has('permite_multiples_trabajadores');
+        }
+
+        // Configuración adicional para casos específicos
+        if ($request->has('config_adicional')) {
+            $tipoTrabajador->configuracion_adicional = $request->config_adicional;
+        }
+
+        $tipoTrabajador->save();
 
         return redirect('tipo-trabajador')->with('status', 'Tipo de trabajador creado exitosamente');
     }
@@ -67,7 +86,8 @@ class TipoTrabajadorController extends Controller
     public function show($id)
     {
         $tipoTrabajador = TipoTrabajador::findOrFail($id);
-        return view('admin.tipotrabajador.show', compact('tipoTrabajador'));
+        $tiposComision = TipoTrabajador::getTiposComision();
+        return view('admin.tipotrabajador.show', compact('tipoTrabajador', 'tiposComision'));
     }
 
     /**
@@ -79,7 +99,8 @@ class TipoTrabajadorController extends Controller
     public function edit($id)
     {
         $tipoTrabajador = TipoTrabajador::findOrFail($id);
-        return view('admin.tipotrabajador.edit', compact('tipoTrabajador'));
+        $tiposComision = TipoTrabajador::getTiposComision();
+        return view('admin.tipotrabajador.edit', compact('tipoTrabajador', 'tiposComision'));
     }
 
     /**
@@ -98,16 +119,38 @@ class TipoTrabajadorController extends Controller
             'descripcion' => 'nullable|string',
             'aplica_comision' => 'boolean',
             'requiere_asignacion' => 'boolean',
+            'tipo_comision' => 'nullable|string',
+            'valor_comision' => 'nullable|numeric|min:0',
+            'porcentaje_comision' => 'nullable|numeric|min:0|max:100',
+            'permite_multiples_trabajadores' => 'boolean',
             'estado' => 'required|in:activo,inactivo'
         ]);
 
-        $tipoTrabajador->update([
-            'nombre' => $request->nombre,
-            'descripcion' => $request->descripcion,
-            'aplica_comision' => $request->has('aplica_comision'),
-            'requiere_asignacion' => $request->has('requiere_asignacion'),
-            'estado' => $request->estado
-        ]);
+        $tipoTrabajador->nombre = $request->nombre;
+        $tipoTrabajador->descripcion = $request->descripcion;
+        $tipoTrabajador->aplica_comision = $request->has('aplica_comision');
+        $tipoTrabajador->requiere_asignacion = $request->has('requiere_asignacion');
+        $tipoTrabajador->estado = $request->estado;
+
+        // Campos de comisión solo si aplica comisión
+        if ($request->has('aplica_comision')) {
+            $tipoTrabajador->tipo_comision = $request->tipo_comision;
+            $tipoTrabajador->valor_comision = $request->valor_comision;
+            $tipoTrabajador->porcentaje_comision = $request->porcentaje_comision;
+            $tipoTrabajador->permite_multiples_trabajadores = $request->has('permite_multiples_trabajadores');
+        } else {
+            $tipoTrabajador->tipo_comision = null;
+            $tipoTrabajador->valor_comision = null;
+            $tipoTrabajador->porcentaje_comision = null;
+            $tipoTrabajador->permite_multiples_trabajadores = false;
+        }
+
+        // Configuración adicional para casos específicos
+        if ($request->has('config_adicional')) {
+            $tipoTrabajador->configuracion_adicional = $request->config_adicional;
+        }
+
+        $tipoTrabajador->save();
 
         return redirect('tipo-trabajador')->with('status', 'Tipo de trabajador actualizado exitosamente');
     }

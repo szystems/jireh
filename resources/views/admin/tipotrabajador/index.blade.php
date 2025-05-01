@@ -58,8 +58,8 @@
                                             <th>ID</th>
                                             <th>Nombre</th>
                                             <th>Descripción</th>
-                                            <th class="text-center">Aplica Comisión</th>
-                                            <th class="text-center">Requiere Asignación</th>
+                                            <th class="text-center">Comisiones</th>
+                                            <th class="text-center">Características</th>
                                             <th class="text-center">Estado</th>
                                             <th class="text-center">Acciones</th>
                                         </tr>
@@ -72,16 +72,34 @@
                                                 <td>{{ Str::limit($tipo->descripcion, 50) }}</td>
                                                 <td class="text-center">
                                                     @if($tipo->aplica_comision)
-                                                        <span class="badge bg-success">Sí</span>
+                                                        <span class="badge bg-success">Aplica</span>
+                                                        @if($tipo->tipo_comision)
+                                                            <span class="badge bg-info">
+                                                                @if($tipo->tipo_comision == 'fijo')
+                                                                    Monto fijo Q{{ number_format($tipo->valor_comision, 2) }}
+                                                                @elseif($tipo->tipo_comision == 'porcentaje_venta' || $tipo->tipo_comision == 'porcentaje_ganancia')
+                                                                    {{ number_format($tipo->porcentaje_comision, 2) }}% 
+                                                                    {{ $tipo->tipo_comision == 'porcentaje_venta' ? 'de venta' : 'de ganancia' }}
+                                                                @else
+                                                                    Personalizada
+                                                                @endif
+                                                            </span>
+                                                        @endif
                                                     @else
-                                                        <span class="badge bg-secondary">No</span>
+                                                        <span class="badge bg-secondary">No aplica</span>
                                                     @endif
                                                 </td>
                                                 <td class="text-center">
                                                     @if($tipo->requiere_asignacion)
-                                                        <span class="badge bg-info">Sí</span>
-                                                    @else
-                                                        <span class="badge bg-secondary">No</span>
+                                                        <span class="badge bg-warning text-dark" title="Requiere asignación a servicios específicos">
+                                                            <i class="bi bi-link"></i> Asignación
+                                                        </span>
+                                                    @endif
+                                                    
+                                                    @if($tipo->permite_multiples_trabajadores)
+                                                        <span class="badge bg-primary" title="Permite múltiples trabajadores por servicio">
+                                                            <i class="bi bi-people"></i> Múltiple
+                                                        </span>
                                                     @endif
                                                 </td>
                                                 <td class="text-center">

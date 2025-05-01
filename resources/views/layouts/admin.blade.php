@@ -200,10 +200,7 @@
 		<!-- Main Js Required -->
 		{{-- <script src="{{ asset('dashboardtemplate/design/assets/js/main.js') }}"></script> --}}
 
-
-
-
-
+        @yield('scripts')
 
         @if (session('status'))
             <script>
