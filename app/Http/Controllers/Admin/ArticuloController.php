@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ArticuloFormRequest;
 use App\Models\Articulo;
 use App\Models\Categoria;
+use App\Models\Trabajador;
 use App\Models\Unidad;
 use Illuminate\Http\Request;
 use App\Models\Config;
@@ -165,7 +166,14 @@ class ArticuloController extends Controller
         $articulos = Articulo::where('estado', 1)->get();
         $unidades = Unidad::where('estado', 1)->get();
         $config = Config::first();
-        return view('admin.articulo.add', compact('articulos','categorias', 'unidades', 'config'));
+
+        // Obtener mecánicos disponibles (trabajadores con tipo que aplica comisiones)
+        $mecanicos = Trabajador::whereHas('tipoTrabajador', function($query) {
+            $query->where('aplica_comision', true)
+                  ->where('requiere_asignacion', true);
+        })->where('estado', 1)->get();
+
+        return view('admin.articulo.add', compact('articulos', 'categorias', 'unidades', 'config', 'mecanicos'));
     }
 
     /**
@@ -210,16 +218,33 @@ class ArticuloController extends Controller
             ],
         ]);
 
-        // Si el tipo es servicio, verificar que el array de artículos del servicio no esté vacío
-        if ($request->tipo == 'servicio' && empty($request->articulos_servicio)) {
-            return back()->withErrors(['articulos_servicio' => 'Debe agregar al menos un artículo al servicio.'])->withInput();
+        // Validación adicional para mecánico si es un servicio
+        if ($request->tipo == 'servicio' && $request->mecanico_id) {
+            // Verificar que el mecánico sea válido y su tipo aplique comisiones
+            $mecanico = Trabajador::find($request->mecanico_id);
+            if (!$mecanico) {
+                return back()->withErrors(['mecanico_id' => 'El mecánico seleccionado no existe.'])->withInput();
+            }
+
+            if (!$mecanico->tipoTrabajador || !$mecanico->tipoTrabajador->aplica_comision || !$mecanico->tipoTrabajador->requiere_asignacion) {
+                return back()->withErrors(['mecanico_id' => 'El trabajador seleccionado no es un mecánico o no puede recibir comisiones.'])->withInput();
+            }
         }
 
-        // Crear el artículo
-        $articulo = Articulo::create($request->all());
+        // Crear el artículo con los campos adicionales
+        $articulo = new Articulo($request->all());
+
+        // Si no es un servicio, asegurarse que los campos de mecánico estén vacíos
+        if ($request->tipo != 'servicio') {
+            $articulo->mecanico_id = null;
+            $articulo->costo_mecanico = 0;
+            $articulo->comision_carwash = 0;
+        }
+
+        $articulo->save();
 
         // Si el tipo es servicio, guardar los artículos del servicio
-        if ($request->tipo == 'servicio') {
+        if ($request->tipo == 'servicio' && isset($request->articulos_servicio)) {
             foreach ($request->articulos_servicio as $articulo_id => $cantidad) {
                 $articulo->articulos()->attach($articulo_id, ['cantidad' => $cantidad]);
             }
@@ -247,7 +272,8 @@ class ArticuloController extends Controller
                 'categoria',
                 'unidad',
                 'articulos.categoria',
-                'articulos.unidad'
+                'articulos.unidad',
+                'mecanico' // Cargar relación con mecánico
             ])->findOrFail($id);
 
             $config = Config::first();
@@ -284,7 +310,13 @@ class ArticuloController extends Controller
         $todosArticulos = Articulo::where('tipo', 'articulo')->get(); // Obtener todos los artículos que no son servicios
         $config = Config::first();
 
-        return view('admin.articulo.edit', compact('articulo', 'categorias', 'unidades', 'todosArticulos', 'config'));
+        // Obtener mecánicos disponibles
+        $mecanicos = Trabajador::whereHas('tipoTrabajador', function($query) {
+            $query->where('aplica_comision', true)
+                  ->where('requiere_asignacion', true);
+        })->where('estado', 1)->get();
+
+        return view('admin.articulo.edit', compact('articulo', 'categorias', 'unidades', 'todosArticulos', 'config', 'mecanicos'));
     }
 
     public function update(Request $request, $id)
@@ -316,8 +348,38 @@ class ArticuloController extends Controller
             'tipo' => 'required|in:articulo,servicio',
         ]);
 
+        // Validación adicional para mecánico si es un servicio
+        if ($request->tipo == 'servicio' && $request->mecanico_id) {
+            // Verificar que el mecánico sea válido y su tipo aplique comisiones
+            $mecanico = Trabajador::find($request->mecanico_id);
+            if (!$mecanico) {
+                return back()->withErrors(['mecanico_id' => 'El mecánico seleccionado no existe.'])->withInput();
+            }
+
+            if (!$mecanico->tipoTrabajador || !$mecanico->tipoTrabajador->aplica_comision || !$mecanico->tipoTrabajador->requiere_asignacion) {
+                return back()->withErrors(['mecanico_id' => 'El trabajador seleccionado no es un mecánico o no puede recibir comisiones.'])->withInput();
+            }
+        }
+
         $articulo = Articulo::find($id);
-        $articulo->update($request->all());
+        // Guardar el tipo original antes de aplicar los cambios
+        $tipoOriginal = $articulo->tipo;
+        $articulo->fill($request->all());
+
+        // Si no es un servicio, asegurarse que los campos de mecánico estén vacíos
+        if ($request->tipo != 'servicio') {
+            $articulo->mecanico_id = null;
+            $articulo->costo_mecanico = 0;
+            $articulo->comision_carwash = 0;
+
+            // NUEVO: Si cambió de tipo servicio a artículo, eliminar las relaciones de componentes
+            if ($tipoOriginal == 'servicio') {
+                $articulo->articulos()->detach();
+                \Log::info("Se eliminaron los componentes del artículo ID {$id} al cambiar de tipo servicio a artículo");
+            }
+        }
+
+        $articulo->save();
 
         // Si el tipo es servicio, actualizar los artículos del servicio
         if ($request->tipo == 'servicio') {
@@ -509,9 +571,29 @@ class ArticuloController extends Controller
      */
     public function exportPdfSingle($id)
     {
-        $articulo = Articulo::with(['categoria', 'unidad', 'articulos.categoria', 'articulos.unidad'])
-            ->findOrFail($id);
+        // Cargamos el artículo con todas las relaciones necesarias
+        $articulo = Articulo::with([
+            'categoria',
+            'unidad',
+            'articulos.categoria',
+            'articulos.unidad',
+            'mecanico'  // Añadir relación con el mecánico asignado
+        ])->findOrFail($id);
+
         $config = Config::first();
+
+        // Si se necesita procesar la ubicación del logo, hazlo aquí
+        if ($config && $config->logo) {
+            // Asegurarse de que la ruta al logo es correcta
+            // No es necesario manipular $config->logo si ya contiene solo el nombre del archivo
+        }
+
+        // Preparar datos para la vista PDF
+        $data = [
+            'articulo' => $articulo,
+            'config' => $config,
+            'fechaGeneracion' => now()->format('d/m/Y H:i:s'),
+        ];
 
         // Preparar datos para la vista PDF
         $data = [
@@ -527,20 +609,38 @@ class ArticuloController extends Controller
                 $totalCosto += $articuloServicio->precio_compra * $articuloServicio->pivot->cantidad;
             }
             $data['totalCosto'] = $totalCosto;
+
+            // Información de las comisiones para servicios
+            $data['costosComisiones'] = ($articulo->costo_mecanico ?? 0) + ($articulo->comision_carwash ?? 0);
         }
 
         // Cálculo de impuestos
         $impuesto = $config->impuesto ?? 0;
         $valorImpuesto = $articulo->precio_venta * ($impuesto / 100);
 
+        // Cálculos de rentabilidad considerando comisiones si es servicio
         $ganancia = $articulo->precio_venta - $articulo->precio_compra;
-        $gananciaReal = $ganancia - $valorImpuesto;
-        $margen = $articulo->precio_compra > 0 ? (($gananciaReal) / $articulo->precio_compra) * 100 : 0;
+        $costosComisiones = $articulo->tipo == 'servicio' ?
+                            ($articulo->costo_mecanico ?? 0) + ($articulo->comision_carwash ?? 0) : 0;
+        $gananciaReal = $ganancia - $valorImpuesto - $costosComisiones;
+
+        // El margen se calcula sobre el costo total (precio de compra + comisiones)
+        $costoTotal = $articulo->precio_compra + $costosComisiones;
+        $margen = $costoTotal > 0 ? ($gananciaReal / $costoTotal) * 100 : 0;
+
+        // Información del estado del stock
+        $data['estadoStock'] = 'Disponible';
+        if ($articulo->stock <= 0) {
+            $data['estadoStock'] = 'Agotado';
+        } elseif ($articulo->stock <= $articulo->stock_minimo) {
+            $data['estadoStock'] = 'Stock bajo';
+        }
 
         $data['impuesto'] = $impuesto;
         $data['valorImpuesto'] = $valorImpuesto;
         $data['gananciaReal'] = $gananciaReal;
         $data['margen'] = $margen;
+        $data['costosComisiones'] = $costosComisiones;
 
         $pdf = PDF::loadView('admin.articulo.pdfarticulo', $data);
 

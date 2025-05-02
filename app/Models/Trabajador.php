@@ -122,4 +122,21 @@ class Trabajador extends Model
         if (!$this->tipoTrabajador) return false;
         return $this->tipoTrabajador->nombre === 'Car Wash';
     }
+
+    /**
+     * Verifica si este trabajador puede recibir comisiones
+     */
+    public function puedeRecibirComisiones()
+    {
+        return $this->tipoTrabajador && $this->tipoTrabajador->aplica_comision;
+    }
+
+    /**
+     * Verifica si este trabajador requiere ser asignado a servicios específicos
+     * (como mecánicos)
+     */
+    public function requiereAsignacion()
+    {
+        return $this->tipoTrabajador && $this->tipoTrabajador->requiere_asignacion;
+    }
 }

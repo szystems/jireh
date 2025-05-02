@@ -21,8 +21,9 @@ class Articulo extends Model
         'stock_minimo',
         'categoria_id',
         'unidad_id',
-        'mecanico_id',
-        'costo_mecanico',
+        'mecanico_id',        // Añadido para comisiones
+        'costo_mecanico',     // Añadido para comisiones
+        'comision_carwash',   // Añadido para comisiones
         'tipo',
         'estado',
     ];
@@ -103,5 +104,52 @@ class Articulo extends Model
             return (($this->precio_venta - $this->precio_compra) / $this->precio_compra) * 100;
         }
         return 0;
+    }
+
+    /**
+     * Verifica si el artículo es un servicio que requiere mecánico
+     */
+    public function requiereMecanico()
+    {
+        return $this->tipo == 'servicio';
+    }
+
+    /**
+     * Genera comisión para el mecánico cuando se vende este servicio
+     *
+     * @param DetalleVenta $detalleVenta
+     * @return Comision|null
+     */
+    public function generarComisionMecanico($detalleVenta)
+    {
+        // Solo generar comisión si es un servicio con mecánico asignado y tiene costo mayor a cero
+        if ($this->tipo == 'servicio' && $this->mecanico_id && $this->costo_mecanico > 0) {
+            // Verificar si ya existe una comisión para este detalle de venta
+            $comisionExistente = Comision::where([
+                'commissionable_id' => $this->mecanico_id,
+                'commissionable_type' => 'App\Models\Trabajador',
+                'detalle_venta_id' => $detalleVenta->id,
+                'articulo_id' => $this->id,
+            ])->first();
+
+            if (!$comisionExistente) {
+                // Crear la comisión
+                return Comision::create([
+                    'commissionable_id' => $this->mecanico_id,
+                    'commissionable_type' => 'App\Models\Trabajador',
+                    'tipo_comision' => 'mecanico',
+                    'monto' => $this->costo_mecanico,
+                    'detalle_venta_id' => $detalleVenta->id,
+                    'venta_id' => $detalleVenta->venta_id,
+                    'articulo_id' => $this->id,
+                    'fecha_calculo' => now(),
+                    'estado' => 'pendiente',
+                ]);
+            }
+
+            return $comisionExistente;
+        }
+
+        return null;
     }
 }

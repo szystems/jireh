@@ -141,4 +141,26 @@ class DetalleVenta extends Model
 
         return $comisiones;
     }
+
+    /**
+     * Genera las comisiones asociadas a este detalle de venta
+     * (para mecánicos y otros trabajadores asignados)
+     * 
+     * @return array Comisiones generadas
+     */
+    public function generarComisiones()
+    {
+        $comisiones = [];
+        
+        // Si hay un artículo asociado y es un servicio, generar comisión para el mecánico
+        if ($this->articulo && $this->articulo->tipo == 'servicio') {
+            // Comisión para el mecánico
+            $comisionMecanico = $this->articulo->generarComisionMecanico($this);
+            if ($comisionMecanico) {
+                $comisiones[] = $comisionMecanico;
+            }
+        }
+        
+        return $comisiones;
+    }
 }

@@ -23,7 +23,6 @@
 
         <!-- Content wrapper start -->
         <div class="content-wrapper">
-
             <!-- Row start -->
             <div class="row gx-3">
                 <div class="col-sm-12 col-12">
@@ -35,339 +34,318 @@
                             <form action="{{ url('insert-articulo') }}" method="POST" enctype="multipart/form-data" id="form-articulo">
                                 @csrf
 
-                                <!-- Navegación de pestañas -->
-                                <ul class="nav nav-tabs mb-4" id="articuloTab" role="tablist">
-                                    <li class="nav-item" role="presentation">
-                                        <button class="nav-link active" id="info-tab" data-bs-toggle="tab" data-bs-target="#info-tab-pane" type="button" role="tab" aria-controls="info-tab-pane" aria-selected="true">
-                                            <i class="bi bi-info-circle"></i> Información Básica
-                                        </button>
-                                    </li>
-                                    <li class="nav-item" role="presentation">
-                                        <button class="nav-link" id="precios-tab" data-bs-toggle="tab" data-bs-target="#precios-tab-pane" type="button" role="tab" aria-controls="precios-tab-pane" aria-selected="false">
-                                            <i class="bi bi-currency-dollar"></i> Precios y Stock
-                                        </button>
-                                    </li>
-                                    <li class="nav-item" role="presentation">
-                                        <button class="nav-link d-none" id="componentes-tab" data-bs-toggle="tab" data-bs-target="#componentes-tab-pane" type="button" role="tab" aria-controls="componentes-tab-pane" aria-selected="false">
-                                            <i class="bi bi-boxes"></i> Componentes del Servicio
-                                        </button>
-                                    </li>
-                                </ul>
-
-                                <!-- Contenido de pestañas -->
-                                <div class="tab-content" id="articuloTabContent">
-                                    <!-- Pestaña de Información Básica -->
-                                    <div class="tab-pane fade show active" id="info-tab-pane" role="tabpanel" aria-labelledby="info-tab" tabindex="0">
-                                        <div class="row gx-3">
-                                            <div class="col-md-4 mb-3">
-                                                <label for="codigo" class="form-label">Código</label>
-                                                <div class="input-group">
-                                                    <span class="input-group-text"><i class="bi bi-upc"></i></span>
-                                                    <input type="text" class="form-control" id="codigo" name="codigo" value="{{ old('codigo') }}">
-                                                </div>
-                                                @if ($errors->has('codigo'))
-                                                    <div class="invalid-feedback d-block">
-                                                        <strong>{{ $errors->first('codigo') }}</strong>
-                                                    </div>
-                                                @endif
+                                <!-- Sección de Información Básica -->
+                                <div class="section mb-4">
+                                    <h5 class="text-primary mb-3"><i class="bi bi-info-circle"></i> Información Básica</h5>
+                                    <div class="row gx-3">
+                                        <div class="col-md-4 mb-3">
+                                            <label for="codigo" class="form-label">Código</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="bi bi-upc"></i></span>
+                                                <input type="text" class="form-control" id="codigo" name="codigo" value="{{ old('codigo') }}">
                                             </div>
-                                            <div class="col-md-8 mb-3">
-                                                <label for="nombre" class="form-label">Nombre</label>
-                                                <div class="input-group">
-                                                    <span class="input-group-text"><i class="bi bi-type"></i></span>
-                                                    <input type="text" class="form-control" id="nombre" name="nombre" value="{{ old('nombre') }}" required>
+                                            @if ($errors->has('codigo'))
+                                                <div class="invalid-feedback d-block">
+                                                    <strong>{{ $errors->first('codigo') }}</strong>
                                                 </div>
-                                                @if ($errors->has('nombre'))
-                                                    <div class="invalid-feedback d-block">
-                                                        <strong>{{ $errors->first('nombre') }}</strong>
-                                                    </div>
-                                                @endif
+                                            @endif
+                                        </div>
+                                        <div class="col-md-8 mb-3">
+                                            <label for="nombre" class="form-label">Nombre</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="bi bi-type"></i></span>
+                                                <input type="text" class="form-control" id="nombre" name="nombre" value="{{ old('nombre') }}" required>
                                             </div>
-                                            <div class="col-md-12 mb-3">
-                                                <label for="descripcion" class="form-label">Descripción</label>
-                                                <div class="input-group">
-                                                    <span class="input-group-text"><i class="bi bi-card-text"></i></span>
-                                                    <textarea class="form-control" id="descripcion" name="descripcion" rows="3">{{ old('descripcion') }}</textarea>
+                                            @if ($errors->has('nombre'))
+                                                <div class="invalid-feedback d-block">
+                                                    <strong>{{ $errors->first('nombre') }}</strong>
                                                 </div>
-                                                @if ($errors->has('descripcion'))
-                                                    <div class="invalid-feedback d-block">
-                                                        <strong>{{ $errors->first('descripcion') }}</strong>
-                                                    </div>
-                                                @endif
+                                            @endif
+                                        </div>
+                                        <div class="col-md-12 mb-3">
+                                            <label for="descripcion" class="form-label">Descripción</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="bi bi-card-text"></i></span>
+                                                <textarea class="form-control" id="descripcion" name="descripcion" rows="3">{{ old('descripcion') }}</textarea>
                                             </div>
-                                            <div class="col-md-6 mb-3">
-                                                <label for="categoria_id" class="form-label">Categoría</label>
-                                                <div class="input-group">
-                                                    <span class="input-group-text"><i class="bi bi-tags"></i></span>
-                                                    <select class="form-select" id="categoria_id" name="categoria_id" required>
-                                                        <option value="">Seleccione una categoría</option>
-                                                        @foreach($categorias as $categoria)
-                                                            <option value="{{ $categoria->id }}" {{ old('categoria_id') == $categoria->id ? 'selected' : '' }}>{{ $categoria->nombre }}</option>
-                                                        @endforeach
-                                                    </select>
+                                            @if ($errors->has('descripcion'))
+                                                <div class="invalid-feedback d-block">
+                                                    <strong>{{ $errors->first('descripcion') }}</strong>
                                                 </div>
-                                                @if ($errors->has('categoria_id'))
-                                                    <div class="invalid-feedback d-block">
-                                                        <strong>{{ $errors->first('categoria_id') }}</strong>
-                                                    </div>
-                                                @endif
+                                            @endif
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="categoria_id" class="form-label">Categoría</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="bi bi-tags"></i></span>
+                                                <select class="form-select" id="categoria_id" name="categoria_id" required>
+                                                    <option value="">Seleccione una categoría</option>
+                                                    @foreach($categorias as $categoria)
+                                                        <option value="{{ $categoria->id }}" {{ old('categoria_id') == $categoria->id ? 'selected' : '' }}>{{ $categoria->nombre }}</option>
+                                                    @endforeach
+                                                </select>
                                             </div>
-                                            <div class="col-md-6 mb-3">
-                                                <label for="tipo" class="form-label">Tipo</label>
-                                                <div class="input-group">
-                                                    <span class="input-group-text"><i class="bi bi-bookmark"></i></span>
-                                                    <select class="form-select" id="tipo" name="tipo" required>
-                                                        <option value="articulo" {{ old('tipo') == 'articulo' ? 'selected' : '' }}>Artículo</option>
-                                                        <option value="servicio" {{ old('tipo') == 'servicio' ? 'selected' : '' }}>Servicio</option>
-                                                    </select>
+                                            @if ($errors->has('categoria_id'))
+                                                <div class="invalid-feedback d-block">
+                                                    <strong>{{ $errors->first('categoria_id') }}</strong>
                                                 </div>
-                                                @if ($errors->has('tipo'))
-                                                    <div class="invalid-feedback d-block">
-                                                        <strong>{{ $errors->first('tipo') }}</strong>
-                                                    </div>
-                                                @endif
+                                            @endif
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="tipo" class="form-label">Tipo</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="bi bi-bookmark"></i></span>
+                                                <select class="form-select" id="tipo" name="tipo" required>
+                                                    <option value="articulo" {{ old('tipo') == 'articulo' ? 'selected' : '' }}>Artículo</option>
+                                                    <option value="servicio" {{ old('tipo') == 'servicio' ? 'selected' : '' }}>Servicio</option>
+                                                </select>
                                             </div>
+                                            @if ($errors->has('tipo'))
+                                                <div class="invalid-feedback d-block">
+                                                    <strong>{{ $errors->first('tipo') }}</strong>
+                                                </div>
+                                            @endif
                                         </div>
                                     </div>
+                                </div>
 
-                                    <!-- Pestaña de Precios y Stock -->
-                                    <div class="tab-pane fade" id="precios-tab-pane" role="tabpanel" aria-labelledby="precios-tab" tabindex="0">
-                                        <div class="row gx-3">
-                                            <!-- Precios -->
-                                            <div class="col-md-6">
-                                                <div class="card mb-3">
-                                                    <div class="card-header bg-light">
-                                                        <h6 class="mb-0"><i class="bi bi-currency-dollar"></i> Precios</h6>
-                                                    </div>
-                                                    <div class="card-body">
-                                                        <div class="mb-3">
-                                                            <label for="precio_compra" class="form-label">Precio de Compra</label>
-                                                            <div class="input-group">
-                                                                <span class="input-group-text"><i class="bi bi-cash"></i></span>
-                                                                <input type="number" step="0.01" class="form-control" id="precio_compra" name="precio_compra" value="{{ old('precio_compra') ?? 0 }}" required min="0" onchange="calcularMargen()">
-                                                            </div>
-                                                            @if ($errors->has('precio_compra'))
-                                                                <div class="invalid-feedback d-block">
-                                                                    <strong>{{ $errors->first('precio_compra') }}</strong>
-                                                                </div>
-                                                            @endif
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <label for="precio_venta" class="form-label">Precio de Venta</label>
-                                                            <div class="input-group">
-                                                                <span class="input-group-text"><i class="bi bi-tag"></i></span>
-                                                                <input type="number" step="0.01" class="form-control" id="precio_venta" name="precio_venta" value="{{ old('precio_venta') ?? 0 }}" required min="0" onchange="calcularMargen()">
-                                                            </div>
-                                                            @if ($errors->has('precio_venta'))
-                                                                <div class="invalid-feedback d-block">
-                                                                    <strong>{{ $errors->first('precio_venta') }}</strong>
-                                                                </div>
-                                                            @endif
-                                                        </div>
-
-                                                        <!-- Tabla de margen de ganancia detallada -->
-                                                        <div id="margen-detalle" class="alert alert-info mb-3">
-                                                            <h6 class="mb-3">Margen de Ganancia</h6>
-                                                            <div class="table-responsive mb-3">
-                                                                <table class="table table-sm table-bordered">
-                                                                    <tbody>
-                                                                        <tr>
-                                                                            <td width="40%">Precio de Venta</td>
-                                                                            <td class="text-end text-success" id="td-precio-venta">{{ $config->currency_simbol ?? '$' }}.0.00</td>
-                                                                        </tr>
-                                                                        <tr>
-                                                                            <td>Precio de Compra</td>
-                                                                            <td class="text-end text-danger" id="td-precio-compra">- {{ $config->currency_simbol ?? '$' }}.0.00</td>
-                                                                        </tr>
-                                                                        <tr id="tr-impuesto">
-                                                                            <td id="td-label-impuesto">Impuesto ({{ number_format($config->impuesto ?? 0, 2) }}%)</td>
-                                                                            <td class="text-end text-danger" id="td-impuesto">- $0.00</td>
-                                                                        </tr>
-                                                                        <tr class="table-active">
-                                                                            <th>Ganancia Real</th>
-                                                                            <th class="text-end" id="td-ganancia-real">$0.00</th>
-                                                                        </tr>
-                                                                    </tbody>
-                                                                </table>
-                                                            </div>
-
-                                                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                                                <span>Margen Real:</span>
-                                                                <span id="margen-valor" class="badge bg-success fs-6">0.00%</span>
-                                                            </div>
-                                                            <div class="progress" style="height: 10px;">
-                                                                <div class="progress-bar" id="margen-barra" role="progressbar" style="width: 0%"></div>
-                                                            </div>
-                                                        </div>
-
-                                                        <!-- Información de Impuesto -->
-                                                        <input type="hidden" id="impuesto_porcentaje" value="{{ $config->impuesto ?? 0 }}">
-                                                        <input type="hidden" id="currency_simbol" value="{{ $config->currency_simbol ?? '$' }}">
-                                                    </div>
+                                <!-- Sección de Precios y Stock -->
+                                <div class="section mb-4">
+                                    <h5 class="text-primary mb-3"><i class="bi bi-currency-dollar"></i> Precios y Stock</h5>
+                                    <div class="row">
+                                        <!-- Precios -->
+                                        <div class="col-md-6">
+                                            <div class="card mb-3">
+                                                <div class="card-header bg-light">
+                                                    <h6 class="mb-0"><i class="bi bi-tag-fill"></i> Precios</h6>
                                                 </div>
-                                            </div>
-
-                                            <!-- Stock -->
-                                            <div class="col-md-6">
-                                                <div class="card mb-3">
-                                                    <div class="card-header bg-light">
-                                                        <h6 class="mb-0"><i class="bi bi-boxes"></i> Inventario</h6>
-                                                    </div>
-                                                    <div class="card-body">
-                                                        <div class="mb-3">
-                                                            <label for="unidad_id" class="form-label">Unidad de Medida</label>
-                                                            <div class="input-group">
-                                                                <span class="input-group-text"><i class="bi bi-rulers"></i></span>
-                                                                <select class="form-select" id="unidad_id" name="unidad_id" required>
-                                                                    <option value="">Seleccione</option>
-                                                                    @foreach($unidades as $unidad)
-                                                                        <option value="{{ $unidad->id }}"
-                                                                                data-tipo="{{ $unidad->tipo }}"
-                                                                                {{ old('unidad_id') == $unidad->id ? 'selected' : '' }}>
-                                                                            {{ $unidad->nombre }} ({{ $unidad->abreviatura }}) - {{ ucfirst($unidad->tipo) }}
-                                                                        </option>
-                                                                    @endforeach
-                                                                </select>
-                                                            </div>
-                                                            @if ($errors->has('unidad_id'))
-                                                                <div class="invalid-feedback d-block">
-                                                                    <strong>{{ $errors->first('unidad_id') }}</strong>
-                                                                </div>
-                                                            @endif
+                                                <div class="card-body">
+                                                    <div class="mb-3">
+                                                        <label for="precio_compra" class="form-label">Precio de compra</label>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">{{ $config->currency_simbol }}</span>
+                                                            <input type="number" step="0.01" min="0" class="form-control" id="precio_compra" name="precio_compra" value="{{ old('precio_compra', 0) }}" required onchange="calcularMargen()">
                                                         </div>
-                                                        <div class="mb-3">
-                                                            <label for="stock" class="form-label">Stock Inicial</label>
-                                                            <div class="input-group">
-                                                                <span class="input-group-text"><i class="bi bi-boxes"></i></span>
-                                                                <input type="number" step="0.01" class="form-control" id="stock" name="stock" value="{{ old('stock') ?? 0 }}" required min="0">
-                                                            </div>
-                                                            @if ($errors->has('stock'))
-                                                                <div class="invalid-feedback d-block">
-                                                                    <strong>{{ $errors->first('stock') }}</strong>
-                                                                </div>
-                                                            @endif
-                                                        </div>
-                                                        <div class="mb-0">
-                                                            <label for="stock_minimo" class="form-label">Stock Mínimo</label>
-                                                            <div class="input-group">
-                                                                <span class="input-group-text"><i class="bi bi-exclamation-triangle"></i></span>
-                                                                <input type="number" step="0.01" class="form-control" id="stock_minimo" name="stock_minimo" value="{{ old('stock_minimo') ?? 0 }}" required min="0">
-                                                            </div>
-                                                            @if ($errors->has('stock_minimo'))
-                                                                <div class="invalid-feedback d-block">
-                                                                    <strong>{{ $errors->first('stock_minimo') }}</strong>
-                                                                </div>
-                                                            @endif
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Pestaña de Componentes del Servicio -->
-                                    <div class="tab-pane fade" id="componentes-tab-pane" role="tabpanel" aria-labelledby="componentes-tab" tabindex="0">
-                                        <div class="alert alert-info">
-                                            <i class="bi bi-info-circle"></i> Agregue los artículos que componen este servicio.
-                                        </div>
-
-                                        <!-- Artículos para el servicio -->
-                                        <div class="card mb-4">
-                                            <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                                                <h6 class="mb-0"><i class="bi bi-list-check"></i> Artículos del Servicio</h6>
-                                                <span class="badge bg-primary" id="contador-articulos">0</span>
-                                            </div>
-                                            <div class="card-body">
-                                                <div class="row mb-3">
-                                                    <div class="col-md-6">
-                                                        <label for="articulo_servicio" class="form-label">Buscar Artículo</label>
-                                                        <select class="form-select" id="articulo_servicio">
-                                                            <option value="">Seleccione un artículo</option>
-                                                            @foreach($articulos as $articulo)
-                                                                <option value="{{ $articulo->id }}" data-precio="{{ $articulo->precio_compra }}" data-unidad="{{ $articulo->unidad->abreviatura }}">
-                                                                    {{ $articulo->codigo ? $articulo->codigo . ' - ' : '' }}{{ $articulo->nombre }}
-                                                                </option>
-                                                            @endforeach
-                                                        </select>
-                                                        @if ($errors->has('articulos_servicio'))
+                                                        @if ($errors->has('precio_compra'))
                                                             <div class="invalid-feedback d-block">
-                                                                <strong>{{ $errors->first('articulos_servicio') }}</strong>
+                                                                <strong>{{ $errors->first('precio_compra') }}</strong>
                                                             </div>
                                                         @endif
                                                     </div>
-                                                    <div class="col-md-3">
-                                                        <label for="cantidad_servicio" class="form-label">Cantidad</label>
-                                                        <input type="number" step="0.01" class="form-control" id="cantidad_servicio" min="0.01" value="1">
+                                                    <div class="mb-3">
+                                                        <label for="precio_venta" class="form-label">Precio de venta</label>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">{{ $config->currency_simbol }}</span>
+                                                            <input type="number" step="0.01" min="0" class="form-control" id="precio_venta" name="precio_venta" value="{{ old('precio_venta', 0) }}" required onchange="calcularMargen()">
+                                                        </div>
+                                                        @if ($errors->has('precio_venta'))
+                                                            <div class="invalid-feedback d-block">
+                                                                <strong>{{ $errors->first('precio_venta') }}</strong>
+                                                            </div>
+                                                        @endif
                                                     </div>
-                                                    <div class="col-md-3 d-flex align-items-end">
-                                                        <button type="button" class="btn btn-primary w-100" id="add-articulo-servicio">
-                                                            <i class="bi bi-plus-lg"></i> Agregar
-                                                        </button>
+                                                    <div class="mb-0">
+                                                        <label for="impuesto_porcentaje" class="form-label">Impuesto (%)</label>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">%</span>
+                                                            <input type="number" step="0.01" min="0" max="100" class="form-control" id="impuesto_porcentaje" value="{{ $config->impuesto ?? 0 }}" readonly onchange="calcularMargen()">
+                                                            <input type="hidden" id="currency_simbol" value="{{ $config->currency_simbol }}">
+                                                        </div>
                                                     </div>
                                                 </div>
+                                            </div>
 
-                                                <div class="table-responsive">
-                                                    <table class="table table-sm table-hover" id="tabla-servicio">
-                                                        <thead>
-                                                            <tr>
-                                                                <th>Artículo</th>
-                                                                <th width="20%">Cantidad</th>
-                                                                <th width="25%">Costo</th>
-                                                                <th width="10%">Acciones</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody id="servicio-articulos-body">
-                                                            @if(old('articulos_servicio'))
-                                                                @foreach(old('articulos_servicio') as $articuloId => $cantidad)
-                                                                    @php
-                                                                        $articuloObj = $articulos->find($articuloId);
-                                                                        $costo = $articuloObj->precio_compra * $cantidad;
-                                                                    @endphp
-                                                                    <tr data-precio="{{ $articuloObj->precio_compra }}">
-                                                                        <td>
-                                                                            <div class="d-flex align-items-center">
-                                                                                <div>
-                                                                                    <span class="d-block fw-bold">{{ $articuloObj->nombre }}</span>
-                                                                                    <small class="text-muted">{{ $articuloObj->codigo ?? 'Sin código' }}</small>
-                                                                                </div>
-                                                                            </div>
-                                                                            <input type="hidden" name="articulos_servicio[{{ $articuloId }}]" value="{{ $cantidad }}">
-                                                                        </td>
-                                                                        <td>
-                                                                            <div class="input-group input-group-sm">
-                                                                                <input type="number" step="0.01" class="form-control cantidad-articulo" value="{{ $cantidad }}" min="0.01" required onchange="actualizarCantidad(this, {{ $articuloId }})">
-                                                                                <span class="input-group-text">{{ $articuloObj->unidad->abreviatura }}</span>
-                                                                            </div>
-                                                                        </td>
-                                                                        <td>
-                                                                            <div class="input-group input-group-sm">
-                                                                                <span class="input-group-text">{{ $config->currency_simbol }}.</span>
-                                                                                <input type="text" class="form-control costo-articulo" value="{{ number_format($costo, 2) }}" readonly>
-                                                                            </div>
-                                                                        </td>
-                                                                        <td>
-                                                                            <button type="button" class="btn btn-danger btn-sm remove-articulo-servicio">
-                                                                                <i class="bi bi-trash"></i>
-                                                                            </button>
-                                                                        </td>
-                                                                    </tr>
-                                                                @endforeach
-                                                            @endif
-                                                        </tbody>
-                                                        <tfoot>
-                                                            <tr class="table-light">
-                                                                <th colspan="2" class="text-end">Costo Total:</th>
-                                                                <th>
-                                                                    <div class="input-group input-group-sm">
-                                                                        <span class="input-group-text">{{ $config->currency_simbol }}.</span>
-                                                                        <input type="text" id="costo-total" class="form-control" value="0.00" readonly>
-                                                                    </div>
-                                                                </th>
-                                                                <th></th>
-                                                            </tr>
-                                                        </tfoot>
-                                                    </table>
+                                            <div class="card mb-3">
+                                                <div class="card-header bg-light">
+                                                    <h6 class="mb-0"><i class="bi bi-graph-up"></i> Análisis de Rentabilidad</h6>
                                                 </div>
+                                                <div class="card-body p-0">
+                                                    <div id="margen-detalle" class="p-3">
+                                                        <h6 class="mb-3">Margen de Ganancia</h6>
+                                                        <table class="table table-sm">
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td class="text-start">Precio de venta</td>
+                                                                    <td class="text-end" id="td-precio-venta">{{ $config->currency_simbol }}.0.00</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td class="text-start">Precio de compra</td>
+                                                                    <td class="text-end text-danger" id="td-precio-compra">- {{ $config->currency_simbol }}.0.00</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td class="text-start" id="td-label-impuesto">Impuesto (0%)</td>
+                                                                    <td class="text-end text-danger" id="td-impuesto">- {{ $config->currency_simbol }}.0.00</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td class="text-start fw-bold">Ganancia real</td>
+                                                                    <td class="text-end text-success" id="td-ganancia-real">{{ $config->currency_simbol }}.0.00</td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                        <div class="d-flex justify-content-between align-items-center mt-2">
+                                                            <span class="fw-bold">Margen:</span>
+                                                            <span class="badge bg-success fs-6" id="margen-valor">0.00%</span>
+                                                        </div>
+                                                        <div class="progress mt-1">
+                                                            <div class="progress-bar bg-success" id="margen-barra" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Stock -->
+                                        <div class="col-md-6">
+                                            <div class="card mb-3">
+                                                <div class="card-header bg-light">
+                                                    <h6 class="mb-0"><i class="bi bi-box-seam"></i> Inventario</h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="mb-3">
+                                                        <label for="unidad_id" class="form-label">Unidad de medida</label>
+                                                        <select class="form-select" id="unidad_id" name="unidad_id" required>
+                                                            <option value="">Seleccione una unidad</option>
+                                                            @foreach($unidades as $unidad)
+                                                                <option value="{{ $unidad->id }}" {{ old('unidad_id') == $unidad->id ? 'selected' : '' }} data-tipo="{{ $unidad->tipo }}">{{ $unidad->nombre }} ({{ $unidad->abreviatura }})</option>
+                                                            @endforeach
+                                                        </select>
+                                                        @if ($errors->has('unidad_id'))
+                                                            <div class="invalid-feedback d-block">
+                                                                <strong>{{ $errors->first('unidad_id') }}</strong>
+                                                            </div>
+                                                        @endif
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label for="stock" class="form-label">Stock actual</label>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text"><i class="bi bi-boxes"></i></span>
+                                                            <input type="number" step="0.01" min="0" class="form-control" id="stock" name="stock" value="{{ old('stock', 0) }}" required>
+                                                        </div>
+                                                        @if ($errors->has('stock'))
+                                                            <div class="invalid-feedback d-block">
+                                                                <strong>{{ $errors->first('stock') }}</strong>
+                                                            </div>
+                                                        @endif
+                                                    </div>
+                                                    <div class="mb-0">
+                                                        <label for="stock_minimo" class="form-label">Stock mínimo</label>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text"><i class="bi bi-exclamation-triangle"></i></span>
+                                                            <input type="number" step="0.01" min="0" class="form-control" id="stock_minimo" name="stock_minimo" value="{{ old('stock_minimo', 0) }}" required>
+                                                        </div>
+                                                        @if ($errors->has('stock_minimo'))
+                                                            <div class="invalid-feedback d-block">
+                                                                <strong>{{ $errors->first('stock_minimo') }}</strong>
+                                                            </div>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Sección: Comisión para mecánico (solo visible para servicios) -->
+                                        <div class="col-md-12 mt-3" id="seccion-mecanico" style="display: none;">
+                                            <div class="card">
+                                                <div class="card-header bg-info bg-opacity-25">
+                                                    <h6 class="mb-0"><i class="bi bi-wrench-adjustable"></i> Asignación y Comisiones</h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="row">
+                                                        <div class="col-md-4 mb-3">
+                                                            <label for="mecanico_id" class="form-label">Asignar Mecánico</label>
+                                                            <select class="form-select" id="mecanico_id" name="mecanico_id">
+                                                                <option value="">No asignar mecánico fijo</option>
+                                                                @foreach($mecanicos as $mecanico)
+                                                                    <option value="{{ $mecanico->id }}" {{ old('mecanico_id') == $mecanico->id ? 'selected' : '' }}>
+                                                                        {{ $mecanico->nombre_completo }}
+                                                                    </option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-4 mb-3">
+                                                            <label for="costo_mecanico" class="form-label">Comisión Mecánico</label>
+                                                            <div class="input-group">
+                                                                <span class="input-group-text">{{ $config->currency_simbol }}</span>
+                                                                <input type="number" step="0.01" min="0" class="form-control" id="costo_mecanico" name="costo_mecanico" value="{{ old('costo_mecanico', 0) }}" onchange="calcularMargen()">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4 mb-3">
+                                                            <label for="comision_carwash" class="form-label">Comisión Car Wash</label>
+                                                            <div class="input-group">
+                                                                <span class="input-group-text">{{ $config->currency_simbol }}</span>
+                                                                <input type="number" step="0.01" min="0" class="form-control" id="comision_carwash" name="comision_carwash" value="{{ old('comision_carwash', 0) }}" onchange="calcularMargen()">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Sección de Componentes de Servicio (solo para servicios) -->
+                                <div class="section mb-4" id="seccion-componentes" style="display: none;">
+                                    <h5 class="text-primary mb-3"><i class="bi bi-boxes"></i> Componentes del Servicio</h5>
+
+                                    <div class="alert alert-info">
+                                        <i class="bi bi-info-circle"></i> Agregue los artículos que componen este servicio.
+                                    </div>
+
+                                    <!-- Artículos para el servicio -->
+                                    <div class="card mb-4">
+                                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                            <h6 class="mb-0"><i class="bi bi-list-check"></i> Artículos del Servicio</h6>
+                                            <span class="badge bg-primary" id="contador-articulos">0</span>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <label for="articulo_servicio" class="form-label">Seleccionar Artículo</label>
+                                                    <select class="form-select" id="articulo_servicio">
+                                                        <option value="">Buscar artículo...</option>
+                                                        @foreach($articulos->where('tipo', 'articulo') as $articulo)
+                                                            <option value="{{ $articulo->id }}" data-precio="{{ $articulo->precio_compra }}" data-unidad="{{ $articulo->unidad->abreviatura }}">
+                                                                {{ $articulo->nombre }} ({{ $articulo->unidad->abreviatura }})
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label for="cantidad_servicio" class="form-label">Cantidad</label>
+                                                    <input type="number" step="0.01" min="0.01" class="form-control" id="cantidad_servicio" value="1">
+                                                </div>
+                                                <div class="col-md-3 d-flex align-items-end">
+                                                    <button type="button" class="btn btn-success w-100" id="add-articulo-servicio">
+                                                        <i class="bi bi-plus-circle"></i> Agregar Artículo
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <div class="table-responsive">
+                                                <table class="table table-sm table-hover" id="tabla-servicio">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Artículo</th>
+                                                            <th style="width: 150px;">Cantidad</th>
+                                                            <th style="width: 150px;">Costo</th>
+                                                            <th style="width: 70px;">Acción</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="servicio-articulos-body">
+                                                        <!-- Aquí se añaden dinámicamente los artículos -->
+                                                    </tbody>
+                                                    <tfoot>
+                                                        <tr class="table-light">
+                                                            <td class="fw-bold text-end" colspan="2">Costo Total:</td>
+                                                            <td class="fw-bold" colspan="2">
+                                                                <div class="input-group input-group-sm">
+                                                                    <span class="input-group-text">{{ $config->currency_simbol }}</span>
+                                                                    <input type="text" class="form-control" id="costo-total" value="0.00" readonly>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </tfoot>
+                                                </table>
                                             </div>
                                         </div>
                                     </div>
@@ -396,18 +374,18 @@
             <!-- Row end -->
         </div>
         <!-- Content wrapper end -->
-
     </div>
     <!-- Content wrapper scroll end -->
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function() {
     // Referencias a elementos principales
     const tipoSelect = document.querySelector('#tipo');
-    const componentesTab = document.querySelector('#componentes-tab');
     const btnGuardar = document.querySelector('#btn-guardar');
     const precioCompraInput = document.querySelector('#precio_compra');
     const precioVentaInput = document.querySelector('#precio_venta');
+    const seccionMecanico = document.querySelector('#seccion-mecanico');
+    const seccionComponentes = document.querySelector('#seccion-componentes');
 
     // Referencias para artículos de servicio
     const articuloServicioSelect = document.querySelector('#articulo_servicio');
@@ -437,7 +415,47 @@ document.addEventListener('DOMContentLoaded', function () {
         $('#unidad_id').select2({
             placeholder: 'Seleccione una unidad de medida'
         });
+
+        $('#mecanico_id').select2({
+            placeholder: 'Seleccione un mecánico'
+        });
     }
+
+    // Cambiar visibilidad de secciones según el tipo
+    tipoSelect.addEventListener('change', function() {
+        console.log("Tipo cambiado a:", this.value);
+
+        if (this.value === 'servicio') {
+            // Mostrar elementos para servicios
+            if (seccionMecanico) seccionMecanico.style.display = 'block';
+            if (seccionComponentes) seccionComponentes.style.display = 'block';
+
+            // Enfocar la sección de componentes para asegurar la visibilidad
+            setTimeout(() => {
+                const seccionRect = seccionComponentes.getBoundingClientRect();
+                const isInViewport = (
+                    seccionRect.top >= 0 &&
+                    seccionRect.left >= 0 &&
+                    seccionRect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+                    seccionRect.right <= (window.innerWidth || document.documentElement.clientWidth)
+                );
+
+                if (!isInViewport) {
+                    seccionComponentes.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 300);
+        } else {
+            // Ocultar elementos para artículos
+            if (seccionMecanico) seccionMecanico.style.display = 'none';
+            if (seccionComponentes) seccionComponentes.style.display = 'none';
+        }
+
+        // Recalcular margen al cambiar el tipo
+        calcularMargen();
+    });
+
+    // Calcular margen al cargar la página
+    calcularMargen();
 
     // Cargar información de unidades para todos los artículos disponibles
     document.querySelectorAll('#articulo_servicio option').forEach(option => {
@@ -460,25 +478,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
     });
-
-    // Cambiar visibilidad de pestaña de componentes según el tipo
-    tipoSelect.addEventListener('change', function() {
-        if (this.value === 'servicio') {
-            componentesTab.classList.remove('d-none');
-            // Activar la pestaña de componentes
-            const componentsTabTrigger = new bootstrap.Tab(componentesTab);
-            componentsTabTrigger.show();
-        } else {
-            componentesTab.classList.add('d-none');
-            // Activar primera pestaña
-            const infoTabTrigger = document.querySelector('#info-tab');
-            const bsInfoTab = new bootstrap.Tab(infoTabTrigger);
-            bsInfoTab.show();
-        }
-    });
-
-    // Calcular margen al cargar la página
-    calcularMargen();
 
     // Modificar validación de campos de stock según tipo de unidad
     unidadSelect.addEventListener('change', function() {
@@ -594,7 +593,7 @@ document.addEventListener('DOMContentLoaded', function () {
             </td>
             <td>
                 <div class="input-group input-group-sm">
-                    <span class="input-group-text">{{ $config->currency_simbol }}.</span>
+                    <span class="input-group-text">{{ $config->currency_simbol }}</span>
                     <input type="text" class="form-control costo-articulo" value="${costo.toFixed(2)}" readonly>
                 </div>
             </td>
@@ -617,7 +616,7 @@ document.addEventListener('DOMContentLoaded', function () {
         actualizarCostoTotal();
     });
 
-    // Eliminar artículo de la tabla (delegación de eventos)
+    // Eliminar artículo de la tabla
     document.addEventListener('click', function(e) {
         if (e.target.matches('.remove-articulo-servicio') || e.target.closest('.remove-articulo-servicio')) {
             const boton = e.target.matches('.remove-articulo-servicio') ? e.target : e.target.closest('.remove-articulo-servicio');
@@ -627,7 +626,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Actualizar costo al cambiar cantidad (delegación de eventos)
+    // Actualizar costo al cambiar cantidad
     document.addEventListener('input', function(e) {
         if (e.target.matches('.cantidad-articulo')) {
             const cantidadInput = e.target;
@@ -658,12 +657,13 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelector('#form-articulo').addEventListener('submit', function(e) {
         if (tipoSelect.value === 'servicio') {
             const tieneArticulos = servicioArticulosBody.querySelectorAll('tr').length > 0;
-
             if (!tieneArticulos) {
                 e.preventDefault();
                 alert('Debe agregar al menos un artículo al servicio');
-                const componentsTabTrigger = new bootstrap.Tab(componentesTab);
-                componentsTabTrigger.show();
+                window.scrollTo({
+                    top: document.querySelector('#seccion-componentes').offsetTop - 100,
+                    behavior: 'smooth'
+                });
             }
         }
     });
@@ -695,25 +695,13 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Verificar si hay datos antiguos de servicio al cargar y actualizar contadores
-    if (servicioArticulosBody.querySelectorAll('tr').length > 0) {
-        actualizarContadores();
-        actualizarCostoTotal();
-    }
-
-    // Mostrar/ocultar pestaña de componentes según el tipo al cargar
+    // Inicialización según el tipo seleccionado al cargar
     if (tipoSelect.value === 'servicio') {
-        componentesTab.classList.remove('d-none');
+        seccionMecanico.style.display = 'block';
+        seccionComponentes.style.display = 'block';
     } else {
-        componentesTab.classList.add('d-none');
-    }
-
-    // Ejecutar la validación inicial de unidades
-    if (unidadSelect.selectedIndex > 0) {
-        setTimeout(() => {
-            const event = new Event('change');
-            unidadSelect.dispatchEvent(event);
-        }, 100);
+        seccionMecanico.style.display = 'none';
+        seccionComponentes.style.display = 'none';
     }
 
     // Función para validar que solo se ingresen números enteros
@@ -743,6 +731,14 @@ document.addEventListener('DOMContentLoaded', function () {
             input.removeEventListener('input', soloPermitirEnteros);
         }
     }
+
+    // Ejecutar la validación inicial de unidades
+    if (unidadSelect.selectedIndex > 0) {
+        setTimeout(() => {
+            const event = new Event('change');
+            unidadSelect.dispatchEvent(event);
+        }, 100);
+    }
 });
 
 // Función para calcular y mostrar margen de ganancia
@@ -753,13 +749,24 @@ function calcularMargen() {
     const impuestoPorcentaje = parseFloat(document.getElementById('impuesto_porcentaje').value) || 0;
     const simboloMoneda = document.getElementById('currency_simbol').value || '$';
 
+    // Costos adicionales - comisiones
+    const costoMecanico = parseFloat(document.getElementById('costo_mecanico')?.value || 0);
+    const comisionCarwash = parseFloat(document.getElementById('comision_carwash')?.value || 0);
+    const tipoArticulo = document.getElementById('tipo').value;
+
+    // Solo aplicar costos de comisiones si es un servicio
+    const costosComisiones = (tipoArticulo === 'servicio') ? (costoMecanico + comisionCarwash) : 0;
+
     // Calcular costos adicionales
     const impuestoValor = precioVenta * (impuestoPorcentaje / 100);
 
-    // Calcular ganancia y margen
+    // Calcular ganancia y margen incluyendo comisiones
     const ganancia = precioVenta - precioCompra;
-    const gananciaReal = ganancia - impuestoValor;
-    const margenReal = precioCompra > 0 ? (gananciaReal / precioCompra) * 100 : 0;
+    const gananciaReal = ganancia - impuestoValor - costosComisiones;
+
+    // CORRECCIÓN: El margen se calcula sobre el costo total (precio de compra + comisiones)
+    const costoTotal = precioCompra + costosComisiones;
+    const margenReal = costoTotal > 0 ? (gananciaReal / costoTotal) * 100 : 0;
 
     // Actualizar etiquetas en la tabla
     document.getElementById('td-precio-venta').textContent = `${simboloMoneda}.${formatNumber(precioVenta)}`;
@@ -768,17 +775,56 @@ function calcularMargen() {
     document.getElementById('td-label-impuesto').textContent = `Impuesto (${formatNumber(impuestoPorcentaje)}%)`;
     document.getElementById('td-impuesto').textContent = `- ${simboloMoneda}.${formatNumber(impuestoValor)}`;
 
+    // Añadir filas para comisiones si es un servicio
+    const tablaMargen = document.querySelector('#margen-detalle table tbody');
+
+    // Buscar o crear filas para comisiones
+    let filaComisiones = document.getElementById('fila-comisiones');
+    if (tipoArticulo === 'servicio' && costosComisiones > 0) {
+        if (!filaComisiones) {
+            // Crear fila si no existe
+            filaComisiones = document.createElement('tr');
+            filaComisiones.id = 'fila-comisiones';
+
+            const tdLabel = document.createElement('td');
+            tdLabel.className = 'text-start';
+            tdLabel.id = 'td-label-comisiones';
+            tdLabel.textContent = 'Comisiones (Mecánico/CarWash)';
+
+            const tdValor = document.createElement('td');
+            tdValor.className = 'text-end text-danger';
+            tdValor.id = 'td-comisiones';
+
+            filaComisiones.appendChild(tdLabel);
+            filaComisiones.appendChild(tdValor);
+
+            // Insertar antes de la fila de ganancia
+            const filaGanancia = document.querySelector('#margen-detalle table tbody tr:last-child');
+            if (filaGanancia) {
+                tablaMargen.insertBefore(filaComisiones, filaGanancia);
+            } else {
+                tablaMargen.appendChild(filaComisiones);
+            }
+        }
+
+        // Actualizar valor
+        document.getElementById('td-comisiones').textContent = `- ${simboloMoneda}.${formatNumber(costosComisiones)}`;
+    } else if (filaComisiones) {
+        // Remover fila si no es servicio o no hay comisiones
+        filaComisiones.remove();
+    }
+
     // Colorear ganancia real
     const tdGananciaReal = document.getElementById('td-ganancia-real');
     tdGananciaReal.textContent = `${simboloMoneda}.${formatNumber(gananciaReal)}`;
     tdGananciaReal.className = gananciaReal >= 0 ? 'text-end text-success' : 'text-end text-danger';
 
-    // Actualizar margen visual
+    // Actualizar margen visual con el valor correcto
     const margenElement = document.getElementById('margen-valor');
     const margenBarra = document.getElementById('margen-barra');
     margenElement.textContent = `${formatNumber(margenReal)}%`;
 
-    // Establecer color según el valor del margen
+    // Establecer color según el valor del margen real
     let colorClass = 'bg-success';
     if (margenReal < 10) {
         colorClass = 'bg-danger';
