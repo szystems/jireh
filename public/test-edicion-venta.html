@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Edición Venta - Trabajadores Car Wash</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .warning { background: #fff3cd; color: #856404; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        .step { margin: 15px 0; padding: 10px; border-left: 3px solid #007bff; }
+        code { background: #f8f9fa; padding: 2px 4px; border-radius: 3px; }
+        .logs { background: #000; color: #0f0; padding: 15px; font-family: monospace; max-height: 300px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Test Edición Venta - Sistema Car Wash</h1>
+    
+    <div class="status info">
+        <strong>Estado actual:</strong> Sistema configurado para depuración completa (backend + frontend)
+    </div>
+
+    <div class="step">
+        <h3>1. Backend Status ✅</h3>
+        <ul>
+            <li>Error de logging corregido en <code>VentaController.php</code></li>
+            <li>Lógica de asignación de trabajadores funcionando correctamente</li>
+            <li>Logs detallados configurados para capturar todos los datos</li>
+        </ul>
+    </div>
+
+    <div class="step">
+        <h3>2. Frontend Status ⚠️</h3>
+        <ul>
+            <li>Script de depuración agregado (<code>test-form-data.js</code>)</li>
+            <li>Hack temporal activado para envío de trabajadores</li>
+            <li>Necesita validación manual en navegador</li>
+        </ul>
+    </div>
+
+    <div class="step">
+        <h3>3. Pasos para Test Manual:</h3>
+        <ol>
+            <li>Abrir una venta para editar (ej: <code>/admin/ventas/41/edit</code>)</li>
+            <li>Abrir la consola del navegador (F12)</li>
+            <li>Cambiar algunos trabajadores en la tabla</li>
+            <li>Verificar mensajes en consola del navegador</li>
+            <li>Hacer click en "Actualizar"</li>
+            <li>Revisar logs del terminal para confirmar datos recibidos</li>
+        </ol>
+    </div>
+
+    <div class="step">
+        <h3>4. Comandos de Monitoreo:</h3>
+        <div class="status warning">
+            <strong>Terminal 1:</strong> <code>tail -f storage/logs/laravel.log | grep -E "(DEBUG|trabajadores|INICIO|FIN)"</code>
+        </div>
+        <div class="status warning">
+            <strong>Terminal 2:</strong> Navegador F12 > Console
+        </div>
+    </div>
+
+    <div class="step">
+        <h3>5. Validaciones Pendientes:</h3>
+        <ul>
+            <li>☐ Confirmar que datos de trabajadores llegan al controlador</li>
+            <li>☐ Verificar que las comisiones se regeneran correctamente</li>
+            <li>☐ Validar que los cambios se reflejan en las vistas</li>
+            <li>☐ Probar agregado de nuevos artículos con trabajadores</li>
+        </ul>
+    </div>
+
+    <div class="step">
+        <h3>6. Enlaces Rápidos:</h3>
+        <ul>
+            <li><a href="/admin/ventas" target="_blank">Lista de Ventas</a></li>
+            <li><a href="/admin/ventas/41/edit" target="_blank">Editar Venta 41 (con trabajadores Car Wash)</a></li>
+            <li><a href="/admin/ventas/41" target="_blank">Ver Venta 41</a></li>
+        </ul>
+    </div>
+
+    <script>
+        // Auto-refresh cada 30 segundos para mantener actualizado
+        setTimeout(function() {
+            location.reload();
+        }, 30000);
+        
+        console.log('🎯 Página de test cargada. Lista para pruebas de edición de venta.');
+    </script>
+</body>
+</html>

@@ -11,8 +11,8 @@ use App\Http\Requests\ClienteFormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use App\Models\Config;
-use PDF;
-use DB;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\DB;
 
 class ClienteController extends Controller
 {
@@ -170,13 +170,13 @@ class ClienteController extends Controller
 
             if ( $verpdf == "Download" )
             {
-                $pdf = PDF::loadView('admin.cliente.pdf',['clientes'=>$clientes,'path'=>$path,'config'=>$config,'imagen'=>$imagen,'currency'=>$currency]);
+                $pdf = Pdf::loadView('admin.cliente.pdf',['clientes'=>$clientes,'path'=>$path,'config'=>$config,'imagen'=>$imagen,'currency'=>$currency]);
 
                 return $pdf->download ('Listado Clientes '.$nompdf.'.pdf');
             }
             if ( $verpdf == "Browser" )
             {
-                $pdf = PDF::loadView('admin.cliente.pdf',['clientes'=>$clientes,'path'=>$path,'config'=>$config,'imagen'=>$imagen,'currency'=>$currency]);
+                $pdf = Pdf::loadView('admin.cliente.pdf',['clientes'=>$clientes,'path'=>$path,'config'=>$config,'imagen'=>$imagen,'currency'=>$currency]);
 
                 return $pdf->stream ('Listado Clientes '.$nompdf.'.pdf');
             }
@@ -218,7 +218,7 @@ class ClienteController extends Controller
 
         if ( $verpdf == "Download" )
         {
-            $pdf = PDF::loadView('admin.cliente.pdfcliente', [
+            $pdf = Pdf::loadView('admin.cliente.pdfcliente', [
                 'cliente' => $cliente,
                 'path' => $path,
                 'config' => $config,
@@ -233,7 +233,7 @@ class ClienteController extends Controller
         }
         if ( $verpdf == "Browser" )
         {
-            $pdf = PDF::loadView('admin.cliente.pdfcliente', [
+            $pdf = Pdf::loadView('admin.cliente.pdfcliente', [
                 'cliente' => $cliente,
                 'path' => $path,
                 'config' => $config,

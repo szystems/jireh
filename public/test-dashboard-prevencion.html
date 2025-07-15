@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba Dashboard Prevención</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-button { margin: 10px; padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        .test-button:hover { background: #0056b3; }
+        .result { margin: 10px 0; padding: 10px; border: 1px solid #ddd; border-radius: 4px; background: #f8f9fa; }
+        .success { border-color: #28a745; background: #d4edda; }
+        .error { border-color: #dc3545; background: #f8d7da; }
+    </style>
+</head>
+<body>
+    <h1>Prueba Dashboard Prevención de Inconsistencias</h1>
+    
+    <div>
+        <h2>Funciones Disponibles</h2>
+        <button class="test-button" onclick="probarValidacionPreventiva()">Probar Validación Preventiva</button>
+        <button class="test-button" onclick="probarTransaccionAtomica()">Probar Transacción Atómica</button>
+        <button class="test-button" onclick="probarMonitoreoContinuo()">Probar Monitoreo Continuo</button>
+        <button class="test-button" onclick="obtenerEstadoSistema()">Obtener Estado del Sistema</button>
+    </div>
+
+    <div id="resultados">
+        <h2>Resultados</h2>
+    </div>
+
+    <script>
+        // Configurar CSRF token para todas las peticiones AJAX
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+
+        function mostrarResultado(titulo, data, isError = false) {
+            const resultado = document.createElement('div');
+            resultado.className = `result ${isError ? 'error' : 'success'}`;
+            resultado.innerHTML = `
+                <h3>${titulo}</h3>
+                <pre>${JSON.stringify(data, null, 2)}</pre>
+            `;
+            document.getElementById('resultados').appendChild(resultado);
+        }        function probarValidacionPreventiva() {
+            $.ajax({
+                url: '/prevencion-test/validacion',
+                method: 'POST',
+                data: {
+                    tipo_operacion: 'venta'
+                },
+                success: function(response) {
+                    mostrarResultado('Validación Preventiva - Éxito', response);
+                },
+                error: function(xhr) {
+                    mostrarResultado('Validación Preventiva - Error', xhr.responseJSON, true);
+                }
+            });
+        }
+
+        function probarTransaccionAtomica() {
+            $.ajax({
+                url: '/prevencion-test/transaccion',
+                method: 'POST',
+                data: {
+                    venta: {
+                        fecha: '2025-06-30',
+                        user_id: 1,
+                        cliente_id: 1,
+                        observaciones: 'Venta de prueba desde dashboard'
+                    },
+                    detalles: [
+                        { articulo_id: 1, cantidad: 2, precio_unitario: 100 },
+                        { articulo_id: 2, cantidad: 1, precio_unitario: 50 }
+                    ]
+                },
+                success: function(response) {
+                    mostrarResultado('Transacción Atómica - Éxito', response);
+                },
+                error: function(xhr) {
+                    mostrarResultado('Transacción Atómica - Error', xhr.responseJSON, true);
+                }
+            });
+        }
+
+        function probarMonitoreoContinuo() {
+            $.ajax({
+                url: '/prevencion-test/monitoreo',
+                method: 'POST',
+                data: {
+                    intervalo: 30
+                },
+                success: function(response) {
+                    mostrarResultado('Monitoreo Continuo - Éxito', response);
+                },
+                error: function(xhr) {
+                    mostrarResultado('Monitoreo Continuo - Error', xhr.responseJSON, true);
+                }
+            });
+        }
+
+        function obtenerEstadoSistema() {
+            $.ajax({
+                url: '/prevencion-test/estado',
+                method: 'GET',
+                success: function(response) {
+                    mostrarResultado('Estado del Sistema - Éxito', response);
+                },
+                error: function(xhr) {
+                    mostrarResultado('Estado del Sistema - Error', xhr.responseJSON, true);
+                }
+            });
+        }
+    </script>
+</body>
+</html>

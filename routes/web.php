@@ -19,9 +19,16 @@ use App\Http\Controllers\Admin\TrabajadorController;
 use App\Http\Controllers\Admin\TipoTrabajadorController; // Añadir esta importación
 use App\Http\Controllers\Admin\InventarioController;
 use App\Http\Controllers\Admin\DescuentoController;
+use App\Http\Controllers\Admin\ComisionController;
 use App\Http\Controllers\Admin\VentaController;
 use App\Http\Controllers\Admin\PagoController;
 use App\Http\Controllers\Admin\ReporteArticuloController;
+use App\Http\Controllers\Admin\TestController; // Controlador de pruebas
+use App\Http\Controllers\Admin\DatosInicialesController; // Controlador para generar datos iniciales
+use App\Http\Controllers\Admin\AuditoriaController; // Controlador de auditoría
+use App\Http\Controllers\Admin\PrevencionInconsistenciasController; // Controlador de prevención
+use App\Http\Controllers\Admin\DashboardController; // Nuevo controlador de dashboard mejorado
+use App\Http\Controllers\Admin\NotificacionController; // Controlador de notificaciones
 
 /*
 |--------------------------------------------------------------------------
@@ -46,6 +53,20 @@ Auth::routes();
 Route::middleware(['auth'])->group(function () {
     //Control Panel
     Route::get('/dashboard',[AdminController::class, 'index']);
+    
+
+    // Notificaciones
+    Route::get('/notificaciones', [NotificacionController::class, 'index'])->name('notificaciones.index');
+    Route::get('/api/notificaciones', [NotificacionController::class, 'obtenerNotificacionesApi'])->name('notificaciones.api');
+    Route::post('/api/notificaciones/marcar-leida/{id}', [NotificacionController::class, 'marcarComoLeida'])->name('notificaciones.marcar_leida');
+    Route::post('/api/notificaciones/marcar-todas-leidas', [NotificacionController::class, 'marcarTodasComoLeidas'])->name('notificaciones.marcar_todas');
+    Route::get('/api/notificaciones/resumen', [NotificacionController::class, 'obtenerResumen'])->name('notificaciones.resumen');
+    Route::get('/api/notificaciones/reporte', [NotificacionController::class, 'generarReporteNotificaciones'])->name('notificaciones.reporte');
+    
+    // Dashboard Mejorado
+    Route::get('/dashboard-pro',[DashboardController::class, 'index'])->name('dashboard.pro');
+    Route::get('/api/dashboard/estado-sistema',[DashboardController::class, 'getEstadoSistema'])->name('dashboard.estado');
+    Route::get('/api/dashboard/metricas-vivo',[DashboardController::class, 'getMetricasEnVivo'])->name('dashboard.metricas');
 
     //Admin Users
     Route::get('users', [UsersController::class, 'users']);
@@ -181,16 +202,23 @@ Route::middleware(['auth'])->group(function () {
     Route::get('delete-descuento/{id}', [DescuentoController::class, 'destroy']);
 
     //Ventas
-    Route::get('ventas', [VentaController::class, 'index']);
+    Route::get('ventas', [VentaController::class, 'index'])->name('admin.ventas.index'); // <- AÑADIR ESTA LÍNEA
     Route::get('add-venta', [VentaController::class, 'create']);
     Route::post('insert-venta', [VentaController::class, 'store']);
     Route::get('show-venta/{id}', [VentaController::class, 'show'])->name('ventas.show');
     Route::get('edit-venta/{id}', [VentaController::class, 'edit']);
-    Route::put('update-venta/{id}', [VentaController::class, 'update']);
+    Route::put('update-venta/{id}', [VentaController::class, 'update'])->name('admin.ventas.update'); // Named this route
     Route::get('delete-venta/{id}', [VentaController::class, 'destroy']);
     Route::get('venta/export/pdf', [VentaController::class, 'exportPdf'])->name('ventas.export.pdf');
     Route::get('venta/export/excel', [VentaController::class, 'exportExcel'])->name('ventas.export.excel');
     Route::get('venta/export/single/pdf/{id}', [VentaController::class, 'exportSinglePdf'])->name('ventas.export.single.pdf');
+    Route::post('update-trabajadores-detalle', [VentaController::class, 'updateTrabajadoresDetalle'])->name('ventas.update.trabajadores');
+
+    // Rutas para detalles de venta (AJAX)
+    Route::put('ventas/{venta}/detalles/{detalle}', [VentaController::class, 'updateDetalle'])->name('admin.ventas.detalle.update');
+    Route::delete('ventas/{venta}/detalles/{detalle}', [VentaController::class, 'destroyDetalle'])->name('admin.ventas.detalle.destroy');
+    Route::post('ventas/{venta}/detalles/{detalle}/restore', [VentaController::class, 'restoreDetalle'])->name('admin.ventas.detalle.restore');
+
 
     // Pagos
     Route::post('pagos', [PagoController::class, 'store']);
@@ -204,6 +232,7 @@ Route::middleware(['auth'])->group(function () {
     //config
     Route::get('config', [ConfigController::class, 'index']);
     Route::put('update-config', [ConfigController::class, 'update']);
+
 });
 
 // Rutas para trabajadores
@@ -211,4 +240,112 @@ Route::middleware(['auth', 'isAdmin'])->group(function () {
     // ...existing routes...
     Route::get('/toggle-status-trabajador/{id}', [App\Http\Controllers\Admin\TrabajadorController::class, 'toggleStatus']);
     // ...existing routes...
+});
+
+// Rutas para comisiones (requiere autenticación)
+Route::middleware(['auth'])->group(function () {
+    Route::prefix('comisiones')->name('comisiones.')->group(function() {
+        Route::get('/', [ComisionController::class, 'index'])->name('index');
+        Route::get('/dashboard', [ComisionController::class, 'dashboard'])->name('dashboard');
+        Route::get('/show/{id}', [ComisionController::class, 'show'])->name('show');
+        Route::get('/por-trabajador', [ComisionController::class, 'porTrabajador'])->name('por_trabajador');
+        Route::get('/por-vendedor', [ComisionController::class, 'porVendedor'])->name('por_vendedor');
+        Route::post('/registrar-pago/{id}', [ComisionController::class, 'registrarPago'])->name('registrar_pago');
+        Route::get('/resumen', [ComisionController::class, 'resumen'])->name('resumen');
+        // Nueva ruta para procesar comisiones de vendedores por metas
+        Route::post('/procesar-vendedores', [ComisionController::class, 'procesarComisionesVendedores'])->name('procesar_vendedores');
+    });
+
+    // Rutas de Auditoría de Ventas e Inventario
+    Route::prefix('admin/auditoria')->name('auditoria.')->group(function() {
+        Route::get('/', [AuditoriaController::class, 'index'])->name('index');
+        Route::post('/ejecutar', [AuditoriaController::class, 'ejecutarAuditoria'])->name('ejecutar');
+        Route::get('/stock-tiempo-real', [AuditoriaController::class, 'reporteStockTiempoReal'])->name('stock_tiempo_real');
+        Route::get('/alertas-stock', [AuditoriaController::class, 'alertasStock'])->name('alertas_stock');
+        Route::get('/inconsistencias-ventas', [AuditoriaController::class, 'inconsistenciasVentas'])->name('inconsistencias_ventas');
+        Route::get('/reporte/{fecha}', [AuditoriaController::class, 'verReporte'])->name('ver_reporte');
+        
+        // Nuevas rutas para funcionalidades avanzadas
+        Route::post('/corregir-stock/{articuloId}', [AuditoriaController::class, 'corregirStock'])->name('corregir_stock');
+        Route::post('/ajuste-manual', [AuditoriaController::class, 'ajusteManual'])->name('ajuste_manual');
+        Route::post('/reabastecer/{articuloId}', [AuditoriaController::class, 'reabastecer'])->name('reabastecer');
+        Route::get('/articulo-detalle/{articuloId}', [AuditoriaController::class, 'articuloDetalle'])->name('articulo_detalle');
+        Route::get('/historial-movimientos/{articuloId}', [AuditoriaController::class, 'historialMovimientos'])->name('historial_movimientos');
+        Route::get('/comparar-ventas/{venta1Id}/{venta2Id}', [AuditoriaController::class, 'compararVentas'])->name('comparar_ventas');
+        Route::post('/enviar-notificaciones', [AuditoriaController::class, 'enviarNotificaciones'])->name('enviar_notificaciones');
+        Route::get('/exportar-stock/{formato}', [AuditoriaController::class, 'exportarStock'])->name('exportar_stock');
+        Route::get('/exportar-reporte/{fecha}', [AuditoriaController::class, 'exportarReporte'])->name('exportar_reporte');
+        
+        // Rutas para corrección de inconsistencias
+        Route::post('/corregir-detalle', [AuditoriaController::class, 'corregirDetalle'])->name('corregir_detalle');
+        Route::delete('/eliminar-detalle/{detalleId}', [AuditoriaController::class, 'eliminarDetalle'])->name('eliminar_detalle');
+        Route::post('/fusionar-ventas/{venta1Id}/{venta2Id}', [AuditoriaController::class, 'fusionarVentas'])->name('fusionar_ventas');
+        Route::delete('/eliminar-venta/{ventaId}', [AuditoriaController::class, 'eliminarVenta'])->name('eliminar_venta');
+    });
+
+    // 🆕 RUTAS PARA PREVENCIÓN DE INCONSISTENCIAS
+    Route::prefix('admin/prevencion')->name('admin.prevencion.')->group(function () {
+        Route::get('/test', [PrevencionInconsistenciasController::class, 'test'])->name('test');
+        Route::get('/dashboard', [PrevencionInconsistenciasController::class, 'dashboard'])->name('dashboard');
+        Route::get('/estado-sistema', [PrevencionInconsistenciasController::class, 'estadoSistema'])->name('estado_sistema');
+        
+        // OPCIÓN 1: Validación preventiva en tiempo real
+        Route::post('/validacion-preventiva', [PrevencionInconsistenciasController::class, 'ejecutarValidacionPreventiva'])->name('validacion_preventiva');
+        
+        // OPCIÓN 2: Transacciones atómicas
+        Route::post('/venta-atomica', [PrevencionInconsistenciasController::class, 'ejecutarVentaAtomica'])->name('venta_atomica');
+        
+        // OPCIÓN 3: Monitoreo continuo y auto-corrección
+        Route::post('/monitoreo-continuo', [PrevencionInconsistenciasController::class, 'ejecutarMonitoreoContinuo'])->name('monitoreo_continuo');
+        Route::post('/configurar-monitoreo', [PrevencionInconsistenciasController::class, 'configurarMonitoreoAutomatico'])->name('configurar_monitoreo');
+        
+        // Reportes y análisis
+        Route::get('/reporte-inconsistencias', [PrevencionInconsistenciasController::class, 'generarReporteInconsistencias'])->name('reporte_inconsistencias');
+    });
+
+    // Rutas para metas de ventas
+    Route::prefix('metas-ventas')->name('metas-ventas.')->group(function() {
+        Route::get('/', [App\Http\Controllers\Admin\MetaVentaController::class, 'index'])->name('index');
+        Route::get('/create', [App\Http\Controllers\Admin\MetaVentaController::class, 'create'])->name('create');
+        Route::post('/', [App\Http\Controllers\Admin\MetaVentaController::class, 'store'])->name('store');
+        Route::get('/{metaVenta}', [App\Http\Controllers\Admin\MetaVentaController::class, 'show'])->name('show');
+        Route::get('/{metaVenta}/edit', [App\Http\Controllers\Admin\MetaVentaController::class, 'edit'])->name('edit');
+        Route::put('/{metaVenta}', [App\Http\Controllers\Admin\MetaVentaController::class, 'update'])->name('update');
+        Route::delete('/{metaVenta}', [App\Http\Controllers\Admin\MetaVentaController::class, 'destroy'])->name('destroy');
+        Route::patch('/{metaVenta}/toggle-estado', [App\Http\Controllers\Admin\MetaVentaController::class, 'toggleEstado'])->name('toggle-estado');
+        Route::get('/periodo/{periodo}', [App\Http\Controllers\Admin\MetaVentaController::class, 'porPeriodo'])->name('por-periodo');
+        Route::get('/api/meta-por-monto', [App\Http\Controllers\Admin\MetaVentaController::class, 'obtenerMetaPorMonto'])->name('meta-por-monto');
+    });
+
+});
+
+//Rutas de prueba - Sin autenticación
+Route::get('test', [TestController::class, 'index']);
+Route::get('test/venta-con-servicio', [TestController::class, 'testVentaConServicio']);
+
+// Ruta de prueba para dashboard sin autenticación
+Route::get('test-dashboard-pro', [DashboardController::class, 'index']);
+
+// Ruta de prueba para notificaciones sin autenticación
+Route::get('test-notificaciones', [NotificacionController::class, 'index']);
+
+// Ruta de prueba para dashboard de prevención sin autenticación
+Route::get('prevencion-test', [PrevencionInconsistenciasController::class, 'dashboard'])->name('prevencion.test');
+Route::get('prevencion-test/estado', [PrevencionInconsistenciasController::class, 'estadoSistema'])->name('prevencion.test.estado');
+Route::post('prevencion-test/validacion', [PrevencionInconsistenciasController::class, 'ejecutarValidacionPreventiva'])->name('prevencion.test.validacion');
+Route::post('prevencion-test/transaccion', [PrevencionInconsistenciasController::class, 'ejecutarVentaAtomica'])->name('prevencion.test.transaccion');
+Route::post('prevencion-test/monitoreo', [PrevencionInconsistenciasController::class, 'ejecutarMonitoreoContinuo'])->name('prevencion.test.monitoreo');
+Route::get('test/venta-completa', [TestController::class, 'testVentaCompleta']);
+Route::get('test/ver-comisiones/{ventaId}', [App\Http\Controllers\Admin\ComisionController::class, 'verComisiones']);
+Route::get('test/eliminar-venta/{ventaId}', [TestController::class, 'testEliminarVenta']);
+Route::get('test/crear-datos-prueba', [DatosInicialesController::class, 'crearDatosPrueba']);
+
+// Ruta de prueba para prevención
+Route::get('/test-prevencion', function() {
+    return response()->json(['mensaje' => 'Rutas de prevención funcionando', 'timestamp' => now()]);
+});
+
+// Ruta de prueba simplificada para prevención (sin autenticación)
+Route::get('/prevencion-simple', function() {
+    return view('admin.prevencion.dashboard-simple');
 });

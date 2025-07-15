@@ -16,17 +16,14 @@ class MetaVenta extends Model
      * The attributes that are mass assignable.
      *
      * @var array
-     */
-    protected $fillable = [
-        'usuario_id',
+     */    protected $fillable = [
+        'nombre',
+        'descripcion',
         'monto_minimo',
         'monto_maximo',
         'porcentaje_comision',
         'periodo',
-        'fecha_inicio',
-        'fecha_fin',
-        'estado',
-        'observaciones',
+        'estado'
     ];
 
     /**
@@ -38,9 +35,7 @@ class MetaVenta extends Model
         'monto_minimo' => 'decimal:2',
         'monto_maximo' => 'decimal:2',
         'porcentaje_comision' => 'decimal:2',
-        'fecha_inicio' => 'date',
-        'fecha_fin' => 'date',
-        'estado' => 'boolean',
+        'estado' => 'boolean'
     ];
 
     /**
@@ -87,23 +82,22 @@ class MetaVenta extends Model
 
     /**
      * Scope para metas del periodo actual
+     * NOTA: Las metas son generales, no tienen fechas específicas
      */
     public function scopePeriodoActual($query)
     {
-        $hoy = Carbon::now();
-        return $query->where('fecha_inicio', '<=', $hoy)
-                    ->where(function($q) use ($hoy) {
-                        $q->where('fecha_fin', '>=', $hoy)
-                          ->orWhereNull('fecha_fin');
-                    });
+        // Para metas generales, simplemente retornamos todas las activas
+        return $query->where('estado', true);
     }
 
     /**
      * Scope para metas de un usuario específico
+     * NOTA: Las metas son generales, no por usuario específico
      */
     public function scopeDeUsuario($query, $usuarioId)
     {
-        return $query->where('usuario_id', $usuarioId);
+        // Para metas generales, ignoramos el usuario y retornamos todas las activas
+        return $query->where('estado', true);
     }
 
     /**
@@ -115,5 +109,55 @@ class MetaVenta extends Model
                     ->periodoActual()
                     ->deUsuario($usuarioId)
                     ->get();
+    }
+
+    /**
+     * Determinar qué meta corresponde a un monto vendido
+     */
+    public static function determinarMetaPorMonto($montoVendido, $periodo = 'mensual')
+    {
+        return self::activas()
+            ->where('periodo', $periodo)
+            ->where('monto_minimo', '<=', $montoVendido)
+            ->where(function($query) use ($montoVendido) {
+                $query->whereNull('monto_maximo')
+                      ->orWhere('monto_maximo', '>=', $montoVendido);
+            })
+            ->orderBy('monto_minimo', 'desc')
+            ->first();
+    }
+
+    /**
+     * Obtener todas las metas ordenadas por monto mínimo
+     */
+    public static function obtenerMetasOrdenadas($periodo = 'mensual')
+    {
+        return self::activas()
+            ->where('periodo', $periodo)
+            ->orderBy('monto_minimo', 'asc')
+            ->get();
+    }
+
+    /**
+     * Formatear el rango de montos para mostrar
+     */
+    public function getRangoFormateadoAttribute()
+    {
+        $inicio = 'Q' . number_format($this->monto_minimo, 2);
+        
+        if ($this->monto_maximo) {
+            $fin = 'Q' . number_format($this->monto_maximo, 2);
+            return "{$inicio} - {$fin}";
+        }
+        
+        return "{$inicio} en adelante";
+    }
+
+    /**
+     * Formatear el porcentaje de comisión
+     */
+    public function getPorcentajeFormateadoAttribute()
+    {
+        return $this->porcentaje_comision . '%';
     }
 }

@@ -1,0 +1,258 @@
+<?php
+/**
+ * Script para probar la funcionalidad de agregar nuevo detalle
+ * Ejecutar en el navegador después de cargar la página de edición de venta
+ */
+?>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Funcionalidad Agregar Detalle</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .test-card { border-left: 4px solid #28a745; }
+        .code-block { 
+            background: #f8f9fa; 
+            border: 1px solid #e9ecef; 
+            border-radius: 5px; 
+            padding: 15px; 
+            font-family: 'Courier New', monospace; 
+            font-size: 14px;
+            white-space: pre-wrap;
+        }
+        .step { margin: 20px 0; padding: 15px; border-left: 3px solid #007bff; background: #f8f9fa; }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <h2>🧪 Test: Funcionalidad Agregar Nuevo Detalle</h2>
+        
+        <div class="alert alert-info">
+            <h5><i class="bi bi-info-circle"></i> Instrucciones</h5>
+            <ol>
+                <li>Abra la página de edición de venta en otra pestaña</li>
+                <li>Abra las herramientas de desarrollador (F12)</li>
+                <li>Vaya a la pestaña Console</li>
+                <li>Copie y pegue cada script de abajo uno por uno</li>
+                <li>Ejecute cada paso y observe los resultados</li>
+            </ol>
+        </div>
+
+        <div class="step">
+            <h4>Paso 1: Verificar que los elementos existen</h4>
+            <div class="code-block">
+// === VERIFICACIÓN DE ELEMENTOS ===
+console.log('🔍 Verificando elementos del formulario...');
+const elementos = {
+    'Botón agregar': $('#agregar-detalle').length,
+    'Select artículo': $('#articulo').length,
+    'Input cantidad': $('#cantidad-nuevo').length,
+    'Select descuento': $('#descuento-nuevo').length,
+    'Select trabajadores': $('#trabajadores-carwash-nuevo').length,
+    'Tbody nuevos detalles': $('#nuevos-detalles').length,
+    'Container nuevos detalles': $('#nuevos-detalles-container').length
+};
+
+Object.entries(elementos).forEach(([nombre, cantidad]) => {
+    console.log(`${cantidad > 0 ? '✅' : '❌'} ${nombre}: ${cantidad}`);
+});
+            </div>
+        </div>
+
+        <div class="step">
+            <h4>Paso 2: Verificar Select2</h4>
+            <div class="code-block">
+// === VERIFICACIÓN DE SELECT2 ===
+console.log('🔍 Verificando Select2...');
+const select2Status = {
+    'Artículo': $('#articulo').hasClass('select2-hidden-accessible'),
+    'Descuento': $('#descuento-nuevo').hasClass('select2-hidden-accessible'),
+    'Trabajadores': $('#trabajadores-carwash-nuevo').hasClass('select2-hidden-accessible')
+};
+
+Object.entries(select2Status).forEach(([nombre, inicializado]) => {
+    console.log(`${inicializado ? '✅' : '❌'} Select2 ${nombre}: ${inicializado ? 'Inicializado' : 'NO inicializado'}`);
+});
+
+console.log('📊 Opciones disponibles:');
+console.log(`  - Artículos: ${$('#articulo option').length}`);
+console.log(`  - Descuentos: ${$('#descuento-nuevo option').length}`);
+console.log(`  - Trabajadores: ${$('#trabajadores-carwash-nuevo option').length}`);
+            </div>
+        </div>
+
+        <div class="step">
+            <h4>Paso 3: Verificar eventos</h4>
+            <div class="code-block">
+// === VERIFICACIÓN DE EVENTOS ===
+console.log('🔍 Verificando eventos...');
+const eventos = $._data($('#agregar-detalle')[0], 'events');
+console.log('Eventos en botón agregar:', eventos);
+
+if (eventos && eventos.click) {
+    console.log('✅ Evento click encontrado:', eventos.click.length, 'handler(s)');
+    eventos.click.forEach((event, index) => {
+        console.log(`  Handler ${index + 1}:`, event.handler.toString().substring(0, 100) + '...');
+    });
+} else {
+    console.log('❌ NO se encontró evento click en el botón');
+    console.log('🔧 Intentando re-agregar evento...');
+    
+    $('#agregar-detalle').off('click').on('click', function() {
+        console.log('🔥 EVENTO CLICK MANUAL EJECUTADO');
+        alert('¡El botón funciona! Pero falta la lógica de agregar detalle.');
+    });
+    
+    console.log('✅ Evento manual agregado');
+}
+            </div>
+        </div>
+
+        <div class="step">
+            <h4>Paso 4: Preparar datos de prueba</h4>
+            <div class="code-block">
+// === PREPARAR DATOS DE PRUEBA ===
+console.log('🔧 Preparando datos de prueba...');
+
+// Buscar primer artículo disponible
+const primerArticulo = $('#articulo option:not([value=""])').first();
+if (primerArticulo.length > 0) {
+    console.log('✅ Artículo encontrado:', primerArticulo.text());
+    $('#articulo').val(primerArticulo.val()).trigger('change');
+    console.log('📝 Artículo seleccionado:', $('#articulo').val());
+    
+    // Establecer cantidad
+    $('#cantidad-nuevo').val('2');
+    console.log('📝 Cantidad establecida:', $('#cantidad-nuevo').val());
+    
+    // Buscar primer descuento si hay
+    const primerDescuento = $('#descuento-nuevo option:not([value=""])').first();
+    if (primerDescuento.length > 0) {
+        $('#descuento-nuevo').val(primerDescuento.val()).trigger('change');
+        console.log('📝 Descuento seleccionado:', $('#descuento-nuevo').val());
+    }
+    
+    console.log('✅ Datos de prueba preparados');
+    console.log('🎯 Estado actual:');
+    console.log(`  - Artículo: ${$('#articulo').val()}`);
+    console.log(`  - Cantidad: ${$('#cantidad-nuevo').val()}`);
+    console.log(`  - Descuento: ${$('#descuento-nuevo').val()}`);
+    
+} else {
+    console.log('❌ No hay artículos disponibles');
+}
+            </div>
+        </div>
+
+        <div class="step">
+            <h4>Paso 5: Probar el botón</h4>
+            <div class="code-block">
+// === PROBAR EL BOTÓN ===
+console.log('🚀 Probando el botón agregar detalle...');
+console.log('Estado del botón antes del click:', {
+    'Existe': $('#agregar-detalle').length > 0,
+    'Visible': $('#agregar-detalle').is(':visible'),
+    'Habilitado': !$('#agregar-detalle').prop('disabled'),
+    'Clase': $('#agregar-detalle').attr('class')
+});
+
+console.log('🔥 Ejecutando click...');
+$('#agregar-detalle').click();
+console.log('✅ Click ejecutado');
+
+// Verificar resultado después de 2 segundos
+setTimeout(() => {
+    console.log('📊 Verificando resultado...');
+    const filasNuevas = $('#nuevos-detalles tr').length;
+    const containerVisible = $('#nuevos-detalles-container').is(':visible');
+    
+    console.log(`Filas en nuevos detalles: ${filasNuevas}`);
+    console.log(`Container visible: ${containerVisible}`);
+    
+    if (filasNuevas > 0 && containerVisible) {
+        console.log('🎉 ¡SUCCESS! El nuevo detalle se agregó correctamente');
+    } else {
+        console.log('❌ FAIL: El nuevo detalle no se agregó');
+        console.log('🔍 Revisando posibles errores...');
+        
+        // Buscar errores en la consola
+        if (window.console && window.console.memory) {
+            console.log('💾 Estado de la consola: OK');
+        }
+    }
+}, 2000);
+            </div>
+        </div>
+
+        <div class="step">
+            <h4>Paso 6: Diagnóstico avanzado (si falla)</h4>
+            <div class="code-block">
+// === DIAGNÓSTICO AVANZADO ===
+console.log('🔍 Diagnóstico avanzado...');
+
+// Verificar si hay errores JavaScript
+console.log('Verificando errores JavaScript...');
+
+// Verificar si jQuery está disponible
+if (typeof $ === 'undefined') {
+    console.log('❌ jQuery no está disponible');
+} else {
+    console.log('✅ jQuery disponible:', $.fn.jquery);
+}
+
+// Verificar si SweetAlert está disponible
+if (typeof Swal === 'undefined') {
+    console.log('❌ SweetAlert no está disponible');
+} else {
+    console.log('✅ SweetAlert disponible');
+}
+
+// Verificar si Select2 está disponible
+if (typeof $.fn.select2 === 'undefined') {
+    console.log('❌ Select2 no está disponible');
+} else {
+    console.log('✅ Select2 disponible');
+}
+
+// Verificar configuración global
+if (typeof window.jirehVentaConfig === 'undefined') {
+    console.log('❌ Configuración global no disponible');
+} else {
+    console.log('✅ Configuración global disponible');
+    console.log('Config keys:', Object.keys(window.jirehVentaConfig));
+}
+
+// Forzar ejecución del evento
+console.log('🔧 Intentando forzar ejecución...');
+try {
+    // Simular el evento manualmente
+    const evento = new Event('click');
+    document.getElementById('agregar-detalle').dispatchEvent(evento);
+    console.log('✅ Evento forzado ejecutado');
+} catch (error) {
+    console.log('❌ Error al forzar evento:', error);
+}
+            </div>
+        </div>
+
+        <div class="alert alert-success mt-4">
+            <h5><i class="bi bi-check-circle"></i> Resultados esperados</h5>
+            <ul>
+                <li><strong>Todos los elementos deben existir</strong> (✅ en Paso 1)</li>
+                <li><strong>Select2 debe estar inicializado</strong> (✅ en Paso 2)</li>
+                <li><strong>Evento click debe existir</strong> (✅ en Paso 3)</li>
+                <li><strong>Al hacer click se debe agregar una fila</strong> (🎉 en Paso 5)</li>
+                <li><strong>La tabla de nuevos detalles debe ser visible</strong></li>
+            </ul>
+        </div>
+
+        <div class="alert alert-warning mt-4">
+            <h5><i class="bi bi-exclamation-triangle"></i> Si algo falla</h5>
+            <p>Copie TODOS los mensajes de la consola y compártalos para poder ayudar a diagnosticar el problema específico.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 
 class TrabajadorDetalleVenta extends Model
 {
@@ -44,7 +45,15 @@ class TrabajadorDetalleVenta extends Model
             'detalle_venta_id' => $this->detalle_venta_id,
         ])->first();
 
-        if (!$comisionExistente) {
+        if (!$comisionExistente && $this->monto_comision > 0) {
+            // Obtener el detalle de venta si no está cargado
+            $detalleVenta = $this->detalleVenta ?? DetalleVenta::find($this->detalle_venta_id);
+            
+            if (!$detalleVenta) {
+                Log::error("No se pudo encontrar el detalle de venta con ID: {$this->detalle_venta_id}");
+                return null;
+            }
+
             // Crear la comisión
             return Comision::create([
                 'commissionable_id' => $this->trabajador_id,
@@ -52,8 +61,8 @@ class TrabajadorDetalleVenta extends Model
                 'tipo_comision' => 'carwash',
                 'monto' => $this->monto_comision,
                 'detalle_venta_id' => $this->detalle_venta_id,
-                'venta_id' => $this->detalleVenta->venta_id,
-                'articulo_id' => $this->detalleVenta->articulo_id,
+                'venta_id' => $detalleVenta->venta_id,
+                'articulo_id' => $detalleVenta->articulo_id,
                 'fecha_calculo' => now(),
                 'estado' => 'pendiente',
             ]);

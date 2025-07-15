@@ -23,6 +23,7 @@ class Venta extends Model
 
     protected $casts = [
         'estado' => 'boolean',
+        'fecha' => 'date',
     ];
 
     public function cliente()
@@ -111,14 +112,6 @@ class Venta extends Model
         // Solo si hay un vendedor asignado
         if (!$this->usuario_id) return null;
 
-        // Obtener metas vigentes del usuario
-        $metas = MetaVenta::activas()
-                 ->periodoActual()
-                 ->deUsuario($this->usuario_id)
-                 ->get();
-
-        if ($metas->isEmpty()) return null;
-
         // Calcular el monto total de ventas del usuario para el periodo actual
         $inicio = Carbon::now()->startOfMonth();
         $fin = Carbon::now()->endOfMonth();
@@ -133,37 +126,50 @@ class Venta extends Model
                           return $venta->detalleVentas->sum('sub_total');
                       });
 
-        // Verificar cada meta y crear comisión si corresponde
-        foreach ($metas as $meta) {
-            if ($meta->esCumplida($totalVentas)) {
-                // Calcular comisión según el porcentaje de la meta
-                $montoComision = $meta->calcularComision($totalVentas);
+        // Determinar qué meta corresponde al monto vendido
+        $meta = MetaVenta::determinarMetaPorMonto($totalVentas, 'mensual');
 
-                // Verificar si ya existe una comisión para esta venta y usuario
-                $comisionExistente = Comision::where([
-                    'commissionable_id' => $this->usuario_id,
-                    'commissionable_type' => 'App\Models\User',
-                    'venta_id' => $this->id,
-                    'tipo_comision' => 'meta_venta'
-                ])->first();
+        if (!$meta) return null;
 
-                if (!$comisionExistente && $montoComision > 0) {
-                    // Crear la comisión
-                    return Comision::create([
-                        'commissionable_id' => $this->usuario_id,
-                        'commissionable_type' => 'App\Models\User',
-                        'tipo_comision' => 'meta_venta',
-                        'monto' => $montoComision,
-                        'porcentaje' => $meta->porcentaje_comision,
-                        'venta_id' => $this->id,
-                        'fecha_calculo' => now(),
-                        'estado' => 'pendiente',
-                        'observaciones' => "Comisión por meta de ventas: {$meta->monto_minimo} - {$meta->monto_maximo}"
-                    ]);
-                }
+        // Verificar si ya existe una comisión para este vendedor en este periodo
+        $comisionExistente = Comision::where([
+            'commissionable_id' => $this->usuario_id,
+            'commissionable_type' => 'App\Models\User',
+            'tipo_comision' => 'meta_venta'
+        ])
+        ->whereMonth('fecha_calculo', Carbon::now()->month)
+        ->whereYear('fecha_calculo', Carbon::now()->year)
+        ->first();
 
-                return $comisionExistente;
-            }
+        // Calcular comisión según el porcentaje de la meta
+        $montoComision = $meta->calcularComision($totalVentas);
+
+        if ($comisionExistente && $montoComision > 0) {
+            // Actualizar comisión existente
+            $comisionExistente->update([
+                'monto' => $montoComision,
+                'porcentaje' => $meta->porcentaje_comision,
+                'observaciones' => "Comisión por meta de ventas: Q{$meta->monto_minimo} - " . 
+                                 ($meta->monto_maximo ? "Q{$meta->monto_maximo}" : "Sin límite") .
+                                 " | Total vendido: Q{$totalVentas}"
+            ]);
+            
+            return $comisionExistente;
+        } elseif (!$comisionExistente && $montoComision > 0) {
+            // Crear nueva comisión
+            return Comision::create([
+                'commissionable_id' => $this->usuario_id,
+                'commissionable_type' => 'App\Models\User',
+                'tipo_comision' => 'meta_venta',
+                'monto' => $montoComision,
+                'porcentaje' => $meta->porcentaje_comision,
+                'venta_id' => $this->id,
+                'fecha_calculo' => now(),
+                'estado' => 'pendiente',
+                'observaciones' => "Comisión por meta de ventas: Q{$meta->monto_minimo} - " . 
+                                 ($meta->monto_maximo ? "Q{$meta->monto_maximo}" : "Sin límite") .
+                                 " | Total vendido: Q{$totalVentas}"
+            ]);
         }
 
         return null;

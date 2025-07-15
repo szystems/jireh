@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 
 class DetalleVenta extends Model
 {
@@ -40,21 +41,9 @@ class DetalleVenta extends Model
     public function trabajador()
     {
         return $this->belongsTo(Trabajador::class);
-    }
-
-    public function usuario()
+    }    public function usuario()
     {
         return $this->belongsTo(User::class);
-    }
-
-    public function tipoComisionTrabajador()
-    {
-        return $this->belongsTo(TipoComision::class, 'tipo_comision_trabajador_id');
-    }
-
-    public function tipoComisionUsuario()
-    {
-        return $this->belongsTo(TipoComision::class, 'tipo_comision_usuario_id');
     }
 
     /**
@@ -115,14 +104,19 @@ class DetalleVenta extends Model
         }
 
         return null;
-    }
-
-    /**
+    }    /**
      * Genera comisiones para trabajadores de car wash
      */
-    public function generarComisionesCarwash()
+    public function generarComisionesCarwash($forzarRegeneracion = false)
     {
         $comisiones = collect([]);
+
+        // Si se fuerza la regeneración, eliminar comisiones existentes
+        if ($forzarRegeneracion) {
+            Comision::where('detalle_venta_id', $this->id)
+                   ->where('tipo_comision', 'carwash')
+                   ->delete();
+        }
 
         // Generar comisiones para cada trabajador asignado
         foreach ($this->trabajadoresCarwash as $trabajador) {
@@ -131,10 +125,32 @@ class DetalleVenta extends Model
                 'detalle_venta_id' => $this->id
             ])->first();
 
-            if ($asignacion) {
-                $comision = $asignacion->generarComision();
-                if ($comision) {
-                    $comisiones->push($comision);
+            if ($asignacion && $asignacion->monto_comision > 0) {
+                // Si estamos forzando regeneración, crear directamente sin verificar existencia
+                if ($forzarRegeneracion) {
+                    $detalleVenta = $this;
+                    
+                    $comision = Comision::create([
+                        'commissionable_id' => $asignacion->trabajador_id,
+                        'commissionable_type' => 'App\Models\Trabajador',
+                        'tipo_comision' => 'carwash',
+                        'monto' => $asignacion->monto_comision,
+                        'detalle_venta_id' => $this->id,
+                        'venta_id' => $detalleVenta->venta_id,
+                        'articulo_id' => $detalleVenta->articulo_id,
+                        'fecha_calculo' => now(),
+                        'estado' => 'pendiente',
+                    ]);
+                    
+                    if ($comision) {
+                        $comisiones->push($comision);
+                    }
+                } else {
+                    // Usar el método normal que verifica existencia
+                    $comision = $asignacion->generarComision();
+                    if ($comision) {
+                        $comisiones->push($comision);
+                    }
                 }
             }
         }
@@ -143,24 +159,156 @@ class DetalleVenta extends Model
     }
 
     /**
+     * Asigna trabajadores a este detalle de venta con el monto de comisión especificado
+     *
+     * @param array|collection $trabajadores Array de IDs de trabajadores o colección de objetos Trabajador
+     * @param float|null $montoComision Monto de comisión individual (si es null, se usa la comisión del artículo)
+     * @return array Asignaciones creadas
+     */
+    public function asignarTrabajadores($trabajadores, $montoComision = null)
+    {
+        $asignaciones = [];
+
+        // Si no hay trabajadores, salir temprano
+        if (empty($trabajadores)) {
+            Log::warning("No se recibieron trabajadores para asignar al detalle de venta ID: {$this->id}");
+            return $asignaciones;
+        }
+
+        // Registrar información sobre los trabajadores recibidos
+        Log::info("Asignando trabajadores al detalle de venta ID: {$this->id}", [
+            'trabajadores_recibidos' => $trabajadores,
+            'tipo_dato' => gettype($trabajadores),
+            'clase' => is_object($trabajadores) ? get_class($trabajadores) : 'no es objeto'
+        ]);
+
+        // Si no se proporciona un monto de comisión, usar el configurado en el artículo
+        if ($montoComision === null && $this->articulo) {
+            $montoComision = $this->articulo->comision_carwash;
+            Log::info("Usando monto de comisión del artículo: {$montoComision}", []);
+        }
+
+        // Asegurarse de que el monto sea válido
+        if ($montoComision === null || $montoComision <= 0) {
+            $montoComision = 0;
+            Log::warning("El monto de comisión es inválido o cero.");
+        }
+
+        // Convertir a array si es una colección o un valor único
+        $trabajadorIds = [];
+
+        if (is_array($trabajadores)) {
+            // Ya es un array
+            $trabajadorIds = array_map('intval', $trabajadores); // Convertir a enteros
+        } else if (is_object($trabajadores) && method_exists($trabajadores, 'pluck')) {
+            // Es una colección
+            $trabajadorIds = $trabajadores->pluck('id')->toArray();
+        } else if (is_string($trabajadores) || is_numeric($trabajadores)) {
+            // Es un ID único
+            $trabajadorIds = [(int)$trabajadores]; // Convertir a entero
+        }
+
+        // Eliminar valores vacíos, nulos o cero
+        $trabajadorIds = array_filter($trabajadorIds, function($id) {
+            return !empty($id) && intval($id) > 0;
+        });
+
+        // Eliminar duplicados
+        $trabajadorIds = array_unique($trabajadorIds);
+
+        // Si después de todo no hay IDs, salir
+        if (empty($trabajadorIds)) {
+            Log::warning("No se pudieron procesar IDs de trabajadores para el detalle {$this->id}");
+            return $asignaciones;
+        }
+
+        Log::info("IDs de trabajadores a procesar: " . implode(', ', $trabajadorIds));
+
+        // Validar que los trabajadores sean de tipo carwash
+        $trabajadoresValidos = Trabajador::whereIn('id', $trabajadorIds)->get();
+
+        Log::info("Trabajadores válidos encontrados: " . $trabajadoresValidos->count(), []);        // Eliminar asignaciones actuales para evitar duplicados
+        $this->trabajadoresCarwash()->detach();
+        
+        // Refrescar la instancia para asegurar que las relaciones se actualicen
+        $this->refresh();
+
+        // Crear asignaciones nuevas
+        foreach ($trabajadoresValidos as $trabajador) {
+            try {
+                // Crear la asignación
+                $asignacion = TrabajadorDetalleVenta::create([
+                    'trabajador_id' => $trabajador->id,
+                    'detalle_venta_id' => $this->id,
+                    'monto_comision' => $montoComision
+                ]);
+
+                $asignaciones[] = $asignacion;
+                Log::info("Trabajador ID {$trabajador->id} asignado al detalle {$this->id} con comisión {$montoComision}", []);
+            } catch (\Exception $e) {
+                Log::error("Error al asignar trabajador ID {$trabajador->id}: " . $e->getMessage());
+            }
+        }
+
+        // Verificar que las asignaciones se hayan creado correctamente
+        $asignacionesCreadas = $this->trabajadoresCarwash()->count();
+        Log::info("Total de asignaciones creadas: {$asignacionesCreadas} para el detalle {$this->id}", []);
+
+        return $asignaciones;
+    }
+
+    /**
      * Genera las comisiones asociadas a este detalle de venta
-     * (para mecánicos y otros trabajadores asignados)
-     * 
+     * (para mecánicos y trabajadores de carwash asignados)
+     *
      * @return array Comisiones generadas
      */
     public function generarComisiones()
     {
         $comisiones = [];
-        
+
         // Si hay un artículo asociado y es un servicio, generar comisión para el mecánico
         if ($this->articulo && $this->articulo->tipo == 'servicio') {
             // Comisión para el mecánico
-            $comisionMecanico = $this->articulo->generarComisionMecanico($this);
+            $comisionMecanico = $this->generarComisionMecanico();
             if ($comisionMecanico) {
                 $comisiones[] = $comisionMecanico;
             }
+
+            // Comisiones para trabajadores de carwash
+            $comisionesCarwash = $this->generarComisionesCarwash();
+            if ($comisionesCarwash && count($comisionesCarwash) > 0) {
+                foreach ($comisionesCarwash as $comision) {
+                    $comisiones[] = $comision;
+                }
+            }
         }
-        
+
         return $comisiones;
+    }
+
+    /**
+     * Calcula el total de comisiones asociadas a este detalle de venta
+     *
+     * @return float Monto total de comisiones
+     */
+    public function calcularComisiones()
+    {
+        $total = 0;
+
+        // Comisión del mecánico (si aplica)
+        if ($this->articulo &&
+            $this->articulo->tipo === 'servicio' &&
+            $this->articulo->mecanico_id &&
+            $this->articulo->costo_mecanico > 0) {
+
+            $total += $this->articulo->costo_mecanico * $this->cantidad;
+        }
+
+        // Comisiones de carwasheros
+        $comisionesCarwash = $this->trabajadoresCarwash()->sum('monto_comision');
+        $total += $comisionesCarwash;
+
+        return $total;
     }
 }

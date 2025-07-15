@@ -24,6 +24,17 @@
                         <i class="bi bi-arrow-left"></i> Volver a Ventas
                     </a>
                     <br>
+                    @if(session('status'))
+                        <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+                            <strong><i class="bi bi-check-circle"></i> ¡Éxito!</strong> {{ session('status') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @elseif(request()->has('success'))
+                        <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+                            <strong><i class="bi bi-check-circle"></i> ¡Éxito!</strong> Venta actualizada exitosamente.
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
                     <div class="card mb-3">
 
                         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center pb-3">
@@ -46,7 +57,7 @@
                                         <i class="bi bi-pencil-fill"></i> Editar
                                     </button>
                                 @endif
-                                <a href="{{ route('ventas.export.single.pdf', $venta->id) }}" class="btn btn-sm btn-light">
+                                <a target="_blank" href="{{ route('ventas.export.single.pdf', $venta->id) }}" class="btn btn-sm btn-light">
                                     <i class="bi bi-file-pdf"></i> PDF
                                 </a>
                             </div>
@@ -137,6 +148,7 @@
                                             <th class="text-center">Cantidad</th>
                                             <th>Precio Venta</th>
                                             <th>Precio Costo</th>
+                                            <th>Trabajadores Asignados</th>
                                             <th>Descuento</th>
                                             <th class="text-end">Impuestos</th>
                                             <th class="text-end">Subtotal</th>
@@ -155,6 +167,24 @@
                                                 // Calcular precio unitario (usar el precio del artículo si existe, o calcularlo desde el subtotal)
                                                 $precioUnitario = $detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad);
                                                 $precioCosto = $detalle->precio_costo;
+                                                
+                                                // Calcular costo real incluyendo comisiones para servicios
+                                                $costoRealUnitario = $precioCosto;
+                                                if($detalle->articulo && $detalle->articulo->tipo === 'servicio') {
+                                                    // Agregar comisiones de trabajadores carwash por unidad
+                                                    $comisionesCarwash = 0;
+                                                    foreach($detalle->trabajadoresCarwash as $trabajador) {
+                                                        if($trabajador->pivot && $trabajador->pivot->monto_comision) {
+                                                            $comisionesCarwash += $trabajador->pivot->monto_comision;
+                                                        }
+                                                    }
+                                                    $costoRealUnitario += ($comisionesCarwash / $detalle->cantidad);
+                                                    
+                                                    // Agregar comisión de mecánico si aplica
+                                                    if($detalle->articulo->mecanico_id && $detalle->articulo->costo_mecanico > 0) {
+                                                        $costoRealUnitario += $detalle->articulo->costo_mecanico;
+                                                    }
+                                                }
 
                                                 // Calcular subtotal sin descuento (precio unitario × cantidad)
                                                 $subtotalSinDescuento = $precioUnitario * $detalle->cantidad;
@@ -177,8 +207,24 @@
                                                 $impuestoDetalle = $subtotalConDescuento * ($detalle->porcentaje_impuestos ?? 0) / 100;
                                                 $totalImpuestos += $impuestoDetalle;
 
-                                                // Calcular costo de compra total
+                                                // Calcular costo de compra total (incluir precio_costo + comisiones)
                                                 $costoCompraArticulo = $detalle->precio_costo * $detalle->cantidad;
+                                                
+                                                // Agregar comisiones de trabajadores carwash/mecánico si es un servicio
+                                                if($detalle->articulo && $detalle->articulo->tipo === 'servicio') {
+                                                    // Sumar comisiones de trabajadores carwash asignados
+                                                    foreach($detalle->trabajadoresCarwash as $trabajador) {
+                                                        if($trabajador->pivot && $trabajador->pivot->monto_comision) {
+                                                            $costoCompraArticulo += $trabajador->pivot->monto_comision;
+                                                        }
+                                                    }
+                                                    
+                                                    // Sumar comisión de mecánico si aplica
+                                                    if($detalle->articulo->mecanico_id && $detalle->articulo->costo_mecanico > 0) {
+                                                        $costoCompraArticulo += $detalle->articulo->costo_mecanico * $detalle->cantidad;
+                                                    }
+                                                }
+                                                
                                                 $totalCostoCompra += $costoCompraArticulo;
 
                                                 // Actualizar totales
@@ -201,6 +247,29 @@
                                                 </td>
                                                 <td>{{ $config->currency_simbol }}.{{ number_format($precioUnitario, 2, '.', ',') }}</td>
                                                 <td>{{ $config->currency_simbol }}.{{ number_format($precioCosto, 2, '.', ',') }}</td>
+                                                <td>
+                                                    @if($detalle->articulo && $detalle->articulo->tipo === 'servicio')
+                                                        @php
+                                                            $trabajadoresAsignados = $detalle->trabajadoresCarwash;
+                                                        @endphp
+                                                        @if($trabajadoresAsignados->count() > 0)
+                                                            <div class="d-flex flex-wrap gap-1">
+                                                                @foreach($trabajadoresAsignados as $trabajador)
+                                                                    <span class="badge bg-info">
+                                                                        {{ $trabajador->nombre }} {{ $trabajador->apellido }}
+                                                                        @if($trabajador->pivot && $trabajador->pivot->monto_comision)
+                                                                            <small>(Q{{ number_format($trabajador->pivot->monto_comision, 2) }})</small>
+                                                                        @endif
+                                                                    </span>
+                                                                @endforeach
+                                                            </div>
+                                                        @else
+                                                            <small class="text-muted">No asignados</small>
+                                                        @endif
+                                                    @else
+                                                        <small class="text-muted">No aplica</small>
+                                                    @endif
+                                                </td>
                                                 <td>
                                                     @if($detalle->descuento_id)
                                                         @php
@@ -227,33 +296,33 @@
                                     <tfoot>
                                         <!-- SECCIÓN DE VENTAS -->
                                         <tr class="table-primary">
-                                            <td colspan="7" class="text-center"><strong>RESUMEN DE VENTA</strong></td>
+                                            <td colspan="8" class="text-center"><strong>RESUMEN DE VENTA</strong></td>
                                         </tr>
                                         <tr class="table-secondary">
-                                            <td colspan="6" class="text-end"><strong>Subtotal sin descuento:</strong></td>
+                                            <td colspan="7" class="text-end"><strong>Subtotal sin descuento:</strong></td>
                                             <td class="text-end">{{ $config->currency_simbol }}.{{ number_format($subtotalSinDescuentoTotal, 2, '.', ',') }}</td>
                                         </tr>
                                         <tr class="table-secondary">
-                                            <td colspan="6" class="text-end"><strong>Total Descuentos:</strong></td>
+                                            <td colspan="7" class="text-end"><strong>Total Descuentos:</strong></td>
                                             <td class="text-end text-danger">{{ $config->currency_simbol }}.{{ number_format($totalDescuentos, 2, '.', ',') }}</td>
                                         </tr>
                                         <tr class="table-secondary">
-                                            <td colspan="6" class="text-end"><strong>Total Impuestos:</strong></td>
+                                            <td colspan="7" class="text-end"><strong>Total Impuestos:</strong></td>
                                             <td class="text-end text-info">{{ $config->currency_simbol }}.{{ number_format($totalImpuestos, 2, '.', ',') }}</td>
                                         </tr>
                                         @if (Auth::user()->role_as != 1)
                                             <tr class="table-secondary">
-                                                <td colspan="6" class="text-end"><strong>Total Costo de Compra:</strong></td>
+                                                <td colspan="7" class="text-end"><strong>Total Costo de Compra:</strong></td>
                                                 <td class="text-end text-danger">{{ $config->currency_simbol }}.{{ number_format($totalCostoCompra, 2, '.', ',') }}</td>
                                             </tr>
                                         @endif
                                         <tr class="table-secondary">
-                                            <td colspan="6" class="text-end"><strong>Total Venta:</strong></td>
+                                            <td colspan="7" class="text-end"><strong>Total Venta:</strong></td>
                                             <td class="text-end text-primary"><h5>{{ $config->currency_simbol }}.{{ number_format($totalVenta, 2, '.', ',') }}</h5></td>
                                         </tr>
                                         @if (Auth::user()->role_as != 1)
                                             <tr class="table-success">
-                                                <td colspan="6" class="text-end"><strong>GANANCIA NETA:</strong></td>
+                                                <td colspan="7" class="text-end"><strong>GANANCIA NETA:</strong></td>
                                                 <td class="text-end">
                                                     <h5 class="text-success">{{ $config->currency_simbol }}.{{ number_format($totalVenta - $totalImpuestos - $totalCostoCompra, 2, '.', ',') }}</h5>
                                                 </td>

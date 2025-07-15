@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Editar Venta</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="container mt-4">
+        <h1>Test - Editar Venta</h1>
+        
+        <!-- Simulación del total -->
+        <div class="row">
+            <div class="col-md-6 text-end">
+                <h4 id="total-venta" class="text-primary">
+                    Total: Q.350.00
+                </h4>
+            </div>
+        </div>
+        
+        <!-- Simulación de tabla de detalles existentes -->
+        <div class="table-responsive mb-4">
+            <table class="table table-striped" id="tabla-detalles-existentes">
+                <thead>
+                    <tr>
+                        <th>Artículo</th>
+                        <th>Cantidad</th>
+                        <th>Precio</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr id="detalle-row-1" class="detalle-existente">
+                        <td>Artículo 1</td>
+                        <td>
+                            <input type="number" class="form-control cantidad-input" value="1" min="1" step="1" data-detalle-id="1" data-precio="350">
+                        </td>
+                        <td>Q.350.00</td>
+                        <td class="subtotal-cell" id="subtotal-1">
+                            Q.350.00
+                            <input type="hidden" name="detalles[1][sub_total]" value="350" class="subtotal-input">
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Simulación del select de artículos -->
+        <div class="card bg-light p-3 mb-3">
+            <h6>Agregar Nuevo Detalle</h6>
+            <div class="row">
+                <div class="col-md-5 mb-2">
+                    <label for="articulo">Artículo</label>
+                    <select id="articulo" class="form-control">
+                        <option value="" selected>Seleccione un artículo</option>
+                        <option value="1" data-precio="350" data-tipo="producto">Artículo 1 (Q.350.00)</option>
+                        <option value="2" data-precio="150" data-tipo="servicio">Servicio Car Wash (Q.150.00)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Contenedor para nuevos detalles -->
+        <table class="table table-striped d-none" id="tabla-nuevos-detalles">
+            <tbody id="nuevos-detalles">
+            </tbody>
+        </table>
+        
+        <!-- Contenedor de trabajadores (oculto por defecto) -->
+        <div class="col-md-12 mb-3" id="trabajadores-carwash-container" style="display:none">
+            <div class="card bg-info bg-opacity-10 p-3">
+                <h6 class="card-title mb-2">Asignar Trabajadores Car Wash</h6>
+                <select id="trabajadores-carwash-nuevo" class="form-control" multiple>
+                    <option value="1">Trabajador 1</option>
+                    <option value="2">Trabajador 2</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts de configuración global -->
+    <script>
+        window.jirehVentaConfig = {
+            currencySymbol: 'Q',
+            vehiculoIdOriginal: '',
+            csrfToken: 'test-token'
+        };
+        window.APP_CURRENCY_SYMBOL = 'Q';
+        window.APP_VEHICULO_ID_ORIGINAL = '';
+        window.APP_CSRF_TOKEN = 'test-token';
+    </script>    <!-- Cargar nuestros scripts -->
+    <script src="/js/venta/edit-venta-main.js?v=1"></script>
+    <script src="/js/venta/debug-total-reset.js?v=1"></script>
+    <script src="/js/venta/total-validation.js?v=1"></script>
+    <script src="/js/venta/reset-articulo-select.js?v=1"></script>
+    <script src="/js/venta/prevent-auto-selection.js?v=1"></script>
+    <!-- Test específico del problema -->
+    <script src="/test-specific-problem.js?v=1"></script>
+
+    <script>
+        $(document).ready(function() {
+            console.log("🧪 TEST: Página de prueba cargada");
+            console.log("🧪 TEST: Total inicial:", $('#total-venta').text());
+            
+            // Simular el cambio en el select para reproducir el problema
+            setTimeout(() => {
+                console.log("🧪 TEST: Simulando reset del select...");
+                $('#articulo').val('').trigger('change');
+            }, 2000);
+            
+            // Verificar el total después del reset
+            setTimeout(() => {
+                console.log("🧪 TEST: Total después del reset:", $('#total-venta').text());
+            }, 4000);
+        });
+    </script>
+</body>
+</html>

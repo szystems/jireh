@@ -1,0 +1,331 @@
+<?php
+/**
+ * Script para verificar específicamente el problema de trabajadores no persistentes
+ */
+?>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug - Problema Trabajadores Persistentes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .debug-card { border-left: 4px solid #dc3545; margin: 15px 0; }
+        .code-block { 
+            background: #f8f9fa; 
+            border: 1px solid #e9ecef; 
+            border-radius: 5px; 
+            padding: 15px; 
+            font-family: 'Courier New', monospace; 
+            font-size: 13px;
+            white-space: pre-wrap;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .step { margin: 20px 0; padding: 15px; border-left: 3px solid #dc3545; background: #f8f9fa; }
+        .critical { border-left-color: #dc3545; background: #f8d7da; }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <h2>🚨 Debug: Problema Trabajadores No Persistentes</h2>
+        
+        <div class="alert alert-danger">
+            <h5><i class="bi bi-exclamation-triangle"></i> PROBLEMA IDENTIFICADO</h5>
+            <p>Los trabajadores se modifican en el modal pero no se guardan en la base de datos.</p>
+            <p><strong>Síntoma:</strong> Al guardar la venta, los trabajadores siguen siendo los mismos de antes.</p>
+        </div>
+
+        <div class="alert alert-info">
+            <h5><i class="bi bi-info-circle"></i> Instrucciones</h5>
+            <ol>
+                <li>Abra la página de edición de venta en otra pestaña</li>
+                <li>Abra las herramientas de desarrollador (F12)</li>
+                <li>Vaya a la pestaña Console</li>
+                <li>Ejecute cada script de abajo para diagnosticar el problema</li>
+            </ol>
+        </div>
+
+        <div class="step critical">
+            <h4>🔍 Paso 1: Verificar estado ANTES de modificar trabajadores</h4>
+            <div class="code-block">
+// === ESTADO INICIAL ===
+console.log('🔍 === VERIFICANDO ESTADO INICIAL ===');
+
+// Contar inputs de trabajadores existentes
+const inputsIniciales = $('input[name*="trabajadores_carwash"]');
+console.log(`📊 Total inputs trabajadores encontrados: ${inputsIniciales.length}`);
+
+if (inputsIniciales.length > 0) {
+    console.log('📋 Detalles de inputs existentes:');
+    inputsIniciales.each(function(index) {
+        console.log(`  ${index + 1}. Name: "${this.name}" = Value: "${this.value}"`);
+    });
+    
+    // Agrupar por detalle
+    const inputsPorDetalle = {};
+    inputsIniciales.each(function() {
+        const match = this.name.match(/trabajadores_carwash\[(\d+)\]/);
+        if (match) {
+            const detalleId = match[1];
+            if (!inputsPorDetalle[detalleId]) inputsPorDetalle[detalleId] = [];
+            inputsPorDetalle[detalleId].push(this.value);
+        }
+    });
+    
+    console.log('📊 Trabajadores por detalle:');
+    Object.entries(inputsPorDetalle).forEach(([detalleId, trabajadores]) => {
+        console.log(`  Detalle ${detalleId}: ${trabajadores.length} trabajadores [${trabajadores.join(', ')}]`);
+    });
+} else {
+    console.log('❌ NO se encontraron inputs de trabajadores');
+}
+
+console.log('===========================================');
+            </div>
+        </div>
+
+        <div class="step critical">
+            <h4>🔧 Paso 2: Simular cambio de trabajadores</h4>
+            <div class="code-block">
+// === SIMULAR CAMBIO DE TRABAJADORES ===
+console.log('🔧 === SIMULANDO CAMBIO DE TRABAJADORES ===');
+
+// Buscar primer botón de editar trabajadores
+const primerBoton = $('.editar-trabajadores').first();
+
+if (primerBoton.length > 0) {
+    const detalleId = primerBoton.data('detalle-id');
+    console.log(`🎯 Simulando edición en detalle ID: ${detalleId}`);
+    
+    // Abrir modal
+    primerBoton.click();
+    
+    setTimeout(() => {
+        if ($('#editar-trabajadores-modal').hasClass('show')) {
+            console.log('✅ Modal abierto correctamente');
+            
+            // Verificar trabajadores preseleccionados
+            const preseleccionados = $('#trabajadores-carwash-edit').val() || [];
+            console.log(`👥 Trabajadores preseleccionados: ${preseleccionados.length}`);
+            console.log(`📋 IDs preseleccionados: [${preseleccionados.join(', ')}]`);
+            
+            // Modificar selección (quitar el primer trabajador si hay más de uno)
+            if (preseleccionados.length > 1) {
+                const nuevaSeleccion = preseleccionados.slice(1); // Quitar el primero
+                console.log(`🔄 Cambiando selección a: [${nuevaSeleccion.join(', ')}]`);
+                
+                $('#trabajadores-carwash-edit').val(nuevaSeleccion).trigger('change');
+                
+                setTimeout(() => {
+                    console.log('💾 Guardando cambios...');
+                    $('#guardar-trabajadores').click();
+                    
+                    setTimeout(() => {
+                        console.log('✅ CAMBIO SIMULADO COMPLETADO');
+                        console.log('📝 Ejecute el Paso 3 para verificar los cambios');
+                    }, 1000);
+                }, 500);
+            } else {
+                console.log('⚠️ No hay suficientes trabajadores para simular cambio');
+                $('#editar-trabajadores-modal').modal('hide');
+            }
+        } else {
+            console.log('❌ Modal no se abrió');
+        }
+    }, 1000);
+} else {
+    console.log('❌ No se encontraron botones "Editar trabajadores"');
+}
+            </div>
+        </div>
+
+        <div class="step critical">
+            <h4>🔍 Paso 3: Verificar estado DESPUÉS del cambio</h4>
+            <div class="code-block">
+// === VERIFICAR ESTADO DESPUÉS DEL CAMBIO ===
+console.log('🔍 === VERIFICANDO ESTADO DESPUÉS DEL CAMBIO ===');
+
+// Contar inputs de trabajadores después del cambio
+const inputsFinales = $('input[name*="trabajadores_carwash"]');
+console.log(`📊 Total inputs trabajadores después: ${inputsFinales.length}`);
+
+if (inputsFinales.length > 0) {
+    console.log('📋 Detalles de inputs después del cambio:');
+    inputsFinales.each(function(index) {
+        console.log(`  ${index + 1}. Name: "${this.name}" = Value: "${this.value}"`);
+    });
+    
+    // Agrupar por detalle
+    const inputsPorDetalleFinal = {};
+    inputsFinales.each(function() {
+        const match = this.name.match(/trabajadores_carwash\[(\d+)\]/);
+        if (match) {
+            const detalleId = match[1];
+            if (!inputsPorDetalleFinal[detalleId]) inputsPorDetalleFinal[detalleId] = [];
+            inputsPorDetalleFinal[detalleId].push(this.value);
+        }
+    });
+    
+    console.log('📊 Trabajadores por detalle DESPUÉS:');
+    Object.entries(inputsPorDetalleFinal).forEach(([detalleId, trabajadores]) => {
+        console.log(`  Detalle ${detalleId}: ${trabajadores.length} trabajadores [${trabajadores.join(', ')}]`);
+    });
+} else {
+    console.log('❌ NO se encontraron inputs de trabajadores después del cambio');
+}
+
+console.log('===========================================');
+            </div>
+        </div>
+
+        <div class="step critical">
+            <h4>🚨 Paso 4: Verificar datos antes del envío del formulario</h4>
+            <div class="code-block">
+// === VERIFICAR DATOS ANTES DEL ENVÍO ===
+console.log('🚨 === VERIFICANDO DATOS ANTES DEL ENVÍO ===');
+
+// Interceptar el formulario antes del envío
+const $form = $('#forma-editar-venta');
+
+if ($form.length > 0) {
+    console.log('✅ Formulario encontrado');
+    
+    // Remover handlers existentes para evitar conflictos
+    $form.off('submit.debug');
+    
+    // Agregar handler de debugging
+    $form.on('submit.debug', function(e) {
+        console.log('🚀 === FORMULARIO ENVIÁNDOSE - INTERCEPTADO ===');
+        
+        // Obtener todos los datos del formulario
+        const formData = new FormData(this);
+        
+        // Filtrar solo datos de trabajadores
+        const trabajadoresData = {};
+        let trabajadoresCount = 0;
+        
+        for (let [key, value] of formData.entries()) {
+            if (key.includes('trabajadores_carwash')) {
+                trabajadoresData[key] = value;
+                trabajadoresCount++;
+            }
+        }
+        
+        console.log(`📊 Datos de trabajadores en el formulario: ${trabajadoresCount} campos`);
+        console.log('📋 Detalle de trabajadores que se enviarán:');
+        Object.entries(trabajadoresData).forEach(([key, value]) => {
+            console.log(`  ${key} = ${value}`);
+        });
+        
+        if (trabajadoresCount === 0) {
+            console.log('❌ ¡PROBLEMA CRÍTICO! No hay datos de trabajadores en el formulario');
+            console.log('⚠️ Esto explica por qué no se guardan los cambios');
+        } else {
+            console.log('✅ Datos de trabajadores presentes en el formulario');
+        }
+        
+        // Verificar también inputs ocultos específicos
+        const inputsOcultos = $('input[type="hidden"][name*="trabajadores_carwash"]');
+        console.log(`📊 Inputs ocultos de trabajadores: ${inputsOcultos.length}`);
+        
+        inputsOcultos.each(function(index) {
+            console.log(`  ${index + 1}. ${this.name} = ${this.value}`);
+        });
+        
+        console.log('🔄 Permitiendo envío del formulario...');
+        // No prevenir el envío - dejar que continúe
+    });
+    
+    console.log('✅ Handler de debugging agregado al formulario');
+    console.log('📝 Ahora haga click en "Guardar Cambios" para ver los datos que se envían');
+} else {
+    console.log('❌ Formulario no encontrado');
+}
+            </div>
+        </div>
+
+        <div class="step critical">
+            <h4>🔧 Paso 5: Forzar recreación de inputs (SOLUCIÓN TEMPORAL)</h4>
+            <div class="code-block">
+// === FORZAR RECREACIÓN DE INPUTS ===
+console.log('🔧 === FORZANDO RECREACIÓN DE INPUTS ===');
+
+// Función para recrear todos los inputs de trabajadores manualmente
+function recrearInputsTrabajadores() {
+    console.log('🔄 Recreando todos los inputs de trabajadores...');
+    
+    // Obtener todos los containers de trabajadores
+    const containers = $('[id^="trabajadores-"]:not([id*="text"]):not([id*="carwash-container"])');
+    console.log(`📦 Containers encontrados: ${containers.length}`);
+    
+    containers.each(function() {
+        const $container = $(this);
+        const containerId = $container.attr('id');
+        const match = containerId.match(/trabajadores-(\d+)/);
+        
+        if (match) {
+            const detalleId = match[1];
+            console.log(`🔧 Procesando container para detalle ${detalleId}`);
+            
+            // Obtener inputs existentes
+            const existingInputs = $container.find('input[name*="trabajadores_carwash"]');
+            const trabajadorIds = [];
+            
+            existingInputs.each(function() {
+                if (this.value && this.value.trim() !== '') {
+                    trabajadorIds.push(this.value);
+                }
+            });
+            
+            console.log(`👥 Trabajadores en detalle ${detalleId}: [${trabajadorIds.join(', ')}]`);
+            
+            // Limpiar container
+            $container.empty();
+            
+            // Recrear inputs
+            trabajadorIds.forEach(function(trabajadorId) {
+                const input = `<input type="hidden" name="trabajadores_carwash[${detalleId}][]" value="${trabajadorId}">`;
+                $container.append(input);
+                console.log(`  ➕ Input recreado: trabajadores_carwash[${detalleId}][] = ${trabajadorId}`);
+            });
+        }
+    });
+    
+    console.log('✅ Recreación de inputs completada');
+}
+
+// Ejecutar recreación
+recrearInputsTrabajadores();
+
+// Verificar resultado
+const inputsRecreados = $('input[name*="trabajadores_carwash"]');
+console.log(`📊 Inputs después de recreación: ${inputsRecreados.length}`);
+            </div>
+        </div>
+
+        <div class="alert alert-warning mt-4">
+            <h5><i class="bi bi-exclamation-triangle"></i> DIAGNÓSTICO ESPERADO</h5>
+            <p><strong>Si el problema persiste, probablemente verás:</strong></p>
+            <ul>
+                <li>✅ Los inputs se crean correctamente en el Paso 1</li>
+                <li>✅ El modal funciona y se pueden cambiar trabajadores en el Paso 2</li>
+                <li>✅ Los inputs se actualizan correctamente en el Paso 3</li>
+                <li>❌ Los datos NO llegan al formulario en el Paso 4 (problema crítico)</li>
+                <li>🔧 La recreación manual en el Paso 5 puede solucionar temporalmente</li>
+            </ul>
+        </div>
+
+        <div class="alert alert-success mt-4">
+            <h5><i class="bi bi-check-circle"></i> PRÓXIMOS PASOS</h5>
+            <ol>
+                <li>Ejecute todos los pasos para identificar exactamente dónde falla</li>
+                <li>Si los datos no llegan al formulario, hay un problema en la función de guardar trabajadores</li>
+                <li>Reporte los resultados para implementar la corrección definitiva</li>
+            </ol>
+        </div>
+    </div>
+</body>
+</html>

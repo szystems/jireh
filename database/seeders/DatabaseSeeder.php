@@ -23,4 +23,13 @@ class DatabaseSeeder extends Seeder
         $this->call(ArticuloSeeder::class);
         $this->call(TrabajadorSeeder::class);
     }
+
+    /**
+     * Este método puede ser llamado manualmente para sincronizar trabajadores existentes
+     * con sus respectivos tipos de trabajador.
+     */
+    public function sincronizarTiposTrabajador()
+    {
+        $this->call(SincronizarTipoTrabajadorSeeder::class);
+    }
 }

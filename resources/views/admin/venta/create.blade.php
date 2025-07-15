@@ -80,7 +80,8 @@
                                                                     data-stock="{{ $articulo->stock }}"
                                                                     data-unidad="{{ $articulo->unidad->nombre }}"
                                                                     data-unidad-tipo="{{ $articulo->unidad->tipo }}"
-                                                                    data-unidad-abreviatura="{{ $articulo->unidad->abreviatura }}">
+                                                                    data-unidad-abreviatura="{{ $articulo->unidad->abreviatura }}"
+                                                                    data-tipo="{{ $articulo->tipo }}">
                                                                 {{ $articulo->codigo }} {{ $articulo->nombre }}
                                                             </option>
                                                         @endforeach
@@ -120,9 +121,30 @@
                                                         @endforeach
                                                     </select>
                                                 </div>
+
+                                                <div class="col-md-12 mt-3" id="trabajadores-carwash-container" style="display:none">
+                                                    <div class="card bg-light p-3">
+                                                        <h6 class="card-title mb-3">
+                                                            <i class="bi bi-people-fill"></i> Asignar Trabajadores Car Wash
+                                                        </h6>
+                                                        <label for="trabajadores_carwash_select" class="form-label">Seleccione los trabajadores que atenderán este servicio:</label>
+                                                        <select class="form-control select2" id="trabajadores_carwash_select" multiple>
+                                                            @foreach($trabajadoresCarwash as $trabajador)
+                                                                <option value="{{ $trabajador->id }}">{{ $trabajador->nombre_completo }} ({{ $trabajador->tipoTrabajador ? $trabajador->tipoTrabajador->nombre : 'Sin tipo' }})</option>
+                                                            @endforeach
+                                                        </select>
+                                                        <small class="text-muted mt-2 d-block">
+                                                            <i class="bi bi-info-circle"></i> Las comisiones se calcularán automáticamente para los trabajadores asignados
+                                                        </small>
+                                                        <small class="text-info mt-1 d-block">
+                                                            <i class="bi bi-lightbulb"></i> La selección de trabajadores es opcional. Puede dejarla vacía si este producto no requiere trabajadores de Car Wash o si desea asignarlos más tarde.
+                                                        </small>
+                                                    </div>
+                                                </div>
+
                                                 <input type="hidden" name="usuario_id" value="{{ Auth::id() }}">
                                                 <div class="col-md-12 mt-3 d-flex justify-content-end">
-                                                    <button type="button" class="btn btn-primary" id="add-detalle"><i class="bi bi-plus-square"></i> Agregar Artículo</button>
+                                                    <button type="button" class="btn btn-primary" id="add-detalle" onclick="console.log('Click directo en botón')"><i class="bi bi-plus-square"></i> Agregar Artículo</button>
                                                 </div>
                                             </div>
                                             <table class="table align-middle table-striped flex-column" id="tabla-detalles">
@@ -133,6 +155,7 @@
                                                         <th>Precio</th>
                                                         <th>Descuento</th>
                                                         <th>Subtotal</th>
+                                                        <th>Trabajadores</th>
                                                         <th>Acciones</th>
                                                     </tr>
                                                 </thead>
@@ -189,7 +212,7 @@
                                     </div>
                                     <div class="col-md-12">
                                         <a href="{{ url('ventas')  }}" class="btn btn-danger"><i class="bi bi-x-circle"></i> Cancelar</a>
-                                        <button type="submit" class="btn btn-success"><i class="bi bi-check2-square"></i> Guardar</button>
+                                        <button type="submit" class="btn btn-success" id="btn-guardar-venta"><i class="bi bi-check2-square"></i> Guardar</button>
                                     </div>
                                 </div>
                             </form>
@@ -213,9 +236,44 @@
             const addDetalleBtn = document.getElementById('add-detalle');
             const detallesBody = document.getElementById('detalles-body');
             const descuentoSelect = document.getElementById('descuento_id');
+            const formularioVenta = document.querySelector('form');
+            const btnGuardarVenta = document.getElementById('btn-guardar-venta');
 
             // Inicializar select2
             $('.select2').select2();
+            console.log('Select2 inicializado');
+
+            // Verificar formulario antes de enviar
+            formularioVenta.addEventListener('submit', function(e) {
+                // Verificar que haya al menos un detalle
+                if (detallesBody.querySelectorAll('tr').length === 0) {
+                    e.preventDefault();
+                    alert('Debe agregar al menos un artículo o servicio a la venta');
+                    return false;
+                }
+
+                // Deshabilitar el botón para prevenir doble envío
+                btnGuardarVenta.disabled = true;
+                btnGuardarVenta.innerHTML = '<i class="bi bi-hourglass"></i> Guardando...';
+
+                // Continuar con el envío
+                return true;
+            });
+
+            // Verificar que los elementos existan
+            console.log('Elementos encontrados:', {
+                clienteSelect: !!clienteSelect,
+                vehiculoSelect: !!vehiculoSelect,
+                articuloSelect: !!articuloSelect,
+                stockInput: !!stockInput,
+                precioVentaInput: !!precioVentaInput,
+                cantidadInput: !!cantidadInput,
+                unidadAbreviaturaSpan: !!unidadAbreviaturaSpan,
+                stockUnidadAbreviaturaSpan: !!stockUnidadAbreviaturaSpan,
+                addDetalleBtn: !!addDetalleBtn,
+                detallesBody: !!detallesBody,
+                descuentoSelect: !!descuentoSelect
+            });
 
             // Inicializar contador de índices usando old (si existen)
             let detalleIndex = {{ count(old('detalles', [])) }};
@@ -251,6 +309,15 @@
                                 const placa = vehiculo.placa || '';
 
                                 option.textContent = `${marca} ${modelo} - ${placa}`;
+                                
+                                // Si hay un old('vehiculo_id'), seleccionarlo automáticamente
+                                @if(old('vehiculo_id'))
+                                    if (vehiculo.id == '{{ old("vehiculo_id") }}') {
+                                        option.selected = true;
+                                        console.log('Vehículo seleccionado automáticamente desde old():', vehiculo.id);
+                                    }
+                                @endif
+                                
                                 vehiculoSelect.appendChild(option);
                             });
                         } else {
@@ -278,6 +345,24 @@
                 const precioVenta = selectedOption.element.getAttribute('data-precio-venta');
                 const unidadAbreviatura = selectedOption.element.getAttribute('data-unidad-abreviatura');
                 const unidadTipo = selectedOption.element.getAttribute('data-unidad-tipo');
+
+                // Verificar si el artículo es un servicio para mostrar el selector de trabajadores car wash
+                const articuloId = selectedOption.id || '';
+                const tipoArticulo = selectedOption.element.getAttribute('data-tipo') || '';
+                const esServicio = tipoArticulo === 'servicio';
+
+                // CORREGIDO NUEVAMENTE: Mostramos el multiselect SOLO para servicios y ocultamos para productos regulares
+                $('#trabajadores-carwash-container').toggle(esServicio);
+
+                // Si NO es servicio, limpiar la selección de trabajadores
+                if (!esServicio) {
+                    $('#trabajadores_carwash_select').val(null).trigger('change');
+                }
+
+                console.log("Estado del contenedor de trabajadores en create:", {
+                    esServicio: esServicio,
+                    containerVisible: !esServicio
+                });
 
                 stockInput.value = stock;
                 precioVentaInput.value = precioVenta;
@@ -320,13 +405,51 @@
                     event.target.value = stock;
                 }
 
-                event.target.setSelectionRange(cursorPosition, cursorPosition);
+                // Solo usar setSelectionRange si el input lo soporta (no en inputs type="number")
+                try {
+                    if (event.target.type !== 'number' && event.target.setSelectionRange) {
+                        event.target.setSelectionRange(cursorPosition, cursorPosition);
+                    }
+                } catch (e) {
+                    // Ignorar errores de setSelectionRange en inputs que no lo soportan
+                    console.log('setSelectionRange no soportado en este input');
+                }
             });
+
+            // Función para verificar si un artículo es servicio
+            function checkIfServicio(articuloId) {
+                // Verificar usando el atributo data-tipo del artículo
+                const option = articuloSelect.querySelector(`option[value="${articuloId}"]`);
+                return option && option.dataset.tipo === 'servicio';
+            }
+
+            // Función para obtener los nombres de los trabajadores seleccionados
+            function obtenerNombresTrabajadores(trabajadoresIds) {
+                let nombres = [];
+                const select = document.getElementById('trabajadores_carwash_select');
+
+                trabajadoresIds.forEach(id => {
+                    const option = select.querySelector(`option[value="${id}"]`);
+                    if (option) {
+                        nombres.push(option.textContent);
+                    }
+                });
+
+                if (nombres.length === 0) return '';
+                if (nombres.length <= 2) return nombres.join(', ');
+
+                // Si hay más de 2 nombres, mostrar solo los primeros dos y un contador para el resto
+                return `${nombres[0]}, ${nombres[1]} y ${nombres.length - 2} más`;
+            }
 
             // Agregar detalle con botón
             addDetalleBtn.addEventListener('click', function () {
+                console.log('Botón Agregar Artículo clickeado');
                 const articuloId = articuloSelect.value;
                 const descuentoId = descuentoSelect.value;
+
+                console.log('Artículo ID:', articuloId);
+                console.log('Descuento ID:', descuentoId);
 
                 // Verificar si el artículo ya está en la tabla de detalles
                 const exists = Array.from(detallesBody.querySelectorAll('input[name*="[articulo_id]"]'))
@@ -346,9 +469,35 @@
                 const cantidad = parseFloat(cantidadInput.value);
                 const unidadAbreviatura = unidadAbreviaturaSpan.textContent;
 
-                if (isNaN(precioVenta) || isNaN(cantidad) ||
-                    cantidad < (cantidadInput.step === "1" ? 1 : 0.01)) {
-                    alert('Por favor, complete todos los campos correctamente.');
+                console.log('Artículo seleccionado:', articuloText);
+                console.log('Precio venta:', precioVenta);
+                console.log('Cantidad:', cantidad);
+                console.log('Unidad:', unidadAbreviatura);
+
+                // Verificar si es un producto regular para obtener los trabajadores seleccionados
+                const tipoArticulo = articuloSelect.options[articuloSelect.selectedIndex].getAttribute('data-tipo');
+                const esServicio = tipoArticulo === 'servicio';
+                console.log('Tipo artículo:', tipoArticulo);
+                console.log('Es servicio:', esServicio);
+
+                let trabajadoresCarwash = [];
+                // CORREGIDO NUEVAMENTE: Obtenemos trabajadores SOLO para servicios, no para productos regulares
+                if (esServicio) {
+                    trabajadoresCarwash = $('#trabajadores_carwash_select').val() || [];
+                    console.log('Trabajadores seleccionados:', trabajadoresCarwash);
+
+                    // Permitir continuar aunque no se hayan seleccionado trabajadores
+                    // Esto es útil para servicios que no requieren trabajadores de Car Wash
+                    // como servicios de mecánica o servicios sin comisiones asignadas
+                }
+
+                if (isNaN(precioVenta) || precioVenta <= 0) {
+                    alert('El precio de venta debe ser un número mayor que cero.');
+                    return;
+                }
+
+                if (isNaN(cantidad) || cantidad <= 0) {
+                    alert('La cantidad debe ser un número mayor que cero.');
                     return;
                 }
 
@@ -382,10 +531,22 @@
                 const row = document.createElement('tr');
                 const usuarioId = {{ Auth::id() }}; // Usuario autenticado
 
+                // Crear inputs ocultos para los trabajadores de carwash si es un servicio
+                let trabajadoresCarwashInputs = '';
+                // CORREGIDO NUEVAMENTE: Asociamos trabajadores SOLO con servicios, no con productos regulares
+                if (esServicio && trabajadoresCarwash && trabajadoresCarwash.length > 0) {
+                    console.log('Generando inputs para trabajadores en índice ' + detalleIndex + ':', trabajadoresCarwash);
+                    // Es mejor usar un único input con el formato trabajadores_carwash[índice] para que PHP lo reciba como array
+                    trabajadoresCarwash.forEach((trabajadorId, i) => {
+                        trabajadoresCarwashInputs += `<input type="hidden" name="trabajadores_carwash[${detalleIndex}][]" value="${trabajadorId}">`;
+                    });
+                }
+
                 row.innerHTML = `
                     <td>
                         ${articuloText}
                         <input type="hidden" name="detalles[${detalleIndex}][articulo_id]" value="${articuloId}">
+                        ${trabajadoresCarwashInputs}
                     </td>
                     <td class="text-center">
                         ${cantidad} ${unidadAbreviatura}
@@ -404,6 +565,20 @@
                         <input type="hidden" name="detalles[${detalleIndex}][usuario_id]" value="${usuarioId}">
                     </td>
                     <td>
+                        ${esServicio ?
+                            (trabajadoresCarwash.length > 0 ?
+                            `<span class="badge bg-info">${trabajadoresCarwash.length} trabajador(es)</span>
+                             <div class="small mt-1">
+                                ${obtenerNombresTrabajadores(trabajadoresCarwash)}
+                             </div>` :
+                            `<span class="badge bg-warning">Sin asignar</span>
+                             <div class="small text-muted mt-1">
+                                Se pueden asignar más tarde
+                             </div>`
+                            ) :
+                            'No aplica'}
+                    </td>
+                    <td>
                         <button type="button" class="btn btn-danger btn-sm remove-detalle"><i class="bi bi-trash-fill"></i></button>
                     </td>`;
                 detallesBody.appendChild(row);
@@ -417,6 +592,8 @@
                 cantidadInput.value = '';
                 unidadAbreviaturaSpan.textContent = '';
                 stockUnidadAbreviaturaSpan.textContent = '';
+                $('#trabajadores_carwash_select').val(null);
+                $('#trabajadores-carwash-container').hide();
                 $('.select2').trigger('change');
                 actualizarTotal();
             });
@@ -456,7 +633,7 @@
                 actualizarTotal();
             }
 
-            // Si hay un cliente_id en la URL, disparar el evento change para cargar sus vehículos
+            // Si hay un cliente_id en la URL o en old(), cargar sus vehículos
             @if(isset($cliente_id) && $cliente_id)
                 // Esperar a que select2 esté inicializado
                 setTimeout(function() {
@@ -465,6 +642,14 @@
 
                     // Si el cliente tiene vehículos, disparar el evento para cargarlos
                     $(clienteSelect).trigger('select2:select');
+                }, 500);
+            @elseif(old('cliente_id'))
+                // Si hay un cliente_id de old(), activar el evento normal de carga
+                setTimeout(function() {
+                    console.log('Cargando datos de old() - Cliente ID: {{ old("cliente_id") }}, Vehículo ID: {{ old("vehiculo_id") }}');
+                    
+                    // Seleccionar cliente y activar el evento que ya funciona
+                    $('#cliente_id').val('{{ old("cliente_id") }}').trigger('change').trigger('select2:select');
                 }, 500);
             @endif
         });

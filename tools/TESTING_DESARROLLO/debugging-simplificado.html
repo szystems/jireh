@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debugging Simplificado - Formulario Edit Venta</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .debug-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .warning { background-color: #fff3cd; border-color: #ffeeba; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        pre { background-color: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+        button { background-color: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 5px; }
+        button:hover { background-color: #0056b3; }
+        .result { margin-top: 10px; padding: 10px; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Debugging Simplificado - Formulario Edit Venta</h1>
+    
+    <div class="debug-section info">
+        <h3>📋 Instrucciones</h3>
+        <p><strong>1.</strong> Abre esta página en una nueva pestaña</p>
+        <p><strong>2.</strong> En la pestaña del formulario de edición de ventas, abre la consola (F12)</p>
+        <p><strong>3.</strong> Si aparece la advertencia de Chrome, escribe: <code>allow pasting</code> y presiona Enter</p>
+        <p><strong>4.</strong> Ejecuta los comandos que te proporcione este debugging</p>
+    </div>
+
+    <div class="debug-section">
+        <h3>🧪 Test 1: Verificación Básica del Formulario</h3>
+        <p>Copia y pega este código en la consola del formulario:</p>
+        <pre id="test1-code">
+// TEST 1: Verificación básica
+console.log('🔍 TEST 1: Verificación básica del formulario');
+const form = document.querySelector('#forma-editar-venta');
+const submitBtn = document.querySelector('#btn-guardar-cambios');
+console.log('Formulario encontrado:', !!form);
+console.log('Botón submit encontrado:', !!submitBtn);
+if (form) {
+    console.log('Action:', form.action);
+    console.log('Method:', form.method);
+    console.log('Tiene CSRF:', !!form.querySelector('input[name="_token"]'));
+    console.log('Tiene METHOD field:', !!form.querySelector('input[name="_method"]'));
+}
+console.log('✅ Test 1 completado');
+        </pre>
+        <button onclick="copyToClipboard('test1-code')">📋 Copiar Test 1</button>
+        <div id="test1-result" class="result" style="display:none;"></div>
+    </div>
+
+    <div class="debug-section">
+        <h3>🧪 Test 2: Interceptar Submit Event</h3>
+        <p>Copia y pega este código para monitorear el evento submit:</p>
+        <pre id="test2-code">
+// TEST 2: Interceptar submit
+console.log('🔍 TEST 2: Interceptando evento submit');
+const form = document.querySelector('#forma-editar-venta');
+if (form) {
+    // Remover listeners existentes y agregar uno nuevo
+    const newForm = form.cloneNode(true);
+    form.parentNode.replaceChild(newForm, form);
+    
+    newForm.addEventListener('submit', function(e) {
+        console.log('🚨 SUBMIT INTERCEPTADO!');
+        console.log('Event:', e);
+        console.log('Target:', e.target);
+        console.log('Action:', e.target.action);
+        console.log('Method:', e.target.method);
+        
+        // Verificar datos
+        const formData = new FormData(e.target);
+        console.log('📊 Datos del formulario:');
+        for (let [key, value] of formData.entries()) {
+            console.log(`  ${key}: ${value}`);
+        }
+        
+        console.log('⚠️ Previniendo envío para debugging...');
+        e.preventDefault();
+        return false;
+    });
+    console.log('✅ Event listener agregado');
+} else {
+    console.log('❌ Formulario no encontrado');
+}
+console.log('✅ Test 2 completado');
+        </pre>
+        <button onclick="copyToClipboard('test2-code')">📋 Copiar Test 2</button>
+    </div>
+
+    <div class="debug-section">
+        <h3>🧪 Test 3: Submit Manual con AJAX</h3>
+        <p>Copia y pega este código para hacer un submit manual:</p>
+        <pre id="test3-code">
+// TEST 3: Submit manual con AJAX
+console.log('🔍 TEST 3: Submit manual con AJAX');
+const form = document.querySelector('#forma-editar-venta');
+if (form) {
+    const formData = new FormData(form);
+    
+    console.log('📤 Enviando datos con fetch...');
+    fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => {
+        console.log('📥 Respuesta recibida:');
+        console.log('Status:', response.status);
+        console.log('Status Text:', response.statusText);
+        console.log('URL:', response.url);
+        console.log('Headers:', response.headers);
+        return response.text();
+    })
+    .then(data => {
+        console.log('📄 Contenido de respuesta (primeros 500 chars):');
+        console.log(data.substring(0, 500));
+        
+        if (data.includes('error') || data.includes('Error') || data.includes('exception')) {
+            console.log('❌ Posible error en respuesta');
+        } else if (data.includes('success') || data.includes('redirect')) {
+            console.log('✅ Posible éxito en respuesta');
+        }
+    })
+    .catch(error => {
+        console.log('❌ Error en fetch:', error);
+    });
+} else {
+    console.log('❌ Formulario no encontrado');
+}
+console.log('✅ Test 3 iniciado - espera la respuesta...');
+        </pre>
+        <button onclick="copyToClipboard('test3-code')">📋 Copiar Test 3</button>
+    </div>
+
+    <div class="debug-section">
+        <h3>🧪 Test 4: Verificar Network Tab</h3>
+        <p>Este test requiere que observes la pestaña Network en DevTools:</p>
+        <pre id="test4-code">
+// TEST 4: Submit real observando Network
+console.log('🔍 TEST 4: Submit real - observa la pestaña Network');
+console.log('📋 INSTRUCCIONES:');
+console.log('1. Abre la pestaña Network en DevTools');
+console.log('2. Ejecuta este código');
+console.log('3. Observa si aparece una petición HTTP');
+
+const form = document.querySelector('#forma-editar-venta');
+if (form) {
+    console.log('⏳ Enviando formulario en 3 segundos...');
+    console.log('🔍 Observa la pestaña Network ahora!');
+    
+    setTimeout(() => {
+        console.log('📤 Enviando formulario ahora...');
+        form.submit();
+    }, 3000);
+} else {
+    console.log('❌ Formulario no encontrado');
+}
+        </pre>
+        <button onclick="copyToClipboard('test4-code')">📋 Copiar Test 4</button>
+        <div class="debug-section warning">
+            <strong>⚠️ IMPORTANTE:</strong> El Test 4 realmente enviará el formulario. Úsalo solo cuando estés listo.
+        </div>
+    </div>
+
+    <div class="debug-section">
+        <h3>📊 Interpretación de Resultados</h3>
+        <ul>
+            <li><strong>Si Test 1 falla:</strong> Problema con la estructura HTML del formulario</li>
+            <li><strong>Si Test 2 no muestra el evento:</strong> Otro script está interfiriendo con el submit</li>
+            <li><strong>Si Test 3 devuelve errores:</strong> Problema en el backend (validación, rutas, etc.)</li>
+            <li><strong>Si Test 4 no muestra petición en Network:</strong> El submit está siendo bloqueado por JavaScript</li>
+        </ul>
+    </div>
+
+    <div class="debug-section info">
+        <h3>🚀 Después de los Tests</h3>
+        <p>Comparte los resultados de los tests en el chat para poder identificar exactamente dónde está el problema.</p>
+    </div>
+
+    <script>
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.textContent;
+            
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('✅ Código copiado al portapapeles');
+                }).catch(err => {
+                    fallbackCopyTextToClipboard(text);
+                });
+            } else {
+                fallbackCopyTextToClipboard(text);
+            }
+        }
+        
+        function fallbackCopyTextToClipboard(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.position = "fixed";
+            
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    alert('✅ Código copiado al portapapeles');
+                } else {
+                    alert('❌ No se pudo copiar automáticamente. Por favor copia manualmente.');
+                }
+            } catch (err) {
+                alert('❌ No se pudo copiar automáticamente. Por favor copia manualmente.');
+            }
+            
+            document.body.removeChild(textArea);
+        }
+    </script>
+</body>
+</html>

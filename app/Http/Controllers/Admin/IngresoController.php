@@ -16,7 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\IngresosExport;
-use PDF;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class IngresoController extends Controller
 {
@@ -200,7 +200,7 @@ class IngresoController extends Controller
             'tipo_compra' => $request->input('tipo_compra'),
             'usuario' => $request->input('usuario'),
         ];
-        $pdf = PDF::loadView('admin.ingreso.pdf', compact('ingresos', 'config', 'filters', 'proveedores', 'usuarios'));
+        $pdf = Pdf::loadView('admin.ingreso.pdf', compact('ingresos', 'config', 'filters', 'proveedores', 'usuarios'));
         return $pdf->stream('ingresos.pdf');
     }
 
@@ -213,7 +213,7 @@ class IngresoController extends Controller
     {
         $ingreso = Ingreso::with(['detalles.articulo', 'proveedor', 'usuario'])->findOrFail($id);
         $config = Config::first();
-        $pdf = PDF::loadView('admin.ingreso.single_pdf', compact('ingreso', 'config'));
+        $pdf = Pdf::loadView('admin.ingreso.single_pdf', compact('ingreso', 'config'));
         return $pdf->stream('ingreso_' . $ingreso->id . '.pdf');
     }
 

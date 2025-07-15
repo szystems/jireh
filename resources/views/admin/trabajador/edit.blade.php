@@ -87,13 +87,28 @@
                                                                         <div class="input-group">
                                                                             <span class="input-group-text"><i class="bi bi-person"></i></span>
                                                                             <input name="nombre" type="text" class="form-control" id="nombre"
-                                                                                placeholder="Nombre completo" value="{{ $trabajador->nombre }}" required />
+                                                                                placeholder="Nombre" value="{{ $trabajador->nombre }}" required />
                                                                             <div class="invalid-feedback">
                                                                                 Por favor ingrese el nombre del trabajador.
                                                                             </div>
                                                                         </div>
                                                                         @if ($errors->has('nombre'))
                                                                             <span class="text-danger small">{{ $errors->first('nombre') }}</span>
+                                                                        @endif
+                                                                    </div>
+
+                                                                    <div class="col-md-6 mb-3">
+                                                                        <label for="apellido" class="form-label">Apellido <span class="text-danger">*</span></label>
+                                                                        <div class="input-group">
+                                                                            <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                                                            <input name="apellido" type="text" class="form-control" id="apellido"
+                                                                                placeholder="Apellido" value="{{ $trabajador->apellido }}" required />
+                                                                            <div class="invalid-feedback">
+                                                                                Por favor ingrese el apellido del trabajador.
+                                                                            </div>
+                                                                        </div>
+                                                                        @if ($errors->has('apellido'))
+                                                                            <span class="text-danger small">{{ $errors->first('apellido') }}</span>
                                                                         @endif
                                                                     </div>
 
@@ -119,43 +134,25 @@
                                                             </div>
                                                             <div class="card-body">
                                                                 <div class="row gx-3">
-                                                                    <div class="col-md-6 mb-3">
-                                                                        <label for="tipo" class="form-label">Tipo de Trabajador <span class="text-danger">*</span></label>
+                                                                    <div class="col-md-12 mb-3">
+                                                                        <label for="tipo_trabajador_id" class="form-label">Tipo de Trabajador <span class="text-danger">*</span></label>
                                                                         <div class="input-group">
                                                                             <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
-                                                                            <select name="tipo" id="tipo" class="form-control" required>
+                                                                            <select class="form-select" id="tipo_trabajador_id" name="tipo_trabajador_id" required>
                                                                                 <option value="">Seleccione un tipo</option>
-                                                                                <option value="mecanico" {{ $trabajador->tipo == 'mecanico' ? 'selected' : '' }}>Mecánico</option>
-                                                                                <option value="carwash" {{ $trabajador->tipo == 'carwash' ? 'selected' : '' }}>Lavador Car Wash</option>
-                                                                                <option value="general" {{ $trabajador->tipo == 'general' || !$trabajador->tipo ? 'selected' : '' }}>General</option>
+                                                                                @foreach($tipoTrabajadores as $tipo)
+                                                                                    <option value="{{ $tipo->id }}" {{ $trabajador->tipo_trabajador_id == $tipo->id ? 'selected' : '' }}>
+                                                                                        {{ $tipo->nombre }}
+                                                                                    </option>
+                                                                                @endforeach
                                                                             </select>
                                                                             <div class="invalid-feedback">
                                                                                 Por favor seleccione el tipo de trabajador.
                                                                             </div>
                                                                         </div>
-                                                                        @if ($errors->has('tipo'))
-                                                                            <span class="text-danger small">{{ $errors->first('tipo') }}</span>
-                                                                        @endif
-                                                                    </div>
-                                                                    <div class="col-md-6 mb-3">
-                                                                        <label for="tipo_trabajador_id" class="form-label">Categoría Específica</label>
-                                                                        <div class="input-group">
-                                                                            <span class="input-group-text"><i class="bi bi-tag"></i></span>
-                                                                            <select name="tipo_trabajador_id" id="tipo_trabajador_id" class="form-control">
-                                                                                <option value="">Seleccione una categoría</option>
-                                                                                @foreach(App\Models\TipoTrabajador::activos() as $tipoTrabajador)
-                                                                                    <option value="{{ $tipoTrabajador->id }}" {{ $trabajador->tipo_trabajador_id == $tipoTrabajador->id ? 'selected' : '' }}>
-                                                                                        {{ $tipoTrabajador->nombre }}
-                                                                                    </option>
-                                                                                @endforeach
-                                                                            </select>
-                                                                        </div>
                                                                         @if ($errors->has('tipo_trabajador_id'))
                                                                             <span class="text-danger small">{{ $errors->first('tipo_trabajador_id') }}</span>
                                                                         @endif
-                                                                        <small class="text-muted">
-                                                                            La categoría permite una clasificación más detallada que el tipo básico.
-                                                                        </small>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -183,11 +180,14 @@
                                                                     </div>
 
                                                                     <div class="col-md-4 mb-3">
-                                                                        <label for="telefono" class="form-label">Teléfono</label>
+                                                                        <label for="telefono" class="form-label">Teléfono <span class="text-danger">*</span></label>
                                                                         <div class="input-group">
                                                                             <span class="input-group-text"><i class="bi bi-telephone"></i></span>
                                                                             <input name="telefono" type="text" class="form-control" id="telefono"
-                                                                                placeholder="Teléfono" value="{{ $trabajador->telefono }}" />
+                                                                                placeholder="Teléfono" value="{{ $trabajador->telefono }}" required />
+                                                                            <div class="invalid-feedback">
+                                                                                Por favor ingrese el teléfono del trabajador.
+                                                                            </div>
                                                                         </div>
                                                                         @if ($errors->has('telefono'))
                                                                             <span class="text-danger small">{{ $errors->first('telefono') }}</span>
@@ -195,26 +195,55 @@
                                                                     </div>
 
                                                                     <div class="col-md-4 mb-3">
-                                                                        <label for="no_documento" class="form-label">No. Documento</label>
+                                                                        <label for="nit" class="form-label">NIT</label>
                                                                         <div class="input-group">
                                                                             <span class="input-group-text"><i class="bi bi-card-text"></i></span>
-                                                                            <input name="no_documento" type="text" class="form-control" id="no_documento"
-                                                                                placeholder="No. Documento" value="{{ $trabajador->no_documento }}" />
+                                                                            <input name="nit" type="text" class="form-control" id="nit"
+                                                                                placeholder="NIT" value="{{ $trabajador->nit }}" />
                                                                         </div>
-                                                                        @if ($errors->has('no_documento'))
-                                                                            <span class="text-danger small">{{ $errors->first('no_documento') }}</span>
+                                                                        @if ($errors->has('nit'))
+                                                                            <span class="text-danger small">{{ $errors->first('nit') }}</span>
                                                                         @endif
                                                                     </div>
 
-                                                                    <div class="col-md-12 mb-3">
+                                                                    <div class="col-md-4 mb-3">
+                                                                        <label for="dpi" class="form-label">DPI</label>
+                                                                        <div class="input-group">
+                                                                            <span class="input-group-text"><i class="bi bi-card-text"></i></span>
+                                                                            <input name="dpi" type="text" class="form-control" id="dpi"
+                                                                                placeholder="DPI" value="{{ $trabajador->dpi }}" />
+                                                                        </div>
+                                                                        @if ($errors->has('dpi'))
+                                                                            <span class="text-danger small">{{ $errors->first('dpi') }}</span>
+                                                                        @endif
+                                                                    </div>
+
+                                                                    <div class="col-md-6 mb-3">
                                                                         <label for="direccion" class="form-label">Dirección</label>
                                                                         <div class="input-group">
                                                                             <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
                                                                             <input name="direccion" type="text" class="form-control" id="direccion"
-                                                                                placeholder="Dirección completa" value="{{ $trabajador->direccion }}" />
+                                                                                placeholder="Dirección completa (opcional)" value="{{ $trabajador->direccion }}" />
                                                                         </div>
                                                                         @if ($errors->has('direccion'))
                                                                             <span class="text-danger small">{{ $errors->first('direccion') }}</span>
+                                                                        @endif
+                                                                    </div>
+
+                                                                    <div class="col-md-6 mb-3">
+                                                                        <label for="estado" class="form-label">Estado <span class="text-danger">*</span></label>
+                                                                        <div class="input-group">
+                                                                            <span class="input-group-text"><i class="bi bi-toggle-on"></i></span>
+                                                                            <select class="form-select" id="estado" name="estado" required>
+                                                                                <option value="1" {{ $trabajador->estado == 1 ? 'selected' : '' }}>Activo</option>
+                                                                                <option value="0" {{ $trabajador->estado == 0 ? 'selected' : '' }}>Inactivo</option>
+                                                                            </select>
+                                                                            <div class="invalid-feedback">
+                                                                                Por favor seleccione el estado del trabajador.
+                                                                            </div>
+                                                                        </div>
+                                                                        @if ($errors->has('estado'))
+                                                                            <span class="text-danger small">{{ $errors->first('estado') }}</span>
                                                                         @endif
                                                                     </div>
                                                                 </div>

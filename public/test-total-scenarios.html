@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pruebas de Escenarios - Cálculo de Total</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { border: 1px solid #ccc; margin: 10px 0; padding: 15px; border-radius: 5px; }
+        .test-button { background: #007cba; color: white; padding: 10px 15px; border: none; border-radius: 3px; cursor: pointer; margin: 5px; }
+        .test-button:hover { background: #005a87; }
+        .results { background: #f5f5f5; padding: 10px; margin: 10px 0; border-radius: 3px; }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        .warning { color: orange; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Pruebas de Escenarios - Cálculo de Total de Venta</h1>
+    
+    <div class="test-section">
+        <h2>📋 Instrucciones de Prueba</h2>
+        <p>Esta página te ayudará a probar todos los escenarios problemáticos reportados:</p>
+        <ol>
+            <li><strong>Carga Inicial:</strong> Abrir la página de edición y verificar que el total sea correcto</li>
+            <li><strong>Recarga de Select:</strong> Simular la recarga del select de artículos</li>
+            <li><strong>Agregar Nuevos Items:</strong> Simular agregar nuevos artículos</li>
+            <li><strong>Eliminar Items:</strong> Simular la eliminación de artículos existentes</li>
+        </ol>
+    </div>
+
+    <div class="test-section">
+        <h2>🚀 Acciones de Prueba</h2>
+        <button class="test-button" onclick="abrirPaginaEdicion()">1. Abrir Página de Edición (Venta 13)</button>
+        <button class="test-button" onclick="ejecutarTodasLasPruebas()">2. Ejecutar Todas las Pruebas</button>
+        <button class="test-button" onclick="limpiarConsola()">🧹 Limpiar Consola</button>
+    </div>
+
+    <div class="test-section">
+        <h2>📊 Script de Pruebas Automatizadas</h2>
+        <p>Copia y pega este script en la consola del navegador en la página de edición:</p>
+        <textarea readonly style="width: 100%; height: 400px;" id="testScript">
+// 🧪 SCRIPT DE PRUEBAS AUTOMATIZADAS PARA CÁLCULO DE TOTALES
+// Copia y pega este script en la consola del navegador en la página de edición
+
+console.clear();
+console.log("🧪 ===============================================");
+console.log("🧪 INICIANDO PRUEBAS AUTOMATIZADAS DE TOTALES");
+console.log("🧪 ===============================================");
+
+// Función auxiliar para esperar
+function esperar(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// Función para obtener el total actual
+function obtenerTotalActual() {
+    const $totalElement = $('#total-venta');
+    if ($totalElement.length === 0) {
+        console.error("❌ Elemento #total-venta no encontrado");
+        return null;
+    }
+    const texto = $totalElement.text();
+    const match = texto.match(/[\d,]+\.?\d*/);
+    return match ? parseFloat(match[0].replace(/,/g, '')) : 0;
+}
+
+// Función para contar elementos de subtotal visibles
+function contarSubtotales() {
+    const elementos = $('input[name*="sub_total"], input.subtotal-input, input[name*="[sub_total]"]');
+    let conteo = {
+        total: elementos.length,
+        visibles: 0,
+        conValor: 0,
+        suma: 0
+    };
+    
+    elementos.each(function() {
+        const $input = $(this);
+        const esVisible = $input.is(':visible') && !$input.closest('tr').hasClass('d-none');
+        if (esVisible) {
+            conteo.visibles++;
+            const valor = parseFloat($input.val()) || 0;
+            if (valor > 0) {
+                conteo.conValor++;
+                conteo.suma += valor;
+            }
+        }
+    });
+    
+    return conteo;
+}
+
+// PRUEBA 1: Estado inicial
+async function prueba1_EstadoInicial() {
+    console.log("\n🧪 PRUEBA 1: VERIFICACIÓN DEL ESTADO INICIAL");
+    console.log("===========================================");
+    
+    const totalInicial = obtenerTotalActual();
+    const subtotales = contarSubtotales();
+    
+    console.log(`📊 Total mostrado: ${totalInicial}`);
+    console.log(`📊 Subtotales encontrados: ${subtotales.total}`);
+    console.log(`📊 Subtotales visibles: ${subtotales.visibles}`);
+    console.log(`📊 Subtotales con valor: ${subtotales.conValor}`);
+    console.log(`📊 Suma manual: ${subtotales.suma}`);
+    
+    const diferencia = Math.abs(totalInicial - subtotales.suma);
+    if (diferencia < 0.01) {
+        console.log("✅ PRUEBA 1 EXITOSA: El total coincide con la suma de subtotales");
+        return true;
+    } else {
+        console.log(`❌ PRUEBA 1 FALLIDA: Diferencia de ${diferencia}`);
+        return false;
+    }
+}
+
+// PRUEBA 2: Llamada manual a actualizarTotalVenta
+async function prueba2_ActualizacionManual() {
+    console.log("\n🧪 PRUEBA 2: LLAMADA MANUAL A actualizarTotalVenta()");
+    console.log("================================================");
+    
+    const totalAntes = obtenerTotalActual();
+    console.log(`📊 Total antes: ${totalAntes}`);
+    
+    if (typeof window.actualizarTotalVenta === 'function') {
+        window.actualizarTotalVenta();
+        await esperar(100); // Dar tiempo para que se actualice
+        
+        const totalDespues = obtenerTotalActual();
+        console.log(`📊 Total después: ${totalDespues}`);
+        
+        if (Math.abs(totalAntes - totalDespues) < 0.01) {
+            console.log("✅ PRUEBA 2 EXITOSA: La función mantiene el total correcto");
+            return true;
+        } else {
+            console.log(`⚠️ PRUEBA 2: El total cambió de ${totalAntes} a ${totalDespues}`);
+            // Verificar si el nuevo total es correcto
+            const subtotales = contarSubtotales();
+            if (Math.abs(totalDespues - subtotales.suma) < 0.01) {
+                console.log("✅ PRUEBA 2 EXITOSA: El nuevo total es correcto");
+                return true;
+            } else {
+                console.log("❌ PRUEBA 2 FALLIDA: El nuevo total no coincide con los subtotales");
+                return false;
+            }
+        }
+    } else {
+        console.log("❌ PRUEBA 2 FALLIDA: Función actualizarTotalVenta no encontrada");
+        return false;
+    }
+}
+
+// PRUEBA 3: Simular recarga del select de artículos
+async function prueba3_RecargaSelect() {
+    console.log("\n🧪 PRUEBA 3: SIMULACIÓN DE RECARGA DEL SELECT");
+    console.log("===========================================");
+    
+    const totalAntes = obtenerTotalActual();
+    console.log(`📊 Total antes de simular recarga: ${totalAntes}`);
+    
+    // Simular el comportamiento de reset-articulo-select.js
+    if (typeof window.resetearSelectArticulos === 'function') {
+        window.resetearSelectArticulos();
+    } else {
+        // Simular manualmente
+        console.log("ℹ️ Simulando recarga manual del select...");
+        const $select = $('#articulo-select, select[name*="articulo"]').first();
+        if ($select.length > 0) {
+            $select.trigger('change');
+        }
+    }
+    
+    await esperar(500); // Dar tiempo para que se procese
+    
+    const totalDespues = obtenerTotalActual();
+    console.log(`📊 Total después de simular recarga: ${totalDespues}`);
+    
+    const diferencia = Math.abs(totalAntes - totalDespues);
+    if (diferencia < 0.01) {
+        console.log("✅ PRUEBA 3 EXITOSA: El total se mantiene después de recargar select");
+        return true;
+    } else {
+        console.log(`❌ PRUEBA 3 FALLIDA: El total cambió ${diferencia} después de recargar select`);
+        return false;
+    }
+}
+
+// PRUEBA 4: Verificar función de depuración
+async function prueba4_FuncionDepuracion() {
+    console.log("\n🧪 PRUEBA 4: VERIFICACIÓN DE FUNCIÓN DE DEPURACIÓN");
+    console.log("===============================================");
+    
+    if (typeof window.debugTotalCalculation === 'function') {
+        console.log("✅ Función de depuración encontrada, ejecutando...");
+        window.debugTotalCalculation();
+        return true;
+    } else {
+        console.log("❌ PRUEBA 4 FALLIDA: Función debugTotalCalculation no encontrada");
+        return false;
+    }
+}
+
+// EJECUTAR TODAS LAS PRUEBAS
+async function ejecutarTodasLasPruebas() {
+    console.log("🧪 EJECUTANDO BATERÍA COMPLETA DE PRUEBAS");
+    console.log("===============================================");
+    
+    const resultados = [];
+    
+    resultados.push(await prueba1_EstadoInicial());
+    await esperar(1000);
+    
+    resultados.push(await prueba2_ActualizacionManual());
+    await esperar(1000);
+    
+    resultados.push(await prueba3_RecargaSelect());
+    await esperar(1000);
+    
+    resultados.push(await prueba4_FuncionDepuracion());
+    
+    console.log("\n🧪 ===============================================");
+    console.log("🧪 RESUMEN DE RESULTADOS DE PRUEBAS");
+    console.log("🧪 ===============================================");
+    
+    const exitosas = resultados.filter(r => r).length;
+    const fallidas = resultados.length - exitosas;
+    
+    console.log(`✅ Pruebas exitosas: ${exitosas}`);
+    console.log(`❌ Pruebas fallidas: ${fallidas}`);
+    
+    if (fallidas === 0) {
+        console.log("🎉 ¡TODAS LAS PRUEBAS EXITOSAS!");
+    } else {
+        console.log("⚠️ Algunas pruebas fallaron, revisar logs arriba");
+    }
+    
+    return fallidas === 0;
+}
+
+// Ejecutar automáticamente
+ejecutarTodasLasPruebas();
+        </textarea>
+        <button class="test-button" onclick="copiarScript()">📋 Copiar Script</button>
+    </div>
+
+    <div class="test-section">
+        <h2>📋 Resultados de Pruebas</h2>
+        <div id="resultados" class="results">
+            <em>Los resultados aparecerán aquí después de ejecutar las pruebas...</em>
+        </div>
+    </div>
+
+    <script>
+        function abrirPaginaEdicion() {
+            window.open('http://127.0.0.1:8000/admin/venta/13/edit', '_blank');
+        }
+
+        function copiarScript() {
+            const script = document.getElementById('testScript');
+            script.select();
+            script.setSelectionRange(0, 99999);
+            document.execCommand('copy');
+            alert('Script copiado al portapapeles. Pégalo en la consola del navegador en la página de edición.');
+        }
+
+        function limpiarConsola() {
+            console.clear();
+            console.log('🧹 Consola limpiada');
+        }
+
+        function ejecutarTodasLasPruebas() {
+            alert('Para ejecutar las pruebas:\n\n1. Abre la página de edición (botón "Abrir Página de Edición")\n2. Abre las herramientas de desarrollador (F12)\n3. Ve a la pestaña "Console"\n4. Copia y pega el script de pruebas\n5. Presiona Enter');
+        }
+    </script>
+</body>
+</html>

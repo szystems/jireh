@@ -285,14 +285,15 @@
         <table>
             <thead>
                 <tr>
-                    <th width="35%">Artículo</th>
-                    <th class="text-center" width="10%">Cantidad</th>
+                    <th width="30%">Artículo</th>
+                    <th class="text-center" width="8%">Cantidad</th>
                     <th class="text-right" width="10%">Precio</th>
                     @if (Auth::user()->role_as != 1)
                         <th class="text-right" width="10%">Costo</th>
                     @endif
+                    <th width="15%">Trabajadores</th>
                     <th class="text-right" width="10%">Descuento</th>
-                    <th class="text-right" width="10%">Subtotal</th>
+                    <th class="text-right" width="12%">Subtotal</th>
                 </tr>
             </thead>
             <tbody>
@@ -315,7 +316,26 @@
 
                         $totalDescuentos += $montoDescuento;
                         $totalVenta += ($subtotalSinDescuento - $montoDescuento);
-                        $totalCostos += ($detalle->precio_costo * $detalle->cantidad);
+                        
+                        // Calcular costo total incluyendo comisiones
+                        $costoDetalle = $detalle->precio_costo * $detalle->cantidad;
+                        
+                        // Agregar comisiones si es servicio
+                        if($detalle->articulo && $detalle->articulo->tipo === 'servicio') {
+                            // Sumar comisiones de trabajadores carwash
+                            foreach($detalle->trabajadoresCarwash as $trabajador) {
+                                if($trabajador->pivot && $trabajador->pivot->monto_comision) {
+                                    $costoDetalle += $trabajador->pivot->monto_comision;
+                                }
+                            }
+                            
+                            // Sumar comisión de mecánico
+                            if($detalle->articulo->mecanico_id && $detalle->articulo->costo_mecanico > 0) {
+                                $costoDetalle += $detalle->articulo->costo_mecanico * $detalle->cantidad;
+                            }
+                        }
+                        
+                        $totalCostos += $costoDetalle;
                     @endphp
 
                     <tr>
@@ -337,6 +357,25 @@
                         @if (Auth::user()->role_as != 1)
                             <td class="text-right moneda">{{ $config->currency_simbol }}.{{ number_format($detalle->precio_costo, 2, '.', ',') }}</td>
                         @endif
+                        <td>
+                            @if($detalle->articulo && $detalle->articulo->tipo === 'servicio')
+                                @php
+                                    $trabajadoresAsignados = $detalle->trabajadoresCarwash;
+                                @endphp
+                                @if($trabajadoresAsignados->count() > 0)
+                                    @foreach($trabajadoresAsignados as $trabajador)
+                                        <span class="badge badge-info">
+                                            {{ $trabajador->nombre }} {{ $trabajador->apellido }}
+                                        </span>
+                                        @if(!$loop->last)<br>@endif
+                                    @endforeach
+                                @else
+                                    <small style="color: #6c757d;">No asignados</small>
+                                @endif
+                            @else
+                                <small style="color: #6c757d;">No aplica</small>
+                            @endif
+                        </td>
                         <td class="text-right">
                             @if($montoDescuento > 0)
                                 <span class="text-danger moneda">
@@ -356,24 +395,35 @@
                 @endforeach
             </tbody>
             <tfoot>
+                <tr style="background-color: #007bff; color: white;">
+                    <th colspan="{{ Auth::user()->role_as != 1 ? '7' : '6' }}" class="text-center">RESUMEN DE VENTA</th>
+                </tr>
                 <tr>
-                    <th colspan="{{ Auth::user()->role_as != 1 ? '5' : '4' }}" class="text-right">Total Descuentos:</th>
-                    <td class="text-right moneda">{{ number_format($totalDescuentos, 2, '.', ',') }}</td>
+                    <th colspan="{{ Auth::user()->role_as != 1 ? '6' : '5' }}" class="text-right">Subtotal sin descuento:</th>
+                    <td class="text-right moneda">{{ $config->currency_simbol }}.{{ number_format($totales['subtotalSinDescuentoTotal'], 2, '.', ',') }}</td>
+                </tr>
+                <tr>
+                    <th colspan="{{ Auth::user()->role_as != 1 ? '6' : '5' }}" class="text-right">Total Descuentos:</th>
+                    <td class="text-right moneda text-danger">{{ $config->currency_simbol }}.{{ number_format($totales['totalDescuentos'], 2, '.', ',') }}</td>
+                </tr>
+                <tr>
+                    <th colspan="{{ Auth::user()->role_as != 1 ? '6' : '5' }}" class="text-right">Total Impuestos:</th>
+                    <td class="text-right moneda text-info">{{ $config->currency_simbol }}.{{ number_format($totales['totalImpuestos'], 2, '.', ',') }}</td>
                 </tr>
                 @if (Auth::user()->role_as != 1)
                     <tr>
-                        <th colspan="5" class="text-right">Total Costo:</th>
-                        <td class="text-right moneda">{{ number_format($totalCostos, 2, '.', ',') }}</td>
+                        <th colspan="6" class="text-right">Total Costo de Compra:</th>
+                        <td class="text-right moneda text-danger">{{ $config->currency_simbol }}.{{ number_format($totales['totalCostoCompra'], 2, '.', ',') }}</td>
                     </tr>
                 @endif
-                <tr class="total-row">
-                    <th colspan="{{ Auth::user()->role_as != 1 ? '5' : '4' }}" class="text-right">TOTAL VENTA:</th>
-                    <td class="text-right moneda">{{ number_format($totalVenta, 2, '.', ',') }}</td>
+                <tr style="background-color: #f8f9fa;">
+                    <th colspan="{{ Auth::user()->role_as != 1 ? '6' : '5' }}" class="text-right">TOTAL VENTA:</th>
+                    <td class="text-right moneda text-primary"><strong>{{ $config->currency_simbol }}.{{ number_format($totales['totalVenta'], 2, '.', ',') }}</strong></td>
                 </tr>
                 @if (Auth::user()->role_as != 1)
-                    <tr class="total-row">
-                        <th colspan="5" class="text-right">GANANCIA NETA:</th>
-                        <td class="text-right moneda">{{ number_format($totalVenta - $totalCostos, 2, '.', ',') }}</td>
+                    <tr style="background-color: #d4edda;">
+                        <th colspan="6" class="text-right">GANANCIA NETA:</th>
+                        <td class="text-right moneda text-success"><strong>{{ $config->currency_simbol }}.{{ number_format($totales['gananciaNeta'], 2, '.', ',') }}</strong></td>
                     </tr>
                 @endif
             </tfoot>
@@ -455,13 +505,13 @@
                                 <tr>
                                     <td style="border: none; text-align: right; font-weight: bold; width: 60%;">Valor de Venta:</td>
                                     <td style="border: none; text-align: right; width: 40%;">
-                                        <span class="text-success moneda">{{ $config->currency_simbol }}.{{ number_format($totalVenta, 2, '.', ',') }}</span>
+                                        <span class="text-success moneda">{{ $config->currency_simbol }}.{{ number_format($totales['totalVenta'], 2, '.', ',') }}</span>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td style="border: none; text-align: right; font-weight: bold;">Costo de Artículos:</td>
                                     <td style="border: none; text-align: right;">
-                                        <span class="text-danger moneda">{{ $config->currency_simbol }}.{{ number_format($totalCostos, 2, '.', ',') }}</span>
+                                        <span class="text-danger moneda">{{ $config->currency_simbol }}.{{ number_format($totales['totalCostoCompra'], 2, '.', ',') }}</span>
                                     </td>
                                 </tr>
                             </table>
@@ -472,7 +522,7 @@
                                     <td style="border: none; text-align: right; font-weight: bold; width: 60%;">Margen Bruto:</td>
                                     <td style="border: none; text-align: right; width: 40%;">
                                         @php
-                                            $margenBruto = $totalVenta > 0 ? (($totalVenta - $totalCostos) / $totalVenta) * 100 : 0;
+                                            $margenBruto = $totales['totalVenta'] > 0 ? (($totales['totalVenta'] - $totales['totalCostoCompra']) / $totales['totalVenta']) * 100 : 0;
                                         @endphp
                                         <span class="{{ $margenBruto >= 20 ? 'text-success' : ($margenBruto >= 10 ? 'text-warning' : 'text-danger') }}">
                                             {{ number_format($margenBruto, 2) }}%
@@ -482,7 +532,7 @@
                                 <tr>
                                     <td style="border: none; text-align: right; font-weight: bold;">Ganancia Bruta:</td>
                                     <td style="border: none; text-align: right;">
-                                        <span class="text-success moneda">{{ $config->currency_simbol }}.{{ number_format($totalVenta - $totalCostos, 2, '.', ',') }}</span>
+                                        <span class="text-success moneda">{{ $config->currency_simbol }}.{{ number_format($totales['totalVenta'] - $totales['totalCostoCompra'], 2, '.', ',') }}</span>
                                     </td>
                                 </tr>
                             </table>
@@ -493,7 +543,7 @@
                                     <td style="border: none; text-align: right; font-weight: bold; width: 60%;">Estado de Pago:</td>
                                     <td style="border: none; text-align: right; width: 40%;">
                                         @php
-                                            $porcentajePagado = $totalVenta > 0 ? ($totalPagado / $totalVenta) * 100 : 0;
+                                            $porcentajePagado = $totales['totalVenta'] > 0 ? ($totales['totalPagado'] / $totales['totalVenta']) * 100 : 0;
                                         @endphp
                                         <span class="{{ $porcentajePagado >= 100 ? 'text-success' : ($porcentajePagado > 0 ? 'text-warning' : 'text-danger') }}">
                                             {{ number_format($porcentajePagado, 0) }}%

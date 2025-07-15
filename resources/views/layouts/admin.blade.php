@@ -76,25 +76,23 @@
             }
 
             .page-wrapper {
-                display: flex;
-                flex-direction: column;
+                padding: 0;
+                position: relative;
                 min-height: 100vh;
-                overflow-x: hidden;
             }
 
             .main-container {
-                display: flex;
-                flex: 1;
-                flex-direction: column;
-                overflow-x: hidden;
+                transition: padding-left 0.3s ease;
+                padding: 0 0 0 250px; /* Mantener consistencia con el template original */
+                min-height: calc(100vh - 65px);
+                background: #eef1f6;
                 position: relative;
+                overflow-x: hidden;
             }
 
             .content-wrapper {
-                flex: 1 0 auto;
-                width: 100%;
-                padding-bottom: 10px;
-                overflow-y: auto;
+                padding: 20px;
+                min-height: calc(100vh - 125px); /* Ajustar para el header y footer */
                 overflow-x: hidden;
             }
 
@@ -103,14 +101,32 @@
             }
 
             .app-footer {
-                flex-shrink: 0;
                 width: 100%;
+                background: #ffffff;
+                border-top: 1px solid #dee2e6;
+                padding: 10px 0;
             }
 
             /* Ajustes específicos para los contenedores del contenido */
             .container-fluid,
             .container {
                 overflow-x: hidden;
+            }
+
+            /* Ajustes cuando el sidebar está colapsado */
+            .sidebar-wrapper.collapsed ~ .main-container {
+                padding-left: 70px !important;
+            }
+
+            /* Responsivo para dispositivos móviles */
+            @media (max-width: 1199.98px) {
+                .main-container {
+                    padding-left: 0 !important;
+                }
+                
+                .sidebar-wrapper.collapsed ~ .main-container {
+                    padding-left: 0 !important;
+                }
             }
         </style>
 
@@ -210,6 +226,22 @@
 
         {{-- Hora y fecha --}}
         <script>
+            // Función para actualizar el contador de notificaciones
+            function actualizarContadorNotificaciones() {
+                fetch('/api/notificaciones/resumen')
+                    .then(response => response.json())
+                    .then(data => {
+                        const contador = document.getElementById('notification-count');
+                        if (contador) {
+                            const total = data.por_prioridad.alta + data.por_prioridad.media;
+                            contador.textContent = total;
+                            contador.style.display = total > 0 ? 'inline' : 'none';
+                        }
+                    })
+                    .catch(error => console.log('Error al obtener notificaciones:', error));
+            }
+
+            // Función para actualizar la hora y fecha
             function actualizarReloj() {
                 const ahora = new Date();
                 const horas = ahora.getHours();
@@ -230,8 +262,18 @@
                 const fechaFormateada = `${dia}/${mes}/${anio}`;
 
                 // Actualiza el contenido del elemento con la fecha y la hora
-                document.getElementById('reloj').textContent = `${fechaFormateada} ${horaFormateada}`;
+                const elementoReloj = document.getElementById('reloj');
+                if (elementoReloj) {
+                    elementoReloj.textContent = `${fechaFormateada} ${horaFormateada}`;
+                }
             }
+
+            // Inicializar cuando el DOM esté listo
+            document.addEventListener('DOMContentLoaded', function() {
+                actualizarContadorNotificaciones();
+                // Actualizar contador cada 30 segundos
+                setInterval(actualizarContadorNotificaciones, 30000);
+            });
 
             // Actualiza la hora y la fecha cada segundo
             setInterval(actualizarReloj, 1000);

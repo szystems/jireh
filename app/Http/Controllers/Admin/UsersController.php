@@ -10,8 +10,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use App\Models\Config;
 use Carbon\Carbon;
-use PDF;
-use DB;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\UserMail;
 
@@ -208,7 +208,7 @@ class UsersController extends Controller
         }
 
         if ($verpdf == "Download") {
-            $pdf = PDF::loadView('admin.user.pdf', [
+            $pdf = Pdf::loadView('admin.user.pdf', [
                 'usuarios' => $usuarios,
                 'path' => $path,
                 'config' => $config,
@@ -220,7 +220,7 @@ class UsersController extends Controller
         }
 
         if ($verpdf == "Browser") {
-            $pdf = PDF::loadView('admin.user.pdf', [
+            $pdf = Pdf::loadView('admin.user.pdf', [
                 'usuarios' => $usuarios,
                 'path' => $path,
                 'config' => $config,
@@ -257,7 +257,7 @@ class UsersController extends Controller
         $pdfhorientacion = 'portrait';
 
         if ($verpdf == "Download") {
-            $pdf = PDF::loadView('admin.user.pdfuser', compact('usuario', 'pathuser', 'defaultImagePath', 'config', 'imagen', 'currency'));
+            $pdf = Pdf::loadView('admin.user.pdfuser', compact('usuario', 'pathuser', 'defaultImagePath', 'config', 'imagen', 'currency'));
 
             // Configuración adicional para DOMPDF
             $pdf->getDomPDF()->set_option("enable_html5_parser", true);
@@ -270,7 +270,7 @@ class UsersController extends Controller
         }
 
         if ($verpdf == "Browser") {
-            $pdf = PDF::loadView('admin.user.pdfuser', compact('usuario', 'pathuser', 'defaultImagePath', 'config', 'imagen', 'currency'));
+            $pdf = Pdf::loadView('admin.user.pdfuser', compact('usuario', 'pathuser', 'defaultImagePath', 'config', 'imagen', 'currency'));
 
             // Configuración adicional para DOMPDF
             $pdf->getDomPDF()->set_option("enable_html5_parser", true);

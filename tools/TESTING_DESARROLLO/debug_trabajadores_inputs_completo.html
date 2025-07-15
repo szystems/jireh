@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Trabajadores - Inputs Completo</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .debug-section { 
+            border: 1px solid #ddd; 
+            margin: 10px 0; 
+            padding: 15px; 
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .error { color: red; }
+        .success { color: green; }
+        .warning { color: orange; }
+        .info { color: blue; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 3px; overflow-x: auto; }
+        button { 
+            margin: 5px; 
+            padding: 10px 15px; 
+            border: none; 
+            border-radius: 3px; 
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+        }
+        button:hover { background-color: #0056b3; }
+        .input-info {
+            background: #e7f3ff;
+            border-left: 4px solid #2196f3;
+            padding: 10px;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Debug de Inputs de Trabajadores - Análisis Completo</h1>
+    
+    <div class="debug-section">
+        <h2>📋 Instrucciones</h2>
+        <p>1. Abre este archivo en tu navegador</p>
+        <p>2. Ve a la página de edición de venta en otra pestaña</p>
+        <p>3. Copia y pega el código JavaScript que aparece abajo en la consola del navegador</p>
+        <p>4. Ejecuta las funciones de debugging antes y después de editar trabajadores</p>
+    </div>
+
+    <div class="debug-section">
+        <h2>🛠️ Código JavaScript para la Consola</h2>
+        <pre id="javascript-code">
+// === ANÁLISIS COMPLETO DE INPUTS DE TRABAJADORES ===
+
+// Función para analizar todos los inputs de trabajadores
+function analizarInputsTrabajadores() {
+    console.log('🔍 === ANÁLISIS COMPLETO DE INPUTS DE TRABAJADORES ===');
+    console.log('⏰ Timestamp:', new Date().toLocaleString());
+    
+    // 1. Buscar todos los inputs de trabajadores
+    const inputsTrabajadores = document.querySelectorAll('input[name*="trabajadores_carwash"]');
+    console.log('📊 Total inputs encontrados:', inputsTrabajadores.length);
+    
+    if (inputsTrabajadores.length === 0) {
+        console.error('❌ NO SE ENCONTRARON INPUTS DE TRABAJADORES');
+        return false;
+    }
+    
+    // 2. Analizar cada input
+    const detallesPorInput = {};
+    const resumen = {
+        totalInputs: inputsTrabajadores.length,
+        detallesUnicos: new Set(),
+        trabajadoresUnicos: new Set(),
+        inputsVacios: 0,
+        inputsValidos: 0
+    };
+    
+    inputsTrabajadores.forEach((input, index) => {
+        const nombre = input.name;
+        const valor = input.value;
+        const esVisible = input.type !== 'hidden';
+        
+        console.log(`📝 Input ${index + 1}:`);
+        console.log(`  - Nombre: ${nombre}`);
+        console.log(`  - Valor: "${valor}"`);
+        console.log(`  - Tipo: ${input.type}`);
+        console.log(`  - Visible: ${esVisible}`);
+        console.log(`  - En DOM: ${document.contains(input)}`);
+        
+        // Extraer ID del detalle
+        const matchDetalle = nombre.match(/trabajadores_carwash\[(\d+)\]/);
+        const matchNuevo = nombre.match(/nuevos_detalles\[(\d+)\]/);
+        
+        let detalleId = null;
+        let esNuevo = false;
+        
+        if (matchDetalle) {
+            detalleId = matchDetalle[1];
+            esNuevo = false;
+        } else if (matchNuevo) {
+            detalleId = `nuevo_${matchNuevo[1]}`;
+            esNuevo = true;
+        }
+        
+        if (detalleId) {
+            resumen.detallesUnicos.add(detalleId);
+            
+            if (!detallesPorInput[detalleId]) {
+                detallesPorInput[detalleId] = {
+                    esNuevo: esNuevo,
+                    trabajadores: [],
+                    inputs: []
+                };
+            }
+            
+            detallesPorInput[detalleId].inputs.push({
+                elemento: input,
+                nombre: nombre,
+                valor: valor,
+                index: index + 1
+            });
+            
+            if (valor && valor.trim() !== '') {
+                detallesPorInput[detalleId].trabajadores.push(valor);
+                resumen.trabajadoresUnicos.add(valor);
+                resumen.inputsValidos++;
+            } else {
+                resumen.inputsVacios++;
+            }
+        }
+        
+        console.log(`  - Detalle ID: ${detalleId || 'No identificado'}`);
+        console.log(`  - Es nuevo: ${esNuevo}`);
+        console.log('  ----');
+    });
+    
+    // 3. Mostrar resumen por detalle
+    console.log('📋 === RESUMEN POR DETALLE ===');
+    Object.keys(detallesPorInput).forEach(detalleId => {
+        const detalle = detallesPorInput[detalleId];
+        console.log(`🔧 Detalle ${detalleId} (${detalle.esNuevo ? 'NUEVO' : 'EXISTENTE'}):`);
+        console.log(`  - Inputs: ${detalle.inputs.length}`);
+        console.log(`  - Trabajadores: ${detalle.trabajadores.length}`);
+        console.log(`  - IDs Trabajadores: [${detalle.trabajadores.join(', ')}]`);
+        
+        // Verificar containers
+        const containerId = detalle.esNuevo ? `trabajadores-nuevo-${detalleId.replace('nuevo_', '')}` : `trabajadores-${detalleId}`;
+        const container = document.getElementById(containerId);
+        console.log(`  - Container "${containerId}": ${container ? 'EXISTE' : 'NO EXISTE'}`);
+        
+        if (container) {
+            const inputsEnContainer = container.querySelectorAll('input[name*="trabajadores_carwash"]');
+            console.log(`  - Inputs en container: ${inputsEnContainer.length}`);
+        }
+    });
+    
+    // 4. Resumen general
+    console.log('📊 === RESUMEN GENERAL ===');
+    console.log(`Total inputs: ${resumen.totalInputs}`);
+    console.log(`Inputs válidos: ${resumen.inputsValidos}`);
+    console.log(`Inputs vacíos: ${resumen.inputsVacios}`);
+    console.log(`Detalles únicos: ${resumen.detallesUnicos.size}`);
+    console.log(`Trabajadores únicos: ${resumen.trabajadoresUnicos.size}`);
+    console.log(`Lista de detalles: [${Array.from(resumen.detallesUnicos).join(', ')}]`);
+    console.log(`Lista de trabajadores: [${Array.from(resumen.trabajadoresUnicos).join(', ')}]`);
+    
+    // 5. Verificar formulario
+    const formulario = document.getElementById('forma-editar-venta');
+    console.log('📝 Formulario encontrado:', formulario ? 'SÍ' : 'NO');
+    
+    if (formulario) {
+        const formData = new FormData(formulario);
+        console.log('📤 Datos del formulario que se enviarían:');
+        
+        for (let [key, value] of formData.entries()) {
+            if (key.includes('trabajadores_carwash')) {
+                console.log(`  ${key}: ${value}`);
+            }
+        }
+    }
+    
+    console.log('🔍 === FIN DEL ANÁLISIS ===');
+    return true;
+}
+
+// Función para analizar un detalle específico
+function analizarDetalle(detalleId) {
+    console.log(`🔍 === ANÁLISIS DEL DETALLE ${detalleId} ===`);
+    
+    // Buscar container
+    const container = document.getElementById(`trabajadores-${detalleId}`);
+    console.log('Container encontrado:', container ? 'SÍ' : 'NO');
+    
+    if (container) {
+        const inputs = container.querySelectorAll('input[name*="trabajadores_carwash"]');
+        console.log('Inputs en container:', inputs.length);
+        
+        inputs.forEach((input, index) => {
+            console.log(`  Input ${index + 1}: ${input.name} = "${input.value}"`);
+        });
+    }
+    
+    // Buscar inputs en todo el DOM para este detalle
+    const todosLosInputs = document.querySelectorAll(`input[name*="trabajadores_carwash[${detalleId}]"]`);
+    console.log('Inputs totales para este detalle:', todosLosInputs.length);
+    
+    return container;
+}
+
+// Función para verificar antes de guardar
+function verificarAntesDeGuardar() {
+    console.log('💾 === VERIFICACIÓN ANTES DE GUARDAR ===');
+    analizarInputsTrabajadores();
+}
+
+// Función para verificar después de guardar
+function verificarDespuesDeGuardar() {
+    console.log('✅ === VERIFICACIÓN DESPUÉS DE GUARDAR ===');
+    setTimeout(() => {
+        analizarInputsTrabajadores();
+    }, 500);
+}
+
+// Funciones globales para fácil acceso
+window.debugInputsTrabajadores = analizarInputsTrabajadores;
+window.debugDetalle = analizarDetalle;
+window.debugAntesGuardar = verificarAntesDeGuardar;
+window.debugDespuesGuardar = verificarDespuesDeGuardar;
+
+console.log('🛠️ Funciones de debugging cargadas:');
+console.log('- debugInputsTrabajadores() - Análisis completo');
+console.log('- debugDetalle(id) - Análisis de un detalle específico');
+console.log('- debugAntesGuardar() - Verificar antes de guardar');
+console.log('- debugDespuesGuardar() - Verificar después de guardar');
+        </pre>
+    </div>
+
+    <div class="debug-section">
+        <h2>📋 Pasos para Debugging</h2>
+        <ol>
+            <li><strong>Carga inicial:</strong> Ejecuta <code>debugInputsTrabajadores()</code> para ver el estado inicial</li>
+            <li><strong>Antes de editar:</strong> Ejecuta <code>debugDetalle(ID_DETALLE)</code> para el detalle que vas a editar</li>
+            <li><strong>Abrir modal:</strong> Abre el modal de trabajadores para el detalle</li>
+            <li><strong>Antes de guardar:</strong> Ejecuta <code>debugAntesGuardar()</code></li>
+            <li><strong>Guardar cambios:</strong> Haz clic en "Guardar trabajadores" en el modal</li>
+            <li><strong>Después de guardar:</strong> Ejecuta <code>debugDespuesGuardar()</code></li>
+            <li><strong>Antes de enviar:</strong> Ejecuta <code>debugInputsTrabajadores()</code> antes de guardar la venta</li>
+        </ol>
+    </div>
+
+    <div class="debug-section">
+        <h2>⚠️ Problemas Comunes</h2>
+        <ul>
+            <li><strong>Inputs duplicados:</strong> Se crean inputs pero no se eliminan los anteriores</li>
+            <li><strong>Container incorrecto:</strong> Los inputs se agregan al container equivocado</li>
+            <li><strong>IDs incorrectos:</strong> Los names de los inputs no coinciden con el formato esperado</li>
+            <li><strong>Timing:</strong> Los inputs se eliminan/crean en el momento incorrecto</li>
+            <li><strong>Scope:</strong> Los inputs no están dentro del formulario principal</li>
+        </ul>
+    </div>
+
+    <div class="debug-section">
+        <h2>🎯 Qué Buscar</h2>
+        <ul>
+            <li>Los inputs deben tener el formato: <code>trabajadores_carwash[ID_DETALLE][]</code></li>
+            <li>Cada container debe tener ID: <code>trabajadores-ID_DETALLE</code></li>
+            <li>No debe haber inputs duplicados para el mismo trabajador en el mismo detalle</li>
+            <li>Los inputs deben estar dentro del formulario principal <code>#forma-editar-venta</code></li>
+            <li>Los valores de los inputs deben ser IDs válidos de trabajadores</li>
+        </ul>
+    </div>
+
+    <script>
+        // Copiar el código JavaScript al portapapeles
+        function copiarCodigo() {
+            const codigo = document.getElementById('javascript-code').textContent;
+            navigator.clipboard.writeText(codigo).then(() => {
+                alert('Código copiado al portapapeles!');
+            });
+        }
+        
+        // Agregar botón para copiar
+        document.addEventListener('DOMContentLoaded', function() {
+            const botonCopiar = document.createElement('button');
+            botonCopiar.textContent = '📋 Copiar Código JavaScript';
+            botonCopiar.onclick = copiarCodigo;
+            
+            const seccionCodigo = document.getElementById('javascript-code').parentElement;
+            seccionCodigo.insertBefore(botonCopiar, seccionCodigo.firstChild);
+        });
+    </script>
+</body>
+</html>

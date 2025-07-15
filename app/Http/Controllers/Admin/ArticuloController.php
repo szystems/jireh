@@ -10,8 +10,9 @@ use App\Models\Trabajador;
 use App\Models\Unidad;
 use Illuminate\Http\Request;
 use App\Models\Config;
-use Illuminate\Support\Str; // Añadir esta importación
-use PDF;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ArticuloController extends Controller
 {
@@ -280,17 +281,17 @@ class ArticuloController extends Controller
 
             // Depuración avanzada
             if ($articulo->tipo == 'servicio') {
-                \Log::info('Servicio encontrado: ' . $articulo->id . ' - ' . $articulo->nombre);
-                \Log::info('Cantidad de componentes: ' . count($articulo->articulos));
+                Log::info('Servicio encontrado: ' . $articulo->id . ' - ' . $articulo->nombre);
+                Log::info('Cantidad de componentes: ' . count($articulo->articulos));
 
                 foreach($articulo->articulos as $componente) {
-                    \Log::info('Componente: ' . $componente->id . ' - ' . $componente->nombre . ', Cantidad: ' . $componente->pivot->cantidad);
+                    Log::info('Componente: ' . $componente->id . ' - ' . $componente->nombre . ', Cantidad: ' . $componente->pivot->cantidad);
                 }
             }
 
             return view('admin.articulo.show', compact('articulo', 'config'));
         } catch (\Exception $e) {
-            \Log::error('Error al mostrar artículo: ' . $e->getMessage());
+            Log::error('Error al mostrar artículo: ' . $e->getMessage());
             return redirect('articulos')->with('error', 'Error al mostrar el artículo: ' . $e->getMessage());
         }
     }
@@ -375,7 +376,7 @@ class ArticuloController extends Controller
             // NUEVO: Si cambió de tipo servicio a artículo, eliminar las relaciones de componentes
             if ($tipoOriginal == 'servicio') {
                 $articulo->articulos()->detach();
-                \Log::info("Se eliminaron los componentes del artículo ID {$id} al cambiar de tipo servicio a artículo");
+                Log::info("Se eliminaron los componentes del artículo ID {$id} al cambiar de tipo servicio a artículo");
             }
         }
 
@@ -557,9 +558,7 @@ class ArticuloController extends Controller
             'filtrosAplicados' => $filtrosAplicados,
             'fechaGeneracion' => $fechaActual,
             'totalArticulos' => $articulos->count(),
-        ];
-
-        $pdf = PDF::loadView('admin.articulo.pdfarticulos', $data);
+        ];        $pdf = Pdf::loadView('admin.articulo.pdfarticulos', $data);
         return $pdf->stream('articulos_' . now()->format('YmdHis') . '.pdf');
     }
 
@@ -640,9 +639,7 @@ class ArticuloController extends Controller
         $data['valorImpuesto'] = $valorImpuesto;
         $data['gananciaReal'] = $gananciaReal;
         $data['margen'] = $margen;
-        $data['costosComisiones'] = $costosComisiones;
-
-        $pdf = PDF::loadView('admin.articulo.pdfarticulo', $data);
+        $data['costosComisiones'] = $costosComisiones;        $pdf = Pdf::loadView('admin.articulo.pdfarticulo', $data);
 
         // Configurar opciones del PDF
         $pdf->setPaper('a4');
@@ -651,5 +648,49 @@ class ArticuloController extends Controller
         $filename = 'articulo_' . Str::slug($articulo->nombre) . '_' . $articulo->id . '.pdf';
 
         return $pdf->stream($filename);
+    }
+
+    /**
+     * Proporciona datos de artículos para Select2 en formato API.
+     */
+    public function getArticulosParaVentaApi(Request $request)
+    {
+        $term = $request->input('q');
+        $page = $request->input('page', 1);
+        $tipoVenta = $request->input('tipo_venta'); // Podría usarse para filtrar más adelante
+
+        $query = Articulo::with('unidad', 'tipoArticulo') // Cargar relaciones necesarias
+                         ->where('estado', 1); // Solo artículos activos
+
+        if ($term) {
+            $query->where(function ($q) use ($term) {
+                $q->where('nombre', 'LIKE', '%' . $term . '%')
+                  ->orWhere('codigo', 'LIKE', '%' . $term . '%');
+            });
+        }
+
+        $articulos = $query->orderBy('nombre')->paginate(15); // Paginar resultados
+
+        $config = Config::first(); // Para el símbolo de moneda y decimales
+
+        $formattedArticulos = $articulos->map(function ($articulo) use ($config) {
+            return [
+                'id' => $articulo->id,
+                'text' => $articulo->nombre .
+                            ($articulo->codigo ? ' (Cod: ' . $articulo->codigo . ')' : '') .
+                            " (" . ($config->simbolo_moneda ?? '$') . number_format($articulo->precio_venta, $config->numero_decimales_precio ?? 2) . ")",
+                'stock_disponible' => $articulo->stock_disponible_venta, // Usar el accesor
+                'unidad_abreviatura' => $articulo->unidad->abreviatura ?? '',
+                'unidad_tipo' => $articulo->unidad->tipo ?? 'decimal',
+                'tipo_articulo_nombre' => $articulo->tipoArticulo->nombre ?? 'producto', // Nombre del tipo de artículo
+                'precio_venta' => (float) $articulo->precio_venta,
+                'es_servicio' => ($articulo->tipoArticulo && strtolower($articulo->tipoArticulo->nombre) === 'servicio')
+            ];
+        });
+
+        return response()->json([
+            'data' => $formattedArticulos,
+            'next_page_url' => $articulos->nextPageUrl() // Para la paginación de Select2
+        ]);
     }
 }

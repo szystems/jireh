@@ -36,10 +36,22 @@ class Articulo extends Model
     protected $casts = [
         'precio_compra' => 'decimal:2',
         'precio_venta' => 'decimal:2',
-        'stock' => 'decimal:2',
+        'stock' => 'decimal:2', // Asegúrate que el stock se trate como decimal si puede tener fracciones
         'stock_minimo' => 'decimal:2',
         'costo_mecanico' => 'decimal:2',
     ];
+
+    /**
+     * Accesor para stock_disponible_venta.
+     *
+     * @return float
+     */
+    public function getStockDisponibleVentaAttribute()
+    {
+        // Por ahora, simplemente devuelve el stock.
+        // Se puede añadir lógica más compleja si es necesario (ej. stock reservado).
+        return (float) $this->attributes['stock'];
+    }
 
     public function categoria()
     {

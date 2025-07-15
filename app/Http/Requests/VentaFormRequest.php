@@ -38,6 +38,10 @@ class VentaFormRequest extends FormRequest
             'detalles.*.descuento_id' => 'nullable|exists:descuentos,id',
             'detalles.*.usuario_id' => 'required|exists:users,id',
             'detalles.*.sub_total' => 'required|numeric|min:0',
+            // Permitir trabajadores de carwash como arreglo opcional
+            'trabajadores_carwash' => 'nullable|array',
+            'trabajadores_carwash.*' => 'nullable|array',
+            'trabajadores_carwash.*.*' => 'nullable|exists:trabajadors,id',
         ];
     }
 }

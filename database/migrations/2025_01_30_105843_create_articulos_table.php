@@ -22,6 +22,7 @@ class CreateArticulosTable extends Migration
             $table->decimal('precio_compra', 10, 2);
             $table->decimal('precio_venta', 10, 2);
             $table->decimal('stock', 10, 2);
+            $table->decimal('stock_inicial', 10, 2)->default(0)->comment('Stock inicial del artículo para auditoría');
             $table->decimal('stock_minimo', 10, 2);
             $table->foreignId('categoria_id')->constrained('categorias');
             $table->foreignId('unidad_id')->constrained('unidads');

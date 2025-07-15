@@ -47,4 +47,12 @@ class Cliente extends Model
         // Aquí puedes añadir otros casts si es necesario, por ejemplo:
         // 'email_verified_at' => 'datetime',
     ];
+
+    /**
+     * Obtiene los vehículos asociados a este cliente.
+     */
+    public function vehiculos()
+    {
+        return $this->hasMany(Vehiculo::class);
+    }
 }

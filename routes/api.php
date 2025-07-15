@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ClienteVehiculoController;
+use App\Http\Controllers\Admin\ArticuloController; // Asegúrate que el namespace y controlador sean correctos
 
 /*
 |--------------------------------------------------------------------------
@@ -20,3 +21,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::get('clientes/{cliente}/vehiculos', [ClienteVehiculoController::class, 'getVehiculos']);
+
+// Ruta para obtener artículos para el selector de ventas
+Route::get('/articulos-para-venta', [ArticuloController::class, 'getArticulosParaVentaApi'])->name('api.articulos.para_venta');

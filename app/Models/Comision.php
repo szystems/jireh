@@ -16,10 +16,10 @@ class Comision extends Model
      * The attributes that are mass assignable.
      *
      * @var array
-     */
-    protected $fillable = [
+     */    protected $fillable = [
         'commissionable_id',
         'commissionable_type',
+        'tipo_comision',
         'monto',
         'porcentaje',
         'detalle_venta_id',
@@ -27,7 +27,6 @@ class Comision extends Model
         'articulo_id',
         'fecha_calculo',
         'estado',
-        'observaciones',
     ];
 
     /**

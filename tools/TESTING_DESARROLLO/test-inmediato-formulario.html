@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>🔧 Test Inmediato - Formulario Edit Venta</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test { margin: 15px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        button { background-color: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 5px; }
+        button:hover { background-color: #0056b3; }
+        pre { background-color: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; font-size: 12px; }
+        .highlight { background-color: #ffff99; padding: 2px 4px; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Test Inmediato - Formulario Edit Venta</h1>
+    
+    <div class="test">
+        <h3>📋 INSTRUCCIONES PARA EL TEST</h3>
+        <ol>
+            <li>Ve al formulario de edición de ventas en otra pestaña</li>
+            <li>Abre la consola del navegador (F12)</li>
+            <li>Si aparece advertencia de Chrome, escribe: <code>allow pasting</code></li>
+            <li>Copia y ejecuta el código de abajo</li>
+            <li>Intenta hacer submit del formulario</li>
+            <li>Verifica si aparecen logs en la terminal de Laravel</li>
+        </ol>
+    </div>
+
+    <div class="test">
+        <h3>🧪 Test 1: Verificar JavaScript Principal</h3>
+        <p>Copia y pega este código en la consola:</p>
+        <pre id="test1">
+// TEST 1: Verificar si el JavaScript principal está funcionando
+console.clear();
+console.log('🔧 TEST 1: Verificando JavaScript principal');
+
+// Verificar formulario
+const form = document.querySelector('#forma-editar-venta');
+console.log('Formulario encontrado:', !!form);
+
+if (form) {
+    console.log('Action del formulario:', form.action);
+    console.log('Method del formulario:', form.method);
+    
+    // Verificar eventos
+    const submitBtn = document.querySelector('#btn-guardar-cambios');
+    console.log('Botón submit encontrado:', !!submitBtn);
+    
+    // Verificar CSRF
+    const csrf = document.querySelector('input[name="_token"]');
+    const method = document.querySelector('input[name="_method"]');
+    console.log('CSRF token:', csrf ? 'Presente' : 'FALTANTE');
+    console.log('Method field:', method ? method.value : 'FALTANTE');
+    
+    // Test de eventos
+    console.log('Agregando listener de test...');
+    form.addEventListener('submit', function(e) {
+        console.log('🚨 SUBMIT DETECTADO POR TEST');
+        console.log('Timestamp:', new Date().toISOString());
+        console.log('URL destino:', e.target.action);
+        
+        // NO prevenir - dejar que funcione
+        console.log('✅ Permitiendo submit normal');
+    }, true);
+    
+    console.log('✅ Test listener agregado');
+} else {
+    console.log('❌ Formulario no encontrado');
+}
+
+console.log('✅ Test 1 completado');
+        </pre>
+        <button onclick="copyToClipboard('test1')">📋 Copiar Test 1</button>
+    </div>
+
+    <div class="test">
+        <h3>🧪 Test 2: Submit Manual (Solo si Test 1 falla)</h3>
+        <p>Si el Test 1 no funciona, prueba esto:</p>
+        <pre id="test2">
+// TEST 2: Submit manual para probar
+console.clear();
+console.log('🔧 TEST 2: Submit manual');
+
+const form = document.querySelector('#forma-editar-venta');
+if (form) {
+    console.log('📤 Enviando formulario manualmente...');
+    
+    // Llenar campos básicos si están vacíos
+    const clienteId = document.querySelector('#cliente_id');
+    const vehiculoId = document.querySelector('#vehiculo_id');
+    const fecha = document.querySelector('#fecha');
+    
+    console.log('Estados de campos:');
+    console.log('Cliente:', clienteId ? clienteId.value : 'No encontrado');
+    console.log('Vehículo:', vehiculoId ? vehiculoId.value : 'No encontrado');
+    console.log('Fecha:', fecha ? fecha.value : 'No encontrado');
+    
+    if (!clienteId.value) {
+        console.log('⚠️ Campo cliente vacío - selecciona uno manualmente antes de continuar');
+        alert('Selecciona un cliente antes de continuar con el test');
+    } else if (!vehiculoId.value) {
+        console.log('⚠️ Campo vehículo vacío - selecciona uno manualmente antes de continuar');
+        alert('Selecciona un vehículo antes de continuar con el test');
+    } else if (!fecha.value) {
+        console.log('⚠️ Campo fecha vacío - agrega una fecha antes de continuar');
+        alert('Agrega una fecha antes de continuar con el test');
+    } else {
+        console.log('✅ Campos válidos, enviando...');
+        console.log('🚨 ENVIANDO FORMULARIO EN 3 SEGUNDOS');
+        setTimeout(() => {
+            form.submit();
+        }, 3000);
+    }
+} else {
+    console.log('❌ Formulario no encontrado');
+}
+        </pre>
+        <button onclick="copyToClipboard('test2')">📋 Copiar Test 2</button>
+        <div style="background-color: #fff3cd; padding: 10px; border-radius: 5px; margin-top: 10px;">
+            <strong>⚠️ CUIDADO:</strong> El Test 2 realmente enviará el formulario
+        </div>
+    </div>
+
+    <div class="test">
+        <h3>📊 Qué observar</h3>
+        <ul>
+            <li><strong>En la consola:</strong> Mensajes que empiecen con 🔧, 🚨, ✅ o ❌</li>
+            <li><strong>En la terminal Laravel:</strong> Mensajes que digan "🚨 PETICIÓN UPDATE RECIBIDA"</li>
+            <li><strong>En el navegador:</strong> Si la página recarga o cambia de URL</li>
+            <li><strong>En Network tab:</strong> Si aparece una petición HTTP a update-venta</li>
+        </ul>
+    </div>
+
+    <div class="test">
+        <h3>💡 Resultados esperados</h3>
+        <div class="highlight">
+            <strong>SI FUNCIONA:</strong> Verás logs en ambos lados (consola y terminal Laravel)
+        </div>
+        <div class="highlight">
+            <strong>SI NO FUNCIONA:</strong> Solo verás logs en consola, nada en Laravel
+        </div>
+    </div>
+
+    <script>
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.textContent;
+            
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('✅ Código copiado al portapapeles');
+                });
+            } else {
+                // Fallback
+                const textArea = document.createElement("textarea");
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('✅ Código copiado al portapapeles');
+            }
+        }
+    </script>
+</body>
+</html>

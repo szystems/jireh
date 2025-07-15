@@ -18,37 +18,19 @@ class TrabajadorSeeder extends Seeder
     {
         $faker = Faker::create();
 
-        // Obtener los tipos de trabajador disponibles
+        // Verificar si hay tipos de trabajador, ya deberían existir por la migración
         $tipoTrabajadores = TipoTrabajador::all();
 
-        // Si no hay tipos de trabajador, crear algunos básicos
         if ($tipoTrabajadores->count() == 0) {
-            TipoTrabajador::create([
-                'nombre' => 'Mecánico',
-                'descripcion' => 'Trabajador encargado de reparaciones mecánicas',
-                'aplica_comision' => true,
-                'requiere_asignacion' => true,
-                'estado' => 'activo'
-            ]);
-
-            TipoTrabajador::create([
-                'nombre' => 'CarWash',
-                'descripcion' => 'Trabajador encargado de lavado de vehículos',
-                'aplica_comision' => true,
-                'requiere_asignacion' => false,
-                'estado' => 'activo'
-            ]);
-
-            // Recargar los tipos
-            $tipoTrabajadores = TipoTrabajador::all();
+            // Si por alguna razón no existen, mostrar un mensaje de error
+            echo "Error: No se encontraron tipos de trabajador. Asegúrese de que la migración 2025_05_15_121720_insert_default_tipo_trabajadors.php se haya ejecutado correctamente.\n";
+            return;
         }
 
         // Crear 5 trabajadores con datos aleatorios
         foreach (range(1, 5) as $index) {
-            // Asignar un tipo de trabajador aleatoriamente si hay disponibles
-            $tipo_trabajador_id = $tipoTrabajadores->count() > 0
-                ? $tipoTrabajadores->random()->id
-                : null;
+            // Asignar un tipo de trabajador aleatoriamente
+            $tipoTrabajador = $tipoTrabajadores->random();
 
             Trabajador::create([
                 'nombre' => $faker->firstName,
@@ -58,7 +40,8 @@ class TrabajadorSeeder extends Seeder
                 'email' => $faker->unique()->safeEmail,
                 'nit' => $faker->numberBetween(100000, 999999),
                 'dpi' => $faker->unique()->numerify('##########'),
-                'tipo_trabajador_id' => $tipo_trabajador_id,
+                'tipo_trabajador_id' => $tipoTrabajador->id,
+                'tipo' => $tipoTrabajador->id, // Sincronizar con tipo_trabajador_id
                 'estado' => 1
             ]);
         }

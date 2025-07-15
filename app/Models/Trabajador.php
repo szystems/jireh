@@ -20,8 +20,19 @@ class Trabajador extends Model
         'nit',
         'dpi',
         'tipo_trabajador_id',
+        'tipo',  // Agregamos campo tipo a fillable
         'estado',
     ];
+
+    /**
+     * Mutador para sincronizar el campo 'tipo' con 'tipo_trabajador_id'
+     */
+    public function setTipoTrabajadorIdAttribute($value)
+    {
+        $this->attributes['tipo_trabajador_id'] = $value;
+        // Actualizamos el campo tipo con el mismo valor
+        $this->attributes['tipo'] = $value;
+    }
 
     /**
      * Relación con el tipo de trabajador

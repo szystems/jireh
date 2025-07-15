@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Trabajadores - Solución de Persistencia</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f5f5f5; }
+        .debug-section { 
+            border: 1px solid #ddd; 
+            margin: 15px 0; 
+            padding: 20px; 
+            border-radius: 8px;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .error { color: #dc3545; font-weight: bold; }
+        .success { color: #28a745; font-weight: bold; }
+        .warning { color: #ffc107; font-weight: bold; }
+        .info { color: #17a2b8; font-weight: bold; }
+        pre { 
+            background: #f8f9fa; 
+            padding: 15px; 
+            border-radius: 5px; 
+            overflow-x: auto;
+            border-left: 4px solid #007bff;
+        }
+        button { 
+            margin: 5px; 
+            padding: 12px 20px; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+        }
+        button:hover { background-color: #0056b3; }
+        .btn-success { background-color: #28a745; }
+        .btn-success:hover { background-color: #1e7e34; }
+        .btn-warning { background-color: #ffc107; color: #212529; }
+        .btn-warning:hover { background-color: #e0a800; }
+        .problem-solution {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .solution-steps {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        ol li { margin: 8px 0; }
+        .code-inline { 
+            background: #e9ecef; 
+            padding: 2px 6px; 
+            border-radius: 3px; 
+            font-family: monospace; 
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Debug Trabajadores - Solución de Persistencia</h1>
+    
+    <div class="debug-section">
+        <h2>🎯 Problema Identificado</h2>
+        <div class="problem-solution">
+            <h3>❌ Error Principal Encontrado:</h3>
+            <p>Se detectó un error en el código JavaScript donde se intenta reasignar una variable <code class="code-inline">const</code>:</p>
+            <pre>
+// ANTES (PROBLEMÁTICO):
+const $containerTrabajadores = $(`#trabajadores-${detalleActualEditando}`);
+// ... más código ...
+$containerTrabajadores = $containerAlternativo; // ❌ ERROR: No se puede reasignar const
+
+// DESPUÉS (CORREGIDO):
+let $containerTrabajadores = $(`#trabajadores-${detalleActualEditando}`);
+// ... más código ...
+$containerTrabajadores = $containerAlternativo; // ✅ CORRECTO: let permite reasignación
+            </pre>
+        </div>
+    </div>
+
+    <div class="debug-section">
+        <h2>✅ Correcciones Implementadas</h2>
+        <div class="solution-steps">
+            <h3>🔧 Cambios Realizados:</h3>
+            <ol>
+                <li><strong>Corrección de Variable:</strong> Cambié <code class="code-inline">const</code> a <code class="code-inline">let</code> para permitir reasignación del container</li>
+                <li><strong>Verificación de Formulario:</strong> Agregué verificación para asegurar que el container está dentro del formulario principal</li>
+                <li><strong>Mejora en Creación de Inputs:</strong> Cada input se verifica después de ser creado para asegurar que existe en el DOM</li>
+                <li><strong>Manejo de Errores:</strong> Mejor manejo de errores con SweetAlert para informar al usuario</li>
+                <li><strong>Verificación Post-Guardado:</strong> Verificación automática después de guardar para confirmar persistencia</li>
+                <li><strong>Funciones de Debug:</strong> Agregué funciones globales para debugging manual</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="debug-section">
+        <h2>🧪 Pruebas Recomendadas</h2>
+        <h3>📋 Pasos para Verificar la Corrección:</h3>
+        <ol>
+            <li><strong>Abrir la página de edición de venta</strong> que tenga al menos un detalle de servicio</li>
+            <li><strong>Abrir la consola del navegador</strong> (F12 → Console)</li>
+            <li><strong>Verificar estado inicial:</strong> Ejecutar <code class="code-inline">debugTrabajadoresManual()</code></li>
+            <li><strong>Abrir modal de trabajadores</strong> para un detalle específico</li>
+            <li><strong>Modificar trabajadores:</strong> Quitar uno o agregar otro</li>
+            <li><strong>Guardar cambios</strong> y verificar que no hay errores en consola</li>
+            <li><strong>Verificar persistencia:</strong> Ejecutar <code class="code-inline">debugDetalleTrabajadores(ID_DETALLE)</code></li>
+            <li><strong>Guardar la venta</strong> y verificar en la página show.blade.php</li>
+        </ol>
+    </div>
+
+    <div class="debug-section">
+        <h2>🛠️ Código JavaScript para Testing</h2>
+        <button onclick="copiarCodigo()" class="btn-success">📋 Copiar Código de Testing</button>
+        <pre id="testing-code">
+// === CÓDIGO DE TESTING PARA LA CONSOLA ===
+
+// 1. Verificar estado actual de todos los trabajadores
+function testearEstadoActual() {
+    console.log('🧪 === TESTING: Estado Actual ===');
+    
+    const inputs = document.querySelectorAll('input[name*="trabajadores_carwash"]');
+    console.log('Total inputs encontrados:', inputs.length);
+    
+    const grupos = {};
+    inputs.forEach(input => {
+        const match = input.name.match(/trabajadores_carwash\[(\d+)\]/);
+        if (match) {
+            const detalle = match[1];
+            if (!grupos[detalle]) grupos[detalle] = [];
+            grupos[detalle].push(input.value);
+        }
+    });
+    
+    console.log('Trabajadores por detalle:', grupos);
+    return grupos;
+}
+
+// 2. Simular edición de trabajadores
+function testearEdicionTrabajadores(detalleId, nuevosTrabajadores) {
+    console.log(`🧪 === TESTING: Edición Detalle ${detalleId} ===`);
+    
+    // Verificar container
+    const container = document.getElementById(`trabajadores-${detalleId}`);
+    if (!container) {
+        console.error('❌ Container no encontrado');
+        return false;
+    }
+    
+    // Limpiar inputs existentes
+    container.innerHTML = '';
+    console.log('🧹 Container limpiado');
+    
+    // Agregar nuevos inputs
+    nuevosTrabajadores.forEach(trabajadorId => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = `trabajadores_carwash[${detalleId}][]`;
+        input.value = trabajadorId;
+        container.appendChild(input);
+        console.log(`➕ Agregado: ${input.name} = ${input.value}`);
+    });
+    
+    // Verificar resultado
+    const inputsFinales = container.querySelectorAll('input');
+    console.log(`✅ Resultado: ${inputsFinales.length} inputs en container`);
+    
+    return inputsFinales.length === nuevosTrabajadores.length;
+}
+
+// 3. Verificar que los datos se mantengan
+function testearPersistencia(detalleId) {
+    console.log(`🧪 === TESTING: Persistencia Detalle ${detalleId} ===`);
+    
+    const container = document.getElementById(`trabajadores-${detalleId}`);
+    if (!container) return false;
+    
+    const inputs = container.querySelectorAll('input[name*="trabajadores_carwash"]');
+    console.log('Inputs en container:', inputs.length);
+    
+    // Verificar que están en el formulario
+    const formulario = document.getElementById('forma-editar-venta');
+    const inputsEnFormulario = formulario.querySelectorAll(`input[name*="trabajadores_carwash[${detalleId}]"]`);
+    console.log('Inputs en formulario:', inputsEnFormulario.length);
+    
+    const coinciden = inputs.length === inputsEnFormulario.length;
+    console.log('Coinciden:', coinciden);
+    
+    return coinciden;
+}
+
+// 4. Test completo
+function testCompleto() {
+    console.log('🚀 === TEST COMPLETO DE TRABAJADORES ===');
+    
+    console.log('1. Estado inicial...');
+    const estadoInicial = testearEstadoActual();
+    
+    console.log('2. Verificando containers...');
+    const detalles = Object.keys(estadoInicial);
+    detalles.forEach(detalleId => {
+        const persistencia = testearPersistencia(detalleId);
+        console.log(`   Detalle ${detalleId}: ${persistencia ? '✅' : '❌'}`);
+    });
+    
+    console.log('3. Test completado');
+    return estadoInicial;
+}
+
+// Funciones globales
+window.testearEstadoActual = testearEstadoActual;
+window.testearEdicionTrabajadores = testearEdicionTrabajadores;
+window.testearPersistencia = testearPersistencia;
+window.testCompleto = testCompleto;
+
+console.log('🧪 Funciones de testing cargadas:');
+console.log('- testearEstadoActual() - Ver estado actual');
+console.log('- testearEdicionTrabajadores(detalleId, [trabajadorIds]) - Simular edición');
+console.log('- testearPersistencia(detalleId) - Verificar persistencia');
+console.log('- testCompleto() - Test completo');
+        </pre>
+    </div>
+
+    <div class="debug-section">
+        <h2>📊 Qué Buscar en las Pruebas</h2>
+        <div class="problem-solution">
+            <h3>✅ Indicadores de Éxito:</h3>
+            <ul>
+                <li>No hay errores en la consola del navegador</li>
+                <li>Los inputs se crean correctamente en el container correcto</li>
+                <li>El número de inputs coincide con el número de trabajadores seleccionados</li>
+                <li>Los inputs están dentro del formulario principal</li>
+                <li>Los datos se mantienen después de cerrar el modal</li>
+                <li>Al guardar la venta, los trabajadores se actualizan en la base de datos</li>
+            </ul>
+            
+            <h3>❌ Indicadores de Problema:</h3>
+            <ul>
+                <li>Errores de "Cannot assign to const variable" en la consola</li>
+                <li>Inputs duplicados o inputs que no se eliminan</li>
+                <li>Discrepancia entre trabajadores seleccionados e inputs creados</li>
+                <li>Container no encontrado o vacío después de guardar</li>
+                <li>Los cambios no se reflejan en show.blade.php</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="debug-section">
+        <h2>🔄 Si el Problema Persiste</h2>
+        <div class="solution-steps">
+            <h3>Pasos Adicionales:</h3>
+            <ol>
+                <li><strong>Limpiar caché del navegador</strong> (Ctrl+Shift+R)</li>
+                <li><strong>Verificar el backend:</strong> Revisar logs de Laravel para errores</li>
+                <li><strong>Comprobar rutas:</strong> Asegurar que la ruta de actualización funciona</li>
+                <li><strong>Verificar validaciones:</strong> Revisar si hay validaciones que rechacen los datos</li>
+                <li><strong>Debug del controlador:</strong> Agregar logs en VentaController.php</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        function copiarCodigo() {
+            const codigo = document.getElementById('testing-code').textContent;
+            navigator.clipboard.writeText(codigo).then(() => {
+                alert('✅ Código de testing copiado al portapapeles!\n\nPega este código en la consola del navegador (F12 → Console) en la página de edición de venta.');
+            });
+        }
+    </script>
+</body>
+</html>

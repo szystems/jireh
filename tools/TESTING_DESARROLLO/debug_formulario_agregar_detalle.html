@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug - Formulario Agregar Nuevo Detalle</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .debug-section { 
+            background: #f8f9fa; 
+            padding: 15px; 
+            margin: 15px 0; 
+            border-left: 4px solid #007bff; 
+        }
+        .console-log { 
+            background: #f4f4f4; 
+            padding: 10px; 
+            font-family: monospace; 
+            border: 1px solid #ddd; 
+            max-height: 300px; 
+            overflow-y: auto; 
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <h2>🔧 Debug: Formulario Agregar Nuevo Detalle</h2>
+        
+        <div class="debug-section">
+            <h5>Estado de los elementos</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <button type="button" id="verificar-elementos" class="btn btn-primary mb-3">
+                        <i class="bi bi-search"></i> Verificar Elementos
+                    </button>
+                    <button type="button" id="simular-click" class="btn btn-warning mb-3">
+                        <i class="bi bi-play"></i> Simular Click en Agregar
+                    </button>
+                </div>
+                <div class="col-md-6">
+                    <button type="button" id="verificar-select2" class="btn btn-info mb-3">
+                        <i class="bi bi-list"></i> Verificar Select2
+                    </button>
+                    <button type="button" id="limpiar-console" class="btn btn-secondary mb-3">
+                        <i class="bi bi-trash"></i> Limpiar Console
+                    </button>
+                </div>
+            </div>
+            <div id="console-output" class="console-log">
+                <div>Consola de debugging - Ejecute las verificaciones arriba</div>
+            </div>
+        </div>
+
+        <div class="debug-section">
+            <h5>Elementos a verificar</h5>
+            <ul>
+                <li><strong>#agregar-detalle</strong> - Botón para agregar detalle</li>
+                <li><strong>#articulo</strong> - Select de artículos</li>
+                <li><strong>#cantidad-nuevo</strong> - Input de cantidad</li>
+                <li><strong>#descuento-nuevo</strong> - Select de descuentos</li>
+                <li><strong>#trabajadores-carwash-nuevo</strong> - Select múltiple de trabajadores</li>
+                <li><strong>#nuevos-detalles</strong> - Tbody donde se agregan las filas</li>
+            </ul>
+        </div>
+
+        <div class="debug-section">
+            <h5>Instrucciones</h5>
+            <ol>
+                <li>Abra esta página en el navegador mientras tiene abierta la página de edición de venta</li>
+                <li>Abra las herramientas de desarrollador (F12)</li>
+                <li>Vaya a la pestaña Console</li>
+                <li>Copie y pegue los scripts de verificación que aparecerán abajo</li>
+                <li>Ejecute los scripts para diagnosticar el problema</li>
+            </ol>
+        </div>
+
+        <div class="debug-section">
+            <h5>Scripts para copiar y pegar en la consola del navegador</h5>
+            
+            <h6>1. Verificar existencia de elementos:</h6>
+            <div class="bg-light p-3 mb-3">
+                <code>
+console.log('=== VERIFICACIÓN DE ELEMENTOS ===');<br>
+console.log('Botón agregar:', $('#agregar-detalle').length > 0 ? '✅ Encontrado' : '❌ No encontrado');<br>
+console.log('Select artículo:', $('#articulo').length > 0 ? '✅ Encontrado' : '❌ No encontrado');<br>
+console.log('Input cantidad:', $('#cantidad-nuevo').length > 0 ? '✅ Encontrado' : '❌ No encontrado');<br>
+console.log('Select descuento:', $('#descuento-nuevo').length > 0 ? '✅ Encontrado' : '❌ No encontrado');<br>
+console.log('Select trabajadores:', $('#trabajadores-carwash-nuevo').length > 0 ? '✅ Encontrado' : '❌ No encontrado');<br>
+console.log('Tbody nuevos detalles:', $('#nuevos-detalles').length > 0 ? '✅ Encontrado' : '❌ No encontrado');
+                </code>
+            </div>
+
+            <h6>2. Verificar eventos en el botón:</h6>
+            <div class="bg-light p-3 mb-3">
+                <code>
+console.log('=== VERIFICACIÓN DE EVENTOS ===');<br>
+const eventos = $._data($('#agregar-detalle')[0], 'events');<br>
+console.log('Eventos en #agregar-detalle:', eventos);<br>
+if (eventos && eventos.click) {<br>
+&nbsp;&nbsp;console.log('✅ Evento click encontrado:', eventos.click.length, 'handler(s)');<br>
+} else {<br>
+&nbsp;&nbsp;console.log('❌ No se encontró evento click');<br>
+}
+                </code>
+            </div>
+
+            <h6>3. Verificar Select2:</h6>
+            <div class="bg-light p-3 mb-3">
+                <code>
+console.log('=== VERIFICACIÓN DE SELECT2 ===');<br>
+console.log('Select2 en artículo:', $('#articulo').hasClass('select2-hidden-accessible') ? '✅ Inicializado' : '❌ No inicializado');<br>
+console.log('Opciones en artículo:', $('#articulo option').length);<br>
+console.log('Select2 en descuento:', $('#descuento-nuevo').hasClass('select2-hidden-accessible') ? '✅ Inicializado' : '❌ No inicializado');<br>
+console.log('Select2 en trabajadores:', $('#trabajadores-carwash-nuevo').hasClass('select2-hidden-accessible') ? '✅ Inicializado' : '❌ No inicializado');
+                </code>
+            </div>
+
+            <h6>4. Simular selección de artículo y agregar detalle:</h6>
+            <div class="bg-light p-3 mb-3">
+                <code>
+console.log('=== SIMULACIÓN DE AGREGADO ===');<br>
+// Seleccionar primer artículo disponible<br>
+const primerArticulo = $('#articulo option:not([value=""])').first();<br>
+if (primerArticulo.length > 0) {<br>
+&nbsp;&nbsp;console.log('Seleccionando artículo:', primerArticulo.text());<br>
+&nbsp;&nbsp;$('#articulo').val(primerArticulo.val()).trigger('change');<br>
+&nbsp;&nbsp;$('#cantidad-nuevo').val('1');<br>
+&nbsp;&nbsp;console.log('Datos preparados para agregar detalle');<br>
+&nbsp;&nbsp;console.log('Valores actuales:');<br>
+&nbsp;&nbsp;console.log('- Artículo ID:', $('#articulo').val());<br>
+&nbsp;&nbsp;console.log('- Cantidad:', $('#cantidad-nuevo').val());<br>
+&nbsp;&nbsp;console.log('- Descuento:', $('#descuento-nuevo').val());<br>
+&nbsp;&nbsp;console.log('- Trabajadores:', $('#trabajadores-carwash-nuevo').val());<br>
+} else {<br>
+&nbsp;&nbsp;console.log('❌ No hay artículos disponibles');<br>
+}
+                </code>
+            </div>
+
+            <h6>5. Click manual en el botón:</h6>
+            <div class="bg-light p-3 mb-3">
+                <code>
+console.log('=== CLICK MANUAL ===');<br>
+$('#agregar-detalle').click();
+                </code>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script>
+        function logToConsole(message) {
+            const output = document.getElementById('console-output');
+            const timestamp = new Date().toLocaleTimeString();
+            output.innerHTML += '<div>[' + timestamp + '] ' + message + '</div>';
+            output.scrollTop = output.scrollHeight;
+        }
+
+        document.getElementById('verificar-elementos').addEventListener('click', function() {
+            logToConsole('Iniciando verificación de elementos...');
+            logToConsole('Esta es una página de prueba. Ejecute los scripts en la consola de la página real.');
+        });
+
+        document.getElementById('simular-click').addEventListener('click', function() {
+            logToConsole('Para simular click, use los scripts de la consola en la página real.');
+        });
+
+        document.getElementById('verificar-select2').addEventListener('click', function() {
+            logToConsole('Para verificar Select2, use los scripts de la consola en la página real.');
+        });
+
+        document.getElementById('limpiar-console').addEventListener('click', function() {
+            document.getElementById('console-output').innerHTML = '<div>Consola limpiada</div>';
+        });
+    </script>
+</body>
+</html>

@@ -62,13 +62,16 @@ class TrabajadorController extends Controller
             'nombre' => 'required|string|max:255',
             'apellido' => 'required|string|max:255',
             'telefono' => 'required|string|max:20',
-            'direccion' => 'required|string|max:255',
+            'direccion' => 'nullable|string|max:255', // Cambiado de required a nullable
             'email' => 'nullable|email|max:255',
             'nit' => 'nullable|string|max:20',
             'dpi' => 'nullable|string|max:20',
             'tipo_trabajador_id' => 'nullable|exists:tipo_trabajadors,id',
-            'estado' => 'required|in:1,0',
+            // Removido 'estado' de la validación ya que será predeterminado
         ]);
+
+        // Establecer estado predeterminado como 1 (activo)
+        $validatedData['estado'] = 1;
 
         $trabajador = Trabajador::create($validatedData);
 
@@ -88,12 +91,12 @@ class TrabajadorController extends Controller
             'nombre' => 'required|string|max:255',
             'apellido' => 'required|string|max:255',
             'telefono' => 'required|string|max:20',
-            'direccion' => 'required|string|max:255',
+            'direccion' => 'nullable|string|max:255', // Cambiado de required a nullable
             'email' => 'nullable|email|max:255',
             'nit' => 'nullable|string|max:20',
             'dpi' => 'nullable|string|max:20',
             'tipo_trabajador_id' => 'nullable|exists:tipo_trabajadors,id',
-            'estado' => 'required|in:1,0',
+            'estado' => 'required|in:1,0', // Mantenemos esto en edición para permitir cambio de estado
         ]);
 
         $trabajador = Trabajador::find($id);

@@ -10,8 +10,8 @@ use App\Models\Cliente;
 use App\Models\Config;
 use App\Http\Requests\VehiculoFormRequest;
 use Illuminate\Support\Facades\File;
-use PDF;
-use DB;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\DB;
 
 class VehiculosController extends Controller
 {
@@ -231,7 +231,7 @@ class VehiculosController extends Controller
             $pdfhorientacion = $request->input('pdfhorientacion', 'landscape');
             $pdfarchivo = $request->input('pdfarchivo', 'stream');
 
-            $pdf = PDF::loadView('admin.vehiculo.pdfvehiculos', compact('imagen', 'vehiculos', 'request', 'config', 'filtros'));
+            $pdf = Pdf::loadView('admin.vehiculo.pdfvehiculos', compact('imagen', 'vehiculos', 'request', 'config', 'filtros'));
             $pdf->getDomPDF()->set_option("enable_html5_parser", true);
             $pdf->setPaper($pdftamaño, $pdfhorientacion);
 
@@ -285,7 +285,7 @@ class VehiculosController extends Controller
         $pdfarchivo = $request->input('pdfarchivo');
 
         // Cargar la vista del PDF
-        $pdf = PDF::loadView('admin.vehiculo.pdfvehiculo', compact('imagen', 'vehiculo', 'config', 'pathvehiculo', 'cliente'));
+        $pdf = Pdf::loadView('admin.vehiculo.pdfvehiculo', compact('imagen', 'vehiculo', 'config', 'pathvehiculo', 'cliente'));
         $pdf->getDomPDF()->set_option("enable_html5_parser", true);
         $pdf->setPaper($pdftamaño, $pdfhorientacion);
 

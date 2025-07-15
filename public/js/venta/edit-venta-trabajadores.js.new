@@ -1,0 +1,193 @@
+$(document).ready(function() {
+    let currentEditDetalleId = null;
+    let isEditingNuevoDetalleTrabajadores = false; // true si se editan trabajadores de un nuevo detalle, false para existente
+    let $modal = $('#editar-trabajadores-modal');
+    let $selectTrabajadoresEdit = $('#trabajadores-carwash-edit'); // El select dentro del modal
+
+    // Inicializar la variable global de trabajadores por detalle
+    window.trabajadoresPorDetalle = {};
+
+    // Inicializar Select2 para el selector de trabajadores en el MODAL
+    if ($selectTrabajadoresEdit.length) {
+        $selectTrabajadoresEdit.select2({
+            dropdownParent: $modal.find('.modal-body'), // Contenedor del modal
+            width: '100%',
+            placeholder: 'Seleccione trabajadores'
+        });
+    }
+
+    // Abrir modal para editar trabajadores de DETALLES EXISTENTES
+    $('#tabla-detalles-existentes').on('click', '.editar-trabajadores', function() {
+        currentEditDetalleId = $(this).data('detalle-id');
+        isEditingNuevoDetalleTrabajadores = false;
+        const articuloNombre = $(this).data('articulo-nombre') || 'Servicio';
+        $modal.find('#servicio-nombre').text(articuloNombre);
+        $modal.find('.modal-title').text('Asignar Trabajadores (Existente)');
+
+        let trabajadoresActuales = [];
+
+        // Si tenemos trabajadores en memoria, los usamos
+        if (window.trabajadoresPorDetalle[currentEditDetalleId]) {
+            console.log("Usando trabajadores de la memoria:", window.trabajadoresPorDetalle[currentEditDetalleId]);
+            trabajadoresActuales = window.trabajadoresPorDetalle[currentEditDetalleId];
+        } else {
+            // Si no hay en memoria, buscamos en el DOM
+            console.log(`Buscando trabajadores en contenedor #trabajadores-${currentEditDetalleId}`);
+            $(`#trabajadores-${currentEditDetalleId} input`).each(function() {
+                console.log("Input encontrado:", $(this).attr('name'), "valor:", $(this).val());
+                trabajadoresActuales.push($(this).val());
+            });
+
+            // Si no encontramos inputs, intentamos directamente con el selector de nombre esperado
+            if (trabajadoresActuales.length === 0) {
+                $(`input[name^="trabajadores_carwash[${currentEditDetalleId}]"]`).each(function() {
+                    console.log("Input por nombre encontrado:", $(this).attr('name'), "valor:", $(this).val());
+                    trabajadoresActuales.push($(this).val());
+                });
+            }
+
+            // Si seguimos sin encontrar trabajadores, usamos los datos originales
+            if (trabajadoresActuales.length === 0) {
+                const detallesOriginales = window.jirehVentaConfig.detallesOriginales || {};
+                const detalleActual = detallesOriginales[currentEditDetalleId] || {};
+                const trabajadoresOriginales = detalleActual.trabajadores_asignados || [];
+                console.log("Usando trabajadores originales:", trabajadoresOriginales);
+                trabajadoresActuales = trabajadoresOriginales;
+            }
+
+            // Guardamos en memoria para futuras referencias
+            window.trabajadoresPorDetalle[currentEditDetalleId] = trabajadoresActuales;
+        }
+
+        console.log("Cargando trabajadores finales para detalle #" + currentEditDetalleId, trabajadoresActuales);
+        $selectTrabajadoresEdit.val(trabajadoresActuales).trigger('change');
+        $modal.modal('show');
+    });
+
+    // Abrir modal para editar trabajadores de NUEVOS DETALLES (desde la tabla de nuevos)
+    $('#nuevos-detalles').on('click', '.editar-trabajadores-nuevo-btn', function() {
+        currentEditDetalleId = $(this).data('nuevo-detalle-indice'); // Índice del nuevo detalle
+        isEditingNuevoDetalleTrabajadores = true;
+        const articuloNombre = $(this).data('articulo-nombre') || 'Servicio';
+        $modal.find('#servicio-nombre').text(articuloNombre);
+        $modal.find('.modal-title').text('Asignar Trabajadores (Nuevo)');
+
+        let trabajadoresActuales = [];
+
+        // Si tenemos trabajadores en memoria, los usamos
+        if (window.trabajadoresPorDetalle['nuevo-' + currentEditDetalleId]) {
+            trabajadoresActuales = window.trabajadoresPorDetalle['nuevo-' + currentEditDetalleId];
+        } else {
+            // Si no, leemos de los inputs
+            $(`input[name^="nuevos_detalles[${currentEditDetalleId}][trabajadores_carwash]"]`).each(function() {
+                trabajadoresActuales.push($(this).val());
+            });
+            // Y guardamos en memoria
+            window.trabajadoresPorDetalle['nuevo-' + currentEditDetalleId] = trabajadoresActuales;
+        }
+
+        $selectTrabajadoresEdit.val(trabajadoresActuales).trigger('change');
+        $modal.modal('show');
+    });
+
+    // Aplicar cambios de trabajadores desde el modal
+    $('#guardar-trabajadores').on('click', function() { // ID del botón "Aplicar cambios" en el modal
+        const selectedTrabajadoresIds = $selectTrabajadoresEdit.val() || [];
+        const detalleIdOrIndex = currentEditDetalleId;
+
+        if (isEditingNuevoDetalleTrabajadores) {
+            // Guardar en memoria los trabajadores seleccionados
+            window.trabajadoresPorDetalle['nuevo-' + detalleIdOrIndex] = selectedTrabajadoresIds;
+
+            // Para nuevos detalles, actualizar los inputs ocultos y la tabla visual
+            const $filaNuevoDetalle = $(`#nuevo-detalle-row-${detalleIdOrIndex}`);
+            // Eliminar inputs de trabajadores anteriores para este nuevo detalle
+            $(`input[name^="nuevos_detalles[${detalleIdOrIndex}][trabajadores_carwash]"]`).remove();
+
+            let trabajadoresNombres = [];
+            if (selectedTrabajadoresIds.length > 0) {
+                selectedTrabajadoresIds.forEach(id => {
+                    // Añadir input oculto al formulario (fuera de la tabla, directamente en el form o en un div contenedor)
+                    $('#forma-editar-venta').append(`<input type="hidden" name="nuevos_detalles[${detalleIdOrIndex}][trabajadores_carwash][]" value="${id}">`);
+                    trabajadoresNombres.push($selectTrabajadoresEdit.find(`option[value="${id}"]`).text().split(' (')[0]); // Tomar solo el nombre
+                });
+            }
+
+            let textoTrabajadores = '<span class="badge bg-warning">Sin asignar</span>';
+            if (trabajadoresNombres.length > 0) {
+                textoTrabajadores = trabajadoresNombres.join(', ');
+            }
+            // Actualizar la celda de texto en la tabla de nuevos detalles
+            $filaNuevoDetalle.find(`#trabajadores-texto-nuevo-${detalleIdOrIndex}`).html(
+                `${textoTrabajadores}
+                 <button type="button" class="btn btn-link btn-sm p-0 editar-trabajadores-nuevo-btn" data-nuevo-detalle-indice="${detalleIdOrIndex}" data-articulo-nombre="${$modal.find('#servicio-nombre').text()}"><i class="bi bi-pencil-square"></i></button>`
+            );
+
+        } else {
+            // Guardar en memoria los trabajadores seleccionados
+            window.trabajadoresPorDetalle[detalleIdOrIndex] = selectedTrabajadoresIds;
+
+            // Para detalles existentes, actualizar los inputs ocultos y la tabla visual
+            const $filaDetalleExistente = $(`#detalle-row-${detalleIdOrIndex}`);
+
+            console.log("Guardando trabajadores para el detalle:", detalleIdOrIndex);
+            console.log("Trabajadores seleccionados:", selectedTrabajadoresIds);
+
+            // Limpiar el contenedor de los inputs de trabajadores
+            let $trabajadoresContainer = $(`#trabajadores-${detalleIdOrIndex}`);
+            console.log("Contenedor de trabajadores encontrado:", $trabajadoresContainer.length);
+
+            // Si el contenedor no existe, lo creamos
+            if ($trabajadoresContainer.length === 0) {
+                console.log("Creando contenedor de trabajadores");
+                $filaDetalleExistente.find('td:first').append(`<div id="trabajadores-${detalleIdOrIndex}"></div>`);
+                // Actualizamos la referencia al contenedor
+                $trabajadoresContainer = $(`#trabajadores-${detalleIdOrIndex}`);
+            }
+
+            $trabajadoresContainer.empty();
+            console.log("Contenedor limpiado");
+
+            let trabajadoresNombres = [];
+            if (selectedTrabajadoresIds.length > 0) {
+                selectedTrabajadoresIds.forEach(id => {
+                    // Añadir input oculto al contenedor específico para los trabajadores
+                    $trabajadoresContainer.append(`<input type="hidden" name="trabajadores_carwash[${detalleIdOrIndex}][]" value="${id}">`);
+                    console.log(`Input añadido: trabajadores_carwash[${detalleIdOrIndex}][] = ${id}`);
+
+                    // Guardar el nombre para mostrar en la interfaz
+                    const optionText = $selectTrabajadoresEdit.find(`option[value="${id}"]`).text();
+                    const nombreCompleto = optionText.split(' (')[0];
+                    trabajadoresNombres.push(nombreCompleto);
+                });
+            }
+
+            let badgeHtml = '';
+            let nombresHtml = '';
+            if (trabajadoresNombres.length > 0) {
+                badgeHtml = `<span class="badge bg-info">${trabajadoresNombres.length} trabajador(es)</span>`;
+                if (trabajadoresNombres.length <= 2) {
+                    nombresHtml = trabajadoresNombres.join(', ');
+                } else {
+                    nombresHtml = `${trabajadoresNombres[0]}, ${trabajadoresNombres[1]} y ${trabajadoresNombres.length - 2} más`;
+                }
+                $filaDetalleExistente.find(`#trabajadores-text-${detalleIdOrIndex}`).html(`${badgeHtml}<div class="small mt-1">${nombresHtml}</div>`);
+            } else {
+                $filaDetalleExistente.find(`#trabajadores-text-${detalleIdOrIndex}`).html('<span class="badge bg-warning">Sin asignar</span>');
+            }
+            // Marcar que hubo un cambio específico en los trabajadores de este detalle existente
+            window.hayCambiosTrabajadores[detalleIdOrIndex] = true;
+        }
+
+        $modal.modal('hide');
+        window.marcarCambio(); // Marcar cambio general para la advertencia de salida
+    });
+
+    // Manejo del evento de cierre del modal
+    $modal.on('hidden.bs.modal', function () {
+        // Mantenemos los valores en memoria pero reiniciamos las variables
+        currentEditDetalleId = null;
+        isEditingNuevoDetalleTrabajadores = false;
+        $modal.find('#servicio-nombre').text('');
+    });
+});

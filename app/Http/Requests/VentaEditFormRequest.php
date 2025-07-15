@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Support\Facades\Log;
 
 class VentaEditFormRequest extends FormRequest
 {
@@ -75,13 +76,52 @@ class VentaEditFormRequest extends FormRequest
      */
     protected function validateDetalles($validator)
     {
-        $tieneDetallesAMantener = $this->has('detalles_a_mantener') && count($this->detalles_a_mantener) > 0;
-        $tieneNuevosDetalles = $this->has('nuevos_detalles') && count($this->nuevos_detalles) > 0;
-        $tieneDetallesAEliminar = $this->has('detalles_a_eliminar') ? count($this->detalles_a_eliminar) : 0;
+        // DEBUG: Log para detectar problemas en la validación
+        Log::info('=== INICIO VALIDACIÓN PERSONALIZADA DE DETALLES ===');
+        Log::info('Datos recibidos en request:', $this->all());
+        
+        // Verificar si existen detalles no eliminados
+        $detalles = $this->input('detalles', []);
+        Log::info('Detalles recibidos:', $detalles);
+        
+        $detallesNoEliminados = collect($detalles)->filter(function ($detalle, $key) {
+            // Si hay un campo 'eliminar' y está en 1, el detalle se considera eliminado
+            $esEliminado = isset($detalle['eliminar']) && $detalle['eliminar'] == '1';
+            Log::info("Detalle $key - Eliminado: " . ($esEliminado ? 'SÍ' : 'NO'), $detalle);
+            return !$esEliminado;
+        });
 
-        if (!$tieneDetallesAMantener && !$tieneNuevosDetalles) {
+        // Contar elementos no eliminados y nuevos
+        $tieneDetallesAMantener = count($detallesNoEliminados) > 0;
+        $tieneNuevosDetalles = $this->has('nuevos_detalles') && count($this->input('nuevos_detalles', [])) > 0;
+
+        Log::info('Análisis de detalles:', [
+            'detalles_a_mantener' => $tieneDetallesAMantener,
+            'nuevos_detalles' => $tieneNuevosDetalles,
+            'count_detalles_no_eliminados' => count($detallesNoEliminados),
+            'nuevos_detalles_data' => $this->input('nuevos_detalles', [])
+        ]);
+
+        // Si hay detalles a eliminar, consideramos que hay cambios en el formulario
+        $hayDetallesAEliminar = $this->has('detalles_a_eliminar') && !empty($this->input('detalles_a_eliminar', []));
+
+        // Verificar si al menos hay un detalle (existente no eliminado o nuevo) en caso de cambios
+        $hayCambios = $hayDetallesAEliminar || $tieneNuevosDetalles || $this->has('_method');
+
+        Log::info('Estado de cambios:', [
+            'hay_detalles_a_eliminar' => $hayDetallesAEliminar,
+            'hay_cambios' => $hayCambios,
+            'tiene_method_field' => $this->has('_method')
+        ]);
+
+        if ($hayCambios && !$tieneDetallesAMantener && !$tieneNuevosDetalles) {
+            Log::warning('VALIDACIÓN FALLIDA: No hay detalles suficientes');
             $validator->errors()->add('detalles', 'Debe haber al menos un artículo en los detalles.');
+        } else {
+            Log::info('VALIDACIÓN EXITOSA: Detalles válidos');
         }
+        
+        Log::info('=== FIN VALIDACIÓN PERSONALIZADA DE DETALLES ===');
     }
 
     /**

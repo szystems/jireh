@@ -16,18 +16,17 @@ class CreateMetasVentasTable extends Migration
         Schema::create('metas_ventas', function (Blueprint $table) {
             $table->id();
 
-            // Relación con usuario/vendedor
-            $table->foreignId('usuario_id')->constrained('users')->onDelete('cascade');
+            // Información de la meta
+            $table->string('nombre'); // Ej: "Meta Bronce", "Meta Plata", etc.
+            $table->text('descripcion')->nullable();
 
-            // Rango de meta
+            // Rango de meta (sin relación a usuario específico)
             $table->decimal('monto_minimo', 10, 2);
-            $table->decimal('monto_maximo', 10, 2);
+            $table->decimal('monto_maximo', 10, 2)->nullable(); // NULL significa "sin límite superior"
             $table->decimal('porcentaje_comision', 5, 2);
 
             // Periodo de aplicación
-            $table->enum('periodo', ['diario', 'semanal', 'quincenal', 'mensual', 'trimestral', 'semestral', 'anual'])->default('mensual');
-            $table->date('fecha_inicio');
-            $table->date('fecha_fin')->nullable();
+            $table->enum('periodo', ['mensual', 'trimestral', 'semestral', 'anual'])->default('mensual');
 
             // Estado: activo/inactivo
             $table->boolean('estado')->default(true);
@@ -35,8 +34,8 @@ class CreateMetasVentasTable extends Migration
             $table->timestamps();
 
             // Índices
-            $table->index(['usuario_id', 'periodo']);
-            $table->index('estado');
+            $table->index(['periodo', 'estado']);
+            $table->index('monto_minimo');
         });
     }
 

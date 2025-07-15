@@ -11,7 +11,7 @@ use App\Models\Venta;
 use App\Models\User;
 use App\Models\Config;
 use App\Models\Cliente;
-use PDF;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -355,7 +355,7 @@ class ReporteArticuloController extends Controller
         $totales['totalImpuestos'] = $totalImpuestos;
 
         // Generar PDF
-        $pdf = PDF::loadView('admin.reportearticulo.pdf', compact('detallesVenta', 'config', 'filtros', 'totales'));
+        $pdf = Pdf::loadView('admin.reportearticulo.pdf', compact('detallesVenta', 'config', 'filtros', 'totales'));
         $pdf->setPaper('a4', 'landscape');
 
         return $pdf->stream('reporte_articulos_'.date('Y-m-d').'.pdf');
