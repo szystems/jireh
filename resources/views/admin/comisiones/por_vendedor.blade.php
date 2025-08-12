@@ -88,7 +88,7 @@
                                             </div>
                                             <div>
                                                 <div class="small text-muted">Total Por Metas</div>
-                                                <div class="fw-bold">Q. {{ number_format($vendedor->comisiones->sum('monto'), 2) }}</div>
+                                                <div class="fw-bold">{{ $config->currency_simbol }} {{ number_format($vendedor->comisiones->sum('monto'), 2) }}</div>
                                             </div>
                                         </div>
                                     </div>
@@ -121,24 +121,24 @@
                                                 <tr>
                                                     <td><span class="badge bg-warning">Pendientes</span></td>
                                                     <td>{{ $vendedor->comisiones->where('estado', 'pendiente')->count() }}</td>
-                                                    <td>Q. {{ number_format($vendedor->comisiones->where('estado', 'pendiente')->sum('monto'), 2) }}</td>
+                                                    <td>{{ $config->currency_simbol }} {{ number_format($vendedor->comisiones->where('estado', 'pendiente')->sum('monto'), 2) }}</td>
                                                 </tr>
                                                 <tr>
                                                     <td><span class="badge bg-success">Pagadas</span></td>
                                                     <td>{{ $vendedor->comisiones->where('estado', 'pagado')->count() }}</td>
-                                                    <td>Q. {{ number_format($vendedor->comisiones->where('estado', 'pagado')->sum('monto'), 2) }}</td>
+                                                    <td>{{ $config->currency_simbol }} {{ number_format($vendedor->comisiones->where('estado', 'pagado')->sum('monto'), 2) }}</td>
                                                 </tr>
                                                 <tr>
                                                     <td><span class="badge bg-danger">Canceladas</span></td>
                                                     <td>{{ $vendedor->comisiones->where('estado', 'cancelado')->count() }}</td>
-                                                    <td>Q. {{ number_format($vendedor->comisiones->where('estado', 'cancelado')->sum('monto'), 2) }}</td>
+                                                    <td>{{ $config->currency_simbol }} {{ number_format($vendedor->comisiones->where('estado', 'cancelado')->sum('monto'), 2) }}</td>
                                                 </tr>
                                             </tbody>
                                             <tfoot>
                                                 <tr class="fw-bold">
                                                     <td>Total</td>
                                                     <td>{{ $vendedor->comisiones->count() }}</td>
-                                                    <td>Q. {{ number_format($vendedor->comisiones->sum('monto'), 2) }}</td>
+                                                    <td>{{ $config->currency_simbol }} {{ number_format($vendedor->comisiones->sum('monto'), 2) }}</td>
                                                 </tr>
                                             </tfoot>
                                         </table>
@@ -167,8 +167,8 @@
                                                     @foreach ($metasActivas as $meta)
                                                         <tr>
                                                             <td>{{ $meta->periodo }}</td>
-                                                            <td>Q. {{ number_format($meta->monto_minimo, 2) }}</td>
-                                                            <td>Q. {{ number_format($meta->monto_maximo, 2) }}</td>
+                                                            <td>{{ $config->currency_simbol }} {{ number_format($meta->monto_minimo, 2) }}</td>
+                                                            <td>{{ $config->currency_simbol }} {{ number_format($meta->monto_maximo, 2) }}</td>
                                                             <td>{{ $meta->porcentaje_comision }}%</td>
                                                         </tr>
                                                     @endforeach
@@ -197,7 +197,7 @@
                                                 @foreach ($vendedor->comisiones->sortByDesc('fecha_calculo')->take(5) as $comision)
                                                     <tr>
                                                         <td>{{ \Carbon\Carbon::parse($comision->fecha_calculo)->format('d/m/Y') }}</td>
-                                                        <td>Q. {{ number_format($comision->monto, 2) }}</td>
+                                                        <td>{{ $config->currency_simbol }} {{ number_format($comision->monto, 2) }}</td>
                                                         <td>
                                                             @if ($comision->estado == 'pendiente')
                                                                 <span class="badge bg-warning">Pendiente</span>

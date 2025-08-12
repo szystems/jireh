@@ -93,7 +93,7 @@
                                         <div class="col-6">
                                             <div class="text-center">
                                                 <h5 class="text-success">
-                                                    Q{{ number_format($comisiones['vendedores']->sum('comision_calculada'), 2) }}
+                                                    {{ $config->currency_simbol }}{{ number_format($comisiones['vendedores']->sum('comision_calculada'), 2) }}
                                                 </h5>
                                                 <small class="text-muted">Total Comisiones</small>
                                             </div>
@@ -127,7 +127,7 @@
                                         <div class="col-6">
                                             <div class="text-center">
                                                 <h5 class="text-success">
-                                                    Q{{ number_format($comisiones['mecanicos']->sum('comision_calculada'), 2) }}
+                                                    {{ $config->currency_simbol }}{{ number_format($comisiones['mecanicos']->sum('comision_calculada'), 2) }}
                                                 </h5>
                                                 <small class="text-muted">Total Comisiones</small>
                                             </div>
@@ -161,7 +161,7 @@
                                         <div class="col-6">
                                             <div class="text-center">
                                                 <h5 class="text-success">
-                                                    Q{{ number_format($comisiones['carwash']->sum('comision_calculada'), 2) }}
+                                                    {{ $config->currency_simbol }}{{ number_format($comisiones['carwash']->sum('comision_calculada'), 2) }}
                                                 </h5>
                                                 <small class="text-muted">Total Comisiones</small>
                                             </div>
@@ -216,7 +216,7 @@
                                                         <span class="badge bg-primary">{{ $vendedor->total_ventas }}</span>
                                                     </td>
                                                     <td class="text-end">
-                                                        <strong>Q{{ number_format($vendedor->total_vendido, 2) }}</strong>
+                                                        <strong>{{ $config->currency_simbol }}{{ number_format($vendedor->total_vendido, 2) }}</strong>
                                                     </td>
                                                     <td class="text-center">
                                                         @if($vendedor->meta_alcanzada != 'Sin meta aplicable')
@@ -229,9 +229,9 @@
                                                     <td class="text-center">
                                                         @if($vendedor->meta_detalles)
                                                             <small class="text-muted">
-                                                                Q{{ number_format($vendedor->meta_detalles['rango_minimo'], 0) }}
+                                                                {{ $config->currency_simbol }}{{ number_format($vendedor->meta_detalles['rango_minimo'], 0) }}
                                                                 @if($vendedor->meta_detalles['rango_maximo'])
-                                                                    - Q{{ number_format($vendedor->meta_detalles['rango_maximo'], 0) }}
+                                                                    - {{ $config->currency_simbol }}{{ number_format($vendedor->meta_detalles['rango_maximo'], 0) }}
                                                                 @else
                                                                     +
                                                                 @endif
@@ -241,7 +241,7 @@
                                                         @endif
                                                     </td>
                                                     <td class="text-end">
-                                                        <strong class="text-success">Q{{ number_format($vendedor->comision_calculada, 2) }}</strong>
+                                                        <strong class="text-success">{{ $config->currency_simbol }}{{ number_format($vendedor->comision_calculada, 2) }}</strong>
                                                     </td>
                                                     <td class="text-center">
                                                         @if($vendedor->estado == 'calculado')
@@ -312,7 +312,7 @@
                                                         <span class="badge bg-warning text-dark">{{ $mecanico->total_servicios }}</span>
                                                     </td>
                                                     <td class="text-end">
-                                                        <strong class="text-success">Q{{ number_format($mecanico->comision_calculada, 2) }}</strong>
+                                                        <strong class="text-success">{{ $config->currency_simbol }}{{ number_format($mecanico->comision_calculada, 2) }}</strong>
                                                     </td>
                                                     <td class="text-center">
                                                         <span class="badge bg-warning">{{ ucfirst($mecanico->estado) }}</span>
@@ -366,7 +366,7 @@
                                                         <span class="badge bg-info">{{ $carwash->total_servicios }}</span>
                                                     </td>
                                                     <td class="text-end">
-                                                        <strong class="text-success">Q{{ number_format($carwash->comision_calculada, 2) }}</strong>
+                                                        <strong class="text-success">{{ $config->currency_simbol }}{{ number_format($carwash->comision_calculada, 2) }}</strong>
                                                     </td>
                                                     <td class="text-center">
                                                         <span class="badge bg-warning">{{ ucfirst($carwash->estado) }}</span>
@@ -462,13 +462,13 @@
                                         </tr>
                                         <tr>
                                             <td><strong>Monto Mínimo:</strong></td>
-                                            <td>Q{{ number_format($vendedor->meta_detalles['rango_minimo'], 2) }}</td>
+                                            <td>{{ $config->currency_simbol }}{{ number_format($vendedor->meta_detalles['rango_minimo'], 2) }}</td>
                                         </tr>
                                         <tr>
                                             <td><strong>Monto Máximo:</strong></td>
                                             <td>
                                                 @if($vendedor->meta_detalles['rango_maximo'])
-                                                    Q{{ number_format($vendedor->meta_detalles['rango_maximo'], 2) }}
+                                                    {{ $config->currency_simbol }}{{ number_format($vendedor->meta_detalles['rango_maximo'], 2) }}
                                                 @else
                                                     <span class="text-muted">Sin límite</span>
                                                 @endif
@@ -489,11 +489,11 @@
                                         </tr>
                                         <tr>
                                             <td><strong>Total Vendido:</strong></td>
-                                            <td><strong>Q{{ number_format($vendedor->total_vendido, 2) }}</strong></td>
+                                            <td><strong>{{ $config->currency_simbol }}{{ number_format($vendedor->total_vendido, 2) }}</strong></td>
                                         </tr>
                                         <tr>
                                             <td><strong>Comisión Calculada:</strong></td>
-                                            <td><strong class="text-success">Q{{ number_format($vendedor->comision_calculada, 2) }}</strong></td>
+                                            <td><strong class="text-success">{{ $config->currency_simbol }}{{ number_format($vendedor->comision_calculada, 2) }}</strong></td>
                                         </tr>
                                         <tr>
                                             <td><strong>Estado:</strong></td>

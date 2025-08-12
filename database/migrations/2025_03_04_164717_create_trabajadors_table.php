@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 class CreateTrabajadorsTable extends Migration
 {
@@ -46,6 +47,57 @@ class CreateTrabajadorsTable extends Migration
             $table->boolean('estado')->default(1);
             $table->timestamps();
         });
+
+        // Insertar tipos de trabajador por defecto
+        DB::table('tipo_trabajadors')->insert([
+            [
+                'nombre' => 'Mecánico',
+                'descripcion' => 'Trabaja en reparación de vehículos',
+                'aplica_comision' => true,
+                'requiere_asignacion' => true,
+                'tipo_comision' => 'fijo',
+                'valor_comision' => 50.00,
+                'porcentaje_comision' => null,
+                'permite_multiples_trabajadores' => false,
+                'configuracion_adicional' => null,
+                'estado' => 'activo',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'nombre' => 'Car Wash',
+                'descripcion' => 'Trabaja en limpieza de vehículos',
+                'aplica_comision' => true,
+                'requiere_asignacion' => false,
+                'tipo_comision' => 'variable',
+                'valor_comision' => null,
+                'porcentaje_comision' => null,
+                'permite_multiples_trabajadores' => true,
+                'configuracion_adicional' => null,
+                'estado' => 'activo',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+            [
+                'nombre' => 'Administrativo',
+                'descripcion' => 'Personal administrativo',
+                'aplica_comision' => false,
+                'requiere_asignacion' => false,
+                'tipo_comision' => null,
+                'valor_comision' => null,
+                'porcentaje_comision' => null,
+                'permite_multiples_trabajadores' => false,
+                'configuracion_adicional' => null,
+                'estado' => 'activo',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+        ]);
+
+        // Agregar foreign key para mecanico_id en articulos después de crear trabajadors
+        Schema::table('articulos', function (Blueprint $table) {
+            $table->foreign('mecanico_id')->references('id')->on('trabajadors')->nullOnDelete();
+        });
     }
 
     /**
@@ -55,6 +107,11 @@ class CreateTrabajadorsTable extends Migration
      */
     public function down()
     {
+        // Eliminar foreign key antes de eliminar tablas
+        Schema::table('articulos', function (Blueprint $table) {
+            $table->dropForeign(['mecanico_id']);
+        });
+        
         Schema::dropIfExists('trabajadors');
         Schema::dropIfExists('tipo_trabajadors');
     }

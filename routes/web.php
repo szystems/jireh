@@ -20,9 +20,12 @@ use App\Http\Controllers\Admin\TipoTrabajadorController; // Añadir esta importa
 use App\Http\Controllers\Admin\InventarioController;
 use App\Http\Controllers\Admin\DescuentoController;
 use App\Http\Controllers\Admin\ComisionController;
+use App\Http\Controllers\Admin\PagoComisionController;
+use App\Http\Controllers\LotePagoController;
 use App\Http\Controllers\Admin\VentaController;
 use App\Http\Controllers\Admin\PagoController;
 use App\Http\Controllers\Admin\ReporteArticuloController;
+use App\Http\Controllers\Admin\ReporteMetasController; // Controlador de reportes de metas
 use App\Http\Controllers\Admin\TestController; // Controlador de pruebas
 use App\Http\Controllers\Admin\DatosInicialesController; // Controlador para generar datos iniciales
 use App\Http\Controllers\Admin\AuditoriaController; // Controlador de auditoría
@@ -221,6 +224,7 @@ Route::middleware(['auth'])->group(function () {
 
 
     // Pagos
+    Route::get('pagos', [PagoController::class, 'index']);
     Route::post('pagos', [PagoController::class, 'store']);
     Route::put('pagos/{id}', [PagoController::class, 'update']);
     Route::delete('pagos/{id}', [PagoController::class, 'destroy']);
@@ -248,12 +252,65 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/', [ComisionController::class, 'index'])->name('index');
         Route::get('/dashboard', [ComisionController::class, 'dashboard'])->name('dashboard');
         Route::get('/show/{id}', [ComisionController::class, 'show'])->name('show');
+        Route::get('/{id}/detalles-meta', [ComisionController::class, 'detallesMeta'])->name('detalles_meta');
         Route::get('/por-trabajador', [ComisionController::class, 'porTrabajador'])->name('por_trabajador');
         Route::get('/por-vendedor', [ComisionController::class, 'porVendedor'])->name('por_vendedor');
         Route::post('/registrar-pago/{id}', [ComisionController::class, 'registrarPago'])->name('registrar_pago');
         Route::get('/resumen', [ComisionController::class, 'resumen'])->name('resumen');
         // Nueva ruta para procesar comisiones de vendedores por metas
         Route::post('/procesar-vendedores', [ComisionController::class, 'procesarComisionesVendedores'])->name('procesar_vendedores');
+        
+        // NUEVAS RUTAS CONSOLIDADAS
+        Route::get('/gestion', [ComisionController::class, 'gestion'])->name('gestion');
+        Route::get('/gestion/todas', [ComisionController::class, 'apiTodasComisiones'])->name('api_todas');
+        Route::get('/gestion/trabajadores', [ComisionController::class, 'apiComisionesTrabajadores'])->name('api_trabajadores');
+        Route::get('/gestion/vendedores', [ComisionController::class, 'apiComisionesVendedores'])->name('api_vendedores');
+        
+        // RUTAS DE PAGO
+        Route::post('/pagar-individual', [ComisionController::class, 'pagarIndividual'])->name('pagar_individual');
+        Route::post('/pagar-multiples', [ComisionController::class, 'pagarMultiples'])->name('pagar_multiples');
+        Route::post('/pagar-trabajador', [ComisionController::class, 'pagarTrabajador'])->name('pagar_trabajador');
+        Route::post('/pagar-vendedor', [ComisionController::class, 'pagarVendedor'])->name('pagar_vendedor');
+    });
+    
+    // Rutas para lotes de pago (nuevo sistema híbrido)
+    Route::prefix('lotes-pago')->name('lotes-pago.')->group(function() {
+        Route::get('/', [LotePagoController::class, 'index'])->name('index');
+        Route::get('/create', [LotePagoController::class, 'create'])->name('create');
+        Route::post('/', [LotePagoController::class, 'store'])->name('store');
+        Route::get('/{lotePago}', [LotePagoController::class, 'show'])->name('show');
+        Route::get('/{lotePago}/edit', [LotePagoController::class, 'edit'])->name('edit');
+        Route::put('/{lotePago}', [LotePagoController::class, 'update'])->name('update');
+        Route::delete('/{lotePago}', [LotePagoController::class, 'destroy'])->name('destroy');
+    });
+    
+    // Rutas para reportes de metas de ventas
+    Route::prefix('reportes/metas')->name('reportes.metas.')->group(function() {
+        Route::get('/', [ReporteMetasController::class, 'index'])->name('index');
+        Route::get('/trabajador/{trabajador}', [ReporteMetasController::class, 'trabajadorDetalle'])->name('trabajador');
+    });
+    
+    // APIs simples para datos de filtros
+    Route::get('/api/trabajadores', function() {
+        return response()->json(\App\Models\Trabajador::select('id', 'nombre', 'apellido')->get());
+    });
+    
+    Route::get('/api/vendedores', function() {
+        return response()->json(\App\Models\User::where('role_as', 1)->select('id', 'name')->get());
+    });
+
+    // Rutas para pagos de comisiones (requiere autenticación)
+    Route::prefix('pagos_comisiones')->name('pagos_comisiones.')->group(function() {
+        Route::get('/', [PagoComisionController::class, 'index'])->name('index');
+        Route::post('/procesar-masivos', [PagoComisionController::class, 'procesarPagosMasivos'])->name('procesar_masivos');
+        Route::post('/registrar/{id}', [PagoComisionController::class, 'registrarPago'])->name('registrar');
+        Route::get('/historial', [PagoComisionController::class, 'historial'])->name('historial');
+        Route::post('/marcar-pendientes', [PagoComisionController::class, 'marcarPendientesPago'])->name('marcar_pendientes');
+        Route::post('/anular/{id}', [PagoComisionController::class, 'anularPago'])->name('anular');
+        Route::get('/reporte', [PagoComisionController::class, 'generarReporte'])->name('reporte');
+        
+        // NUEVAS RUTAS PARA PAGOS MASIVOS
+        Route::post('/masivo', [PagoComisionController::class, 'procesarPagoMasivo'])->name('pago_masivo');
     });
 
     // Rutas de Auditoría de Ventas e Inventario

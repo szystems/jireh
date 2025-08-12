@@ -237,7 +237,11 @@ class VentaController extends Controller
 
     public function show($id)
     {
-        $venta = Venta::with('pagos')->findOrFail($id);
+        $venta = Venta::with([
+            'pagos',
+            'detalleVentas.articulo.mecanico',
+            'detalleVentas.trabajadoresCarwash'
+        ])->findOrFail($id);
         $config = Config::first();
         return view('admin.venta.show', compact('venta', 'config'));
     }
@@ -737,6 +741,7 @@ class VentaController extends Controller
         // Cargar todos los datos relacionados necesarios para el PDF
         $venta = Venta::with([
             'detalleVentas.articulo.unidad',
+            'detalleVentas.articulo.mecanico',
             'detalleVentas.descuento',
             'detalleVentas.trabajadoresCarwash',
             'cliente',

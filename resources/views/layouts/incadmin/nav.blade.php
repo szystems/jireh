@@ -22,7 +22,7 @@
         <!-- Header actions start -->
         <div class="header-actions d-flex gap-3">
             @if(Auth::user()->role_as != 1)
-            <a href="{{ url('configs') }}" class="header-action-link" data-bs-toggle="tooltip" data-bs-placement="bottom"
+            <a href="{{ url('config') }}" class="header-action-link" data-bs-toggle="tooltip" data-bs-placement="bottom"
                 data-bs-title="Configuración">
                 <i class="bi bi-gear fs-5"></i>
             </a>

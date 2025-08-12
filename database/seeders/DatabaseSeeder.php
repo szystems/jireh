@@ -22,6 +22,11 @@ class DatabaseSeeder extends Seeder
         $this->call(UnidadsTableSeeder::class);
         $this->call(ArticuloSeeder::class);
         $this->call(TrabajadorSeeder::class);
+        $this->call(MetaVentaSeeder::class);
+        
+        // Para datos de prueba específicos de comisiones
+        // Ejecutar con: php artisan db:seed --class=ComisionesTestSeeder
+        // $this->call(ComisionesTestSeeder::class);
     }
 
     /**

@@ -110,7 +110,7 @@
                                             </div>
                                             <div>
                                                 <div class="small text-muted">Total Comisiones</div>
-                                                <div class="fw-bold">Q. {{ number_format($trabajador->comisiones->sum('monto'), 2) }}</div>
+                                                <div class="fw-bold">{{ $config->currency_simbol }} {{ number_format($trabajador->comisiones->sum('monto'), 2) }}</div>
                                             </div>
                                         </div>
                                     </div>
@@ -138,15 +138,15 @@
                                                     <tr>
                                                         <td>{{ ucfirst($tipo) }}</td>
                                                         <td>
-                                                            Q. {{ number_format($grupo->where('estado', 'pendiente')->sum('monto'), 2) }}
+                                                            {{ $config->currency_simbol }} {{ number_format($grupo->where('estado', 'pendiente')->sum('monto'), 2) }}
                                                             <span class="badge bg-warning">{{ $grupo->where('estado', 'pendiente')->count() }}</span>
                                                         </td>
                                                         <td>
-                                                            Q. {{ number_format($grupo->where('estado', 'pagado')->sum('monto'), 2) }}
+                                                            {{ $config->currency_simbol }} {{ number_format($grupo->where('estado', 'pagado')->sum('monto'), 2) }}
                                                             <span class="badge bg-success">{{ $grupo->where('estado', 'pagado')->count() }}</span>
                                                         </td>
                                                         <td>
-                                                            Q. {{ number_format($grupo->sum('monto'), 2) }}
+                                                            {{ $config->currency_simbol }} {{ number_format($grupo->sum('monto'), 2) }}
                                                             <span class="badge bg-primary">{{ $grupo->count() }}</span>
                                                         </td>
                                                     </tr>
@@ -155,9 +155,9 @@
                                             <tfoot>
                                                 <tr class="fw-bold">
                                                     <td>Total</td>
-                                                    <td>Q. {{ number_format($trabajador->comisiones->where('estado', 'pendiente')->sum('monto'), 2) }}</td>
-                                                    <td>Q. {{ number_format($trabajador->comisiones->where('estado', 'pagado')->sum('monto'), 2) }}</td>
-                                                    <td>Q. {{ number_format($trabajador->comisiones->sum('monto'), 2) }}</td>
+                                                    <td>{{ $config->currency_simbol }} {{ number_format($trabajador->comisiones->where('estado', 'pendiente')->sum('monto'), 2) }}</td>
+                                                    <td>{{ $config->currency_simbol }} {{ number_format($trabajador->comisiones->where('estado', 'pagado')->sum('monto'), 2) }}</td>
+                                                    <td>{{ $config->currency_simbol }} {{ number_format($trabajador->comisiones->sum('monto'), 2) }}</td>
                                                 </tr>
                                             </tfoot>
                                         </table>
@@ -183,7 +183,7 @@
                                                     <tr>
                                                         <td>{{ \Carbon\Carbon::parse($comision->fecha_calculo)->format('d/m/Y') }}</td>
                                                         <td>{{ ucfirst($comision->tipo_comision) }}</td>
-                                                        <td>Q. {{ number_format($comision->monto, 2) }}</td>
+                                                        <td>{{ $config->currency_simbol }} {{ number_format($comision->monto, 2) }}</td>
                                                         <td>
                                                             @if ($comision->estado == 'pendiente')
                                                                 <span class="badge bg-warning">Pendiente</span>

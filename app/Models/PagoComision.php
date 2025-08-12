@@ -18,6 +18,7 @@ class PagoComision extends Model
      */
     protected $fillable = [
         'comision_id',
+        'lote_pago_id',
         'monto',
         'metodo_pago',
         'usuario_id',
@@ -44,6 +45,14 @@ class PagoComision extends Model
     public function comision()
     {
         return $this->belongsTo(Comision::class);
+    }
+
+    /**
+     * Relación con el lote de pago (nuevo)
+     */
+    public function lotePago()
+    {
+        return $this->belongsTo(LotePago::class, 'lote_pago_id');
     }
 
     /**

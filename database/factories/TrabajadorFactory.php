@@ -28,4 +28,42 @@ class TrabajadorFactory extends Factory
             'estado' => 1,
         ];
     }
+
+    /**
+     * Estado específico para mecánicos
+     */
+    public function mecanico()
+    {
+        return $this->state(function (array $attributes) {
+            // Buscar el ID del tipo "Mecánico"
+            $mecanicoTipo = TipoTrabajador::where('nombre', 'like', '%mecánico%')
+                                          ->orWhere('nombre', 'like', '%Mecánico%')
+                                          ->first();
+            $mecanicoTipoId = $mecanicoTipo ? $mecanicoTipo->id : 1;
+            
+            return [
+                'tipo_trabajador_id' => $mecanicoTipoId,
+                'tipo' => $mecanicoTipoId,
+            ];
+        });
+    }
+
+    /**
+     * Estado específico para trabajadores Car Wash
+     */
+    public function carwash()
+    {
+        return $this->state(function (array $attributes) {
+            // Buscar el ID del tipo "Car Wash"
+            $carwashTipo = TipoTrabajador::where('nombre', 'like', '%Car Wash%')
+                                         ->orWhere('nombre', 'like', '%carwash%')
+                                         ->first();
+            $carwashTipoId = $carwashTipo ? $carwashTipo->id : 2;
+            
+            return [
+                'tipo_trabajador_id' => $carwashTipoId,
+                'tipo' => $carwashTipoId,
+            ];
+        });
+    }
 }

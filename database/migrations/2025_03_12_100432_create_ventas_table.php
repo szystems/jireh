@@ -22,7 +22,7 @@ class CreateVentasTable extends Migration
             $table->enum('tipo_venta', ['Car Wash', 'CDS']);
             $table->unsignedBigInteger('usuario_id')->nullable();
             $table->boolean('estado')->nullable()->default(true);
-            $table->enum('estado_pago', ['pagado', 'pendiente'])->default('pendiente');
+            $table->enum('estado_pago', ['pendiente', 'pagado', 'parcial'])->default('pendiente');
             $table->timestamps();
 
             $table->foreign('cliente_id')->references('id')->on('clientes')->onUpdate('cascade')->onDelete('set null');

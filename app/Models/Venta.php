@@ -51,6 +51,14 @@ class Venta extends Model
     }
 
     /**
+     * Accessor para calcular el total de la venta
+     */
+    public function getTotalAttribute()
+    {
+        return $this->detalleVentas->sum('sub_total');
+    }
+
+    /**
      * Obtiene los pagos asociados a esta venta.
      */
     public function pagos()
@@ -106,72 +114,140 @@ class Venta extends Model
 
     /**
      * Genera la comisión para el vendedor según sus metas
+     * Ahora evalúa cada meta según su tipo específico (mensual, semestral, anual)
      */
     public function generarComisionVendedor()
     {
         // Solo si hay un vendedor asignado
         if (!$this->usuario_id) return null;
 
-        // Calcular el monto total de ventas del usuario para el periodo actual
-        $inicio = Carbon::now()->startOfMonth();
-        $fin = Carbon::now()->endOfMonth();
+        $fechaActual = Carbon::now();
+        $usuario = $this->usuario;
+        if (!$usuario) return null;
 
-        // Obtener total de ventas del vendedor en el periodo
-        $totalVentas = Venta::where('usuario_id', $this->usuario_id)
-                      ->whereBetween('fecha', [$inicio, $fin])
-                      ->where('estado', true)
-                      ->with('detalleVentas')
-                      ->get()
-                      ->sum(function($venta) {
-                          return $venta->detalleVentas->sum('sub_total');
-                      });
-
-        // Determinar qué meta corresponde al monto vendido
-        $meta = MetaVenta::determinarMetaPorMonto($totalVentas, 'mensual');
-
-        if (!$meta) return null;
-
-        // Verificar si ya existe una comisión para este vendedor en este periodo
-        $comisionExistente = Comision::where([
-            'commissionable_id' => $this->usuario_id,
-            'commissionable_type' => 'App\Models\User',
-            'tipo_comision' => 'meta_venta'
-        ])
-        ->whereMonth('fecha_calculo', Carbon::now()->month)
-        ->whereYear('fecha_calculo', Carbon::now()->year)
-        ->first();
-
-        // Calcular comisión según el porcentaje de la meta
-        $montoComision = $meta->calcularComision($totalVentas);
-
-        if ($comisionExistente && $montoComision > 0) {
-            // Actualizar comisión existente
-            $comisionExistente->update([
-                'monto' => $montoComision,
-                'porcentaje' => $meta->porcentaje_comision,
-                'observaciones' => "Comisión por meta de ventas: Q{$meta->monto_minimo} - " . 
-                                 ($meta->monto_maximo ? "Q{$meta->monto_maximo}" : "Sin límite") .
-                                 " | Total vendido: Q{$totalVentas}"
-            ]);
+        // Obtener todas las metas activas para evaluar
+        $todasLasMetas = MetaVenta::where('estado', 1)->orderBy('monto_minimo')->get();
+        
+        $comisionesCreadas = collect();
+        
+        // Evaluar cada meta según su tipo específico
+        foreach ($todasLasMetas as $meta) {
+            // Calcular ventas según el tipo de meta específico
+            $ventasParaMeta = $this->calcularVentasSegunTipoMeta($usuario, $meta, $fechaActual);
             
-            return $comisionExistente;
-        } elseif (!$comisionExistente && $montoComision > 0) {
-            // Crear nueva comisión
-            return Comision::create([
-                'commissionable_id' => $this->usuario_id,
-                'commissionable_type' => 'App\Models\User',
-                'tipo_comision' => 'meta_venta',
-                'monto' => $montoComision,
-                'porcentaje' => $meta->porcentaje_comision,
-                'venta_id' => $this->id,
-                'fecha_calculo' => now(),
-                'estado' => 'pendiente',
-                'observaciones' => "Comisión por meta de ventas: Q{$meta->monto_minimo} - " . 
-                                 ($meta->monto_maximo ? "Q{$meta->monto_maximo}" : "Sin límite") .
-                                 " | Total vendido: Q{$totalVentas}"
-            ]);
-        }
+            // Verificar si alcanza esta meta
+            if ($ventasParaMeta >= $meta->monto_minimo) {
+                // Determinar el período de la meta para verificar duplicados
+                $fechasPeriodo = $this->obtenerFechasPorTipoMeta($meta, $fechaActual);
+                
+                // Verificar si ya existe una comisión para esta meta en este período
+                $comisionExistente = Comision::where([
+                    'commissionable_id' => $this->usuario_id,
+                    'commissionable_type' => 'App\Models\User',
+                    'tipo_comision' => 'meta_venta'
+                ])
+                ->whereBetween('fecha_calculo', [$fechasPeriodo['inicio'], $fechasPeriodo['fin']])
+                ->first();
 
-        return null;
+                // Calcular comisión según el porcentaje de la meta
+                $montoComision = $meta->calcularComision($ventasParaMeta);
+                
+                if ($comisionExistente && $montoComision > 0) {
+                    // Actualizar comisión existente
+                    $comisionExistente->update([
+                        'monto' => $montoComision,
+                        'porcentaje' => $meta->porcentaje_comision,
+                        'observaciones' => "Comisión por meta {$meta->nombre}: Q{$meta->monto_minimo}" . 
+                                         ($meta->monto_maximo ? " - Q{$meta->monto_maximo}" : " - Sin límite") .
+                                         " | Total vendido: Q" . number_format($ventasParaMeta, 2)
+                    ]);
+                    
+                    $comisionesCreadas->push($comisionExistente);
+                    
+                } elseif (!$comisionExistente && $montoComision > 0) {
+                    // Crear nueva comisión
+                    $nuevaComision = Comision::create([
+                        'commissionable_id' => $this->usuario_id,
+                        'commissionable_type' => 'App\Models\User',
+                        'tipo_comision' => 'meta_venta',
+                        'monto' => $montoComision,
+                        'porcentaje' => $meta->porcentaje_comision,
+                        'venta_id' => $this->id,
+                        'fecha_calculo' => now(),
+                        'estado' => 'pendiente',
+                        'observaciones' => "Comisión por meta {$meta->nombre}: Q{$meta->monto_minimo}" . 
+                                         ($meta->monto_maximo ? " - Q{$meta->monto_maximo}" : " - Sin límite") .
+                                         " | Total vendido: Q" . number_format($ventasParaMeta, 2)
+                    ]);
+                    
+                    $comisionesCreadas->push($nuevaComision);
+                }
+            }
+        }
+        
+        return $comisionesCreadas;
+    }
+
+    /**
+     * Calcular ventas de un trabajador según el tipo específico de meta
+     * (Reutiliza la lógica del ReporteMetasController)
+     */
+    private function calcularVentasSegunTipoMeta($usuario, $meta, $fechaActual)
+    {
+        $fechasPeriodo = $this->obtenerFechasPorTipoMeta($meta, $fechaActual);
+        
+        // Calcular ventas del período específico de esta meta
+        $ventas = $usuario->ventas()
+            ->whereBetween('fecha', [$fechasPeriodo['inicio'], $fechasPeriodo['fin']])
+            ->where('estado', 1)
+            ->with('detalleVentas')
+            ->get();
+            
+        return $ventas->sum(function($venta) {
+            return $venta->detalleVentas->sum('sub_total');
+        });
+    }
+
+    /**
+     * Obtener fechas de inicio y fin según el tipo de meta
+     */
+    private function obtenerFechasPorTipoMeta($meta, $fechaActual)
+    {
+        // Determinar el período según el tipo de meta
+        $tipoMeta = strtolower($meta->nombre);
+        
+        if (strpos($tipoMeta, 'mensual') !== false || strpos($tipoMeta, 'mes') !== false) {
+            // Meta mensual: ventas del mes actual
+            return [
+                'inicio' => $fechaActual->copy()->startOfMonth(),
+                'fin' => $fechaActual->copy()->endOfMonth()
+            ];
+        } elseif (strpos($tipoMeta, 'semestral') !== false || strpos($tipoMeta, 'semestre') !== false) {
+            // Meta semestral: ventas del semestre actual
+            $mes = $fechaActual->month;
+            if ($mes <= 6) {
+                return [
+                    'inicio' => $fechaActual->copy()->startOfYear(),
+                    'fin' => $fechaActual->copy()->month(6)->endOfMonth()
+                ];
+            } else {
+                return [
+                    'inicio' => $fechaActual->copy()->month(7)->startOfMonth(),
+                    'fin' => $fechaActual->copy()->endOfYear()
+                ];
+            }
+        } elseif (strpos($tipoMeta, 'anual') !== false || strpos($tipoMeta, 'año') !== false) {
+            // Meta anual: ventas del año actual
+            return [
+                'inicio' => $fechaActual->copy()->startOfYear(),
+                'fin' => $fechaActual->copy()->endOfYear()
+            ];
+        } else {
+            // Por defecto, usar el período mensual
+            return [
+                'inicio' => $fechaActual->copy()->startOfMonth(),
+                'fin' => $fechaActual->copy()->endOfMonth()
+            ];
+        }
     }
 }

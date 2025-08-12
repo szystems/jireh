@@ -83,7 +83,7 @@
                                         @forelse ($totalesPorTipo as $tipo)
                                             <tr>
                                                 <td>{{ ucfirst($tipo->tipo_comision) }}</td>
-                                                <td>Q. {{ number_format($tipo->total, 2) }}</td>
+                                                <td>{{ $config->currency_simbol }} {{ number_format($tipo->total, 2) }}</td>
                                                 <td>
                                                     @if($totalGlobal > 0)
                                                         {{ number_format(($tipo->total / $totalGlobal) * 100, 2) }}%
@@ -101,7 +101,7 @@
                                     <tfoot>
                                         <tr class="fw-bold">
                                             <td>Total</td>
-                                            <td>Q. {{ number_format($totalGlobal, 2) }}</td>
+                                            <td>{{ $config->currency_simbol }} {{ number_format($totalGlobal, 2) }}</td>
                                             <td>100%</td>
                                         </tr>
                                     </tfoot>
@@ -142,7 +142,7 @@
                                                         <span class="badge bg-danger">Cancelado</span>
                                                     @endif
                                                 </td>
-                                                <td>Q. {{ number_format($estado->total, 2) }}</td>
+                                                <td>{{ $config->currency_simbol }} {{ number_format($estado->total, 2) }}</td>
                                                 <td>
                                                     @if($totalEstados > 0)
                                                         {{ number_format(($estado->total / $totalEstados) * 100, 2) }}%
@@ -160,7 +160,7 @@
                                     <tfoot>
                                         <tr class="fw-bold">
                                             <td>Total</td>
-                                            <td>Q. {{ number_format($totalEstados, 2) }}</td>
+                                            <td>{{ $config->currency_simbol }} {{ number_format($totalEstados, 2) }}</td>
                                             <td>100%</td>
                                         </tr>
                                     </tfoot>
@@ -197,7 +197,7 @@
                                                     </a>
                                                 </td>
                                                 <td>{{ $trabajador->tipoTrabajador ? $trabajador->tipoTrabajador->nombre : 'Sin tipo' }}</td>
-                                                <td>Q. {{ number_format($trabajador->comisiones_sum_monto, 2) }}</td>
+                                                <td>{{ $config->currency_simbol }} {{ number_format($trabajador->comisiones_sum_monto, 2) }}</td>
                                             </tr>
                                         @empty
                                             <tr>
@@ -234,7 +234,7 @@
                                                         {{ $vendedor->name }}
                                                     </a>
                                                 </td>
-                                                <td>Q. {{ number_format($vendedor->comisiones_sum_monto, 2) }}</td>
+                                                <td>{{ $config->currency_simbol }} {{ number_format($vendedor->comisiones_sum_monto, 2) }}</td>
                                             </tr>
                                         @empty
                                             <tr>

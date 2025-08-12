@@ -49,6 +49,14 @@ class Comision extends Model
     }
 
     /**
+     * Relación específica con trabajador (para facilitar el acceso)
+     */
+    public function trabajador()
+    {
+        return $this->morphTo('commissionable')->where('commissionable_type', 'App\Models\Trabajador');
+    }
+
+    /**
      * Relación con el detalle de venta asociado
      */
     public function detalleVenta()
@@ -111,9 +119,8 @@ class Comision extends Model
     {
         if ($this->montoPendiente() <= 0) {
             $this->estado = 'pagado';
-        } else if ($this->pagos()->count() > 0) {
-            $this->estado = 'parcial';
         } else {
+            // Si tiene pagos pero no está completamente pagada, mantener como pendiente
             $this->estado = 'pendiente';
         }
         return $this->save();
@@ -148,5 +155,97 @@ class Comision extends Model
             return $query->where('commissionable_type', 'App\Models\Trabajador');
         }
         return $query;
+    }
+
+    /**
+     * Obtener las ventas que conformaron esta comisión de meta_venta
+     */
+    public function getVentasDeMetaAttribute()
+    {
+        if ($this->tipo_comision !== 'meta_venta' || $this->commissionable_type !== 'App\Models\User') {
+            return collect();
+        }
+
+        // Calcular el período de la meta basado en fecha_calculo
+        $fechaCalculo = Carbon::parse($this->fecha_calculo);
+        $fechaInicio = $fechaCalculo->copy()->startOfMonth();
+        $fechaFin = $fechaCalculo->copy()->endOfMonth();
+
+        // Obtener las ventas del vendedor en ese período
+        $ventas = \App\Models\Venta::with(['cliente', 'detalleVentas'])
+            ->where('usuario_id', $this->commissionable_id)
+            ->whereBetween('fecha', [$fechaInicio, $fechaFin])
+            ->where('estado', 1)
+            ->orderBy('fecha', 'desc')
+            ->get();
+
+        return $ventas;
+    }
+
+    /**
+     * Obtener información resumida de la meta
+     */
+    public function getInfoMetaResumenAttribute()
+    {
+        if ($this->tipo_comision !== 'meta_venta') {
+            return null;
+        }
+
+        $ventas = $this->ventas_de_meta;
+        
+        if ($ventas->isEmpty()) {
+            return [
+                'periodo' => $this->fecha_calculo->format('m/Y'),
+                'cantidad_ventas' => 0,
+                'total_vendido' => 0,
+                'meta_info' => $this->obtenerInfoMeta()
+            ];
+        }
+
+        return [
+            'periodo' => $this->fecha_calculo->format('m/Y'),
+            'fecha_inicio' => $ventas->min('fecha')->format('d/m/Y'),
+            'fecha_fin' => $ventas->max('fecha')->format('d/m/Y'),
+            'cantidad_ventas' => $ventas->count(),
+            'total_vendido' => $ventas->sum(function($venta) {
+                return $venta->detalleVentas->sum('sub_total');
+            }),
+            'meta_info' => $this->obtenerInfoMeta()
+        ];
+    }
+
+    /**
+     * Obtener información de la meta alcanzada (método auxiliar)
+     */
+    private function obtenerInfoMeta()
+    {
+        $porcentaje = $this->porcentaje;
+        
+        switch($porcentaje) {
+            case 3:
+                return [
+                    'nombre' => 'Bronce',
+                    'color' => 'warning',
+                    'rango' => '$1K - $2.5K'
+                ];
+            case 5:
+                return [
+                    'nombre' => 'Plata', 
+                    'color' => 'secondary',
+                    'rango' => '$2.5K - $5K'
+                ];
+            case 8:
+                return [
+                    'nombre' => 'Oro',
+                    'color' => 'success', 
+                    'rango' => '$5K+'
+                ];
+            default:
+                return [
+                    'nombre' => 'Desconocida',
+                    'color' => 'dark',
+                    'rango' => 'N/A'
+                ];
+        }
     }
 }

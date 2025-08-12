@@ -251,17 +251,26 @@
                                                     @if($detalle->articulo && $detalle->articulo->tipo === 'servicio')
                                                         @php
                                                             $trabajadoresAsignados = $detalle->trabajadoresCarwash;
+                                                            $mechanicoAsignado = $detalle->articulo->mecanico;
+                                                            $hayTrabajadores = $trabajadoresAsignados->count() > 0;
+                                                            $hayMecanico = $mechanicoAsignado && $detalle->articulo->mecanico_id;
                                                         @endphp
-                                                        @if($trabajadoresAsignados->count() > 0)
+                                                        
+                                                        @if($hayTrabajadores || $hayMecanico)
                                                             <div class="d-flex flex-wrap gap-1">
+                                                                {{-- Mostrar trabajadores carwash --}}
                                                                 @foreach($trabajadoresAsignados as $trabajador)
                                                                     <span class="badge bg-info">
-                                                                        {{ $trabajador->nombre }} {{ $trabajador->apellido }}
-                                                                        @if($trabajador->pivot && $trabajador->pivot->monto_comision)
-                                                                            <small>(Q{{ number_format($trabajador->pivot->monto_comision, 2) }})</small>
-                                                                        @endif
+                                                                        <i class="bi bi-car-front"></i> {{ $trabajador->nombre }} {{ $trabajador->apellido }}
                                                                     </span>
                                                                 @endforeach
+                                                                
+                                                                {{-- Mostrar mecánico asignado --}}
+                                                                @if($hayMecanico)
+                                                                    <span class="badge bg-warning text-dark">
+                                                                        <i class="bi bi-gear"></i> {{ $mechanicoAsignado->nombre }} {{ $mechanicoAsignado->apellido }}
+                                                                    </span>
+                                                                @endif
                                                             </div>
                                                         @else
                                                             <small class="text-muted">No asignados</small>

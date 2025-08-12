@@ -34,7 +34,24 @@
                                 </tr>
                                 <tr>
                                     <th>Tipo:</th>
-                                    <td>{{ ucfirst($comision->tipo_comision) }}</td>
+                                    <td>
+                                        @if($comision->tipo_comision == 'meta_venta' || $comision->tipo_comision == 'venta_meta')
+                                            <span class="badge bg-primary">Meta de Ventas</span>
+                                            @if($metaInfo)
+                                                <br><small>
+                                                    <span class="badge bg-{{ $metaInfo['color'] }} mt-1" title="Rango: {{ $metaInfo['rango'] }}">
+                                                        🏆 {{ $metaInfo['nombre'] }}
+                                                    </span>
+                                                </small>
+                                            @endif
+                                        @elseif($comision->tipo_comision == 'mecanico')
+                                            <span class="badge bg-info">Mecánico</span>
+                                        @elseif($comision->tipo_comision == 'carwash')
+                                            <span class="badge bg-secondary">Car Wash</span>
+                                        @else
+                                            <span class="badge bg-dark">{{ ucfirst($comision->tipo_comision) }}</span>
+                                        @endif
+                                    </td>
                                 </tr>
                                 <tr>
                                     <th>Fecha:</th>
@@ -50,25 +67,44 @@
                                     <td>{{ $comision->porcentaje }}%</td>
                                 </tr>
                                 @endif
+                                @if($metaInfo && ($comision->tipo_comision == 'meta_venta' || $comision->tipo_comision == 'venta_meta'))
+                                <tr>
+                                    <th>Meta Alcanzada:</th>
+                                    <td>
+                                        <span class="badge bg-{{ $metaInfo['color'] }} me-2">
+                                            {{ $metaInfo['nombre'] }}
+                                        </span>
+                                        <small class="text-muted">
+                                            ({{ $metaInfo['rango'] }} - {{ $comision->porcentaje }}% comisión)
+                                        </small>
+                                    </td>
+                                </tr>
+                                @endif
                                 <tr>
                                     <th>Estado:</th>
                                     <td>
                                         @if ($comision->estado == 'pendiente')
-                                            <span class="badge bg-warning">Pendiente</span>
+                                            <span class="badge bg-warning">Pendiente de Pago</span>
+                                            <small class="text-muted d-block mt-1">
+                                                Pendiente: Q. {{ number_format($comision->montoPendiente(), 2) }}
+                                            </small>
                                         @elseif ($comision->estado == 'pagado')
-                                            <span class="badge bg-success">Pagado</span>
+                                            <span class="badge bg-success">Pagado Completamente</span>
+                                            @if($comision->pagos->count() > 0)
+                                                @php $pago = $comision->pagos->first() @endphp
+                                                <small class="text-muted d-block mt-1">
+                                                    Pagado el {{ \Carbon\Carbon::parse($pago->fecha_pago)->format('d/m/Y') }}
+                                                    @if($pago->lotePago)
+                                                        - <a href="{{ route('lotes-pago.show', $pago->lotePago->id) }}" class="text-decoration-none">
+                                                            Lote {{ $pago->lotePago->numero_lote }}
+                                                        </a>
+                                                    @endif
+                                                </small>
+                                            @endif
                                         @elseif ($comision->estado == 'cancelado')
                                             <span class="badge bg-danger">Cancelado</span>
                                         @endif
                                     </td>
-                                </tr>
-                                <tr>
-                                    <th>Monto Pagado:</th>
-                                    <td>Q. {{ number_format($comision->montoPagado(), 2) }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Monto Pendiente:</th>
-                                    <td>Q. {{ number_format($comision->montoPendiente(), 2) }}</td>
                                 </tr>
                             </table>
                         </div>
@@ -202,7 +238,7 @@
                                 </tr>
                                 <tr>
                                     <th>Subtotal:</th>
-                                    <td>Q. {{ number_format($comision->detalleVenta->subtotal, 2) }}</td>
+                                    <td>{{ $config->currency_simbol }} {{ number_format($comision->detalleVenta->subtotal, 2) }}</td>
                                 </tr>
                             </table>
                         </div>
@@ -212,74 +248,202 @@
             </div>
             
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-12">
                     <div class="card mb-4">
                         <div class="card-header">
-                            <h5>Historial de Pagos</h5>
+                            <h5>Información de Pago</h5>
                         </div>
                         <div class="card-body">
-                            @if ($comision->pagos->count() > 0)
-                                <table class="table table-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>Fecha</th>
-                                            <th>Monto</th>
-                                            <th>Observaciones</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($comision->pagos as $pago)
-                                            <tr>
-                                                <td>{{ $pago->id }}</td>
-                                                <td>{{ \Carbon\Carbon::parse($pago->fecha_pago)->format('d/m/Y') }}</td>
-                                                <td>Q. {{ number_format($pago->monto, 2) }}</td>
-                                                <td>{{ $pago->observaciones }}</td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                    <tfoot>
-                                        <tr>
-                                            <th colspan="2">Total:</th>
-                                            <th colspan="2">Q. {{ number_format($comision->montoPagado(), 2) }}</th>
-                                        </tr>
-                                    </tfoot>
-                                </table>
+                            @if ($comision->estado == 'pagado')
+                                @php $pago = $comision->pagos->first() @endphp
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <strong>Estado:</strong><br>
+                                        <span class="badge bg-success">Pagado Completamente</span>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <strong>Fecha de Pago:</strong><br>
+                                        {{ \Carbon\Carbon::parse($pago->fecha_pago)->format('d/m/Y') }}
+                                    </div>
+                                    <div class="col-md-3">
+                                        <strong>Monto Pagado:</strong><br>
+                                        {{ $config->currency_simbol }} {{ number_format($pago->monto, 2) }}
+                                    </div>
+                                    <div class="col-md-3">
+                                        <strong>Lote de Pago:</strong><br>
+                                        @if($pago->lotePago)
+                                            <a href="{{ route('lotes-pago.show', $pago->lotePago->id) }}" 
+                                               class="btn btn-sm btn-outline-success">
+                                                <i class="bi bi-file-earmark-check"></i> {{ $pago->lotePago->numero_lote }}
+                                            </a>
+                                        @else
+                                            <span class="text-muted">No disponible</span>
+                                        @endif
+                                    </div>
+                                </div>
+                                
+                                @if($pago->observaciones)
+                                <div class="row mt-3">
+                                    <div class="col-md-12">
+                                        <strong>Observaciones:</strong><br>
+                                        <div class="alert alert-info mb-0">
+                                            {{ $pago->observaciones }}
+                                        </div>
+                                    </div>
+                                </div>
+                                @endif
+                                
+                            @elseif ($comision->estado == 'pendiente')
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <strong>Estado:</strong><br>
+                                        <span class="badge bg-warning">Pendiente de Pago</span>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <strong>Monto Total:</strong><br>
+                                        {{ $config->currency_simbol }} {{ number_format($comision->monto, 2) }}
+                                    </div>
+                                    <div class="col-md-4">
+                                        <strong>Pendiente por Pagar:</strong><br>
+                                        <span class="text-danger fw-bold">{{ $config->currency_simbol }} {{ number_format($comision->montoPendiente(), 2) }}</span>
+                                    </div>
+                                </div>
                             @else
-                                <div class="alert alert-info">No hay pagos registrados para esta comisión.</div>
+                                <div class="alert alert-secondary mb-0">
+                                    <strong>Estado:</strong> {{ ucfirst($comision->estado) }}
+                                </div>
                             @endif
                         </div>
                     </div>
                 </div>
+            </div>
                 
-                @if ($comision->estado != 'pagado' && $comision->montoPendiente() > 0)
-                <div class="col-md-6">
+            @if ($comision->estado != 'pagado' && $comision->montoPendiente() > 0)
+            <div class="row">
+                <div class="col-md-12">
                     <div class="card mb-4">
                         <div class="card-header">
-                            <h5>Registrar Pago</h5>
+                            <h5><i class="bi bi-file-earmark-plus"></i> Crear Lote de Pago Individual</h5>
                         </div>
                         <div class="card-body">
-                            <form action="{{ url('comisiones/registrar-pago/'.$comision->id) }}" method="POST">
+                            <form action="{{ url('comisiones/registrar-pago/'.$comision->id) }}" method="POST" enctype="multipart/form-data">
                                 @csrf
+                                
+                                <!-- Información del Monto -->
+                                <div class="alert alert-info">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <strong>Comisión a pagar:</strong> #{{ $comision->id }}
+                                        </div>
+                                        <div class="col-md-6 text-end">
+                                            <strong>Monto total:</strong> {{ $config->currency_simbol }} {{ number_format($comision->montoPendiente(), 2) }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Campo oculto para el monto -->
+                                <input type="hidden" name="monto" value="{{ number_format($comision->montoPendiente(), 2, '.', '') }}">
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="fecha_pago" class="form-label">
+                                                <i class="bi bi-calendar"></i> Fecha de Pago *
+                                            </label>
+                                            <input type="date" 
+                                                   name="fecha_pago" 
+                                                   id="fecha_pago" 
+                                                   class="form-control @error('fecha_pago') is-invalid @enderror" 
+                                                   value="{{ old('fecha_pago', date('Y-m-d')) }}"
+                                                   required>
+                                            @error('fecha_pago')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="metodo_pago" class="form-label">
+                                                <i class="bi bi-credit-card"></i> Método de Pago *
+                                            </label>
+                                            <select name="metodo_pago" 
+                                                    id="metodo_pago" 
+                                                    class="form-control @error('metodo_pago') is-invalid @enderror"
+                                                    required>
+                                                <option value="">Seleccionar método...</option>
+                                                <option value="efectivo" {{ old('metodo_pago') == 'efectivo' ? 'selected' : '' }}>
+                                                    Efectivo
+                                                </option>
+                                                <option value="transferencia" {{ old('metodo_pago') == 'transferencia' ? 'selected' : '' }}>
+                                                    Transferencia Bancaria
+                                                </option>
+                                                <option value="cheque" {{ old('metodo_pago') == 'cheque' ? 'selected' : '' }}>
+                                                    Cheque
+                                                </option>
+                                            </select>
+                                            @error('metodo_pago')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="referencia" class="form-label">
+                                                <i class="bi bi-hash"></i> Referencia
+                                            </label>
+                                            <input type="text" 
+                                                   name="referencia" 
+                                                   id="referencia" 
+                                                   class="form-control @error('referencia') is-invalid @enderror" 
+                                                   value="{{ old('referencia') }}"
+                                                   placeholder="Número de transferencia, cheque, etc.">
+                                            @error('referencia')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="comprobante_imagen" class="form-label">
+                                                <i class="bi bi-file-earmark-image"></i> Comprobante de Pago
+                                            </label>
+                                            <input type="file" 
+                                                   name="comprobante_imagen" 
+                                                   id="comprobante_imagen" 
+                                                   class="form-control @error('comprobante_imagen') is-invalid @enderror"
+                                                   accept="image/*">
+                                            <small class="form-text text-muted">
+                                                Formatos permitidos: JPG, PNG, GIF. Máximo 2MB.
+                                            </small>
+                                            @error('comprobante_imagen')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div class="mb-3">
-                                    <label for="monto" class="form-label">Monto a Pagar</label>
-                                    <input type="number" step="0.01" min="0.01" max="{{ $comision->montoPendiente() }}" name="monto" id="monto" class="form-control" value="{{ $comision->montoPendiente() }}" required>
-                                    <div class="form-text">Monto pendiente: Q. {{ number_format($comision->montoPendiente(), 2) }}</div>
+                                    <label for="observaciones" class="form-label">
+                                        <i class="bi bi-chat-text"></i> Observaciones
+                                    </label>
+                                    <textarea name="observaciones" 
+                                              id="observaciones" 
+                                              class="form-control @error('observaciones') is-invalid @enderror" 
+                                              rows="3"
+                                              placeholder="Observaciones adicionales sobre el pago...">{{ old('observaciones') }}</textarea>
+                                    @error('observaciones')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                                 
-                                <div class="mb-3">
-                                    <label for="fecha_pago" class="form-label">Fecha de Pago</label>
-                                    <input type="date" name="fecha_pago" id="fecha_pago" class="form-control" value="{{ date('Y-m-d') }}" required>
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-success btn-lg">
+                                        <i class="bi bi-file-earmark-plus"></i> Crear Lote y Registrar Pago
+                                    </button>
                                 </div>
-                                
-                                <div class="mb-3">
-                                    <label for="observaciones" class="form-label">Observaciones</label>
-                                    <textarea name="observaciones" id="observaciones" class="form-control" rows="3"></textarea>
-                                </div>
-                                
-                                <button type="submit" class="btn btn-success">
-                                    <i class="bi bi-cash"></i> Registrar Pago
-                                </button>
                             </form>
                         </div>
                     </div>

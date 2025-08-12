@@ -6,12 +6,66 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\PagoFormRequest;
 use App\Models\Pago;
 use App\Models\Venta;
+use App\Models\Config;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 
 class PagoController extends Controller
 {
+    /**
+     * Muestra la lista de pagos con filtros y estadísticas.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function index(Request $request)
+    {
+        $query = Pago::with(['venta.cliente', 'usuario']);
+
+        // Aplicar filtros
+        if ($request->filled('fecha_desde')) {
+            $query->where('fecha', '>=', $request->fecha_desde);
+        }
+
+        if ($request->filled('fecha_hasta')) {
+            $query->where('fecha', '<=', $request->fecha_hasta);
+        }
+
+        if ($request->filled('metodo_pago')) {
+            $query->where('metodo_pago', $request->metodo_pago);
+        }
+
+        // Obtener pagos paginados
+        $pagos = $query->orderBy('fecha', 'desc')->paginate(15);
+
+        // Calcular estadísticas
+        $totalPagos = Pago::count();
+        $montoTotal = Pago::sum('monto');
+        
+        // Pagos de esta semana
+        $inicioSemana = Carbon::now()->startOfWeek();
+        $finSemana = Carbon::now()->endOfWeek();
+        $montoSemana = Pago::whereBetween('fecha', [$inicioSemana, $finSemana])->sum('monto');
+        
+        // Pagos de este mes
+        $inicioMes = Carbon::now()->startOfMonth();
+        $finMes = Carbon::now()->endOfMonth();
+        $montoMes = Pago::whereBetween('fecha', [$inicioMes, $finMes])->sum('monto');
+
+        $config = Config::first();
+
+        return view('admin.pago.index', compact(
+            'pagos',
+            'config',
+            'totalPagos',
+            'montoTotal',
+            'montoSemana',
+            'montoMes'
+        ));
+    }
+
     /**
      * Almacena un nuevo pago en la base de datos.
      *

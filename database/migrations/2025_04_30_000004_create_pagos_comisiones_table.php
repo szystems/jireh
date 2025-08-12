@@ -31,11 +31,15 @@ class CreatePagosComisionesTable extends Migration
             $table->string('referencia')->nullable();
             $table->string('comprobante_imagen')->nullable();
             $table->text('observaciones')->nullable();
+            
+            // Estado del pago: pendiente, completado, anulado
+            $table->enum('estado', ['pendiente', 'completado', 'anulado'])->default('pendiente');
 
             $table->timestamps();
 
             // Índices
             $table->index('fecha_pago');
+            $table->index('estado');
         });
     }
 

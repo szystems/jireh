@@ -87,7 +87,7 @@
                 @if(Auth::user()->role_as != 1)
                     <li class="menu-category">Inventario y Catálogos</li>
                     <li class="sidebar-dropdown">
-                        <a href="#" class="{{ Request::is('categorias','articulos','unidades','tipo-comisiones', 'show-categoria/*', 'show-articulo/*', 'show-unidad/*', 'show-tipo-comision/*') ? 'active-dropdown':''  }}">
+                        <a href="#" class="{{ Request::is('categorias','articulos','unidades','tipo-comisiones', 'show-categoria/*', 'show-articulo/*', 'show-unidad/*', 'show-tipo-comision/*') ? 'active-dropdown':''  }}" title="Inventario y Catálogos">
                             <i class="bi bi-boxes"></i>
                             <span class="menu-text">Almacén</span>
                             <i class="bi bi-chevron-down menu-arrow"></i>
@@ -115,7 +115,7 @@
                 @if(Auth::user()->role_as != 1)
                 <li class="menu-category">Gestión de Personal</li>
                 <li class="sidebar-dropdown">
-                    <a href="#" class="{{ Request::is('trabajadores','tipotrabajador','show-trabajador/*','edit-trabajador/*','add-trabajador') ? 'active-dropdown':''  }}">
+                    <a href="#" class="{{ Request::is('trabajadores','tipotrabajador','show-trabajador/*','edit-trabajador/*','add-trabajador') ? 'active-dropdown':''  }}" title="Gestión de Personal">
                         <i class="bi bi-people-fill"></i>
                         <span class="menu-text">Trabajadores</span>
                         <i class="bi bi-chevron-down menu-arrow"></i>
@@ -137,7 +137,7 @@
                 @if(Auth::user()->role_as != 1)
                 <li class="menu-category">Sistema de Comisiones</li>
                 <li class="sidebar-dropdown">
-                    <a href="#" class="{{ Request::is('comisiones*') || Request::is('metas-ventas*') ? 'active-dropdown':''  }}">
+                    <a href="#" class="{{ Request::is('comisiones*') || Request::is('metas-ventas*') || Request::is('pagos_comisiones*') || Request::is('lotes-pago*') || Request::is('reportes/metas*') ? 'active-dropdown':''  }}" title="Sistema de Comisiones">
                         <i class="bi bi-currency-dollar"></i>
                         <span class="menu-text">Comisiones</span>
                         <i class="bi bi-chevron-down menu-arrow"></i>
@@ -145,22 +145,23 @@
                     <div class="sidebar-submenu">
                         <ul>
                             <li class="{{ Request::is('comisiones/dashboard') ? 'active-page-link':''  }}">
-                                <a href="{{ route('comisiones.dashboard') }}"><i class="bi bi-speedometer2"></i> Dashboard Comisiones</a>
+                                <a href="{{ route('comisiones.dashboard') }}"><i class="bi bi-speedometer2"></i> Dashboard</a>
                             </li>
-                            <li class="{{ Request::is('comisiones') && !Request::is('comisiones/dashboard') ? 'active-page-link':''  }}">
-                                <a href="{{ route('comisiones.index') }}"><i class="bi bi-list-check"></i> Todas las Comisiones</a>
+                            
+                            <li class="{{ Request::is('comisiones/gestion') ? 'active-page-link':''  }}">
+                                <a href="{{ route('comisiones.gestion') }}"><i class="bi bi-cash-coin"></i> Gestión y Pagos</a>
                             </li>
-                            <li class="{{ Request::is('comisiones/por-trabajador') ? 'active-page-link':''  }}">
-                                <a href="{{ route('comisiones.por_trabajador') }}"><i class="bi bi-person-workspace"></i> Por Trabajador</a>
+                            
+                            <li class="{{ Request::is('lotes-pago*') ? 'active-page-link':''  }}">
+                                <a href="{{ route('lotes-pago.index') }}"><i class="bi bi-file-earmark-plus"></i> Lotes de Pago</a>
                             </li>
-                            <li class="{{ Request::is('comisiones/por-vendedor') ? 'active-page-link':''  }}">
-                                <a href="{{ route('comisiones.por_vendedor') }}"><i class="bi bi-person-check"></i> Por Vendedor</a>
-                            </li>
-                            <li class="{{ Request::is('comisiones/resumen') ? 'active-page-link':''  }}">
-                                <a href="{{ route('comisiones.resumen') }}"><i class="bi bi-graph-up"></i> Resumen & Reportes</a>
-                            </li>
+                            
                             <li class="{{ Request::is('metas-ventas*') ? 'active-page-link':''  }}">
-                                <a href="{{ route('metas-ventas.index') }}"><i class="bi bi-target"></i> Metas de Ventas</a>
+                                <a href="{{ route('metas-ventas.index') }}"><i class="bi bi-bullseye"></i> Metas de Ventas</a>
+                            </li>
+                            
+                            <li class="{{ Request::is('reportes/metas*') ? 'active-page-link':''  }}">
+                                <a href="{{ route('reportes.metas.index') }}"><i class="bi bi-graph-up-arrow"></i> Reporte de Metas</a>
                             </li>
                         </ul>
                     </div>
@@ -171,7 +172,7 @@
                 @if(Auth::user()->role_as != 1)
                     <li class="menu-category">Operaciones</li>
                     <li class="sidebar-dropdown">
-                        <a href="#" class="{{ Request::is('ingresos','proveedores','show-ingreso/*','show-proveedor/*') ? 'active-dropdown':''  }}">
+                        <a href="#" class="{{ Request::is('ingresos','proveedores','show-ingreso/*','show-proveedor/*') ? 'active-dropdown':''  }}" title="Gestión de Compras">
                             <i class="bi bi-cart4"></i>
                             <span class="menu-text">Compras</span>
                             <i class="bi bi-chevron-down menu-arrow"></i>
@@ -191,7 +192,7 @@
 
                 <!-- Ventas -->
                 <li class="sidebar-dropdown">
-                    <a href="#" class="{{ Request::is('ventas','reportearticulos','inventario','descuentos','show-venta/*','show-descuento/*','admin/auditoria*') ? 'active-dropdown':''  }}">
+                    <a href="#" class="{{ Request::is('ventas','reportearticulos','inventario','descuentos','pagos','show-venta/*','show-descuento/*','admin/auditoria*') ? 'active-dropdown':''  }}" title="Gestión de Ventas">
                         <i class="bi bi-cash-stack"></i>
                         <span class="menu-text">Ventas</span>
                         <i class="bi bi-chevron-down menu-arrow"></i>
@@ -202,6 +203,9 @@
                                 <a href="{{ url('ventas') }}"><i class="bi bi-cash-stack"></i> Ventas</a>
                             </li>
                             @if(Auth::user()->role_as != 1)
+                                <li class="{{ Request::is('pagos') ? 'active-page-link':''  }}">
+                                    <a href="{{ url('pagos') }}"><i class="bi bi-credit-card"></i> Gestión de Pagos</a>
+                                </li>
                                 <li class="{{ Request::is('reportearticulos') ? 'active-page-link':''  }}">
                                     <a href="{{ url('reportearticulos') }}"><i class="bi bi-bar-chart-line"></i> Artículos Vendidos</a>
                                 </li>
@@ -228,7 +232,7 @@
                 @if(Auth::user()->role_as != 1)
                 <li class="menu-category">Administración</li>
                 <li class="sidebar-dropdown">
-                    <a href="#" class="{{ Request::is('users','show-user/*','add-user','edit-user/*') ? 'active-dropdown':''  }}">
+                    <a href="#" class="{{ Request::is('users','show-user/*','add-user','edit-user/*') ? 'active-dropdown':''  }}" title="Administración y Seguridad">
                         <i class="bi bi-shield-shaded"></i>
                         <span class="menu-text">Seguridad</span>
                         <i class="bi bi-chevron-down menu-arrow"></i>
@@ -333,6 +337,31 @@
         // Ejecutar al cargar y al redimensionar
         handleResponsive();
         window.addEventListener('resize', handleResponsive);
+        
+        // Manejar dropdowns del sidebar
+        const dropdownLinks = document.querySelectorAll('.sidebar-dropdown > a');
+        dropdownLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const parentLi = this.parentElement;
+                const isActive = parentLi.classList.contains('active-dropdown');
+                
+                // Cerrar todos los otros dropdowns
+                document.querySelectorAll('.sidebar-dropdown').forEach(dropdown => {
+                    if (dropdown !== parentLi) {
+                        dropdown.classList.remove('active-dropdown');
+                    }
+                });
+                
+                // Toggle del dropdown actual
+                if (isActive) {
+                    parentLi.classList.remove('active-dropdown');
+                } else {
+                    parentLi.classList.add('active-dropdown');
+                }
+            });
+        });
     });
 </script>
 
@@ -340,22 +369,63 @@
 <style>
     /* Mejoras de categorías y separadores sin interferir con el layout principal */
     .sidebar-wrapper .menu-category {
-        font-size: 0.8rem;
-        color: #bec9d9;
-        font-weight: 600;
-        padding: 12px 20px 5px;
+        font-size: 0.75rem;
+        color: #ffffff;
+        font-weight: 700;
+        padding: 15px 20px 8px;
         text-transform: uppercase;
-        margin: 0;
+        margin: 10px 0 5px 0;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+        border-radius: 4px 4px 0 0;
+        position: relative;
+    }
+    
+    .sidebar-wrapper .menu-category::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: -2px;
+        width: 30px;
+        height: 2px;
+        background: linear-gradient(90deg, #ffd700, #ffaa00);
+        border-radius: 1px;
+        transition: width 0.3s ease;
+    }
+    
+    .sidebar-wrapper .menu-category:hover::before {
+        width: 50px;
+    }
+    
+    .sidebar-wrapper .menu-category:hover {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08));
+        transition: all 0.3s ease;
     }
     
     .sidebar-wrapper .menu-separator {
-        padding: 0 20px;
-        margin: 5px 0;
+        padding: 8px 20px;
+        margin: 8px 0;
     }
     
     .sidebar-wrapper .menu-separator hr {
-        border-color: rgba(255, 255, 255, 0.2);
+        border: none;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
         margin: 5px 0;
+        position: relative;
+    }
+    
+    .sidebar-wrapper .menu-separator hr::before {
+        content: '';
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: 4px;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.6);
+        border-radius: 50%;
     }
     
     /* Mejoras en el scroll del menú manteniendo la estructura original */
@@ -416,6 +486,61 @@
         display: none;
     }
     
+    /* Mostrar indicador visual para categorías cuando está colapsado */
+    .sidebar-wrapper.collapsed .menu-category {
+        display: block !important;
+        width: 70px;
+        height: 3px;
+        background: linear-gradient(90deg, #ffd700, #ffaa00);
+        margin: 15px 0 5px 0;
+        padding: 0;
+        border-radius: 0 2px 2px 0;
+        text-indent: -9999px;
+        overflow: hidden;
+    }
+    
+    .sidebar-wrapper.collapsed .menu-category::before {
+        display: none;
+    }
+    
+    /* Ocultar chevrons cuando está colapsado */
+    .sidebar-wrapper.collapsed .menu-arrow {
+        display: none;
+    }
+    
+    /* Mejorar tooltips para modo colapsado */
+    .sidebar-wrapper.collapsed .sidebar-dropdown > a {
+        position: relative;
+    }
+    
+    .sidebar-wrapper.collapsed .sidebar-dropdown > a:hover::after {
+        content: attr(title);
+        position: absolute;
+        left: 70px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(0, 0, 0, 0.9);
+        color: white;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        white-space: nowrap;
+        z-index: 1000;
+        opacity: 0;
+        animation: tooltipFadeIn 0.3s ease forwards;
+    }
+    
+    @keyframes tooltipFadeIn {
+        from { 
+            opacity: 0; 
+            transform: translateY(-50%) translateX(-10px); 
+        }
+        to { 
+            opacity: 1; 
+            transform: translateY(-50%) translateX(0); 
+        }
+    }
+    
     .sidebar-wrapper.collapsed .sidebar-toggle {
         text-align: center;
         width: 100%;
@@ -427,10 +552,63 @@
         padding-left: 0 !important;
     }
     
-    /* Rotación de iconos de dropdown */
-    .sidebar-wrapper .active-dropdown > a:after {
-        transform: rotate(0deg) !important;
+    /* Rotación de iconos de dropdown mejorada */
+    .sidebar-wrapper .sidebar-dropdown > a .menu-arrow {
+        transition: all 0.3s ease;
+        font-size: 0.8rem;
+        margin-left: auto;
+        opacity: 0.7;
     }
+    
+    .sidebar-wrapper .sidebar-dropdown.active-dropdown > a .menu-arrow,
+    .sidebar-wrapper .sidebar-dropdown:hover > a .menu-arrow {
+        transform: rotate(180deg);
+        opacity: 1;
+        color: #ffd700;
+    }
+    
+    /* Mejorar el hover en los enlaces de dropdown */
+    .sidebar-wrapper .sidebar-dropdown > a {
+        transition: all 0.3s ease;
+        position: relative;
+    }
+    
+    .sidebar-wrapper .sidebar-dropdown > a:hover {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+        transform: translateX(2px);
+    }
+    
+    /* Animación del submenu */
+    .sidebar-wrapper .sidebar-submenu {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease, opacity 0.3s ease;
+        opacity: 0;
+    }
+    
+    .sidebar-wrapper .sidebar-dropdown.active-dropdown .sidebar-submenu {
+        max-height: 500px;
+        opacity: 1;
+    }
+    
+    /* Efecto de cascada en los elementos del submenu */
+    .sidebar-wrapper .sidebar-submenu ul li {
+        opacity: 0;
+        transform: translateX(-10px);
+        transition: all 0.2s ease;
+    }
+    
+    .sidebar-wrapper .sidebar-dropdown.active-dropdown .sidebar-submenu ul li {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    
+    .sidebar-wrapper .sidebar-dropdown.active-dropdown .sidebar-submenu ul li:nth-child(1) { transition-delay: 0.05s; }
+    .sidebar-wrapper .sidebar-dropdown.active-dropdown .sidebar-submenu ul li:nth-child(2) { transition-delay: 0.1s; }
+    .sidebar-wrapper .sidebar-dropdown.active-dropdown .sidebar-submenu ul li:nth-child(3) { transition-delay: 0.15s; }
+    .sidebar-wrapper .sidebar-dropdown.active-dropdown .sidebar-submenu ul li:nth-child(4) { transition-delay: 0.2s; }
+    .sidebar-wrapper .sidebar-dropdown.active-dropdown .sidebar-submenu ul li:nth-child(5) { transition-delay: 0.25s; }
+    .sidebar-wrapper .sidebar-dropdown.active-dropdown .sidebar-submenu ul li:nth-child(6) { transition-delay: 0.3s; }
     
     /* Mejorar la visualización en dispositivos pequeños */
     @media (max-height: 600px) {
@@ -444,9 +622,14 @@
         }
     }
     
-    /* Animación suave para las transiciones del menú */
-    .sidebar-wrapper .sidebar-submenu {
-        transition: all 0.3s ease;
+    /* Mejorar la separación entre categorías y elementos del menú */
+    .sidebar-wrapper .menu-category + li {
+        margin-top: 8px;
+    }
+    
+    /* Espaciado adicional antes de una nueva categoría */
+    .sidebar-wrapper li.menu-category:not(:first-child) {
+        margin-top: 20px;
     }
     
     /* Asegurar que los elementos del menú no se corten */

@@ -361,14 +361,26 @@
                             @if($detalle->articulo && $detalle->articulo->tipo === 'servicio')
                                 @php
                                     $trabajadoresAsignados = $detalle->trabajadoresCarwash;
+                                    $mechanicoAsignado = $detalle->articulo->mecanico;
+                                    $hayTrabajadores = $trabajadoresAsignados->count() > 0;
+                                    $hayMecanico = $mechanicoAsignado && $detalle->articulo->mecanico_id;
                                 @endphp
-                                @if($trabajadoresAsignados->count() > 0)
+                                
+                                @if($hayTrabajadores || $hayMecanico)
+                                    {{-- Mostrar trabajadores carwash --}}
                                     @foreach($trabajadoresAsignados as $trabajador)
                                         <span class="badge badge-info">
                                             {{ $trabajador->nombre }} {{ $trabajador->apellido }}
                                         </span>
-                                        @if(!$loop->last)<br>@endif
+                                        @if(!$loop->last || $hayMecanico)<br>@endif
                                     @endforeach
+                                    
+                                    {{-- Mostrar mecánico asignado --}}
+                                    @if($hayMecanico)
+                                        <span class="badge badge-warning">
+                                            {{ $mechanicoAsignado->nombre }} {{ $mechanicoAsignado->apellido }}
+                                        </span>
+                                    @endif
                                 @else
                                     <small style="color: #6c757d;">No asignados</small>
                                 @endif

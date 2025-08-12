@@ -27,6 +27,12 @@ class CreateArticulosTable extends Migration
             $table->foreignId('categoria_id')->constrained('categorias');
             $table->foreignId('unidad_id')->constrained('unidads');
             $table->enum('tipo', ['articulo', 'servicio']);
+            
+            // Campos para servicios de mecánico y carwash
+            $table->unsignedBigInteger('mecanico_id')->nullable();
+            $table->decimal('costo_mecanico', 10, 2)->nullable()->default(0);
+            $table->decimal('comision_carwash', 10, 2)->nullable()->default(0);
+            
             $table->boolean('estado')->default(true);
             $table->timestamps();
         });
