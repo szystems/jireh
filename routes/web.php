@@ -288,6 +288,10 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('reportes/metas')->name('reportes.metas.')->group(function() {
         Route::get('/', [ReporteMetasController::class, 'index'])->name('index');
         Route::get('/trabajador/{trabajador}', [ReporteMetasController::class, 'trabajadorDetalle'])->name('trabajador');
+        
+        // Rutas para PDFs
+        Route::get('/pdf', [ReporteMetasController::class, 'generarPDFGeneral'])->name('pdf');
+        Route::get('/pdf/trabajador/{trabajador}', [ReporteMetasController::class, 'generarPDFTrabajador'])->name('pdf.trabajador');
     });
     
     // APIs simples para datos de filtros

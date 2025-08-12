@@ -10,6 +10,7 @@ use App\Models\MetaVenta;
 use App\Models\Config;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReporteMetasController extends Controller
 {
@@ -262,9 +263,9 @@ class ReporteMetasController extends Controller
         });
         
         // Llenar todo el año, día por día
-        $fechaActual = $fechaInicio->copy();
-        while ($fechaActual->lte($fechaFin)) {
-            $fechaKey = $fechaActual->format('Y-m-d');
+        $fechaIteracion = $fechaInicio->copy();
+        while ($fechaIteracion->lte($fechaFin)) {
+            $fechaKey = $fechaIteracion->format('Y-m-d');
             
             if ($ventasPorFecha->has($fechaKey)) {
                 $estadisticasDiarias[$fechaKey] = $ventasPorFecha[$fechaKey];
@@ -275,7 +276,7 @@ class ReporteMetasController extends Controller
                 ];
             }
             
-            $fechaActual->addDay();
+            $fechaIteracion->addDay();
         }
 
         $totalVendidoPeriodo = $ventas->sum('total');
@@ -285,28 +286,31 @@ class ReporteMetasController extends Controller
         $todasLasMetas = MetaVenta::where('estado', 1)->orderBy('monto_minimo')->get();
         
         // Calcular progreso por cada meta según su tipo específico
-        $metasConProgreso = $todasLasMetas->map(function($meta) use ($trabajador, $fechaActual) {
+        $metasConProgreso = collect();
+        foreach($todasLasMetas as $meta) {
             // Calcular ventas según el tipo específico de la meta
             $ventasParaMeta = $this->calcularVentasSegunTipoMeta($trabajador, $meta, $fechaActual);
             
             $alcanzada = $ventasParaMeta >= $meta->monto_minimo;
-            $porcentaje = ($ventasParaMeta / $meta->monto_minimo) * 100;
+            $porcentaje = $meta->monto_minimo > 0 ? ($ventasParaMeta / $meta->monto_minimo) * 100 : 0;
             $porcentaje = min($porcentaje, 100);
             
             // Usar los métodos genéricos para colores
             $color = $this->generarColorMeta($meta->id);
             $claseProgreso = $this->generarClaseProgreso($meta->id);
             
-            return [
+            $metaData = [
                 'meta' => $meta,
                 'ventas_para_meta' => $ventasParaMeta,
                 'alcanzada' => $alcanzada,
                 'porcentaje' => $porcentaje,
                 'color' => $color,
                 'clase_progreso' => $claseProgreso,
-                'faltante' => $meta->monto_minimo - $ventasParaMeta
+                'faltante' => max(0, $meta->monto_minimo - $ventasParaMeta)
             ];
-        });
+            
+            $metasConProgreso->push($metaData);
+        }
         
         return view('admin.reportes.trabajador-detalle', compact(
             'trabajador',
@@ -328,14 +332,14 @@ class ReporteMetasController extends Controller
      */
     private function calcularVentasSegunTipoMeta($trabajador, $meta, $fechaActual)
     {
-        // Determinar el período según el tipo de meta
-        $tipoMeta = strtolower($meta->nombre);
+        // Usar el campo 'periodo' de la meta para determinar el tipo
+        $tipoMeta = strtolower($meta->periodo);
         
-        if (strpos($tipoMeta, 'mensual') !== false || strpos($tipoMeta, 'mes') !== false) {
+        if ($tipoMeta === 'mensual' || $tipoMeta === 'mes') {
             // Meta mensual: ventas del mes actual
             $fechaInicio = $fechaActual->copy()->startOfMonth();
             $fechaFin = $fechaActual->copy()->endOfMonth();
-        } elseif (strpos($tipoMeta, 'semestral') !== false || strpos($tipoMeta, 'semestre') !== false) {
+        } elseif ($tipoMeta === 'semestral' || $tipoMeta === 'semestre') {
             // Meta semestral: ventas del semestre actual
             $mes = $fechaActual->month;
             if ($mes <= 6) {
@@ -345,14 +349,14 @@ class ReporteMetasController extends Controller
                 $fechaInicio = $fechaActual->copy()->month(7)->startOfMonth();
                 $fechaFin = $fechaActual->copy()->endOfYear();
             }
-        } elseif (strpos($tipoMeta, 'anual') !== false || strpos($tipoMeta, 'año') !== false) {
+        } elseif ($tipoMeta === 'anual' || $tipoMeta === 'año') {
             // Meta anual: ventas del año actual
             $fechaInicio = $fechaActual->copy()->startOfYear();
             $fechaFin = $fechaActual->copy()->endOfYear();
         } else {
-            // Por defecto, usar el período mensual
-            $fechaInicio = $fechaActual->copy()->startOfMonth();
-            $fechaFin = $fechaActual->copy()->endOfMonth();
+            // Por defecto, usar el período anual (es lo más común)
+            $fechaInicio = $fechaActual->copy()->startOfYear();
+            $fechaFin = $fechaActual->copy()->endOfYear();
         }
         
         // Calcular ventas del período específico de esta meta
@@ -362,5 +366,209 @@ class ReporteMetasController extends Controller
             ->get();
             
         return $ventas->sum('total');
+    }
+
+    public function generarPDFGeneral(Request $request)
+    {
+        $periodo = $request->get('periodo', 'mes');
+        $fechaActual = Carbon::now();
+        
+        // Obtener datos igual que en el método index
+        $metas = MetaVenta::where('estado', 1)->get();
+        $config = Config::first();
+        
+        // Calcular fechas según período
+        switch($periodo) {
+            case 'trimestre':
+                $fechaInicio = $fechaActual->copy()->startOfQuarter();
+                $fechaFin = $fechaActual->copy()->endOfQuarter();
+                break;
+            case 'semestre':
+                $mes = $fechaActual->month;
+                if ($mes <= 6) {
+                    $fechaInicio = $fechaActual->copy()->startOfYear();
+                    $fechaFin = $fechaActual->copy()->month(6)->endOfMonth();
+                } else {
+                    $fechaInicio = $fechaActual->copy()->month(7)->startOfMonth();
+                    $fechaFin = $fechaActual->copy()->endOfYear();
+                }
+                break;
+            case 'año':
+                $fechaInicio = $fechaActual->copy()->startOfYear();
+                $fechaFin = $fechaActual->copy()->endOfYear();
+                break;
+            default: // mes
+                $fechaInicio = $fechaActual->copy()->startOfMonth();
+                $fechaFin = $fechaActual->copy()->endOfMonth();
+        }
+
+        // Obtener trabajadores con sus datos de metas
+        $trabajadores = User::where('role_as', 1)
+            ->where('estado', 1)
+            ->get()
+            ->map(function($trabajador) use ($metas, $fechaActual) {
+                $metasConProgreso = collect();
+                foreach($metas as $meta) {
+                    $ventasParaMeta = $this->calcularVentasSegunTipoMeta($trabajador, $meta, $fechaActual);
+                    $porcentaje = $meta->monto_minimo > 0 ? ($ventasParaMeta / $meta->monto_minimo) * 100 : 0;
+                    $porcentaje = min($porcentaje, 100);
+                    $alcanzada = $ventasParaMeta >= $meta->monto_minimo;
+                    $color = $this->generarColorMeta($meta->id);
+                    $claseProgreso = $this->generarClaseProgreso($meta->id);
+                    
+                    $metasConProgreso->push([
+                        'meta' => $meta,
+                        'ventas_para_meta' => $ventasParaMeta,
+                        'porcentaje' => $porcentaje,
+                        'alcanzada' => $alcanzada,
+                        'color' => $color,
+                        'clase_progreso' => $claseProgreso,
+                        'faltante' => max(0, $meta->monto_minimo - $ventasParaMeta)
+                    ]);
+                }
+                
+                $trabajador->metasConProgreso = $metasConProgreso;
+                return $trabajador;
+            });
+
+        // Preparar metas con sus clases CSS y progreso promedio
+        $metasConClases = $metas->map(function($meta) use ($trabajadores) {
+            $meta->clase_progreso = $this->generarClaseProgreso($meta->id);
+            
+            // Calcular progreso promedio de todos los trabajadores para esta meta
+            $progresos = $trabajadores->map(function($trabajador) use ($meta) {
+                $metaData = $trabajador->metasConProgreso->first(function($item) use ($meta) {
+                    return $item['meta']->id == $meta->id;
+                });
+                return $metaData ? $metaData['porcentaje'] : 0;
+            });
+            
+            $meta->progreso_promedio = $progresos->avg();
+            return $meta;
+        });
+
+        // Ordenar trabajadores por total de ventas (de mayor a menor)
+        $trabajadoresOrdenados = $trabajadores->sortByDesc(function($trabajador) {
+            return $trabajador->metasConProgreso->sum('ventas_para_meta');
+        });
+
+        // Preparar datos para el PDF
+        $data = [
+            'titulo' => 'Reporte de Metas de Ventas',
+            'periodo' => $periodo,
+            'fechaInicio' => $fechaInicio,
+            'fechaFin' => $fechaFin,
+            'trabajadores' => $trabajadoresOrdenados,
+            'metasOriginales' => $metasConClases,
+            'config' => $config,
+            'logoPath' => $this->obtenerLogoPath($config)
+        ];
+
+        $pdf = Pdf::loadView('admin.reportes.pdf.metas-general', $data);
+        $pdf->setPaper('A4', 'portrait');
+        return $pdf->stream('reporte-metas-general-' . $periodo . '-' . date('Y-m-d') . '.pdf');
+    }
+
+    public function generarPDFTrabajador(Request $request, User $trabajador)
+    {
+        $periodo = $request->get('periodo', 'año');
+        $fechaActual = Carbon::now();
+        $config = Config::first();
+        
+        // Calcular fechas según período seleccionado para estadísticas
+        switch($periodo) {
+            case 'trimestre':
+                $fechaInicio = $fechaActual->copy()->startOfQuarter();
+                $fechaFin = $fechaActual->copy()->endOfQuarter();
+                break;
+            case 'semestre':
+                $mes = $fechaActual->month;
+                if ($mes <= 6) {
+                    $fechaInicio = $fechaActual->copy()->startOfYear();
+                    $fechaFin = $fechaActual->copy()->month(6)->endOfMonth();
+                } else {
+                    $fechaInicio = $fechaActual->copy()->month(7)->startOfMonth();
+                    $fechaFin = $fechaActual->copy()->endOfYear();
+                }
+                break;
+            case 'año':
+                $fechaInicio = $fechaActual->copy()->startOfYear();
+                $fechaFin = $fechaActual->copy()->endOfYear();
+                break;
+            default: // mes
+                $fechaInicio = $fechaActual->copy()->startOfMonth();
+                $fechaFin = $fechaActual->copy()->endOfMonth();
+        }
+
+        // Obtener datos igual que en trabajadorDetalle
+        $todasLasMetas = MetaVenta::where('estado', 1)->get();
+        
+        $metasConProgreso = $todasLasMetas->map(function($meta) use ($trabajador, $fechaActual) {
+            $ventasParaMeta = $this->calcularVentasSegunTipoMeta($trabajador, $meta, $fechaActual);
+            $porcentaje = $meta->monto_minimo > 0 ? ($ventasParaMeta / $meta->monto_minimo) * 100 : 0;
+            $porcentaje = min($porcentaje, 100);
+            $alcanzada = $ventasParaMeta >= $meta->monto_minimo;
+            $color = $this->generarColorMeta($meta->id);
+            $claseProgreso = $this->generarClaseProgreso($meta->id);
+            
+            return [
+                'meta' => $meta,
+                'ventas_para_meta' => $ventasParaMeta,
+                'porcentaje' => $porcentaje,
+                'alcanzada' => $alcanzada,
+                'color' => $color,
+                'clase_progreso' => $claseProgreso,
+                'faltante' => max(0, $meta->monto_minimo - $ventasParaMeta)
+            ];
+        });
+
+        // Obtener ventas del período seleccionado
+        $ventas = Venta::where('usuario_id', $trabajador->id)
+            ->whereBetween('fecha', [$fechaInicio, $fechaFin])
+            ->where('estado', 1)
+            ->with(['cliente', 'detalleVentas.articulo'])
+            ->orderBy('fecha', 'desc')
+            ->get();
+
+        $totalVendidoPeriodo = $ventas->sum(function($venta) {
+            return $venta->detalleVentas->sum('sub_total');
+        });
+        $cantidadVentas = $ventas->count();
+
+        // Preparar datos para el PDF
+        $data = [
+            'titulo' => 'Reporte Individual de Metas',
+            'trabajador' => $trabajador,
+            'periodo' => $periodo,
+            'fechaInicio' => $fechaInicio,
+            'fechaFin' => $fechaFin,
+            'metasConProgreso' => $metasConProgreso,
+            'ventas' => $ventas,
+            'totalVentas' => $totalVendidoPeriodo,
+            'config' => $config,
+            'logoPath' => $this->obtenerLogoPath($config)
+        ];
+
+        $pdf = Pdf::loadView('admin.reportes.pdf.trabajador-detalle', $data);
+        $pdf->setPaper('A4', 'portrait');
+        return $pdf->stream('reporte-metas-' . $trabajador->name . '-' . $periodo . '-' . date('Y-m-d') . '.pdf');
+    }
+
+    private function obtenerLogoPath($config)
+    {
+        if ($config && $config->logo) {
+            $logoConfigPath = public_path('img/' . $config->logo);
+            if (file_exists($logoConfigPath)) {
+                return $logoConfigPath;
+            }
+        }
+        
+        // Logo por defecto
+        $logoDefaultPath = public_path('img/jireh.png');
+        if (file_exists($logoDefaultPath)) {
+            return $logoDefaultPath;
+        }
+        
+        return null;
     }
 }

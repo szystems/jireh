@@ -30,6 +30,12 @@
                             </small>
                         </div>
                     </div>
+                    <div>
+                        <a href="{{ route('reportes.metas.pdf.trabajador', ['trabajador' => $trabajador->id, 'periodo' => $periodo]) }}" 
+                           class="btn btn-danger btn-sm" target="_blank" title="Generar PDF">
+                            <i class="bi bi-file-earmark-pdf"></i> PDF
+                        </a>
+                    </div>
                 </div>
             </div>
 
@@ -80,7 +86,7 @@
                     <small class="text-muted">Cada meta se evalúa según su período específico (mensual, semestral, anual)</small>
                 </div>
                 <div class="card-body">
-                    @if($metasConProgreso->count() > 0)
+                    @if($metasConProgreso && $metasConProgreso->count() > 0)
                         @foreach($metasConProgreso as $metaData)
                         @php
                             $meta = $metaData['meta'];

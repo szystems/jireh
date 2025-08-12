@@ -16,14 +16,18 @@
                         </small>
                     </div>
                     <div>
-                        <!-- Selector de período -->
-                        <form method="GET" class="d-flex gap-2">
+                        <!-- Selector de período y botón PDF -->
+                        <form method="GET" class="d-flex gap-2 align-items-center">
                             <select name="periodo" class="form-select form-select-sm" onchange="this.form.submit()">
                                 <option value="mes" {{ $periodo == 'mes' ? 'selected' : '' }}>Este Mes</option>
                                 <option value="trimestre" {{ $periodo == 'trimestre' ? 'selected' : '' }}>Este Trimestre</option>
                                 <option value="semestre" {{ $periodo == 'semestre' ? 'selected' : '' }}>Este Semestre</option>
                                 <option value="año" {{ $periodo == 'año' ? 'selected' : '' }}>Este Año</option>
                             </select>
+                            <a href="{{ route('reportes.metas.pdf', ['periodo' => $periodo]) }}" 
+                               class="btn btn-danger btn-sm" target="_blank" title="Generar PDF">
+                                <i class="bi bi-file-earmark-pdf"></i> PDF
+                            </a>
                         </form>
                     </div>
                 </div>
