@@ -1,37 +1,38 @@
-# TOOLS - HERRAMIENTAS Y DOCUMENTACIÓN DEL PROYECTO
+# 📁 Directorio Tools - Proyecto Jireh
 
-Esta carpeta contiene todas las herramientas, documentación y archivos auxiliares del proyecto Jireh Automotriz organizados por categorías.
+Este directorio contiene toda la documentación, historial de cambios, scripts de testing y archivos de desarrollo del proyecto organizados profesionalmente.
 
-## Estructura de Carpetas
+## 📋 Estructura Organizada (Actualizada Agosto 13, 2025)
 
-### 📁 DOCUMENTACION_PROYECTO/
-**Propósito:** Documentación principal del sistema y arquitectura
-- Estados finales del sistema
-- Documentación de módulos principales (Auditoría, Carwash, Dashboard, etc.)
-- Soluciones implementadas y consolidaciones importantes
-- **Archivos:** 8 documentos
+### � CORRECCIONES_HISTORIAL/
+Historial detallado de todas las correcciones realizadas durante el desarrollo.
+- **Archivos:** 34 documentos de correcciones, guías y mejoras
 
-### 📁 CORRECCIONES_HISTORIAL/
-**Propósito:** Historial completo de correcciones y mejoras aplicadas
-- Documentación de correcciones (CORRECCION_*.md)
-- Guías de debugging (GUIA_*.md)
-- Mejoras implementadas (MEJORA_*.md)
-- Instrucciones y diagnósticos específicos
-- **Archivos:** 34 documentos
+### 📚 DOCUMENTACION_PROYECTO/
+Documentación técnica y de proyecto.
+- `cambios/` - Resúmenes de cambios importantes
+  - `RESUMEN_CAMBIOS_VENTA.md`
+  - `RESUMEN_COMPLETO_CAMBIOS.md`
+- **Archivos:** 8 documentos principales + nuevos resúmenes
 
-### 📁 TESTING_DESARROLLO/
-**Propósito:** Archivos de testing, debugging y desarrollo
-- Scripts de debugging (debug_*.php, debug_*.html)
-- Scripts de testing (test_*.php, test_*.html)
-- Utilidades de desarrollo (crear_*, encontrar_*, validar_*, etc.)
-- Archivos de verificación
-- **Archivos:** 59 herramientas
+### � DOCUMENTACION_CAMBIOS_TRABAJADORES/
+Documentación específica sobre cambios en el sistema de trabajadores.
+- `ACTUALIZACION_ICONOS_TRABAJADORES.md`
+- `CAMBIOS_MECANICO_TRABAJADORES.md`
 
-### 📁 RESUMEN_TRABAJO/
-**Propósito:** Resúmenes consolidados del trabajo realizado
-- Resúmenes de correcciones (resumen_*.txt)
-- Estados finales documentados (RESUMEN_*.md)
-- **Archivos:** 4 resúmenes
+### 🧪 TESTING_DESARROLLO/
+Scripts y archivos para testing y desarrollo.
+- `scripts/` - Scripts de validación, testing y verificación
+  - `test-columna-venta.js`
+  - `test-filtros-comisiones.sh`
+  - `test_syntax.html`
+  - `validate_js.sh`
+  - `verificar-cambios-venta.sh`
+- **Archivos:** 59 herramientas + 5 scripts organizados
+
+### � RESUMEN_TRABAJO/
+Resúmenes del trabajo realizado y mejoras implementadas.
+- **Archivos:** 4 resúmenes consolidados
 
 ## Acceso Rápido
 
@@ -39,36 +40,42 @@ Esta carpeta contiene todas las herramientas, documentación y archivos auxiliar
 - **Debugging:** `tools/TESTING_DESARROLLO/`
 - **Historial de cambios:** `tools/CORRECCIONES_HISTORIAL/`
 
+---
+
+## 📝 Archivos de Limpieza y Organización
+
+- `LIMPIEZA_FINAL_AGOSTO_2025.md` - Registro de limpieza inicial
+- `LIMPIEZA_RAIZ_COMPLETADA.md` - Completación de limpieza
+- `ORGANIZACION_COMPLETADA.md` - Organización general
+- `ORGANIZACION_COMPLETADA_AGOSTO_12.md` - Organización específica
+- `LIMPIEZA_FINAL_AGOSTO_13_2025.md` - **Limpieza final completa**
+
+## Acceso Rápido
+
+### Para Desarrolladores
+- **Debugging:** `tools/TESTING_DESARROLLO/scripts/`
+- **Historial de cambios:** `tools/CORRECCIONES_HISTORIAL/`
+
 ### Para Documentación
 - **Arquitectura del sistema:** `tools/DOCUMENTACION_PROYECTO/`
 - **Resúmenes ejecutivos:** `tools/RESUMEN_TRABAJO/`
+- **Cambios de trabajadores:** `tools/DOCUMENTACION_CAMBIOS_TRABAJADORES/`
 
 ### Para Mantenimiento
 - **Guías de corrección:** `tools/CORRECCIONES_HISTORIAL/GUIA_*.md`
-- **Scripts de utilidad:** `tools/TESTING_DESARROLLO/`
+- **Scripts de utilidad:** `tools/TESTING_DESARROLLO/scripts/`
 
-## Uso Recomendado
+## Estadísticas Actualizadas
 
-1. **Antes de modificar código:** Revisar `CORRECCIONES_HISTORIAL/` para entender cambios previos
-2. **Para debugging:** Usar herramientas en `TESTING_DESARROLLO/`
-3. **Para entender arquitectura:** Consultar `DOCUMENTACION_PROYECTO/`
-4. **Para reportes:** Revisar `RESUMEN_TRABAJO/`
-
-## Nota Importante
-
-⚠️ **Los archivos en esta carpeta NO deben ejecutarse en producción**
-- Son herramientas de desarrollo y documentación
-- Solo para uso en entornos de desarrollo/testing
-- Mantener separado del código de producción
-
-## Estadísticas
-
-- **Total de archivos organizados:** 105
+- **Total de archivos organizados:** 110+
 - **Documentos de correcciones:** 34
-- **Herramientas de desarrollo:** 59
-- **Documentación principal:** 8
+- **Herramientas de desarrollo:** 64 (59 + 5 scripts organizados)
+- **Documentación principal:** 10 (8 + 2 resúmenes de cambios)
+- **Documentación de trabajadores:** 2
 - **Resúmenes:** 4
 
 ---
-*Organizado el 9 de julio de 2025*
-*Proyecto: Jireh Automotriz - Sistema de Gestión Automotriz*
+
+**Estado:** ✅ **ORGANIZADO Y COMPLETO**  
+**Última actualización:** 13 de Agosto, 2025  
+**Proyecto:** Jireh Automotriz - Sistema de Gestión Automotriz
