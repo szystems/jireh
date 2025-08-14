@@ -15,7 +15,8 @@ class MetaVentaController extends Controller
     public function index()
     {
         $metas = MetaVenta::orderBy('monto_minimo', 'asc')->paginate(10);
-        return view('admin.metas-ventas.index', compact('metas'));
+        $filtroAplicado = null; // Sin filtro aplicado
+        return view('admin.metas-ventas.index', compact('metas', 'filtroAplicado'));
     }
 
     /**

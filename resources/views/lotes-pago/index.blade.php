@@ -11,9 +11,14 @@
                     <h4 class="mb-0">
                         <i class="bi bi-file-earmark-plus"></i> Lotes de Pago de Comisiones
                     </h4>
-                    <a href="{{ route('lotes-pago.create') }}" class="btn btn-primary">
-                        <i class="bi bi-plus-circle"></i> Nuevo Lote de Pago
-                    </a>
+                    <div class="btn-group">
+                        <a href="{{ route('lotes-pago.pdf', request()->all()) }}" class="btn btn-danger" target="_blank">
+                            <i class="bi bi-file-earmark-pdf"></i> Generar PDF
+                        </a>
+                        <a href="{{ route('lotes-pago.create') }}" class="btn btn-primary">
+                            <i class="bi bi-plus-circle"></i> Nuevo Lote de Pago
+                        </a>
+                    </div>
                 </div>
 
                 <div class="card-body">

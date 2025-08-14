@@ -6,9 +6,14 @@
         <div class="card-header">
             <div class="d-flex justify-content-between align-items-center">
                 <h4>Detalle de Comisión #{{ $comision->id }}</h4>
-                <a href="{{ url('comisiones') }}" class="btn btn-primary">
-                    <i class="bi bi-arrow-left"></i> Volver al listado
-                </a>
+                <div class="btn-group">
+                    <a href="{{ route('comisiones.pdf_individual', $comision->id) }}" class="btn btn-danger btn-sm" target="_blank">
+                        <i class="bi bi-file-earmark-pdf"></i> Generar PDF
+                    </a>
+                    <a href="{{ url('comisiones') }}" class="btn btn-primary btn-sm">
+                        <i class="bi bi-arrow-left"></i> Volver al listado
+                    </a>
+                </div>
             </div>
         </div>
         <div class="card-body">

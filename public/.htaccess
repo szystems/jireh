@@ -3,7 +3,33 @@
         Options -MultiViews -Indexes
     </IfModule>
 
+<IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews -Indexes
+    </IfModule>
+
     RewriteEngine On
+
+    # ========================================
+    # CONFIGURACIÓN DE DOMINIO Y HTTPS
+    # ========================================
+    # NOTA: Descomenta estas reglas SOLO cuando:
+    # 1. El dominio esté configurado correctamente
+    # 2. Los DNS apunten al servidor
+    # 3. El certificado SSL esté instalado
+    # ========================================
+
+    # PASO 1: Descomenta para forzar HTTPS (cuando SSL esté listo)
+    # RewriteCond %{HTTPS} off
+    # RewriteCond %{HTTP_HOST} !^localhost$ [NC]
+    # RewriteCond %{HTTP_HOST} !^127\.0\.0\.1$ [NC]
+    # RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # PASO 2: Descomenta para forzar dominio específico (cuando todo esté configurado)
+    # RewriteCond %{HTTP_HOST} !^www\.software\.jirehautomotriz\.com$ [NC]
+    # RewriteCond %{HTTP_HOST} !^localhost$ [NC]
+    # RewriteCond %{HTTP_HOST} !^127\.0\.0\.1$ [NC]
+    # RewriteRule ^(.*)$ https://www.software.jirehautomotriz.com/$1 [L,R=301]
 
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .

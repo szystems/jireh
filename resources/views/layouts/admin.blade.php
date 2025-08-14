@@ -128,6 +128,88 @@
                     padding-left: 0 !important;
                 }
             }
+
+            /* ========== OPTIMIZACION DEL SIDEBAR ========== */
+            /* Reducir padding y margin de los elementos del sidebar para ahorrar espacio */
+            
+            /* Optimizar espaciado general del sidebar */
+            .sidebar-menu {
+                padding: 10px 0 10px 0 !important; /* Reducido de 20px a 10px */
+            }
+            
+            .sidebar-menu ul {
+                padding: 10px 0 !important; /* Reducido de 20px a 10px */
+            }
+            
+            /* Optimizar espaciado de los elementos de menú */
+            .sidebar-menu ul li a {
+                padding: 8px 20px 8px 20px !important; /* Reducido de 15px a 8px verticalmente */
+                font-size: 0.9rem !important;
+                line-height: 1.2 !important;
+            }
+            
+            /* Optimizar iconos para mantener el tamaño pero reducir espaciado */
+            .sidebar-menu ul li a i {
+                min-height: 32px !important; /* Reducido de 40px a 32px */
+                font-size: 1.25rem !important;
+                margin-right: 10px !important;
+            }
+            
+            /* Optimizar submenús */
+            .sidebar-menu .sidebar-dropdown .sidebar-submenu ul li a {
+                padding: 10px 7px 10px 60px !important; /* Reducido de 15px a 10px verticalmente */
+                line-height: 1.1 !important;
+            }
+            
+            /* Optimizar categorías de menú */
+            .sidebar-menu ul li.menu-category {
+                font-size: 0.75rem !important;
+                font-weight: 600 !important;
+                color: #a8b3c5 !important;
+                text-transform: uppercase !important;
+                letter-spacing: 0.5px !important;
+                padding: 8px 20px 4px 20px !important;
+                margin: 10px 0 5px 0 !important;
+                line-height: 1 !important;
+            }
+            
+            /* Optimizar separadores */
+            .sidebar-menu ul li.menu-separator {
+                margin: 8px 0 !important; /* Reducido de márgenes por defecto */
+            }
+            
+            .sidebar-menu ul li.menu-separator hr {
+                margin: 4px 20px !important;
+                border-color: #1a5bb8 !important;
+                opacity: 0.3 !important;
+            }
+            
+            /* Optimizar perfil de usuario */
+            .sidebar-menu ul li:first-child a {
+                padding: 10px 20px !important; /* Reducir padding del perfil de usuario */
+            }
+            
+            .sidebar-menu ul li:first-child a .avatar img {
+                height: 35px !important; /* Reducir ligeramente el avatar */
+            }
+            
+            /* Optimizar badges y notificaciones */
+            .sidebar-menu ul li a .badge {
+                margin: 0 10px 0 auto !important; /* Reducir márgenes del badge */
+                min-width: 28px !important;
+                font-size: 0.7rem !important;
+                padding: 2px 6px !important;
+            }
+            
+            /* Mantener hover effects */
+            .sidebar-menu ul li a:hover {
+                transition: all 0.2s ease-in-out !important;
+            }
+            
+            /* Ajustes para flechas de dropdown */
+            .sidebar-menu ul li a .menu-arrow {
+                font-size: 0.8rem !important;
+            }
         </style>
 
 
@@ -233,13 +315,20 @@
                     .then(data => {
                         const contador = document.getElementById('notification-count');
                         if (contador) {
-                            const total = data.por_prioridad.alta + data.por_prioridad.media;
+                            // Usar el conteo de notificaciones no leídas desde el backend
+                            const total = data.no_leidas || 0;
                             contador.textContent = total;
                             contador.style.display = total > 0 ? 'inline' : 'none';
+                            console.log('Contador del sidebar actualizado a:', total);
                         }
                     })
                     .catch(error => console.log('Error al obtener notificaciones:', error));
             }
+            
+            // Función global para actualizar el badge desde cualquier página
+            window.actualizarBadgeNotificaciones = function() {
+                actualizarContadorNotificaciones();
+            };
 
             // Función para actualizar la hora y fecha
             function actualizarReloj() {

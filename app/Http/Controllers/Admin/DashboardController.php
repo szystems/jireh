@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use App\Models\Config;
 use App\Models\Cliente;
 use App\Models\Vehiculo;
@@ -13,6 +14,10 @@ use App\Models\Trabajador;
 use App\Models\User;
 use App\Models\Proveedor;
 use App\Models\DetalleVenta;
+use App\Models\Comision;
+use App\Models\LotePago;
+use App\Models\MetaVenta;
+use App\Models\Ingreso;
 use App\Services\PrevencionInconsistencias;
 use App\Services\MonitoreoAutocorreccion;
 use Carbon\Carbon;
@@ -47,7 +52,7 @@ class DashboardController extends Controller
         $endOfMonth = $today->copy()->endOfMonth();
         $startOfYear = $today->copy()->startOfYear();
 
-        // Estadísticas básicas
+        // Estadísticas básicas expandidas
         $data = [
             'contadores' => [
                 'clientes' => Cliente::count(),
@@ -56,13 +61,28 @@ class DashboardController extends Controller
                 'trabajadores' => Trabajador::count(),
                 'proveedores' => Proveedor::count(),
                 'articulos' => Articulo::count(),
+                'comisiones_total' => Comision::count(),
+                'lotes_pago' => LotePago::count(),
+                'metas_activas' => MetaVenta::where('estado', true)->count(),
             ],
             'ventas' => $this->getVentasData($today, $startOfWeek, $endOfWeek, $startOfMonth, $endOfMonth),
+            'comisiones' => $this->getComisionesData($startOfMonth, $endOfMonth),
             'inventario' => $this->getInventarioData(),
-            'alertas' => $this->getAlertas(),
+            'stock' => [
+                'bajo' => Articulo::where('stock_minimo', '>', 0)->whereColumn('stock', '<=', 'stock_minimo')->where('stock', '>', 0)->count(),
+                'agotado' => Articulo::where('stock', '=', 0)->count(),
+                'critico' => Articulo::where('stock_minimo', '>', 0)->whereColumn('stock', '<=', 'stock_minimo')->count(),
+                'sin_stock_total' => Articulo::where('stock', '<=', 0)->count(),
+            ],
+            'metas' => [
+                'alcanzadas' => $this->calculateMetasAlcanzadas(),
+                'activas' => MetaVenta::where('estado', true)->count(),
+            ],
+            'alertas' => $this->getAlertasUnificadas(),
             'tendencias' => $this->getTendencias(),
-            'kpis' => $this->getKPIs(),
+            'kpis' => $this->getKPIsUnificados(),
             'actividad_reciente' => $this->getActividadReciente(),
+            'resumen_financiero' => $this->getResumenFinanciero($startOfMonth, $endOfMonth),
         ];
 
         return $data;
@@ -133,11 +153,32 @@ class DashboardController extends Controller
             });
     }
 
+    /**
+     * Calcular total de ingresos (compras) por período
+     */
+    private function calcularIngresosPorPeriodo($fechaInicio, $fechaFin)
+    {
+        return Ingreso::with('detalles')
+            ->whereBetween('fecha', [$fechaInicio, $fechaFin])
+            ->get()
+            ->sum(function($ingreso) {
+                return $ingreso->detalles->sum(function($detalle) {
+                    return $detalle->precio_compra * $detalle->cantidad;
+                });
+            });
+    }
+
     private function getInventarioData()
     {
-        $stockBajo = Articulo::whereRaw('stock <= stock_minimo')
-            ->where('stock_minimo', '>', 0)
+        $stockBajo = Articulo::where('stock_minimo', '>', 0)
+            ->whereColumn('stock', '<=', 'stock_minimo')
+            ->where('stock', '>', 0)
             ->orderBy('stock', 'asc')
+            ->limit(10)
+            ->get();
+
+        $stockAgotado = Articulo::where('stock', '=', 0)
+            ->orderBy('nombre', 'asc')
             ->limit(10)
             ->get();
 
@@ -154,6 +195,7 @@ class DashboardController extends Controller
 
         return [
             'stock_bajo' => $stockBajo,
+            'stock_agotado' => $stockAgotado,
             'stock_critico_count' => $stockCritico,
             'articulos_mas_vendidos' => $articulosMasVendidos,
             'valor_inventario' => $this->calcularValorInventario(),
@@ -173,9 +215,10 @@ class DashboardController extends Controller
     {
         $alertas = [];
 
-        // Alertas de stock
-        $stockBajo = Articulo::whereRaw('stock <= stock_minimo')
-            ->where('stock_minimo', '>', 0)
+        // Alertas de stock bajo
+        $stockBajo = Articulo::where('stock_minimo', '>', 0)
+            ->whereColumn('stock', '<=', 'stock_minimo')
+            ->where('stock', '>', 0)
             ->count();
 
         if ($stockBajo > 0) {
@@ -188,7 +231,20 @@ class DashboardController extends Controller
             ];
         }
 
-        // Alertas de stock crítico
+        // Alertas de stock agotado (todos los artículos con stock = 0)
+        $stockAgotado = Articulo::where('stock', '=', 0)->count();
+
+        if ($stockAgotado > 0) {
+            $alertas[] = [
+                'tipo' => 'danger',
+                'icono' => 'x-circle-fill',
+                'mensaje' => "$stockAgotado artículos completamente agotados",
+                'url' => '/inventario',
+                'fecha' => now(),
+            ];
+        }
+
+        // Alertas de stock crítico (todos los artículos sin stock)
         $stockCritico = Articulo::where('stock', '<=', 0)->count();
         if ($stockCritico > 0) {
             $alertas[] = [
@@ -354,19 +410,315 @@ class DashboardController extends Controller
         }
     }
 
+    /**
+     * Obtener datos de comisiones para el dashboard unificado
+     */
+    private function getComisionesData($startOfMonth, $endOfMonth)
+    {
+        return [
+            'pendientes' => [
+                'monto' => Comision::where('estado', 'pendiente')->sum('monto'),
+                'cantidad' => Comision::where('estado', 'pendiente')->count(),
+            ],
+            'pagadas' => [
+                'monto' => Comision::where('estado', 'pagado')->sum('monto'),
+                'cantidad' => Comision::where('estado', 'pagado')->count(),
+            ],
+            'pagadas_mes' => [
+                'monto' => Comision::where('estado', 'pagado')
+                    ->whereMonth('created_at', $startOfMonth->month)
+                    ->whereYear('created_at', $startOfMonth->year)
+                    ->sum('monto'),
+                'cantidad' => Comision::where('estado', 'pagado')
+                    ->whereMonth('created_at', $startOfMonth->month)
+                    ->whereYear('created_at', $startOfMonth->year)
+                    ->count(),
+            ],
+            'total' => [
+                'monto' => Comision::sum('monto'),
+                'cantidad' => Comision::count(),
+            ],
+            'lotes_recientes' => LotePago::where('created_at', '>=', now()->subDays(30))->count(),
+            'comisiones_vencidas' => Comision::where('estado', 'pendiente')
+                ->where('fecha_calculo', '<', now()->subDays(30))
+                ->count(),
+        ];
+    }
+
+    /**
+     * Alertas unificadas de todos los módulos
+     */
+    private function getAlertasUnificadas()
+    {
+        $alertas = [];
+
+        // Alertas de comisiones
+        $comisionesVencidas = Comision::where('estado', 'pendiente')
+            ->where('fecha_calculo', '<', now()->subDays(30))
+            ->count();
+        if ($comisionesVencidas > 0) {
+            $alertas[] = [
+                'tipo' => 'warning',
+                'modulo' => 'Comisiones',
+                'mensaje' => "$comisionesVencidas comisiones pendientes por más de 30 días",
+                'accion' => '/comisiones/gestion?estado=pendiente',
+                'prioridad' => 'alta',
+                'icono' => 'clock-history'
+            ];
+        }
+
+        // Alertas de inventario (stock bajo)
+        $stockBajo = Articulo::where('stock_minimo', '>', 0)
+            ->whereColumn('stock', '<=', 'stock_minimo')
+            ->where('stock', '>', 0)
+            ->count();
+        if ($stockBajo > 0) {
+            $alertas[] = [
+                'tipo' => 'warning',
+                'modulo' => 'Inventario',
+                'mensaje' => "$stockBajo artículos con stock bajo",
+                'accion' => '/inventario',
+                'prioridad' => 'alta',
+                'icono' => 'exclamation-triangle'
+            ];
+        }
+
+        // Alertas de inventario (stock agotado)
+        $stockAgotado = Articulo::where('stock', '=', 0)->count();
+        if ($stockAgotado > 0) {
+            $alertas[] = [
+                'tipo' => 'danger',
+                'modulo' => 'Inventario',
+                'mensaje' => "$stockAgotado artículos completamente agotados",
+                'accion' => '/inventario',
+                'prioridad' => 'crítica',
+                'icono' => 'x-circle-fill'
+            ];
+        }
+
+        // Alertas de metas no cumplidas del mes actual
+        $mesActual = now()->format('Y-m');
+        $metasActivas = MetaVenta::where('estado', true)->count();
+        $metasCumplidas = 0;
+        
+        if ($metasActivas > 0) {
+            // Calcular cuántas metas se están cumpliendo basado en ventas del mes
+            $ventasPorVendedor = Venta::with('detalleVentas')
+                ->whereYear('created_at', now()->year)
+                ->whereMonth('created_at', now()->month)
+                ->get()
+                ->groupBy('usuario_id')
+                ->map(function ($ventas) {
+                    return $ventas->sum(function ($venta) {
+                        return $venta->detalleVentas->sum('sub_total');
+                    });
+                });
+                
+            $totalVendedores = count($ventasPorVendedor);
+            
+            if ($totalVendedores > 0) {
+                foreach ($ventasPorVendedor as $usuarioId => $totalVentas) {
+                    $metaCorrespondiente = MetaVenta::where('estado', true)
+                        ->where('monto_minimo', '<=', $totalVentas)
+                        ->where(function ($query) use ($totalVentas) {
+                            $query->whereNull('monto_maximo')
+                                  ->orWhere('monto_maximo', '>=', $totalVentas);
+                        })
+                        ->orderBy('monto_minimo', 'desc')
+                        ->first();
+
+                    if ($metaCorrespondiente) {
+                        $metasCumplidas++;
+                    }
+                }
+                
+                $porcentajeCumplimiento = round(($metasCumplidas / $totalVendedores) * 100, 1);
+                
+                if ($porcentajeCumplimiento < 50) {
+                    $alertas[] = [
+                        'tipo' => 'warning',
+                        'modulo' => 'Metas',
+                        'mensaje' => "Solo {$porcentajeCumplimiento}% de cumplimiento de metas este mes",
+                        'accion' => '/metas-ventas',
+                        'prioridad' => 'alta',
+                        'icono' => 'target'
+                    ];
+                }
+            }
+        }
+
+        return $alertas;
+    }
+
+    /**
+     * KPIs unificados de toda la aplicación
+     */
+    private function getKPIsUnificados()
+    {
+        $ventasMes = $this->calcularVentasPorPeriodo(
+            now()->startOfMonth()->format('Y-m-d'),
+            now()->format('Y-m-d')
+        );
+        
+        $ingresosMes = $this->calcularIngresosPorPeriodo(
+            now()->startOfMonth()->format('Y-m-d'),
+            now()->format('Y-m-d')
+        );
+
+        $margenBruto = $ventasMes - $ingresosMes;
+        $porcentajeMargen = $ventasMes > 0 ? ($margenBruto / $ventasMes) * 100 : 0;
+
+        return [
+            'ventas_mes' => $ventasMes,
+            'ingresos_mes' => $ingresosMes,
+            'margen_bruto' => $margenBruto,
+            'porcentaje_margen' => round($porcentajeMargen, 2),
+            'comisiones_pendientes' => Comision::where('estado', 'pendiente')->sum('monto'),
+            'efectividad_cobranza' => $this->calcularEfectividadCobranza(),
+        ];
+    }
+
+    /**
+     * Resumen financiero del período
+     */
+    private function getResumenFinanciero($startOfMonth, $endOfMonth)
+    {
+        $ventas = $this->calcularVentasPorPeriodo($startOfMonth->format('Y-m-d'), $endOfMonth->format('Y-m-d'));
+        $ingresos = $this->calcularIngresosPorPeriodo($startOfMonth->format('Y-m-d'), $endOfMonth->format('Y-m-d'));
+        $comisionesPagadas = Comision::where('estado', 'pagado')
+            ->whereMonth('created_at', $startOfMonth->month)
+            ->whereYear('created_at', $startOfMonth->year)
+            ->sum('monto');
+        
+        $comisionesPendientes = Comision::where('estado', 'pendiente')->sum('monto');
+        $totalComisiones = $comisionesPagadas + $comisionesPendientes;
+        
+        // Calcular porcentajes
+        $porcentajePagadas = $totalComisiones > 0 ? ($comisionesPagadas / $totalComisiones) * 100 : 0;
+        $porcentajePendientes = $totalComisiones > 0 ? ($comisionesPendientes / $totalComisiones) * 100 : 0;
+        
+        // Calcular ROI de comisiones
+        $roiComisiones = $ventas > 0 ? ($comisionesPagadas / $ventas) * 100 : 0;
+        
+        // Calcular tiempo promedio de pago (simplificado)
+        $tiempoPromedioPago = 15; // Valor estimado por ahora
+
+        return [
+            'ingresos_totales' => $ventas,
+            'comisiones_pagadas' => $comisionesPagadas,
+            'pendientes_pago' => $comisionesPendientes,
+            'porcentaje_pagadas' => round($porcentajePagadas, 1),
+            'porcentaje_pendientes' => round($porcentajePendientes, 1),
+            'roi_comisiones' => round($roiComisiones, 1),
+            'tiempo_promedio_pago' => $tiempoPromedioPago,
+            'gastos_compras' => $ingresos,
+            'gastos_comisiones' => $comisionesPagadas,
+            'utilidad_bruta' => $ventas - $ingresos,
+            'utilidad_neta' => $ventas - $ingresos - $comisionesPagadas,
+        ];
+    }
+
+    /**
+     * Calcular efectividad de cobranza de comisiones
+     */
+    private function calcularEfectividadCobranza()
+    {
+        $totalComisiones = Comision::count();
+        $comisionesPagadas = Comision::where('estado', 'pagado')->count();
+        
+        return $totalComisiones > 0 ? round(($comisionesPagadas / $totalComisiones) * 100, 2) : 0;
+    }
+
+    /**
+     * API: Obtener métricas en tiempo real para actualización dinámica
+     */
     public function getMetricasEnVivo()
     {
-        $ventasHoy = $this->calcularVentasPorPeriodo(now()->format('Y-m-d'), now()->format('Y-m-d'));
-        $ventasAyer = $this->calcularVentasPorPeriodo(now()->subDay()->format('Y-m-d'), now()->subDay()->format('Y-m-d'));
-        
-        return response()->json([
-            'ventas_hoy' => $ventasHoy,
-            'ventas_ayer' => $ventasAyer,
-            'diferencia' => $ventasHoy - $ventasAyer,
-            'porcentaje_cambio' => $ventasAyer > 0 ? (($ventasHoy - $ventasAyer) / $ventasAyer) * 100 : 0,
-            'stock_critico' => Articulo::where('stock', '<=', 0)->count(),
-            'alertas_nuevas' => count($this->getAlertas()),
-            'timestamp' => now(),
-        ]);
+        try {
+            $kpis = $this->getKPIsUnificados();
+            $stockCritico = Articulo::where('stock', '<=', DB::raw('stock_minimo'))->count();
+            $metasAlcanzadas = $this->calculateMetasAlcanzadas();
+
+            return response()->json([
+                'ventas_mes' => $kpis['ventas_mes'],
+                'comisiones_pendientes' => $kpis['comisiones_pendientes'],
+                'efectividad_cobranza' => $kpis['efectividad_cobranza'],
+                'stock_critico' => $stockCritico,
+                'metas_alcanzadas' => $metasAlcanzadas,
+                'timestamp' => now()->toISOString()
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error al obtener métricas en vivo: ' . $e->getMessage());
+            return response()->json(['error' => 'Error al cargar métricas'], 500);
+        }
+    }
+
+    /**
+     * API: Obtener alertas actuales del sistema
+     */
+    public function getAlertasApi()
+    {
+        try {
+            $alertas = $this->getAlertasUnificadas();
+            return response()->json(['alertas' => $alertas]);
+        } catch (\Exception $e) {
+            Log::error('Error al obtener alertas: ' . $e->getMessage());
+            return response()->json(['error' => 'Error al cargar alertas'], 500);
+        }
+    }
+
+    /**
+     * Calcular porcentaje de metas alcanzadas
+     */
+    private function calculateMetasAlcanzadas()
+    {
+        try {
+            $mesActual = now()->format('Y-m');
+            $metas = MetaVenta::where('estado', true)->get();
+            
+            if ($metas->isEmpty()) {
+                return 0;
+            }
+
+            // Obtener ventas del mes agrupadas por vendedor
+            $ventasPorVendedor = Venta::with('detalleVentas')
+                ->whereYear('created_at', now()->year)
+                ->whereMonth('created_at', now()->month)
+                ->get()
+                ->groupBy('usuario_id')
+                ->map(function ($ventas) {
+                    return $ventas->sum(function ($venta) {
+                        return $venta->detalleVentas->sum('sub_total');
+                    });
+                });
+
+            $metasAlcanzadas = 0;
+            $totalVendedores = count($ventasPorVendedor);
+            
+            if ($totalVendedores == 0) {
+                return 0;
+            }
+
+            foreach ($ventasPorVendedor as $usuarioId => $totalVentas) {
+                // Buscar la meta que corresponde a este monto
+                $metaCorrespondiente = MetaVenta::where('estado', true)
+                    ->where('monto_minimo', '<=', $totalVentas)
+                    ->where(function ($query) use ($totalVentas) {
+                        $query->whereNull('monto_maximo')
+                              ->orWhere('monto_maximo', '>=', $totalVentas);
+                    })
+                    ->orderBy('monto_minimo', 'desc')
+                    ->first();
+
+                if ($metaCorrespondiente) {
+                    $metasAlcanzadas++;
+                }
+            }
+
+            return $totalVendedores > 0 ? round(($metasAlcanzadas / $totalVendedores) * 100, 1) : 0;
+        } catch (\Exception $e) {
+            Log::error('Error al calcular metas alcanzadas: ' . $e->getMessage());
+            return 0;
+        }
     }
 }

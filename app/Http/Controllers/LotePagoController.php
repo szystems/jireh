@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class LotePagoController extends Controller
 {
@@ -436,5 +437,96 @@ class LotePagoController extends Controller
             DB::rollback();
             return back()->with('error', 'Error al anular el lote de pago: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Generar PDF con listado de lotes de pago
+     */
+    public function generarPDFListado(Request $request)
+    {
+        $config = Config::first();
+        
+        $query = LotePago::with(['usuario', 'pagosComisiones'])
+                          ->orderBy('created_at', 'desc');
+
+        // Aplicar los mismos filtros que en el index
+        if ($request->filled('fecha_inicio')) {
+            $query->whereDate('fecha_pago', '>=', $request->fecha_inicio);
+        }
+
+        if ($request->filled('fecha_fin')) {
+            $query->whereDate('fecha_pago', '<=', $request->fecha_fin);
+        }
+
+        if ($request->filled('estado')) {
+            $query->where('estado', $request->estado);
+        }
+
+        if ($request->filled('metodo_pago')) {
+            $query->where('metodo_pago', $request->metodo_pago);
+        }
+
+        $lotesPago = $query->get();
+
+        // Calcular estadísticas
+        $estadisticas = [
+            'total_lotes' => $lotesPago->count(),
+            'monto_total' => $lotesPago->sum('monto_total'),
+            'total_comisiones' => $lotesPago->sum('cantidad_comisiones'),
+            'por_estado' => [
+                'procesando' => $lotesPago->where('estado', 'procesando')->count(),
+                'completado' => $lotesPago->where('estado', 'completado')->count(),
+                'anulado' => $lotesPago->where('estado', 'anulado')->count(),
+            ],
+            'por_metodo' => [
+                'efectivo' => $lotesPago->where('metodo_pago', 'efectivo')->count(),
+                'transferencia' => $lotesPago->where('metodo_pago', 'transferencia')->count(),
+                'cheque' => $lotesPago->where('metodo_pago', 'cheque')->count(),
+            ]
+        ];
+
+        // Generar filtros aplicados para mostrar en el PDF
+        $filtrosAplicados = [];
+        if ($request->filled('fecha_inicio')) {
+            $filtrosAplicados[] = 'Desde: ' . \Carbon\Carbon::parse($request->fecha_inicio)->format('d/m/Y');
+        }
+        if ($request->filled('fecha_fin')) {
+            $filtrosAplicados[] = 'Hasta: ' . \Carbon\Carbon::parse($request->fecha_fin)->format('d/m/Y');
+        }
+        if ($request->filled('estado')) {
+            $filtrosAplicados[] = 'Estado: ' . ucfirst($request->estado);
+        }
+        if ($request->filled('metodo_pago')) {
+            $filtrosAplicados[] = 'Método: ' . ucfirst($request->metodo_pago);
+        }
+
+        $pdf = Pdf::loadView('lotes-pago.pdf.listado-general', compact(
+            'lotesPago', 
+            'config', 
+            'estadisticas',
+            'filtrosAplicados'
+        ));
+
+        $nombreArchivo = 'lotes-pago-' . now()->format('Y-m-d-H-i-s') . '.pdf';
+        
+        return $pdf->stream($nombreArchivo);
+    }
+
+    /**
+     * Generar PDF individual de un lote de pago
+     */
+    public function generarPDFIndividual(LotePago $lotePago)
+    {
+        $config = Config::first();
+        $lotePago->load(['usuario', 'pagosComisiones.comision.commissionable', 'pagosComisiones.comision.venta.cliente']);
+
+        $pdf = Pdf::loadView('lotes-pago.pdf.individual', compact(
+            'lotePago',
+            'config'
+        ));
+
+        $nombreArchivo = 'lote-pago-' . $lotePago->numero_lote . '.pdf';
+        
+        return $pdf->stream($nombreArchivo);
     }
 }

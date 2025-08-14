@@ -40,6 +40,9 @@
                         Lote de Pago: {{ $lotePago->numero_lote }}
                     </h4>
                     <div class="btn-group">
+                        <a href="{{ route('lotes-pago.pdf.individual', $lotePago) }}" class="btn btn-danger" target="_blank">
+                            <i class="bi bi-file-earmark-pdf"></i> Generar PDF
+                        </a>
                         @if($lotePago->estado != 'anulado')
                             <a href="{{ route('lotes-pago.edit', $lotePago) }}" class="btn btn-warning">
                                 <i class="bi bi-pencil"></i> Editar

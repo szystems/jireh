@@ -1,9 +1,9 @@
 # PRD - Proyecto Jireh - Sistema de Gestión Integral
 
 **Fecha de creación:** Agosto 6, 2025  
-**Última actualización:** Agosto 13, 2025  
-**Versión:** 1.5  
-**Estado:** En desarrollo activo - Sistema de reportes de metas COMPLETADO - Proyecto ORGANIZADO
+**Última actualización:** Agosto 13, 2025 - Sistema de Notificaciones Completado  
+**Versión:** 1.6  
+**Estado:** En desarrollo activo - Sistema de notificaciones COMPLETADO - Proyecto ORGANIZADO
 
 ---
 
@@ -20,6 +20,7 @@ Sistema de gestión integral para Car Wash y CDS (Centro de Servicios) desarroll
 - ✅ **Sistema de Reportes de Metas:** COMPLETADO (Agosto 12, 2025)
 - ✅ **Organización del proyecto:** COMPLETADA (Agosto 13, 2025)
 - ✅ **Limpieza de raíz del proyecto:** COMPLETADA (Agosto 13, 2025)
+- ✅ **Sistema de Notificaciones:** COMPLETADO (Agosto 13, 2025)
 - ✅ **Proyecto listo para producción:** SÍ
 
 ---
@@ -273,7 +274,169 @@ generarClaseProgreso($metaId)    // Clase CSS consistente por ID
 3. **Libertad de nomenclatura**: Sin restricciones de nombres predefinidos
 4. **Consistencia visual**: Colores automáticos y predecibles
 
-### 3. Gestión de Trabajadores
+### 3. Sistema de Notificaciones Inteligentes
+**Estado:** ✅ COMPLETADO - Implementado completamente (Agosto 13, 2025)
+
+**🎯 FUNCIONALIDADES PRINCIPALES:**
+
+**Centro de Notificaciones Completo:**
+- ✅ **Vista principal**: `/notificaciones` - Dashboard centralizado de todas las alertas
+- ✅ **Categorías dinámicas**: 7 tipos de notificaciones automatizadas
+- ✅ **Filtros avanzados**: Por tipo, prioridad y estado (leída/no leída)
+- ✅ **Persistencia**: Filtros guardados en localStorage
+- ✅ **Estados visuales**: Diferenciación clara entre notificaciones leídas y no leídas
+- ✅ **Ordenamiento cronológico**: De más nueva a más antigua
+- ✅ **Fechas realistas**: Basadas en eventos reales, no artificiales
+
+**Tipos de Notificaciones Implementadas:**
+
+1. **Stock Crítico** (Prioridad: Alta)
+   - Artículos sin stock donde `stock <= 0` y `stock_minimo > 0`
+   - Fecha: Basada en `updated_at` del artículo (últimas 24 horas)
+   - Acción: Enlace directo a "Reabastecer" artículo
+
+2. **Stock Bajo** (Prioridad: Media)
+   - Artículos donde `stock <= stock_minimo` y `stock > 0`
+   - Fecha: Basada en `updated_at` del artículo (últimas 72 horas)
+   - Acción: Enlace directo para "Ver Artículo"
+
+3. **Ventas Importantes** (Prioridad: Media)
+   - Ventas > Q1,000 de los últimos 7 días
+   - Fecha: Fecha real de la venta
+   - Acción: Enlace para "Ver Venta"
+
+4. **Clientes Nuevos** (Prioridad: Baja)
+   - Clientes registrados en los últimos 30 días
+   - Fecha: `created_at` del cliente
+   - Acción: Enlace para "Ver Cliente"
+
+5. **Comisiones Vencidas** (Prioridad: Alta)
+   - Comisiones pendientes por más de 30 días
+   - Fecha: Fecha de la comisión más antigua
+   - Acción: "Gestionar Comisiones"
+
+6. **Metas Incumplidas** (Prioridad: Alta)
+   - Cuando menos del 50% de vendedores cumplen metas del mes
+   - Fecha: Inicio del mes actual
+   - Acción: "Revisar Metas"
+
+7. **Objetivos Alcanzados** (Prioridad: Alta)
+   - Cuando se alcanza el 90% de objetivos mensuales
+   - Fecha: Inicio del mes actual
+   - Acción: Celebración y seguimiento
+
+**🔧 CARACTERÍSTICAS TÉCNICAS:**
+
+**Sistema de Filtros Avanzado:**
+```javascript
+// Filtros persistentes con localStorage
+aplicarFiltros()        // Por tipo, prioridad y estado
+cargarFiltrosGuardados() // Restaura filtros al recargar
+limpiarFiltros()        // Reset completo
+```
+
+**Gestión de Estados:**
+- **Backend**: Sistema basado en sesiones de Laravel para persistencia
+- **Frontend**: Actualización visual en tiempo real sin recargas
+- **Sincronización**: Badge del sidebar actualizado automáticamente
+
+**Badge del Sidebar:**
+- **Ubicación**: Menú lateral junto a "Notificaciones"
+- **Estilo**: Fondo rojo sólido (`bg-danger text-white`) para máximo contraste
+- **Actualización**: Tiempo real cuando se marcan notificaciones como leídas
+- **Contador**: Muestra solo notificaciones no leídas
+
+**Iconografía Específica:**
+```php
+// Iconos Bootstrap Icons por tipo
+'stock_critico' → 'bi-exclamation-circle text-danger'
+'stock_bajo' → 'bi-exclamation-triangle text-warning'  
+'venta_importante' → 'bi-cash-coin text-success'
+'cliente_nuevo' → 'bi-person-plus text-info'
+'comisiones_vencidas' → 'bi-clock-history text-danger'
+'metas_incumplidas' → 'bi-graph-down-arrow text-warning'
+'objetivo_alcanzado' → 'bi-trophy text-primary'
+```
+
+**Fechas Inteligentes:**
+- **Stock**: Usa `updated_at` con variación aleatoria realista
+- **Ventas**: Fecha real de la venta (`Carbon::parse($venta->fecha)`)
+- **Clientes**: `created_at` real del registro
+- **Comisiones**: Fecha de la comisión más antigua pendiente
+- **Metas**: Referenciadas al inicio del período correspondiente
+
+**🗂️ ARCHIVOS IMPLEMENTADOS:**
+
+**Controlador Principal:**
+- `app/Http/Controllers/Admin/NotificacionController.php` ✅ NUEVO COMPLETO
+  - `index()`: Vista principal del centro de notificaciones
+  - `obtenerNotificaciones()`: Generación dinámica de todas las notificaciones
+  - `obtenerResumen()`: API para contadores y badges
+  - `marcarComoLeida($id)`: Marcar notificación individual
+  - `marcarTodasComoLeidas()`: Marcar todas como leídas
+  - `limpiarNotificacionesLeidas()`: Reset del sistema
+
+**Vista Principal:**
+- `resources/views/admin/notificaciones/index.blade.php` ✅ NUEVO
+  - Dashboard completo con estadísticas
+  - Sistema de filtros avanzado con localStorage
+  - Notificaciones con estados visuales diferenciados
+  - JavaScript para marcado sin recargas
+  - Estilos CSS personalizados para UX
+
+**Sidebar Integrado:**
+- `resources/views/layouts/incadmin/sidebar.blade.php` ✅ MODIFICADO
+  - Badge rojo con contador de notificaciones no leídas
+  - Actualización automática via JavaScript global
+
+**Layout Principal:**
+- `resources/views/layouts/admin.blade.php` ✅ MODIFICADO
+  - Función global `actualizarContadorNotificaciones()`
+  - Actualización automática cada 60 segundos
+  - Badge sincronizado en todas las páginas
+
+**Rutas API:**
+```php
+// En routes/web.php - Grupo API notificaciones
+Route::group(['prefix' => 'api/notificaciones'], function () {
+    Route::get('/resumen', [NotificacionController::class, 'obtenerResumen']);
+    Route::post('/marcar-leida/{id}', [NotificacionController::class, 'marcarComoLeida']);
+    Route::post('/marcar-todas-leidas', [NotificacionController::class, 'marcarTodasComoLeidas']);
+    Route::post('/limpiar-leidas', [NotificacionController::class, 'limpiarNotificacionesLeidas']);
+});
+```
+
+**🎨 EXPERIENCIA DE USUARIO:**
+
+**Estados Visuales:**
+- **No leída**: Fondo claro, borde azul, título normal
+- **Leída**: Fondo gris, borde verde, título tachado, botón verde deshabilitado
+
+**Interacciones:**
+- **Clic en botón**: Marca como leída sin recargar página
+- **Filtros automáticos**: Se aplican al cambiar select (onchange)
+- **Botón "Limpiar"**: Reset visual de todos los filtros
+- **Indicadores**: Muestra cantidad de resultados filtrados
+
+**Performance:**
+- **Sin recargas**: Actualización AJAX de contadores cada 60 segundos
+- **Filtros persistentes**: Mantiene selección entre páginas
+- **Optimización**: Solo consultas necesarias al backend
+
+**📊 MÉTRICAS DEL SISTEMA:**
+
+**Estadísticas Dashboard:**
+- **Total notificaciones**: Contador general
+- **Prioridad alta**: Stock crítico + comisiones vencidas + metas
+- **Stock crítico**: Artículos sin inventario
+- **Ventas importantes**: Ventas destacadas recientes
+
+**URLs de Acceso:**
+- Principal: `/notificaciones`
+- API Resumen: `/api/notificaciones/resumen`
+- API Marcar: `/api/notificaciones/marcar-leida/{id}`
+
+### 4. Gestión de Trabajadores
 **Estado:** ✅ Completamente funcional
 
 **Tipos de trabajadores:**
@@ -292,7 +455,7 @@ generarClaseProgreso($metaId)    // Clase CSS consistente por ID
 - `database/migrations/*_create_trabajadors_table.php`
 - `database/migrations/*_create_trabajador_detalle_venta_table.php`
 
-### 4. Gestión de Artículos e Inventario
+### 5. Gestión de Artículos e Inventario
 **Estado:** ✅ Funcional con correcciones aplicadas
 
 **Funcionalidades:**
@@ -847,6 +1010,30 @@ DB_PASSWORD=
 ## 📝 CHANGELOG
 
 ### Agosto 13, 2025:
+- ✅ **SISTEMA DE NOTIFICACIONES INTELIGENTES:** Implementación completa
+  - **Centro de notificaciones**: `/notificaciones` con 7 tipos de alertas automatizadas
+  - **Notificaciones por categoría**: Stock crítico/bajo, ventas importantes, clientes nuevos, comisiones vencidas, metas incumplidas, objetivos alcanzados
+  - **Filtros avanzados**: Por tipo, prioridad y estado con persistencia en localStorage
+  - **Estados visuales**: Diferenciación clara entre notificaciones leídas/no leídas
+  - **Fechas realistas**: Basadas en eventos reales con ordenamiento cronológico
+  - **Badge del sidebar**: Contador rojo con actualización en tiempo real
+  - **API REST**: Endpoints para marcar leídas, resumen y gestión de estados
+  - **Performance**: Sin recargas, actualización AJAX cada 60 segundos
+  - **Arquitectura**: Sistema basado en sesiones Laravel con sincronización frontend
+- ✅ **CORRECCIÓN DE PROBLEMAS MENORES DEL SIDEBAR:** Resolución de z-index y navegación
+  - Ajustes de CSS para evitar solapamiento de elementos
+  - Optimización de la navegación móvil y desktop
+  - Mejoras en la experiencia de usuario del menú lateral
+- ✅ **REPORTES PDF LOTES DE PAGO:** Implementación completa
+  - PDF listado general con filtros aplicados y estadísticas
+  - PDF individual por lote con cabecera completa y comisiones incluidas
+  - Seguimiento de estructura de metas-general.blade.php para consistencia
+  - Botones integrados en vistas index y show
+- ✅ **CORRECCIÓN FILTROS METAS DE VENTAS:** Funcionalidad restaurada
+  - Corregido método `index` en `MetaVentaController` para pasar variable `$filtroAplicado`
+  - Botones de filtro por período funcionando correctamente
+  - Indicadores visuales activos (botón sólido vs outline)
+  - Badge informativo con botón quitar filtro funcional
 - ✅ **ORGANIZACIÓN COMPLETA DEL PROYECTO:** Limpieza final de archivos
   - Movidos todos los archivos de documentación de la raíz a `tools/`
   - Creadas subcarpetas categorizadas: `DOCUMENTACION_CAMBIOS_TRABAJADORES/`, `TESTING_DESARROLLO/scripts/`

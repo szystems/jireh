@@ -54,8 +54,10 @@ Auth::routes();
 
 //Admin Dashboard
 Route::middleware(['auth'])->group(function () {
-    //Control Panel
-    Route::get('/dashboard',[AdminController::class, 'index']);
+    //Control Panel - Dashboard Unificado
+    Route::get('/dashboard', function() {
+        return redirect('/dashboard-pro');
+    });
     
 
     // Notificaciones
@@ -63,6 +65,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/api/notificaciones', [NotificacionController::class, 'obtenerNotificacionesApi'])->name('notificaciones.api');
     Route::post('/api/notificaciones/marcar-leida/{id}', [NotificacionController::class, 'marcarComoLeida'])->name('notificaciones.marcar_leida');
     Route::post('/api/notificaciones/marcar-todas-leidas', [NotificacionController::class, 'marcarTodasComoLeidas'])->name('notificaciones.marcar_todas');
+    Route::post('/api/notificaciones/limpiar-leidas', [NotificacionController::class, 'limpiarNotificacionesLeidas'])->name('notificaciones.limpiar');
     Route::get('/api/notificaciones/resumen', [NotificacionController::class, 'obtenerResumen'])->name('notificaciones.resumen');
     Route::get('/api/notificaciones/reporte', [NotificacionController::class, 'generarReporteNotificaciones'])->name('notificaciones.reporte');
     
@@ -223,11 +226,11 @@ Route::middleware(['auth'])->group(function () {
     Route::post('ventas/{venta}/detalles/{detalle}/restore', [VentaController::class, 'restoreDetalle'])->name('admin.ventas.detalle.restore');
 
 
-    // Pagos
-    Route::get('pagos', [PagoController::class, 'index']);
-    Route::post('pagos', [PagoController::class, 'store']);
-    Route::put('pagos/{id}', [PagoController::class, 'update']);
-    Route::delete('pagos/{id}', [PagoController::class, 'destroy']);
+    // OBSOLETO: Módulo de pagos genérico - Reemplazado por sistema de comisiones
+    // Route::get('pagos', [PagoController::class, 'index']);
+    // Route::post('pagos', [PagoController::class, 'store']);
+    // Route::put('pagos/{id}', [PagoController::class, 'update']);
+    // Route::delete('pagos/{id}', [PagoController::class, 'destroy']);
 
     //Reportes Articulos
     Route::get('reportearticulos', [ReporteArticuloController::class, 'index']);
@@ -251,7 +254,12 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('comisiones')->name('comisiones.')->group(function() {
         Route::get('/', [ComisionController::class, 'index'])->name('index');
         Route::get('/dashboard', [ComisionController::class, 'dashboard'])->name('dashboard');
+        
+        // Rutas PDF - DEBEN IR ANTES de las rutas con parámetros
+        Route::get('/pdf', [ComisionController::class, 'generarPDFListado'])->name('pdf_listado');
+        
         Route::get('/show/{id}', [ComisionController::class, 'show'])->name('show');
+        Route::get('/{id}/pdf', [ComisionController::class, 'generarPDFIndividual'])->name('pdf_individual');
         Route::get('/{id}/detalles-meta', [ComisionController::class, 'detallesMeta'])->name('detalles_meta');
         Route::get('/por-trabajador', [ComisionController::class, 'porTrabajador'])->name('por_trabajador');
         Route::get('/por-vendedor', [ComisionController::class, 'porVendedor'])->name('por_vendedor');
@@ -277,9 +285,14 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('lotes-pago')->name('lotes-pago.')->group(function() {
         Route::get('/', [LotePagoController::class, 'index'])->name('index');
         Route::get('/create', [LotePagoController::class, 'create'])->name('create');
+        
+        // Rutas para PDFs (deben ir ANTES de las rutas con parámetros)
+        Route::get('/pdf', [LotePagoController::class, 'generarPDFListado'])->name('pdf');
+        
         Route::post('/', [LotePagoController::class, 'store'])->name('store');
         Route::get('/{lotePago}', [LotePagoController::class, 'show'])->name('show');
         Route::get('/{lotePago}/edit', [LotePagoController::class, 'edit'])->name('edit');
+        Route::get('/{lotePago}/pdf', [LotePagoController::class, 'generarPDFIndividual'])->name('pdf.individual');
         Route::put('/{lotePago}', [LotePagoController::class, 'update'])->name('update');
         Route::delete('/{lotePago}', [LotePagoController::class, 'destroy'])->name('destroy');
     });

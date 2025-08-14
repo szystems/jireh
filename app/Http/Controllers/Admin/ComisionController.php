@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ComisionController extends Controller
 {
@@ -62,6 +63,7 @@ class ComisionController extends Controller
         // Debug temporal - eliminar en producción
         \Illuminate\Support\Facades\Log::info('Filtros recibidos en apiTodasComisiones:', $request->all());
         
+        $config = Config::first();
         $query = Comision::with(['commissionable', 'venta', 'detalleVenta', 'articulo', 'pagos.lotePago']);
 
         // Aplicar filtros
@@ -71,7 +73,7 @@ class ComisionController extends Controller
                            ->paginate(50);
 
         // Transformar datos para la vista
-        $comisionesTransformadas = $comisiones->map(function ($comision) {
+        $comisionesTransformadas = $comisiones->map(function ($comision) use ($config) {
             // Obtener información del lote de pago si existe
             $loteInfo = null;
             $pagoCompleto = $comision->pagos()->where('estado', 'completado')->first();
@@ -91,7 +93,7 @@ class ComisionController extends Controller
                 'tipo_receptor' => $this->obtenerTipoReceptor($comision),
                 'tipo_comision' => $comision->tipo_comision,
                 'tipo_comision_texto' => $this->obtenerTextoTipoComision($comision->tipo_comision),
-                'meta_info' => $this->obtenerInfoMeta($comision),
+                'meta_info' => $this->obtenerInfoMeta($comision, $config),
                 'monto' => $comision->monto,
                 'estado' => $comision->estado,
                 'estado_texto' => ucfirst($comision->estado),
@@ -455,82 +457,191 @@ class ComisionController extends Controller
     /**
      * Obtener información de la meta alcanzada para comisiones por metas
      */
-    private function obtenerInfoMeta($comision)
+    private function obtenerInfoMeta($comision, $config = null)
     {
         // Solo para comisiones de meta_venta
-        if ($comision->tipo_comision !== 'meta_venta') {
+        if ($comision->tipo_comision !== 'meta_venta' && $comision->tipo_comision !== 'venta_meta') {
             return null;
         }
 
-        // Determinar la meta basándose en el porcentaje de la comisión
-        $porcentaje = $comision->porcentaje;
-        
-        switch($porcentaje) {
-            case 3:
-                return [
-                    'nombre' => 'Bronce',
-                    'color' => 'warning',
-                    'rango' => '$1K - $2.5K'
-                ];
-            case 5:
-                return [
-                    'nombre' => 'Plata', 
-                    'color' => 'secondary',
-                    'rango' => '$2.5K - $5K'
-                ];
-            case 8:
-                return [
-                    'nombre' => 'Oro',
-                    'color' => 'success', 
-                    'rango' => '$5K+'
-                ];
-            default:
-                return [
-                    'nombre' => 'Desconocida',
-                    'color' => 'dark',
-                    'rango' => 'N/A'
-                ];
+        // Obtener configuración si no se proporciona
+        if (!$config) {
+            $config = Config::first();
         }
+
+        // Buscar la meta que coincida con el porcentaje de la comisión
+        $meta = MetaVenta::where('porcentaje_comision', $comision->porcentaje)
+                        ->where('estado', true)
+                        ->first();
+        
+        if ($meta) {
+            // Generar color basado en el nombre de la meta para consistencia
+            $colores = ['primary', 'success', 'info', 'warning', 'secondary', 'dark'];
+            $colorIndex = abs(crc32($meta->nombre)) % count($colores);
+            
+            return [
+                'nombre' => $meta->nombre,
+                'color' => $colores[$colorIndex],
+                'rango' => $config->currency_simbol . number_format($meta->monto_minimo, 0) . ' - ' . $config->currency_simbol . number_format($meta->monto_maximo, 0),
+                'porcentaje' => $meta->porcentaje_comision
+            ];
+        }
+
+        // Si no se encuentra la meta, usar porcentaje como fallback
+        return [
+            'nombre' => $comision->porcentaje . '%',
+            'color' => 'secondary',
+            'rango' => 'Meta no encontrada',
+            'porcentaje' => $comision->porcentaje
+        ];
     }
 
     /**
-     * Dashboard principal de comisiones con 3 tipos
+     * Dashboard principal modernizado de comisiones
      */
     public function dashboard(Request $request)
     {
         $config = Config::first();
         
-        // Filtros
-        $periodo = $request->get('periodo', 'mes_actual');
-        $tipoComision = $request->get('tipo', 'todas');
-        $periodoMeta = $request->get('periodo_meta', 'mensual');
+        // === ESTADÍSTICAS PRINCIPALES ===
         
-        // Calcular fechas según período
-        $fechas = $this->calcularPeriodo($periodo);
+        // Comisiones pendientes
+        $comisionesPendientes = Comision::where('estado', 'pendiente')->sum('monto');
+        $cantidadPendientes = Comision::where('estado', 'pendiente')->count();
         
-        // Obtener comisiones por tipo
-        $comisiones = [
-            'vendedores' => $this->calcularComisionesVendedores($fechas, $periodoMeta),
-            'mecanicos' => $this->calcularComisionesMecanicos($fechas),
-            'carwash' => $this->calcularComisionesCarwash($fechas)
+        // Comisiones pagadas este mes (usando created_at es más preciso que updated_at)
+        $comisionesPagadasMes = Comision::where('estado', 'pagado')
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->sum('monto');
+        $cantidadPagadasMes = Comision::where('estado', 'pagado')
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->count();
+        
+        // Lotes de pago recientes (últimos 30 días) - ya que no hay pendientes
+        $lotesPendientes = LotePago::where('created_at', '>=', now()->subDays(30))->count();
+        $montoLotesPendientes = LotePago::where('created_at', '>=', now()->subDays(30))->sum('monto_total');
+        
+        // Todas las metas activas (no solo mensuales)
+        $metasProximasVencer = MetaVenta::where('estado', true)->count();
+            
+        // === DISTRIBUCIÓN POR TIPOS ===
+        $comisionesPorTipo = Comision::select('tipo_comision', DB::raw('SUM(monto) as total_monto'), DB::raw('COUNT(*) as cantidad'))
+            ->where('estado', 'pendiente')
+            ->groupBy('tipo_comision')
+            ->get();
+            
+        // === TENDENCIAS MENSUALES (últimos 6 meses por fecha de creación) ===
+        $tendenciaMensual = Comision::select(
+                DB::raw('YEAR(created_at) as año'),
+                DB::raw('MONTH(created_at) as mes'),
+                DB::raw('SUM(monto) as total'),
+                DB::raw('COUNT(*) as cantidad')
+            )
+            ->where('created_at', '>=', now()->subMonths(6))
+            ->groupBy('año', 'mes')
+            ->orderBy('año', 'desc')
+            ->orderBy('mes', 'desc')
+            ->get();
+            
+        // === TOP BENEFICIARIOS ===
+        // Top vendedores por comisiones (histórico total, no solo pendientes)
+        $topVendedoresData = Comision::where('commissionable_type', 'App\Models\User')
+            ->select('commissionable_id', DB::raw('SUM(monto) as total_comisiones'), DB::raw('COUNT(*) as cantidad'))
+            ->groupBy('commissionable_id')
+            ->orderBy('total_comisiones', 'desc')
+            ->limit(5)
+            ->get();
+            
+        // Cargar los usuarios correspondientes
+        $topVendedores = $topVendedoresData->map(function($item) {
+            $usuario = User::find($item->commissionable_id);
+            return (object)[
+                'commissionable_id' => $item->commissionable_id,
+                'total_comisiones' => $item->total_comisiones,
+                'cantidad' => $item->cantidad,
+                'commissionable' => $usuario
+            ];
+        });
+            
+        // Top trabajadores por comisiones (histórico total, no solo pendientes)
+        $topTrabajadoresData = Comision::where('commissionable_type', 'App\Models\Trabajador')
+            ->select('commissionable_id', DB::raw('SUM(monto) as total_comisiones'), DB::raw('COUNT(*) as cantidad'))
+            ->groupBy('commissionable_id')
+            ->orderBy('total_comisiones', 'desc')
+            ->limit(5)
+            ->get();
+            
+        // Cargar los trabajadores correspondientes
+        $topTrabajadores = $topTrabajadoresData->map(function($item) {
+            $trabajador = Trabajador::find($item->commissionable_id);
+            return (object)[
+                'commissionable_id' => $item->commissionable_id,
+                'total_comisiones' => $item->total_comisiones,
+                'cantidad' => $item->cantidad,
+                'commissionable' => $trabajador
+            ];
+        });
+            
+        // === ACTIVIDAD RECIENTE ===
+        // Últimas comisiones generadas
+        $ultimasComisiones = Comision::with(['commissionable', 'venta'])
+            ->orderBy('fecha_calculo', 'desc')
+            ->limit(10)
+            ->get();
+            
+        // Últimos lotes de pago
+        $ultimosLotes = LotePago::orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+            
+        // === ALERTAS Y NOTIFICACIONES ===
+        $alertas = [];
+        
+        // Comisiones pendientes por más de 30 días
+        $comisionesVencidas = Comision::where('estado', 'pendiente')
+            ->where('fecha_calculo', '<', now()->subDays(30))
+            ->count();
+        if ($comisionesVencidas > 0) {
+            $alertas[] = [
+                'tipo' => 'warning',
+                'mensaje' => "$comisionesVencidas comisiones pendientes por más de 30 días",
+                'accion' => route('comisiones.gestion', ['estado' => 'pendiente'])
+            ];
+        }
+        
+        // Lotes de pago realmente pendientes (no completados)
+        $lotesPendientesReales = LotePago::where('estado', '!=', 'completado')->count();
+        if ($lotesPendientesReales > 0) {
+            $alertas[] = [
+                'tipo' => 'info',
+                'mensaje' => "$lotesPendientesReales lotes de pago pendientes de procesamiento",
+                'accion' => route('lotes-pago.index')
+            ];
+        }
+        
+        // Compilar datos para la vista
+        $datos = [
+            'estadisticas' => [
+                'comisiones_pendientes' => $comisionesPendientes,
+                'cantidad_pendientes' => $cantidadPendientes,
+                'comisiones_pagadas_mes' => $comisionesPagadasMes,
+                'cantidad_pagadas_mes' => $cantidadPagadasMes,
+                'lotes_pendientes' => $lotesPendientes,
+                'monto_lotes_pendientes' => $montoLotesPendientes,
+                'metas_proximas_vencer' => $metasProximasVencer
+            ],
+            'distribucion_tipos' => $comisionesPorTipo,
+            'tendencia_mensual' => $tendenciaMensual,
+            'top_vendedores' => $topVendedores,
+            'top_trabajadores' => $topTrabajadores,
+            'ultimas_comisiones' => $ultimasComisiones,
+            'ultimos_lotes' => $ultimosLotes,
+            'alertas' => $alertas
         ];
         
-        // Obtener trabajadores para filtros
-        $vendedores = User::where('role_as', 1)->get();
-        $mecanicos = Trabajador::whereHas('tipoTrabajador', function($q) {
-            $q->where('nombre', 'like', '%mecánico%');
-        })->get();
-        $carwasheros = Trabajador::whereHas('tipoTrabajador', function($q) {
-            $q->where('nombre', 'like', '%carwash%');
-        })->get();
-        
-        // Obtener metas disponibles
-        $metasDisponibles = MetaVenta::activas()->get()->groupBy('periodo');
-        
-        return view('admin.comisiones.dashboard', compact(
-            'comisiones', 'vendedores', 'mecanicos', 'carwasheros',
-            'periodo', 'tipoComision', 'periodoMeta', 'fechas', 'metasDisponibles', 'config'
-        ));
+        return view('admin.comisiones.dashboard-moderno', compact('datos', 'config'));
     }
     
     /**
@@ -788,7 +899,7 @@ class ComisionController extends Controller
             ->findOrFail($id);
 
         // Agregar información de meta si es comisión de meta_venta
-        $metaInfo = $this->obtenerInfoMeta($comision);
+        $metaInfo = $this->obtenerInfoMeta($comision, $config);
 
         return view('admin.comisiones.show', compact('comision', 'config', 'metaInfo'));
     }
@@ -1517,5 +1628,170 @@ class ComisionController extends Controller
                 'message' => 'Error al cargar los detalles: ' . $e->getMessage()
             ]);
         }
+    }
+
+    /**
+     * Generar PDF del listado general de comisiones
+     */
+    public function generarPDFListado(Request $request)
+    {
+        $config = Config::first();
+        
+        // Obtener comisiones con filtros aplicados
+        $query = Comision::with(['commissionable', 'venta', 'detalleVenta', 'articulo', 'pagos.lotePago']);
+        $this->aplicarFiltrosAvanzados($query, $request);
+        $comisiones = $query->orderBy('fecha_calculo', 'desc')->get();
+        
+        // Calcular estadísticas
+        $totalComisiones = $comisiones->sum('monto');
+        $cantidadComisiones = $comisiones->count();
+        $pendientes = $comisiones->where('estado', 'pendiente')->count();
+        $pagadas = $comisiones->where('estado', 'pagado')->count();
+        $canceladas = $comisiones->where('estado', 'cancelado')->count();
+        
+        // Obtener información de filtros aplicados
+        $filtrosAplicados = $this->obtenerTextoFiltrosAplicados($request);
+        
+        // Transformar comisiones para la vista
+        $comisionesTransformadas = $comisiones->map(function ($comision) use ($config) {
+            return [
+                'id' => $comision->id,
+                'beneficiario_nombre' => $this->obtenerNombreBeneficiario($comision),
+                'tipo_receptor' => $this->obtenerTipoReceptor($comision),
+                'tipo_comision' => $comision->tipo_comision,
+                'tipo_comision_texto' => $this->obtenerTextoTipoComision($comision->tipo_comision),
+                'meta_info' => $this->obtenerInfoMeta($comision, $config),
+                'monto' => $comision->monto,
+                'estado' => $comision->estado,
+                'fecha_calculo' => $comision->fecha_calculo,
+                'venta_id' => $comision->venta_id,
+                'fecha_venta' => $comision->venta ? $comision->venta->fecha : null,
+            ];
+        });
+        
+        $data = [
+            'config' => $config,
+            'comisiones' => $comisionesTransformadas,
+            'totalComisiones' => $totalComisiones,
+            'cantidadComisiones' => $cantidadComisiones,
+            'pendientes' => $pendientes,
+            'pagadas' => $pagadas,
+            'canceladas' => $canceladas,
+            'filtrosAplicados' => $filtrosAplicados,
+            'fechaGeneracion' => now()->format('d/m/Y H:i:s')
+        ];
+        
+        $pdf = Pdf::loadView('comisiones.pdf.listado-general', $data);
+        $pdf->setPaper('A4', 'portrait');
+        
+        return $pdf->stream('reporte-comisiones-' . now()->format('Y-m-d') . '.pdf');
+    }
+    
+    /**
+     * Generar PDF individual de una comisión específica
+     */
+    public function generarPDFIndividual($id)
+    {
+        $config = Config::first();
+        $comision = Comision::with(['commissionable', 'venta', 'detalleVenta', 'articulo', 'pagos.lotePago'])
+            ->findOrFail($id);
+        
+        // Obtener información adicional
+        $metaInfo = $this->obtenerInfoMeta($comision, $config);
+        $beneficiario = $this->obtenerNombreBeneficiario($comision);
+        $tipoReceptor = $this->obtenerTipoReceptor($comision);
+        $tipoComisionTexto = $this->obtenerTextoTipoComision($comision->tipo_comision);
+        
+        // Información del lote de pago si existe
+        $loteInfo = null;
+        $pagoCompleto = $comision->pagos()->where('estado', 'completado')->first();
+        if ($pagoCompleto && $pagoCompleto->lotePago) {
+            $loteInfo = [
+                'id' => $pagoCompleto->lotePago->id,
+                'numero_lote' => $pagoCompleto->lotePago->numero_lote,
+                'fecha_pago' => $pagoCompleto->lotePago->fecha_pago,
+                'metodo_pago' => $pagoCompleto->lotePago->metodo_pago,
+                'referencia' => $pagoCompleto->lotePago->referencia
+            ];
+        }
+        
+        $data = [
+            'config' => $config,
+            'comision' => $comision,
+            'metaInfo' => $metaInfo,
+            'beneficiario' => $beneficiario,
+            'tipoReceptor' => $tipoReceptor,
+            'tipoComisionTexto' => $tipoComisionTexto,
+            'loteInfo' => $loteInfo,
+            'fechaGeneracion' => now()->format('d/m/Y H:i:s')
+        ];
+        
+        $pdf = Pdf::loadView('comisiones.pdf.individual', $data);
+        $pdf->setPaper('A4', 'portrait');
+        
+        return $pdf->stream('comision-' . $comision->id . '-' . now()->format('Y-m-d') . '.pdf');
+    }
+    
+    /**
+     * Obtener texto descriptivo de los filtros aplicados
+     */
+    private function obtenerTextoFiltrosAplicados(Request $request)
+    {
+        $filtros = [];
+        
+        if ($request->filled('fecha_inicio') && $request->filled('fecha_fin')) {
+            $filtros[] = 'Fechas: ' . Carbon::parse($request->fecha_inicio)->format('d/m/Y') . ' - ' . Carbon::parse($request->fecha_fin)->format('d/m/Y');
+        } elseif ($request->filled('tipo_periodo')) {
+            $periodos = [
+                'hoy' => 'Hoy',
+                'ayer' => 'Ayer',
+                'semana_actual' => 'Semana actual',
+                'mes_actual' => 'Mes actual',
+                'mes_anterior' => 'Mes anterior',
+                'trimestre_actual' => 'Trimestre actual',
+                'ano_actual' => 'Año actual'
+            ];
+            if (isset($periodos[$request->tipo_periodo])) {
+                $filtros[] = 'Período: ' . $periodos[$request->tipo_periodo];
+            }
+        }
+        
+        if ($request->filled('estado')) {
+            $filtros[] = 'Estado: ' . ucfirst($request->estado);
+        }
+        
+        if ($request->filled('tipo_comision')) {
+            $tipos = [
+                'mecanico' => 'Mecánico',
+                'carwash' => 'Car Wash',
+                'venta_meta' => 'Meta de Ventas',
+                'meta_venta' => 'Meta de Ventas'
+            ];
+            $filtros[] = 'Tipo: ' . ($tipos[$request->tipo_comision] ?? ucfirst($request->tipo_comision));
+        }
+        
+        if ($request->filled('trabajador_id')) {
+            $trabajador = Trabajador::find($request->trabajador_id);
+            if ($trabajador) {
+                $filtros[] = 'Trabajador: ' . $trabajador->nombre;
+            }
+        }
+        
+        if ($request->filled('vendedor_id')) {
+            $vendedor = User::find($request->vendedor_id);
+            if ($vendedor) {
+                $filtros[] = 'Vendedor: ' . $vendedor->name;
+            }
+        }
+        
+        if ($request->filled('monto_minimo')) {
+            $filtros[] = 'Monto mínimo: $' . number_format($request->monto_minimo, 2);
+        }
+        
+        if ($request->filled('monto_maximo')) {
+            $filtros[] = 'Monto máximo: $' . number_format($request->monto_maximo, 2);
+        }
+        
+        return empty($filtros) ? 'Sin filtros aplicados' : implode(' | ', $filtros);
     }
 }

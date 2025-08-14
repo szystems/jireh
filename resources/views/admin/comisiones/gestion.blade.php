@@ -15,6 +15,9 @@
                         <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#filtrosAvanzados">
                             <i class="bi bi-funnel"></i> Filtros Avanzados
                         </button>
+                        <a href="{{ route('comisiones.pdf_listado') }}" class="btn btn-danger btn-sm" target="_blank" id="btnGenerarPDF">
+                            <i class="bi bi-file-earmark-pdf"></i> Generar PDF
+                        </a>
                         <button type="button" class="btn btn-success btn-sm" id="btnPagarSeleccionadas" disabled>
                             <i class="bi bi-credit-card"></i> Pagar Seleccionadas
                         </button>
@@ -394,6 +397,15 @@ function configurarEventos() {
                 pagarMultiples(comisionIds);
             }
         }
+    });
+    
+    // Event listener para botón de generar PDF
+    $('#btnGenerarPDF').click(function(e) {
+        e.preventDefault();
+        const filtros = obtenerFiltrosAplicados();
+        const params = new URLSearchParams(filtros);
+        const url = '{{ route("comisiones.pdf_listado") }}?' + params.toString();
+        window.open(url, '_blank');
     });
 }
 

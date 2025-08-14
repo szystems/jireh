@@ -64,7 +64,7 @@
                     <a href="{{ url('/notificaciones') }}">
                         <i class="bi bi-bell"></i>
                         <span class="menu-text">Notificaciones</span>
-                        <span class="badge bg-danger text-white ms-auto" id="notification-count">0</span>
+                        <span class="badge bg-danger-transparent ms-auto" id="notification-count">0</span>
                     </a>
                 </li>
 
@@ -258,7 +258,7 @@
     <div class="sidebar-footer">
         <div class="d-flex align-items-center justify-content-between">
             <div>
-                <span class="small text-muted"><a class="text-white" href="https://szystems.com" target="_blank" rel="noopener noreferrer"><b>Szystems v1.6.0</b></a></span>
+                <span class="small text-muted"><a href="https://szystems.com" target="_blank" rel="noopener noreferrer">Szystems v1.0.0</a></span>
             </div>
             <div>
                 <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
@@ -646,26 +646,5 @@
     
     .sidebar-wrapper.collapsed + .main-container {
         padding-left: 70px !important;
-    }
-    
-    /* AJUSTES MÍNIMOS PARA SOLUCIONAR PROBLEMAS ESPECÍFICOS */
-    
-    /* 1. Evitar que el sidebar tape el navbar */
-    .sidebar-wrapper {
-        z-index: 1040 !important; /* Debajo del navbar */
-    }
-    
-    /* 2. Asegurar que el navbar esté encima */
-    .page-header {
-        z-index: 1050 !important; /* Encima del sidebar */
-        position: relative !important;
-    }
-    
-    /* 3. En móvil, botón hamburguesa siempre accesible */
-    @media (max-width: 991.98px) {
-        .toggle-sidebar {
-            z-index: 1060 !important; /* Encima de todo */
-            position: relative !important;
-        }
     }
 </style>
