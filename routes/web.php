@@ -21,6 +21,7 @@ use App\Http\Controllers\Admin\InventarioController;
 use App\Http\Controllers\Admin\DescuentoController;
 use App\Http\Controllers\Admin\ComisionController;
 use App\Http\Controllers\Admin\PagoComisionController;
+use App\Http\Controllers\Admin\PagoSueldoController; // Nuevo controlador de pagos de sueldos
 use App\Http\Controllers\LotePagoController;
 use App\Http\Controllers\Admin\VentaController;
 use App\Http\Controllers\Admin\PagoController;
@@ -191,6 +192,19 @@ Route::middleware(['auth'])->group(function () {
     Route::get('edit-tipo-trabajador/{id}', [TipoTrabajadorController::class, 'edit']);
     Route::put('update-tipo-trabajador/{id}', [TipoTrabajadorController::class, 'update']);
     Route::get('delete-tipo-trabajador/{id}', [TipoTrabajadorController::class, 'destroy']); // Cambiado de DELETE a GET
+
+    //Pagos de Sueldos (solo administradores)
+    Route::get('pagos-sueldos', [PagoSueldoController::class, 'index'])->name('admin.pago-sueldo.index');
+    Route::get('pagos-sueldos/create', [PagoSueldoController::class, 'create'])->name('admin.pago-sueldo.create');
+    Route::post('pagos-sueldos', [PagoSueldoController::class, 'store'])->name('admin.pago-sueldo.store');
+    Route::get('pagos-sueldos/{id}', [PagoSueldoController::class, 'show'])->name('admin.pago-sueldo.show');
+    Route::get('pagos-sueldos/{id}/edit', [PagoSueldoController::class, 'edit'])->name('admin.pago-sueldo.edit');
+    Route::put('pagos-sueldos/{id}', [PagoSueldoController::class, 'update'])->name('admin.pago-sueldo.update');
+    Route::post('pagos-sueldos/{id}/update-post', [PagoSueldoController::class, 'update'])->name('admin.pago-sueldo.update-post');
+    Route::delete('pagos-sueldos/{id}', [PagoSueldoController::class, 'destroy'])->name('admin.pago-sueldo.destroy');
+    Route::patch('pagos-sueldos/{id}/cambiar-estado', [PagoSueldoController::class, 'cambiarEstado'])->name('admin.pago-sueldo.cambiar-estado');
+    Route::patch('pagos-sueldos/detalle/{id}/estado', [PagoSueldoController::class, 'cambiarEstadoDetalle'])->name('admin.pago-sueldo.cambiar-estado-detalle');
+    Route::get('pagos-sueldos/{id}/pdf', [PagoSueldoController::class, 'generarPDF'])->name('admin.pago-sueldo.pdf');
 
     //inventario
     Route::get('inventario', [InventarioController::class, 'index']);

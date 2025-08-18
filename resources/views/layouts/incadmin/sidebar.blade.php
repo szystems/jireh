@@ -115,7 +115,7 @@
                 @if(Auth::user()->role_as != 1)
                 <li class="menu-category">Gestión de Personal</li>
                 <li class="sidebar-dropdown">
-                    <a href="#" class="{{ Request::is('trabajadores','tipotrabajador','show-trabajador/*','edit-trabajador/*','add-trabajador') ? 'active-dropdown':''  }}" title="Gestión de Personal">
+                    <a href="#" class="{{ Request::is('trabajadores','tipotrabajador','show-trabajador/*','edit-trabajador/*','add-trabajador','admin/pago-sueldo*') ? 'active-dropdown':''  }}" title="Gestión de Personal">
                         <i class="bi bi-people-fill"></i>
                         <span class="menu-text">Trabajadores</span>
                         <i class="bi bi-chevron-down menu-arrow"></i>
@@ -127,6 +127,9 @@
                             </li>
                             <li class="{{ Request::is('tipo-trabajador','show-tipo-trabajador/*','add-tipo-trabajador','edit-tipo-trabajador/*') ? 'active-page-link':''  }}">
                                 <a href="{{ url('tipo-trabajador') }}"><i class="bi bi-tags"></i> Tipos</a>
+                            </li>
+                            <li class="{{ Request::is('admin/pago-sueldo*') ? 'active-page-link':''  }}">
+                                <a href="{{ route('admin.pago-sueldo.index') }}"><i class="bi bi-wallet2"></i> Pagos de Sueldos</a>
                             </li>
                         </ul>
                     </div>

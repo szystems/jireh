@@ -1,0 +1,617 @@
+@extends('layouts.admin')
+@section('content')
+
+    <!-- Content wrapper scroll start -->
+    <div class="content-wrapper-scroll">
+
+        <!-- Main header starts -->
+        <div class="main-header d-flex align-items-center justify-content-between position-relative">
+            <div class="d-flex align-items-center justify-content-center">
+                <div class="page-icon">
+                    <i class="bi bi-pencil-square"></i>
+                </div>
+                <div class="page-title">
+                    <h5>Editar Lote de Sueldos</h5>
+                </div>
+            </div>
+            <!-- Date range start -->
+            <div class="d-flex align-items-end d-none d-sm-block">
+                <h6 class="float-end text-light" id="reloj"></h6>
+            </div>
+        </div>
+        <!-- Main header ends -->
+
+        <!-- Content wrapper start -->
+        <div class="content-wrapper">
+            <div class="subscribe-header">
+                <img src="{{ asset('dashboardtemplate/design/assets/images/bg.jpg') }}" class="img-fluid w-100" alt="Header" />
+            </div>
+            <div class="subscriber-body">
+                <!-- Row start -->
+                <div class="row justify-content-center mt-4">
+                    <div class="col-lg-12">
+                        <!-- Row start -->
+                        <div class="row align-items-end">
+                            <div class="col-auto">
+                                <div class="avatar-circle bg-warning">
+                                    <i class="bi bi-pencil-square text-white display-4"></i>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <h6>Editar Lote: {{ $pagoSueldo->numero_lote }}</h6>
+                                <small class="text-muted">
+                                    Estado: 
+                                    @switch($pagoSueldo->estado)
+                                        @case('pendiente')
+                                            <span class="badge bg-warning">Pendiente</span>
+                                            @break
+                                        @case('pagado')
+                                            <span class="badge bg-success">Pagado</span>
+                                            @break
+                                        @case('cancelado')
+                                            <span class="badge bg-danger">Cancelado</span>
+                                            @break
+                                    @endswitch
+                                </small>
+                            </div>
+                        </div>
+                        <!-- Row end -->
+                    </div>
+                </div>
+                <!-- Row end -->
+
+                @if($pagoSueldo->estado !== 'pendiente')
+                    <div class="row justify-content-center mt-4">
+                        <div class="col-lg-12">
+                            <div class="alert alert-warning">
+                                <i class="bi bi-exclamation-triangle"></i>
+                                <strong>Advertencia:</strong> Solo se pueden editar lotes en estado "Pendiente". 
+                                Este lote está en estado "{{ ucfirst($pagoSueldo->estado) }}".
+                                <div class="mt-2">
+                                    <a href="{{ route('admin.pago-sueldo.show', $pagoSueldo->id) }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i> Ver Detalle
+                                    </a>
+                                    <a href="{{ route('admin.pago-sueldo.index') }}" class="btn btn-sm btn-outline-secondary">
+                                        <i class="bi bi-arrow-left"></i> Volver al Listado
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @else
+                    <!-- Row start -->
+                    <div class="row justify-content-center mt-4">
+                        <div class="col-lg-12">
+                            <div class="card light">
+                                <div class="card-body">
+                                    <div class="custom-tabs-container">
+                                        <ul class="nav nav-tabs" id="customTab2" role="tablist">
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link active" id="tab-oneA" data-bs-toggle="tab" href="#oneA" role="tab"
+                                                    aria-controls="oneA" aria-selected="true">Información del Lote</a>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link" id="tab-twoA" data-bs-toggle="tab" href="#twoA" role="tab"
+                                                    aria-controls="twoA" aria-selected="false">Empleados y Sueldos</a>
+                                            </li>
+                                        </ul>
+                                        <div class="tab-content">
+                                            <!-- Tab 1: Información del Lote -->
+                                            <div class="tab-pane fade show active" id="oneA" role="tabpanel">
+                                                <!-- Row start -->
+                                                <div class="row gx-3">
+                                                    <div class="col-sm-12 col-12">
+                                                        @if (count($errors)>0)
+                                                            <div class="alert alert-danger" role="alert">
+                                                                <ul class="mb-0">
+                                                                    @foreach ($errors->all() as $error)
+                                                                        <li>{{$error}}</li>
+                                                                    @endforeach
+                                                                </ul>
+                                                            </div>
+                                                        @endif
+
+                                                        <form action="{{ route('admin.pago-sueldo.update', $pagoSueldo->id) }}" method="POST" id="pagoSueldoForm" class="needs-validation" novalidate>
+                                                            @csrf
+                                                            @method('PUT')
+
+                                                            <div class="card mb-3">
+                                                                <div class="card-header bg-light">
+                                                                    <h6 class="mb-0"><i class="bi bi-calendar-range"></i> Información del Período</h6>
+                                                                </div>
+                                                                <div class="card-body">
+                                                                    <div class="row">
+                                                                        <div class="col-md-6 mb-3">
+                                                                            <label for="periodo_mes" class="form-label">Mes del Período <span class="text-danger">*</span></label>
+                                                                            <select class="form-select" id="periodo_mes" name="periodo_mes" required>
+                                                                                <option value="">Seleccione el mes</option>
+                                                                                @php
+                                                                                    $meses = [
+                                                                                        1 => 'Enero', 2 => 'Febrero', 3 => 'Marzo', 4 => 'Abril',
+                                                                                        5 => 'Mayo', 6 => 'Junio', 7 => 'Julio', 8 => 'Agosto',
+                                                                                        9 => 'Septiembre', 10 => 'Octubre', 11 => 'Noviembre', 12 => 'Diciembre'
+                                                                                    ];
+                                                                                @endphp
+                                                                                @for($i = 1; $i <= 12; $i++)
+                                                                                    <option value="{{ $i }}" {{ old('periodo_mes', $pagoSueldo->periodo_mes) == $i ? 'selected' : '' }}>
+                                                                                        {{ $meses[$i] }}
+                                                                                    </option>
+                                                                                @endfor
+                                                                            </select>
+                                                                            <div class="invalid-feedback">
+                                                                                Por favor seleccione el mes.
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-md-6 mb-3">
+                                                                            <label for="periodo_anio" class="form-label">Año del Período <span class="text-danger">*</span></label>
+                                                                            <select class="form-select" id="periodo_anio" name="periodo_anio" required>
+                                                                                <option value="">Seleccione el año</option>
+                                                                                @for($year = date('Y') - 1; $year <= date('Y') + 1; $year++)
+                                                                                    <option value="{{ $year }}" {{ old('periodo_anio', $pagoSueldo->periodo_anio) == $year ? 'selected' : '' }}>
+                                                                                        {{ $year }}
+                                                                                    </option>
+                                                                                @endfor
+                                                                            </select>
+                                                                            <div class="invalid-feedback">
+                                                                                Por favor seleccione el año.
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="card mb-3">
+                                                                <div class="card-header bg-light">
+                                                                    <h6 class="mb-0"><i class="bi bi-credit-card"></i> Información de Pago</h6>
+                                                                </div>
+                                                                <div class="card-body">
+                                                                    <div class="row">
+                                                                        <div class="col-md-6 mb-3">
+                                                                            <label for="metodo_pago" class="form-label">Método de Pago <span class="text-danger">*</span></label>
+                                                                            <select class="form-select" id="metodo_pago" name="metodo_pago" required>
+                                                                                <option value="">Seleccione método de pago</option>
+                                                                                <option value="transferencia" {{ old('metodo_pago', $pagoSueldo->metodo_pago) == 'transferencia' ? 'selected' : '' }}>
+                                                                                    Transferencia Bancaria
+                                                                                </option>
+                                                                                <option value="efectivo" {{ old('metodo_pago', $pagoSueldo->metodo_pago) == 'efectivo' ? 'selected' : '' }}>
+                                                                                    Efectivo
+                                                                                </option>
+                                                                                <option value="cheque" {{ old('metodo_pago', $pagoSueldo->metodo_pago) == 'cheque' ? 'selected' : '' }}>
+                                                                                    Cheque
+                                                                                </option>
+                                                                            </select>
+                                                                            <div class="invalid-feedback">
+                                                                                Por favor seleccione el método de pago.
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-md-6 mb-3">
+                                                                            <label for="fecha_pago" class="form-label">Fecha de Pago <span class="text-danger">*</span></label>
+                                                                            <input type="date" class="form-control" id="fecha_pago" name="fecha_pago" 
+                                                                                   value="{{ old('fecha_pago', $pagoSueldo->fecha_pago ? $pagoSueldo->fecha_pago->format('Y-m-d') : '') }}" required>
+                                                                            <div class="invalid-feedback">
+                                                                                Por favor ingrese la fecha de pago.
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="row">
+                                                                        <div class="col-md-6 mb-3">
+                                                                            <label for="estado" class="form-label">Estado del Lote <span class="text-danger">*</span></label>
+                                                                            <select class="form-select" id="estado" name="estado" required>
+                                                                                <option value="pendiente" {{ old('estado', $pagoSueldo->estado) == 'pendiente' ? 'selected' : '' }}>
+                                                                                    <i class="bi bi-clock"></i> Pendiente
+                                                                                </option>
+                                                                                <option value="pagado" {{ old('estado', $pagoSueldo->estado) == 'pagado' ? 'selected' : '' }}>
+                                                                                    <i class="bi bi-check-circle"></i> Pagado
+                                                                                </option>
+                                                                            </select>
+                                                                            <div class="invalid-feedback">
+                                                                                Por favor seleccione el estado del lote.
+                                                                            </div>
+                                                                            <small class="form-text text-muted">
+                                                                                <i class="bi bi-info-circle"></i> 
+                                                                                Pendiente: Se puede editar. Pagado: No se puede modificar.
+                                                                            </small>
+                                                                        </div>
+                                                                        <div class="col-md-6 mb-3">
+                                                                            <!-- Espacio para balance visual -->
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="row">
+                                                                        <div class="col-12 mb-3">
+                                                                            <label for="observaciones" class="form-label">Observaciones</label>
+                                                                            <textarea class="form-control" id="observaciones" name="observaciones" rows="3" 
+                                                                                      placeholder="Observaciones adicionales del lote de sueldos...">{{ old('observaciones', $pagoSueldo->observaciones) }}</textarea>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="d-flex justify-content-between">
+                                                                <a href="{{ route('admin.pago-sueldo.show', $pagoSueldo->id) }}" class="btn btn-secondary">
+                                                                    <i class="bi bi-arrow-left"></i> Cancelar
+                                                                </a>
+                                                                <button type="button" class="btn btn-primary" onclick="nextTab()">
+                                                                    Siguiente: Empleados <i class="bi bi-arrow-right"></i>
+                                                                </button>
+                                                            </div>
+                                                    </div>
+                                                </div>
+                                                <!-- Row end -->
+                                            </div>
+
+                                            <!-- Tab 2: Empleados y Sueldos -->
+                                            <div class="tab-pane fade" id="twoA" role="tabpanel">
+                                                <div class="row gx-3">
+                                                    <div class="col-sm-12 col-12">
+                                                        <div class="card mb-3">
+                                                            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                                                <h6 class="mb-0"><i class="bi bi-people"></i> Empleados del Lote</h6>
+                                                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="agregarEmpleado()">
+                                                                    <i class="bi bi-plus-circle"></i> Agregar Empleado
+                                                                </button>
+                                                            </div>
+                                                            <div class="card-body">
+                                                                <div id="empleados-container">
+                                                                    <!-- Los empleados existentes se cargarán aquí -->
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Resumen del lote -->
+                                                        <div class="card mb-3" id="resumen-card">
+                                                            <div class="card-header bg-success text-white">
+                                                                <h6 class="mb-0"><i class="bi bi-calculator"></i> Resumen del Lote</h6>
+                                                            </div>
+                                                            <div class="card-body">
+                                                                <div class="row text-center">
+                                                                    <div class="col-md-4">
+                                                                        <h6>Total Empleados</h6>
+                                                                        <h4 id="total-empleados" class="text-primary">{{ $pagoSueldo->detalles->count() }}</h4>
+                                                                    </div>
+                                                                    <div class="col-md-4">
+                                                                        <h6>Total Sueldo Base</h6>
+                                                                        <h4 id="total-sueldo" class="text-info">Q{{ number_format($pagoSueldo->detalles->sum('sueldo_base'), 2) }}</h4>
+                                                                    </div>
+                                                                    <div class="col-md-4">
+                                                                        <h6>Total General</h6>
+                                                                        <h4 id="total-general" class="text-success">Q{{ number_format($pagoSueldo->total_monto, 2) }}</h4>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="d-flex justify-content-between">
+                                                            <button type="button" class="btn btn-secondary" onclick="prevTab()">
+                                                                <i class="bi bi-arrow-left"></i> Anterior
+                                                            </button>
+                                                            <button type="submit" class="btn btn-success">
+                                                                <i class="bi bi-check-circle"></i> Actualizar Lote de Sueldos
+                                                            </button>
+                                                        </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Row end -->
+                @endif
+            </div>
+        </div>
+    </div>
+
+@endsection
+
+@section('scripts')
+<script>
+let empleadoIndex = 0;
+const trabajadores = @json($trabajadores);
+const usuarios = @json($usuarios);
+const empleadosExistentes = @json($empleadosExistentes);
+
+console.log('=== EDIT PAGE LOADED ===');
+console.log('Trabajadores:', trabajadores.length);
+console.log('Usuarios:', usuarios.length);
+console.log('Empleados existentes:', empleadosExistentes);
+
+// Agregar interceptor del formulario para debugging
+document.getElementById('pagoSueldoForm').addEventListener('submit', function(e) {
+    console.log('=== FORM SUBMIT INTERCEPTED ===');
+    
+    const formData = new FormData(this);
+    const formObject = {};
+    
+    // Convertir FormData a objeto para ver en consola
+    for (let [key, value] of formData.entries()) {
+        if (formObject[key]) {
+            if (Array.isArray(formObject[key])) {
+                formObject[key].push(value);
+            } else {
+                formObject[key] = [formObject[key], value];
+            }
+        } else {
+            formObject[key] = value;
+        }
+    }
+    
+    console.log('Datos del formulario:', formObject);
+    console.log('Empleados encontrados en el DOM:', document.querySelectorAll('.empleado-item').length);
+    console.log('Inputs de empleados encontrados:', document.querySelectorAll('input[name^="empleados"]').length);
+    console.log('Selects de empleados encontrados:', document.querySelectorAll('select[name^="empleados"]').length);
+    
+    // Verificar campos específicos de empleados
+    const empleadosInputs = document.querySelectorAll('input[name^="empleados"], select[name^="empleados"]');
+    console.log('=== CAMPOS DE EMPLEADOS ===');
+    empleadosInputs.forEach(input => {
+        console.log(`Campo: ${input.name} = ${input.value}`);
+    });
+    
+    // PREVENIR EL SUBMIT TEMPORALMENTE PARA VER EL LOG
+    e.preventDefault();
+    alert('Formulario interceptado para debugging. Revisa la consola y luego presiona F5 para recargar la página.');
+    return false;
+});
+});
+
+const detallesExistentes = @json($pagoSueldo->detalles);
+
+function nextTab() {
+    // Validar primera pestaña
+    const form = document.getElementById('pagoSueldoForm');
+    const firstTabInputs = form.querySelectorAll('#oneA input[required], #oneA select[required]');
+    let valid = true;
+    
+    firstTabInputs.forEach(input => {
+        if (!input.value) {
+            input.classList.add('is-invalid');
+            valid = false;
+        } else {
+            input.classList.remove('is-invalid');
+        }
+    });
+    
+    if (valid) {
+        document.getElementById('tab-twoA').click();
+    }
+}
+
+function prevTab() {
+    document.getElementById('tab-oneA').click();
+}
+
+function agregarEmpleado() {
+    const container = document.getElementById('empleados-container');
+    
+    const empleadoHtml = `
+        <div class="empleado-item border rounded p-3 mb-3" data-index="${empleadoIndex}">
+            <div class="row">
+                <div class="col-md-12 d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="mb-0">Empleado #${empleadoIndex + 1}</h6>
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="removerEmpleado(${empleadoIndex})">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Tipo de Empleado <span class="text-danger">*</span></label>
+                    <select class="form-select" name="empleados[${empleadoIndex}][tipo]" onchange="cargarEmpleados(${empleadoIndex})" required>
+                        <option value="">Seleccione tipo</option>
+                        <option value="trabajador">Trabajador</option>
+                        <option value="vendedor">Usuario/Vendedor</option>
+                    </select>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Empleado <span class="text-danger">*</span></label>
+                    <select class="form-select" name="empleados[${empleadoIndex}][id]" required disabled>
+                        <option value="">Primero seleccione el tipo</option>
+                    </select>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Sueldo Base <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" name="empleados[${empleadoIndex}][sueldo_base]" 
+                           step="0.01" min="0" placeholder="0.00" onchange="calcularTotal(${empleadoIndex})" required>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Bonificaciones Totales</label>
+                    <input type="number" class="form-control" name="empleados[${empleadoIndex}][bonificaciones]" 
+                           step="0.01" min="0" placeholder="0.00" onchange="calcularTotal(${empleadoIndex})">
+                    <small class="text-info">Incluye H.E., comisiones y bonificaciones</small>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Descuentos</label>
+                    <input type="number" class="form-control" name="empleados[${empleadoIndex}][descuentos]" 
+                           step="0.01" min="0" placeholder="0.00" onchange="calcularTotal(${empleadoIndex})">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Total a Pagar</label>
+                    <input type="text" class="form-control total-empleado bg-light" 
+                           id="total-${empleadoIndex}" readonly value="Q0.00">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 mb-3">
+                    <label class="form-label">Observaciones</label>
+                    <input type="text" class="form-control" name="empleados[${empleadoIndex}][observaciones]" 
+                           placeholder="Observaciones del empleado">
+                </div>
+            </div>
+            
+            <!-- Campos ocultos para mantener compatibilidad -->
+            <input type="hidden" name="empleados[${empleadoIndex}][horas_extra]" value="0">
+            <input type="hidden" name="empleados[${empleadoIndex}][valor_hora_extra]" value="0">
+            <input type="hidden" name="empleados[${empleadoIndex}][comisiones]" value="0">
+        </div>
+    `;
+    
+    container.insertAdjacentHTML('beforeend', empleadoHtml);
+    empleadoIndex++;
+    
+    actualizarResumen();
+}
+
+function removerEmpleado(index) {
+    const empleado = document.querySelector(`[data-index="${index}"]`);
+    empleado.remove();
+    actualizarResumen();
+}
+
+function cargarEmpleados(index) {
+    const tipoSelect = document.querySelector(`select[name="empleados[${index}][tipo]"]`);
+    const empleadoSelect = document.querySelector(`select[name="empleados[${index}][id]"]`);
+    
+    empleadoSelect.innerHTML = '<option value="">Seleccione empleado</option>';
+    empleadoSelect.disabled = false;
+    
+    if (tipoSelect.value === 'trabajador') {
+        trabajadores.forEach(trabajador => {
+            empleadoSelect.innerHTML += `<option value="${trabajador.id}">${trabajador.nombre} ${trabajador.apellido}</option>`;
+        });
+    } else if (tipoSelect.value === 'vendedor') {
+        usuarios.forEach(usuario => {
+            empleadoSelect.innerHTML += `<option value="${usuario.id}">${usuario.name}</option>`;
+        });
+    }
+}
+
+function calcularTotal(index) {
+    const sueldoBase = parseFloat(document.querySelector(`input[name="empleados[${index}][sueldo_base]"]`).value) || 0;
+    const bonificaciones = parseFloat(document.querySelector(`input[name="empleados[${index}][bonificaciones]"]`).value) || 0;
+    const descuentos = parseFloat(document.querySelector(`input[name="empleados[${index}][descuentos]"]`).value) || 0;
+    
+    const total = sueldoBase + bonificaciones - descuentos;
+    
+    const totalInput = document.getElementById(`total-${index}`);
+    if (totalInput) {
+        totalInput.value = `Q${total.toFixed(2)}`;
+    }
+    
+    actualizarResumen();
+}
+
+function formatearMoneda(numero) {
+    return new Intl.NumberFormat('es-GT', {
+        style: 'currency',
+        currency: 'GTQ',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }).format(numero).replace('GTQ', 'Q');
+}
+
+function actualizarResumen() {
+    const empleados = document.querySelectorAll('.empleado-item');
+    
+    let totalEmpleados = empleados.length;
+    let totalSueldo = 0;
+    let totalGeneral = 0;
+    
+    empleados.forEach((empleado, index) => {
+        const sueldoBaseInput = empleado.querySelector(`input[name*="[sueldo_base]"]`);
+        const totalInput = empleado.querySelector('.total-empleado');
+        
+        const sueldoBase = sueldoBaseInput ? parseFloat(sueldoBaseInput.value) || 0 : 0;
+        const totalValue = totalInput ? parseFloat(totalInput.value.replace('Q', '')) || 0 : 0;
+        
+        totalSueldo += sueldoBase;
+        totalGeneral += totalValue;
+    });
+    
+    const totalEmpleadosEl = document.getElementById('total-empleados');
+    const totalSueldoEl = document.getElementById('total-sueldo');
+    const totalGeneralEl = document.getElementById('total-general');
+    
+    if (totalEmpleadosEl) totalEmpleadosEl.textContent = totalEmpleados;
+    if (totalSueldoEl) totalSueldoEl.textContent = formatearMoneda(totalSueldo);
+    if (totalGeneralEl) totalGeneralEl.textContent = formatearMoneda(totalGeneral);
+}
+
+// Cargar empleados existentes
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Empleados existentes:', empleadosExistentes);
+    console.log('Cantidad de empleados existentes:', empleadosExistentes.length);
+    
+    empleadosExistentes.forEach((detalle, index) => {
+        // No manipular empleadoIndex aquí, agregarEmpleado() lo maneja
+        console.log(`Agregando empleado existente ${index}:`, detalle);
+        agregarEmpleado();
+        
+        // El empleadoIndex se incrementa en agregarEmpleado(), así que el índice actual es empleadoIndex - 1
+        const currentIndex = empleadoIndex - 1;
+        
+        // Llenar datos existentes
+        const tipoSelect = document.querySelector(`select[name="empleados[${currentIndex}][tipo]"]`);
+        let tipo = detalle.tipo;
+        // Mapear 'vendedor' a 'vendedor' (mantener consistencia)
+        if (tipo === 'vendedor') {
+            tipo = 'vendedor';
+        }
+        console.log(`Estableciendo tipo: ${tipo} para empleado ${currentIndex}`);
+        if (tipoSelect) {
+            tipoSelect.value = tipo;
+        }
+        
+        cargarEmpleados(currentIndex);
+        
+        setTimeout(() => {
+            console.log(`Llenando campos para empleado ${currentIndex}:`, detalle);
+            
+            const empleadoSelect = document.querySelector(`select[name="empleados[${currentIndex}][id]"]`);
+            console.log('Select de empleado encontrado:', !!empleadoSelect);
+            if (empleadoSelect) {
+                empleadoSelect.value = detalle.id;
+                console.log('ID establecido:', detalle.id);
+            }
+            
+            const sueldoInput = document.querySelector(`input[name="empleados[${currentIndex}][sueldo_base]"]`);
+            if (sueldoInput) {
+                sueldoInput.value = detalle.sueldo_base;
+                console.log('Sueldo base establecido:', detalle.sueldo_base);
+            }
+            
+            const bonificacionesInput = document.querySelector(`input[name="empleados[${currentIndex}][bonificaciones]"]`);
+            if (bonificacionesInput) {
+                bonificacionesInput.value = detalle.bonificaciones;
+                console.log('Bonificaciones establecidas:', detalle.bonificaciones);
+            }
+            
+            const descuentosInput = document.querySelector(`input[name="empleados[${currentIndex}][descuentos]"]`);
+            if (descuentosInput) {
+                descuentosInput.value = detalle.descuentos;
+                console.log('Descuentos establecidos:', detalle.descuentos);
+            }
+            
+            const observacionesInput = document.querySelector(`input[name="empleados[${currentIndex}][observaciones]"]`);
+            if (observacionesInput) observacionesInput.value = detalle.observaciones || '';
+            
+            // Mostrar el total calculado
+            const totalInput = document.getElementById(`total-${currentIndex}`);
+            if (totalInput && detalle.total_pagar) {
+                totalInput.value = `Q${parseFloat(detalle.total_pagar).toFixed(2)}`;
+                console.log('Total establecido:', detalle.total_pagar);
+            } else {
+                // Si no hay total guardado, calculamos
+                calcularTotal(currentIndex);
+            }
+        }, 500 + (currentIndex * 100)); // Incrementar delay por empleado
+    });
+    
+    // Actualizar resumen después de cargar todos los empleados
+    setTimeout(() => {
+        actualizarResumen();
+        console.log('Empleados cargados completamente, resumen actualizado');
+        
+        // Debug final: verificar que todos los empleados estén en el formulario
+        console.log('=== VERIFICACIÓN FINAL ===');
+        console.log('Empleados en DOM:', document.querySelectorAll('.empleado-item').length);
+        console.log('Inputs de empleados:', document.querySelectorAll('input[name^="empleados"]').length);
+        console.log('Selects de empleados:', document.querySelectorAll('select[name^="empleados"]').length);
+    }, 800);
+});
+</script>
+@endsection

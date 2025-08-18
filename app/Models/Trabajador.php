@@ -43,6 +43,14 @@ class Trabajador extends Model
     }
 
     /**
+     * Scope para obtener solo trabajadores activos
+     */
+    public function scopeActivos($query)
+    {
+        return $query->where('estado', 1);
+    }
+
+    /**
      * Obtener el nombre completo del trabajador
      */
     public function getNombreCompletoAttribute()
