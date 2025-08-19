@@ -59,7 +59,8 @@
                     </a>
                 </li>
                 
-                <!-- Notificaciones -->
+                <!-- Notificaciones (solo para admins y otros, no vendedores) -->
+                @if(Auth::user()->role_as != 1)
                 <li class="{{ Request::is('notificaciones') ? 'active-page-link':''  }}">
                     <a href="{{ url('/notificaciones') }}">
                         <i class="bi bi-bell"></i>
@@ -67,6 +68,7 @@
                         <span class="badge bg-danger text-white ms-auto" id="notification-count">0</span>
                     </a>
                 </li>
+                @endif
 
                 <!-- Gestión de Clientes y Vehículos -->
                 <li class="menu-category">Gestión de Clientes</li>

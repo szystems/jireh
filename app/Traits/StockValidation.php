@@ -80,11 +80,11 @@ trait StockValidation
             ->get();
         
         if ($componentes->isEmpty()) {
-            Log::warning("Servicio {$servicio->codigo} no tiene componentes definidos");
+            Log::info("Servicio {$servicio->codigo} no tiene componentes definidos - permitiendo como servicio puro");
             return [
-                'valido' => false,
-                'mensaje' => "El servicio {$servicio->codigo} no tiene componentes definidos",
-                'stock_actual' => 0,
+                'valido' => true,
+                'mensaje' => "Servicio puro sin componentes - válido",
+                'stock_actual' => 999999, // Stock "infinito" para servicios puros
                 'stock_requerido' => $cantidadServicio
             ];
         }

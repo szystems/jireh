@@ -980,4 +980,62 @@ class VentaController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Mostrar solo las ventas del vendedor autenticado
+     */
+    public function misVentas(Request $request)
+    {
+        $usuarioId = auth()->user()->id;
+        $query = Venta::with(['cliente', 'detalleVentas', 'vehiculo'])
+            ->where('usuario_id', $usuarioId);
+
+        // Aplicar filtros si existen
+        if ($request->filled('fecha_desde')) {
+            $query->where('fecha', '>=', $request->fecha_desde);
+        } else {
+            $query->where('fecha', '>=', \Carbon\Carbon::now()->subDays(30)->format('Y-m-d'));
+        }
+
+        if ($request->filled('fecha_hasta')) {
+            $query->where('fecha', '<=', $request->fecha_hasta);
+        } else {
+            $query->where('fecha', '<=', \Carbon\Carbon::now()->format('Y-m-d'));
+        }
+
+        if ($request->filled('numero_factura')) {
+            $query->where('numero_factura', 'like', '%' . $request->numero_factura . '%');
+        }
+
+        if ($request->filled('cliente')) {
+            $query->whereHas('cliente', function($q) use ($request) {
+                $q->where('nombre', 'like', '%' . $request->cliente . '%');
+            });
+        }
+
+        $ventas = $query->orderBy('fecha', 'desc')->paginate(15);
+        
+        // Calcular totales del vendedor
+        $totalVentas = Venta::where('usuario_id', $usuarioId)
+            ->with('detalleVentas')
+            ->get()
+            ->sum(function($venta) {
+                return $venta->detalleVentas->sum('sub_total');
+            });
+            
+        $ventasEstesMes = Venta::where('usuario_id', $usuarioId)
+            ->whereMonth('fecha', now()->month)
+            ->whereYear('fecha', now()->year)
+            ->with('detalleVentas')
+            ->get()
+            ->sum(function($venta) {
+                return $venta->detalleVentas->sum('sub_total');
+            });
+        
+        $config = Config::first();
+        
+        return view('admin.ventas.mis-ventas', compact(
+            'ventas', 'config', 'totalVentas', 'ventasEstesMes'
+        ));
+    }
 }

@@ -33,7 +33,7 @@
                 </div>
                 <div class="card-body py-3">
                     <div class="row g-3">
-                        <!-- Nueva Venta -->
+                        <!-- Nueva Venta - Todos los usuarios -->
                         <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
                             <a href="/add-venta" class="btn btn-outline-primary w-100 d-flex flex-column align-items-center py-3 text-decoration-none">
                                 <i class="bi bi-cart-plus fs-3 mb-2"></i>
@@ -42,7 +42,7 @@
                             </a>
                         </div>
 
-                        <!-- Gestión de Ventas -->
+                        <!-- Gestión de Ventas - Todos los usuarios -->
                         <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
                             <a href="/ventas" class="btn btn-outline-success w-100 d-flex flex-column align-items-center py-3 text-decoration-none">
                                 <i class="bi bi-graph-up fs-3 mb-2"></i>
@@ -51,7 +51,7 @@
                             </a>
                         </div>
 
-                        <!-- Inventario -->
+                        <!-- Inventario - Todos los usuarios (consulta) -->
                         <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
                             <a href="/inventario" class="btn btn-outline-warning w-100 d-flex flex-column align-items-center py-3 text-decoration-none">
                                 <i class="bi bi-boxes fs-3 mb-2"></i>
@@ -60,7 +60,8 @@
                             </a>
                         </div>
 
-                        <!-- Comisiones -->
+                        @if(Auth::user()->role_as != 1)
+                        <!-- Comisiones - Solo administradores -->
                         <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
                             <a href="/comisiones" class="btn btn-outline-info w-100 d-flex flex-column align-items-center py-3 text-decoration-none">
                                 <i class="bi bi-currency-dollar fs-3 mb-2"></i>
@@ -68,8 +69,9 @@
                                 <small class="text-muted">Gestión pagos</small>
                             </a>
                         </div>
+                        @endif
 
-                        <!-- Clientes -->
+                        <!-- Clientes - Todos los usuarios -->
                         <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
                             <a href="/clientes" class="btn btn-outline-secondary w-100 d-flex flex-column align-items-center py-3 text-decoration-none">
                                 <i class="bi bi-people fs-3 mb-2"></i>
@@ -78,7 +80,17 @@
                             </a>
                         </div>
 
-                        <!-- Reportes -->
+                        @if(Auth::user()->role_as == 1)
+                        <!-- Mis Comisiones - Solo vendedores -->
+                        <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+                            <a href="{{ route('vendedor.mis_comisiones') }}" class="btn btn-outline-info w-100 d-flex flex-column align-items-center py-3 text-decoration-none">
+                                <i class="bi bi-currency-dollar fs-3 mb-2"></i>
+                                <span class="fw-semibold">Mis Comisiones</span>
+                                <small class="text-muted">Ver mis comisiones</small>
+                            </a>
+                        </div>
+                        @else
+                        <!-- Reportes - Solo administradores -->
                         <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
                             <a href="/reportes/metas" class="btn btn-outline-dark w-100 d-flex flex-column align-items-center py-3 text-decoration-none">
                                 <i class="bi bi-file-text fs-3 mb-2"></i>
@@ -86,9 +98,11 @@
                                 <small class="text-muted">Metas y análisis</small>
                             </a>
                         </div>
+                        @endif
                     </div>
 
-                    <!-- Segunda fila de accesos adicionales -->
+                    <!-- Segunda fila de accesos adicionales - Solo para Administradores -->
+                    @if(Auth::user()->role_as != 1)
                     <div class="row g-3 mt-2">
                         <!-- Artículos -->
                         <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
@@ -138,6 +152,42 @@
                             </a>
                         </div>
                     </div>
+                    @else
+                    <!-- Accesos específicos para Vendedores -->
+                    <div class="row g-3 mt-2">
+                        <!-- Mis Ventas del Mes -->
+                        <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+                            <a href="{{ route('vendedor.mis_ventas') }}" class="btn btn-light w-100 d-flex flex-column align-items-center py-2 text-decoration-none">
+                                <i class="bi bi-graph-up-arrow fs-5 mb-1"></i>
+                                <span class="fw-medium">Mis Ventas</span>
+                            </a>
+                        </div>
+
+                        <!-- Mi Rendimiento -->
+                        <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+                            <a href="{{ route('vendedor.mi_rendimiento') }}" class="btn btn-light w-100 d-flex flex-column align-items-center py-2 text-decoration-none">
+                                <i class="bi bi-trophy fs-5 mb-1"></i>
+                                <span class="fw-medium">Mi Rendimiento</span>
+                            </a>
+                        </div>
+
+                        <!-- Metas Disponibles -->
+                        <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+                            <a href="{{ route('vendedor.metas_disponibles') }}" class="btn btn-light w-100 d-flex flex-column align-items-center py-2 text-decoration-none">
+                                <i class="bi bi-bullseye fs-5 mb-1"></i>
+                                <span class="fw-medium">Metas</span>
+                            </a>
+                        </div>
+
+                        <!-- Mi Perfil -->
+                        <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+                            <a href="/show-user/{{ Auth::id() }}" class="btn btn-light w-100 d-flex flex-column align-items-center py-2 text-decoration-none">
+                                <i class="bi bi-person-circle fs-5 mb-1"></i>
+                                <span class="fw-medium">Mi Perfil</span>
+                            </a>
+                        </div>
+                    </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -183,6 +233,8 @@
 
     <!-- KPIs Cards Unificados -->
     <div class="row mb-4">
+        @if (Auth::user()->role_as != 1)
+        <!-- Métricas Ejecutivas - Solo Administradores -->
         <div class="col-xl-3 col-lg-4 col-md-6">
             <div class="card stats-card bg-primary-gradient">
                 <div class="card-body">
@@ -248,7 +300,9 @@
                 </div>
             </div>
         </div>
+        @endif
 
+        <!-- Métricas Comunes - Visibles para Todos -->
         <div class="col-xl-2 col-lg-4 col-md-6">
             <div class="card stats-card bg-warning-gradient">
                 <div class="card-body">
@@ -294,7 +348,8 @@
         </div>
     </div>
 
-    <!-- Resumen Financiero Unificado -->
+    @if (Auth::user()->role_as != 1)
+    <!-- Resumen Financiero Unificado - Solo Administradores -->
     <div class="row mb-4">
         <div class="col-xl-8">
             <div class="card border-0 shadow-sm">
@@ -429,6 +484,47 @@
             </div>
         </div>
     </div>
+    @else
+    <!-- Vista Simplificada para Vendedores -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-gradient-success text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-person-check me-2"></i>
+                        Dashboard del Vendedor
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="vendor-metric">
+                                <i class="bi bi-calendar3 text-success mb-3" style="font-size: 2rem;"></i>
+                                <h4>Bienvenido, {{ Auth::user()->name }}</h4>
+                                <p class="text-muted">Sistema de Gestión - Jireh</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="vendor-actions">
+                                <h6 class="text-muted mb-3">Acciones Disponibles</h6>
+                                <div class="d-grid gap-2">
+                                    <a href="{{ url('articulos') }}" class="btn btn-outline-primary">
+                                        <i class="bi bi-box-seam me-1"></i>
+                                        Ver Inventario
+                                    </a>
+                                    <a href="{{ route('admin.ventas.index') }}" class="btn btn-outline-success">
+                                        <i class="bi bi-cash-stack me-1"></i>
+                                        Gestionar Ventas
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
 
     
 
@@ -439,7 +535,11 @@
                 <div class="card-header">
                     <h5 class="card-title mb-0">
                         <i class="bi bi-graph-up text-primary me-2"></i>
-                        Tendencia de Ventas - Últimos 12 meses
+                        @if(auth()->user()->role_as == 1)
+                            Mis Ventas - Últimos 12 meses
+                        @else
+                            Tendencia de Ventas - Últimos 12 meses
+                        @endif
                     </h5>
                 </div>
                 <div class="card-body">
@@ -554,7 +654,13 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">Ventas Recientes</h5>
+                    <h5 class="card-title mb-0">
+                        @if(auth()->user()->role_as == 1)
+                            Mis Ventas Recientes
+                        @else
+                            Ventas Recientes
+                        @endif
+                    </h5>
                     <a href="{{ url('ventas') }}" class="btn btn-sm btn-primary">
                         <i class="bi bi-eye me-1"></i>
                         Ver Todas
@@ -567,6 +673,9 @@
                                 <tr>
                                     <th>Fecha</th>
                                     <th>Cliente</th>
+                                    @if(auth()->user()->role_as != 1)
+                                        <th>Vendedor</th>
+                                    @endif
                                     <th>Total</th>
                                     <th>Estado</th>
                                     <th>Acciones</th>
@@ -577,6 +686,13 @@
                                 <tr>
                                     <td>{{ \Carbon\Carbon::parse($venta->fecha)->format('d/m/Y') }}</td>
                                     <td>{{ $venta->cliente->nombre ?? 'Cliente no especificado' }}</td>
+                                    @if(auth()->user()->role_as != 1)
+                                        <td>
+                                            <span class="badge bg-info">
+                                                {{ $venta->usuario->name ?? 'No asignado' }}
+                                            </span>
+                                        </td>
+                                    @endif
                                     <td>{{ $config->currency_simbol }}.{{ number_format($venta->total_calculado, 2) }}</td>
                                     <td>
                                         <span class="badge {{ $venta->estado ? 'bg-success' : 'bg-danger' }}">
@@ -952,7 +1068,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         },
         series: [{
-            name: 'Ventas',
+            name: @if(auth()->user()->role_as == 1) 'Mis Ventas' @else 'Ventas' @endif,
             data: @json($data['ventas']['por_mes'])
         }],
         xaxis: {

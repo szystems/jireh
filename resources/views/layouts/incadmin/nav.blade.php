@@ -59,7 +59,7 @@
                         <span class="status online"></span>
                     </span>
                 </a>
-                <div class="dropdown-menu dropdown-menu-end shadow-lg" aria-labelledby="userSettings">
+                <div class="dropdown-menu dropdown-menu-end shadow-lg user-dropdown-menu" aria-labelledby="userSettings">
                     <div class="dropdown-header d-flex align-items-center">
                         <div class="user-avatar me-3">
                             @if (Auth::user()->fotografia != null)
@@ -122,8 +122,33 @@
     color: #0d6efd;
 }
 
+/* Fix para el z-index del dropdown del usuario - Solución específica */
+.header-profile {
+    position: relative;
+    z-index: 999999; /* Z-index máximo para el contenedor del perfil */
+}
+
+.header-profile .dropdown {
+    position: relative;
+    z-index: 999999;
+}
+
+/* Forzar el dropdown fuera del contexto de apilamiento normal */
+.user-dropdown-menu {
+    position: fixed !important; /* Fixed positioning para salir del stacking context */
+    z-index: 9999999 !important; /* Z-index extremadamente alto */
+    min-width: 280px;
+    border: 1px solid rgba(0,0,0,.15);
+    background-color: #fff !important;
+    background-clip: padding-box;
+    border-radius: 0.375rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.175) !important;
+    /* El posicionamiento se calculará dinámicamente con JavaScript */
+}
+
 .header-profile-actions .dropdown-item {
     padding: 0.5rem 1rem;
+    white-space: nowrap;
 }
 
 .header-profile-actions .dropdown-item:hover {
@@ -132,6 +157,8 @@
 
 .dropdown-header {
     padding: 1rem;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
 }
 
 .user-settings:hover {
@@ -140,6 +167,12 @@
 
 .user-name {
     margin-right: 0.5rem;
+}
+
+/* Asegurar que el page-header no interfiera */
+.page-header {
+    position: relative;
+    z-index: 100; /* Z-index bajo para que no interfiera con el dropdown */
 }
 
 /* Corrección para dispositivos móviles */
@@ -151,15 +184,99 @@
     .header-action-link {
         padding: 0.25rem;
     }
+    
+    .user-dropdown-menu {
+        min-width: 250px;
+        right: 0 !important;
+        left: auto !important;
+    }
+}
+
+/* Asegurar que el dropdown esté visible en todas las condiciones */
+.dropdown-menu.show {
+    display: block !important;
+    z-index: 9999999 !important; /* Z-index extremo para estar encima de absolutamente todo */
+}
+
+/* Regla específica para controlar el Dashboard Header que interfiere */
+.content-wrapper .page-header,
+.main-container .page-header {
+    position: relative !important;
+    z-index: 1 !important; /* Z-index muy bajo para que no interfiera nunca */
 }
 </style>
 
-<!-- Initialize tooltips -->
+<!-- Script para posicionar correctamente el dropdown con position: fixed -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar tooltips
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl);
     });
+
+    // Posicionamiento correcto del dropdown con position: fixed
+    const userSettingsBtn = document.getElementById('userSettings');
+    const userDropdownMenu = document.querySelector('.user-dropdown-menu');
+    
+    if (userSettingsBtn && userDropdownMenu) {
+        // Prevenir que el dropdown se cierre cuando se hace click dentro del dropdown
+        userDropdownMenu.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+        
+        userSettingsBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Calcular posición del botón
+            const btnRect = this.getBoundingClientRect();
+            
+            // Posicionar el dropdown
+            userDropdownMenu.style.top = (btnRect.bottom + 5) + 'px';
+            userDropdownMenu.style.left = (btnRect.right - 280) + 'px'; // 280px es el ancho del dropdown
+            
+            // Asegurar que no se salga de la pantalla
+            const viewportWidth = window.innerWidth;
+            if (parseInt(userDropdownMenu.style.left) < 10) {
+                userDropdownMenu.style.left = '10px';
+            }
+            if (parseInt(userDropdownMenu.style.left) + 280 > viewportWidth - 10) {
+                userDropdownMenu.style.left = (viewportWidth - 290) + 'px';
+            }
+            
+            // Toggle dropdown usando Bootstrap
+            const dropdown = new bootstrap.Dropdown(this);
+            dropdown.toggle();
+        });
+        
+        // Actualizar posición cuando se redimensiona la ventana
+        window.addEventListener('resize', function() {
+            if (userDropdownMenu.classList.contains('show')) {
+                const btnRect = userSettingsBtn.getBoundingClientRect();
+                userDropdownMenu.style.top = (btnRect.bottom + 5) + 'px';
+                userDropdownMenu.style.left = (btnRect.right - 280) + 'px';
+                
+                const viewportWidth = window.innerWidth;
+                if (parseInt(userDropdownMenu.style.left) < 10) {
+                    userDropdownMenu.style.left = '10px';
+                }
+                if (parseInt(userDropdownMenu.style.left) + 280 > viewportWidth - 10) {
+                    userDropdownMenu.style.left = (viewportWidth - 290) + 'px';
+                }
+            }
+        });
+        
+        // Cerrar dropdown al hacer click fuera (pero no en elementos que interfieren)
+        document.addEventListener('click', function(e) {
+            if (!userSettingsBtn.contains(e.target) && !userDropdownMenu.contains(e.target)) {
+                if (userDropdownMenu.classList.contains('show')) {
+                    const dropdown = bootstrap.Dropdown.getInstance(userSettingsBtn);
+                    if (dropdown) {
+                        dropdown.hide();
+                    }
+                }
+            }
+        });
+    }
 });
 </script>

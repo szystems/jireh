@@ -240,12 +240,12 @@ Route::middleware(['auth'])->group(function () {
     Route::post('ventas/{venta}/detalles/{detalle}/restore', [VentaController::class, 'restoreDetalle'])->name('admin.ventas.detalle.restore');
 
 
-    // OBSOLETO: Módulo de pagos genérico - Reemplazado por sistema de comisiones
-    // Route::get('pagos', [PagoController::class, 'index']);
-    // Route::post('pagos', [PagoController::class, 'store']);
-    // Route::put('pagos/{id}', [PagoController::class, 'update']);
-    // Route::delete('pagos/{id}', [PagoController::class, 'destroy']);
-
+    // Reactivado: Ruta para registrar pagos de ventas
+    Route::post('pagos', [PagoController::class, 'store'])->name('pagos.store');
+    // Reactivado: Ruta para actualizar pagos de ventas
+    Route::put('pagos/{id}', [PagoController::class, 'update'])->name('pagos.update');
+    // Reactivado: Ruta para eliminar pagos de ventas
+    Route::delete('pagos/{id}', [PagoController::class, 'destroy'])->name('pagos.destroy');
     //Reportes Articulos
     Route::get('reportearticulos', [ReporteArticuloController::class, 'index']);
     Route::get('reportearticulos/export/pdf', [ReporteArticuloController::class, 'exportPdf'])->name('reportearticulo.export.pdf');
@@ -436,4 +436,24 @@ Route::get('/test-prevencion', function() {
 // Ruta de prueba simplificada para prevención (sin autenticación)
 Route::get('/prevencion-simple', function() {
     return view('admin.prevencion.dashboard-simple');
+});
+
+// ============================================================================
+// RUTAS ESPECÍFICAS PARA VENDEDORES (Control de Acceso por Rol)
+// ============================================================================
+Route::middleware(['auth'])->group(function () {
+    // Rutas solo para vendedores con filtrado automático
+    Route::prefix('vendedor')->name('vendedor.')->group(function() {
+        // Dashboard de comisiones personal
+        Route::get('/mis-comisiones', [ComisionController::class, 'dashboardVendedor'])->name('mis_comisiones');
+        
+        // Mis ventas filtradas automáticamente
+        Route::get('/mis-ventas', [VentaController::class, 'misVentas'])->name('mis_ventas');
+        
+        // Mi rendimiento personal
+        Route::get('/mi-rendimiento', [DashboardController::class, 'miRendimiento'])->name('mi_rendimiento');
+        
+        // Vista de metas (solo lectura para vendedores)
+        Route::get('/metas-disponibles', [ReporteMetasController::class, 'metasVendedor'])->name('metas_disponibles');
+    });
 });

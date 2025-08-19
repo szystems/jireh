@@ -175,15 +175,20 @@
                                             </td>
                                             <td><small>{{ Str::limit($articulo->descripcion, 50) }}</small></td>
                                             <td class="text-center">
-                                                <div>Compra: <strong><span class="text-danger">{{ $config->currency_simbol }}.{{ number_format($articulo->precio_compra, 2, '.', ',') }}</span></strong></div>
-                                                <div>Venta: <strong><span class="text-success">{{ $config->currency_simbol }}.{{ number_format($articulo->precio_venta, 2, '.', ',') }}</span></strong></div>
-                                                <small class="text-muted">Ganancia: 
-                                                    @if($articulo->precio_compra > 0)
-                                                        {{ number_format((($articulo->precio_venta - $articulo->precio_compra) / $articulo->precio_compra) * 100, 1) }}%
-                                                    @else
-                                                        N/A
-                                                    @endif
-                                                </small>
+                                                @if (Auth::user()->role_as != 1)
+                                                    <div>Compra: <strong><span class="text-danger">{{ $config->currency_simbol }}.{{ number_format($articulo->precio_compra, 2, '.', ',') }}</span></strong></div>
+                                                    <div>Venta: <strong><span class="text-success">{{ $config->currency_simbol }}.{{ number_format($articulo->precio_venta, 2, '.', ',') }}</span></strong></div>
+                                                    <small class="text-muted">Ganancia: 
+                                                        @if($articulo->precio_compra > 0)
+                                                            {{ number_format((($articulo->precio_venta - $articulo->precio_compra) / $articulo->precio_compra) * 100, 1) }}%
+                                                        @else
+                                                            N/A
+                                                        @endif
+                                                    </small>
+                                                @else
+                                                    <div>Precio: <strong><span class="text-success">{{ $config->currency_simbol }}.{{ number_format($articulo->precio_venta, 2, '.', ',') }}</span></strong></div>
+                                                    <small class="text-muted">Solo precio de venta</small>
+                                                @endif
                                             </td>
                                             <td class="text-center">
                                                 @if($articulo->tipo == 'servicio')

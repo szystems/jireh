@@ -107,7 +107,8 @@
                                             </div>
                                         </div>
 
-                                        <!-- Análisis de Rentabilidad -->
+                                        @if (Auth::user()->role_as != 1)
+                                        <!-- Análisis de Rentabilidad - Solo Administradores -->
                                         <div class="card mb-3">
                                             <div class="card-header bg-light">
                                                 <h6 class="mb-0"><i class="bi bi-graph-up"></i> Análisis de Rentabilidad</h6>
@@ -189,6 +190,25 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        @else
+                                        <!-- Vista Simplificada para Vendedores -->
+                                        <div class="card mb-3">
+                                            <div class="card-header bg-light">
+                                                <h6 class="mb-0"><i class="bi bi-tag"></i> Información de Precio</h6>
+                                            </div>
+                                            <div class="card-body p-3">
+                                                <table class="table table-sm">
+                                                    <tbody>
+                                                        <tr>
+                                                            <td class="text-start">Precio de venta</td>
+                                                            <td class="text-end text-success fw-bold">{{ $config->currency_simbol }}.{{ number_format($articulo->precio_venta, 2) }}</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                                <small class="text-muted">Información disponible para vendedores</small>
+                                            </div>
+                                        </div>
+                                        @endif
                                     </div>
 
                                     <!-- Stock -->

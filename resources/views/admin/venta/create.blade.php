@@ -58,7 +58,7 @@
                                     <div class="col-md-6 mb-3">
                                         <label for="tipo_venta" class="form-label">Tipo de Venta</label>
                                         <select class="form-control" id="tipo_venta" name="tipo_venta" required>
-                                            <option value="Car Wash" {{ old('tipo_venta') == 'Car Wash' ? 'selected' : '' }}>Car Wash</option>
+                                            <option value="Car Wash" {{ old('tipo_venta', 'Car Wash') == 'Car Wash' ? 'selected' : '' }}>Car Wash</option>
                                             <option value="CDS" {{ old('tipo_venta') == 'CDS' ? 'selected' : '' }}>CDS</option>
                                         </select>
                                     </div>

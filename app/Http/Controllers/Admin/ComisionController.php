@@ -233,6 +233,14 @@ class ComisionController extends Controller
      */
     private function aplicarFiltrosAvanzados($query, $request)
     {
+        // FILTRO AUTOMÁTICO DE SEGURIDAD: Los vendedores solo ven sus propias comisiones
+        if (auth()->user()->role_as == 1) {
+            $query->where(function($q) {
+                $q->where('commissionable_type', 'App\\Models\\User')
+                  ->where('commissionable_id', auth()->user()->id);
+            });
+        }
+
         // Filtro por fechas específicas
         if ($request->filled('fecha_inicio') && $request->filled('fecha_fin')) {
             $query->whereBetween('fecha_calculo', [
@@ -262,14 +270,14 @@ class ComisionController extends Controller
             $query->where('monto', '<=', $request->monto_maximo);
         }
 
-        // FILTROS ESPECÍFICOS POR TRABAJADOR
-        if ($request->filled('trabajador_id')) {
+        // FILTROS ESPECÍFICOS POR TRABAJADOR (Solo para administradores)
+        if (auth()->user()->role_as != 1 && $request->filled('trabajador_id')) {
             $query->where('commissionable_type', 'App\\Models\\Trabajador')
                   ->where('commissionable_id', $request->trabajador_id);
         }
 
-        // Filtro por tipo de trabajador (necesita join con tabla trabajadores y tipo_trabajadors)
-        if ($request->filled('tipo_trabajador')) {
+        // Filtro por tipo de trabajador (Solo para administradores)
+        if (auth()->user()->role_as != 1 && $request->filled('tipo_trabajador')) {
             $query->where('commissionable_type', 'App\\Models\\Trabajador')
                   ->whereHas('commissionable.tipoTrabajador', function($q) use ($request) {
                       switch ($request->tipo_trabajador) {
@@ -290,8 +298,8 @@ class ComisionController extends Controller
                   });
         }
 
-        // FILTROS ESPECÍFICOS POR VENDEDOR  
-        if ($request->filled('vendedor_id')) {
+        // FILTROS ESPECÍFICOS POR VENDEDOR (Solo para administradores)
+        if (auth()->user()->role_as != 1 && $request->filled('vendedor_id')) {
             $query->where('commissionable_type', 'App\\Models\\User')
                   ->where('commissionable_id', $request->vendedor_id);
         }
@@ -503,37 +511,48 @@ class ComisionController extends Controller
     {
         $config = Config::first();
         
+        // FILTRO DE SEGURIDAD: Los vendedores solo ven sus propios datos
+        $baseQuery = Comision::query();
+        if (auth()->user()->role_as == 1) {
+            $baseQuery->where('commissionable_type', 'App\\Models\\User')
+                      ->where('commissionable_id', auth()->user()->id);
+        }
+        
         // === ESTADÍSTICAS PRINCIPALES ===
         
-        // Comisiones pendientes
-        $comisionesPendientes = Comision::where('estado', 'pendiente')->sum('monto');
-        $cantidadPendientes = Comision::where('estado', 'pendiente')->count();
+        // Comisiones pendientes (filtradas por usuario si es vendedor)
+        $comisionesPendientes = (clone $baseQuery)->where('estado', 'pendiente')->sum('monto');
+        $cantidadPendientes = (clone $baseQuery)->where('estado', 'pendiente')->count();
         
-        // Comisiones pagadas este mes (usando created_at es más preciso que updated_at)
-        $comisionesPagadasMes = Comision::where('estado', 'pagado')
+        // Comisiones pagadas este mes (filtradas por usuario si es vendedor)
+        $comisionesPagadasMes = (clone $baseQuery)->where('estado', 'pagado')
             ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
             ->sum('monto');
-        $cantidadPagadasMes = Comision::where('estado', 'pagado')
+        $cantidadPagadasMes = (clone $baseQuery)->where('estado', 'pagado')
             ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
             ->count();
         
-        // Lotes de pago recientes (últimos 30 días) - ya que no hay pendientes
-        $lotesPendientes = LotePago::where('created_at', '>=', now()->subDays(30))->count();
-        $montoLotesPendientes = LotePago::where('created_at', '>=', now()->subDays(30))->sum('monto_total');
-        
-        // Todas las metas activas (no solo mensuales)
-        $metasProximasVencer = MetaVenta::where('estado', true)->count();
+        // Lotes de pago recientes - Solo administradores
+        if (auth()->user()->role_as != 1) {
+            $lotesPendientes = LotePago::where('created_at', '>=', now()->subDays(30))->count();
+            $montoLotesPendientes = LotePago::where('created_at', '>=', now()->subDays(30))->sum('monto_total');
+            $metasProximasVencer = MetaVenta::where('estado', true)->count();
+        } else {
+            $lotesPendientes = 0;
+            $montoLotesPendientes = 0;
+            $metasProximasVencer = 0;
+        }
             
-        // === DISTRIBUCIÓN POR TIPOS ===
-        $comisionesPorTipo = Comision::select('tipo_comision', DB::raw('SUM(monto) as total_monto'), DB::raw('COUNT(*) as cantidad'))
+        // === DISTRIBUCIÓN POR TIPOS (filtrada) ===
+        $comisionesPorTipo = (clone $baseQuery)->select('tipo_comision', DB::raw('SUM(monto) as total_monto'), DB::raw('COUNT(*) as cantidad'))
             ->where('estado', 'pendiente')
             ->groupBy('tipo_comision')
             ->get();
             
-        // === TENDENCIAS MENSUALES (últimos 6 meses por fecha de creación) ===
-        $tendenciaMensual = Comision::select(
+        // === TENDENCIAS MENSUALES (filtrada) ===
+        $tendenciaMensual = (clone $baseQuery)->select(
                 DB::raw('YEAR(created_at) as año'),
                 DB::raw('MONTH(created_at) as mes'),
                 DB::raw('SUM(monto) as total'),
@@ -546,9 +565,13 @@ class ComisionController extends Controller
             ->get();
             
         // === TOP BENEFICIARIOS ===
-        // Top vendedores por comisiones (histórico total, no solo pendientes)
-        $topVendedoresData = Comision::where('commissionable_type', 'App\Models\User')
-            ->select('commissionable_id', DB::raw('SUM(monto) as total_comisiones'), DB::raw('COUNT(*) as cantidad'))
+        // Top vendedores por comisiones (filtrado)
+        $topVendedoresQuery = Comision::where('commissionable_type', 'App\Models\User');
+        if (auth()->user()->role_as == 1) {
+            $topVendedoresQuery->where('commissionable_id', auth()->user()->id);
+        }
+        
+        $topVendedoresData = $topVendedoresQuery->select('commissionable_id', DB::raw('SUM(monto) as total_comisiones'), DB::raw('COUNT(*) as cantidad'))
             ->groupBy('commissionable_id')
             ->orderBy('total_comisiones', 'desc')
             ->limit(5)
@@ -565,24 +588,28 @@ class ComisionController extends Controller
             ];
         });
             
-        // Top trabajadores por comisiones (histórico total, no solo pendientes)
-        $topTrabajadoresData = Comision::where('commissionable_type', 'App\Models\Trabajador')
-            ->select('commissionable_id', DB::raw('SUM(monto) as total_comisiones'), DB::raw('COUNT(*) as cantidad'))
-            ->groupBy('commissionable_id')
-            ->orderBy('total_comisiones', 'desc')
-            ->limit(5)
-            ->get();
-            
-        // Cargar los trabajadores correspondientes
-        $topTrabajadores = $topTrabajadoresData->map(function($item) {
-            $trabajador = Trabajador::find($item->commissionable_id);
-            return (object)[
-                'commissionable_id' => $item->commissionable_id,
-                'total_comisiones' => $item->total_comisiones,
-                'cantidad' => $item->cantidad,
-                'commissionable' => $trabajador
-            ];
-        });
+        // Top trabajadores por comisiones - Solo administradores
+        if (auth()->user()->role_as != 1) {
+            $topTrabajadoresData = Comision::where('commissionable_type', 'App\Models\Trabajador')
+                ->select('commissionable_id', DB::raw('SUM(monto) as total_comisiones'), DB::raw('COUNT(*) as cantidad'))
+                ->groupBy('commissionable_id')
+                ->orderBy('total_comisiones', 'desc')
+                ->limit(5)
+                ->get();
+                
+            // Cargar los trabajadores correspondientes
+            $topTrabajadores = $topTrabajadoresData->map(function($item) {
+                $trabajador = Trabajador::find($item->commissionable_id);
+                return (object)[
+                    'commissionable_id' => $item->commissionable_id,
+                    'total_comisiones' => $item->total_comisiones,
+                    'cantidad' => $item->cantidad,
+                    'commissionable' => $trabajador
+                ];
+            });
+        } else {
+            $topTrabajadores = collect();
+        }
             
         // === ACTIVIDAD RECIENTE ===
         // Últimas comisiones generadas
@@ -1793,5 +1820,57 @@ class ComisionController extends Controller
         }
         
         return empty($filtros) ? 'Sin filtros aplicados' : implode(' | ', $filtros);
+    }
+
+    /**
+     * Dashboard específico para vendedores - Solo sus comisiones
+     */
+    public function dashboardVendedor()
+    {
+        $usuarioId = auth()->user()->id;
+        $config = Config::first();
+        
+        // Solo comisiones del vendedor actual
+        $comisiones = Comision::with(['venta.cliente', 'trabajador', 'metaVenta'])
+            ->where('commissionable_type', 'App\\Models\\User')
+            ->where('commissionable_id', $usuarioId)
+            ->orderBy('fecha_calculo', 'desc')
+            ->paginate(15);
+        
+        // Métricas del vendedor
+        $totalComisiones = Comision::where('commissionable_type', 'App\\Models\\User')
+            ->where('commissionable_id', $usuarioId)
+            ->sum('monto');
+            
+        $comisionesPendientes = Comision::where('commissionable_type', 'App\\Models\\User')
+            ->where('commissionable_id', $usuarioId)
+            ->where('estado', 'pendiente')
+            ->sum('monto');
+            
+        $comisionesPagadas = Comision::where('commissionable_type', 'App\\Models\\User')
+            ->where('commissionable_id', $usuarioId)
+            ->where('estado', 'pagada')
+            ->sum('monto');
+            
+        // Comisiones por mes (últimos 6 meses)
+        $comisionesPorMes = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $fecha = Carbon::now()->subMonths($i);
+            $monto = Comision::where('commissionable_type', 'App\\Models\\User')
+                ->where('commissionable_id', $usuarioId)
+                ->whereYear('fecha_calculo', $fecha->year)
+                ->whereMonth('fecha_calculo', $fecha->month)
+                ->sum('monto');
+                
+            $comisionesPorMes[] = [
+                'mes' => $fecha->format('M Y'),
+                'monto' => $monto
+            ];
+        }
+        
+        return view('admin.comisiones.dashboard-vendedor', compact(
+            'config', 'comisiones', 'totalComisiones', 'comisionesPendientes',
+            'comisionesPagadas', 'comisionesPorMes'
+        ));
     }
 }

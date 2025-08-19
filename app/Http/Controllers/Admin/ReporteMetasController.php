@@ -571,4 +571,62 @@ class ReporteMetasController extends Controller
         
         return null;
     }
+
+    /**
+     * Vista de metas disponibles para vendedores (solo lectura)
+     */
+    public function metasVendedor()
+    {
+        $usuarioId = auth()->user()->id;
+        
+        // Verificar que sea vendedor
+        if (auth()->user()->role_as != 1) {
+            return redirect()->route('dashboard')->with('error', 'Acceso no autorizado');
+        }
+        
+        // Obtener metas activas
+        $metas = MetaVenta::where('estado', true)
+            ->orderBy('monto_minimo', 'asc')
+            ->get();
+        
+        // Calcular mis ventas del mes actual
+        $misVentasMes = Venta::where('usuario_id', $usuarioId)
+            ->whereMonth('fecha', now()->month)
+            ->whereYear('fecha', now()->year)
+            ->with('detalleVentas')
+            ->get()
+            ->sum(function($venta) {
+                return $venta->detalleVentas->sum('sub_total');
+            });
+        
+        // Determinar mi meta alcanzada
+        $miMetaAlcanzada = null;
+        foreach ($metas as $meta) {
+            if ($misVentasMes >= $meta->monto_minimo) {
+                if (is_null($meta->monto_maximo) || $misVentasMes <= $meta->monto_maximo) {
+                    $miMetaAlcanzada = $meta;
+                }
+            }
+        }
+        
+        // Calcular progreso hacia cada meta
+        $metasConProgreso = $metas->map(function($meta) use ($misVentasMes) {
+            $progreso = 0;
+            if ($meta->monto_minimo > 0) {
+                $progreso = min(100, ($misVentasMes / $meta->monto_minimo) * 100);
+            }
+            
+            $meta->progreso = $progreso;
+            $meta->alcanzada = $progreso >= 100;
+            $meta->faltante = max(0, $meta->monto_minimo - $misVentasMes);
+            
+            return $meta;
+        });
+        
+        $config = Config::first();
+        
+        return view('admin.metas.vendedor-metas', compact(
+            'config', 'metasConProgreso', 'misVentasMes', 'miMetaAlcanzada'
+        ));
+    }
 }

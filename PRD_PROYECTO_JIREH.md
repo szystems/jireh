@@ -1,7 +1,7 @@
 # PRD - Proyecto Jireh - Sistema de Gestión Integral
 
 **Fecha de creación:** Agosto 6, 2025  
-**Última actualización:** Agosto 15, 2025 - Módulo de Pagos de Sueldos 100% COMPLETADO  
+**Última actualización:** Agosto 19, 2025 - Módulo de Pagos de Sueldos 100% COMPLETADO  
 **Versión:** 2.3  
 **Estado:** PROYECTO 100% COMPLETADO + MÓDULO DE SUELDOS COMPLETAMENTE FUNCIONAL
 
@@ -756,7 +756,7 @@ Route::group(['prefix' => 'api/notificaciones'], function () {
 - ✅ Información sensible de otros usuarios protegida
 - ✅ Roles y permisos claramente identificados
 
-**🔍 Áreas Pendientes de Auditoría:**
+**🔍 ÁREAS PENDIENTES DE AUDITORÍA:**
 - ❓ **Reportes de Artículos**: Verificar exposición de precios de costo
 - ❓ **Dashboard Ejecutivo**: Revisar métricas financieras sensibles  
 - ❓ **Sistema de Inventario**: Controlar acceso a márgenes de ganancia
@@ -1298,7 +1298,7 @@ php tools/TESTING_DESARROLLO/test_carwash_final.php
 **⚡ VENTAJAS TÉCNICAS:**
 - Reducir 9 vistas a 4 vistas con pestañas
 - Consolidar lógica en menos controladores  
-- Flujo UX: Ver → Filtrar → Seleccionar → Pagar (sin cambiar de pantalla)
+- Flujo UX: Ver→Filtrar→Seleccionar→Pagar (sin cambiar de pantalla)
 - Mantenimiento más simple
 
 **📂 VISTAS ACTUALES IDENTIFICADAS:**
@@ -1339,8 +1339,8 @@ pagos_comisiones/
 **FASE 4: Actualizar sidebar**
 4. Reducir 9 elementos a 4 elementos:
    - Dashboard Comisiones (actual)
-   - Gestión de Comisiones (nuevo - consolidado)
-   - Centro de Pagos (nuevo - consolidado)  
+   - Gestión de Comisiones (consolidado)
+   - Centro de Pagos (consolidado)  
    - Metas de Ventas (actual)
 
 **⚠️ CONSIDERACIONES CRÍTICAS:**
@@ -1375,10 +1375,6 @@ Basándome en el análisis quirúrgico realizado, **SÍ RECOMIENDO la consolidac
 - ✅ **Funcionalidad 100%:** Mantener todas las funciones existentes
 - ✅ **Performance:** Menos consultas duplicadas
 - ✅ **Testing:** Validar los 3 tipos de comisiones (vendedores, mecánicos, carwash)
-
-**¿Procedemos con la implementación de esta consolidación?**
-
-La estructura actual está bien implementada técnicamente, pero la experiencia de usuario y mantenimiento pueden mejorar significativamente con esta consolidación inteligente.
 
 ---
 
@@ -1517,176 +1513,14 @@ La estructura actual está bien implementada técnicamente, pero la experiencia 
 - ✅ **Selección masiva**: Interface para procesamiento múltiple
 - ✅ **API endpoints**: Separación backend/frontend para mejor rendimiento
 
----
-
-## 📞 INFORMACIÓN TÉCNICA
-
-### Configuración del Entorno:
-- **PHP:** 7.4+
-- **MySQL:** 5.7+
-- **Laravel:** 8.x
-- **Composer:** 2.x
-- **Node.js:** 14.x+
-
-### Variables de Entorno Clave:
-```
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=jireh
-DB_USERNAME=root
-DB_PASSWORD=
-```
-
-### Archivos de Configuración:
-- `.env` - Variables de entorno
-- `config/app.php` - Configuración de aplicación
-- `config/database.php` - Configuración de base de datos
-
----
-
-## 📚 DOCUMENTACIÓN ADICIONAL
-
-### Ubicación de Documentación:
-- **Correcciones históricas:** `tools/CORRECCIONES_HISTORIAL/`
-- **Documentación técnica:** `tools/DOCUMENTACION_PROYECTO/`
-- **Scripts de testing:** `tools/TESTING_DESARROLLO/`
-- **Resúmenes de trabajo:** `tools/RESUMEN_TRABAJO/`
-
-### Archivos de Referencia:
-- `tools/LIMPIEZA_FINAL_AGOSTO_2025.md` - Historial de organización
-- `tools/ORGANIZACION_COMPLETADA.md` - Estado de organización
-- `tools/CORRECCIONES_HISTORIAL/README.md` - Índice de correcciones
-- `tools/DOCUMENTACION_CAMBIOS/` - Documentación de mejoras UX (Agosto 8, 2025)
-- `tools/TESTING_DESARROLLO/` - Scripts de testing y validación
-
----
-
-## ⚠️ NOTAS IMPORTANTES
-
-### Para Nuevos Desarrolladores:
-1. **Ejecutar siempre `php artisan migrate:fresh --seed`** antes de trabajar
-2. **Verificar que el servidor esté en puerto 8000** con `php artisan serve`
-3. **Usar scripts de testing** para validar cambios
-4. **Mantener organización** de archivos según estructura en `tools/`
-
-### Problemas Conocidos Resueltos:
-- ✅ División por cero en cálculo de ganancias
-- ✅ Comisiones Car Wash no aparecían
-- ✅ Migraciones duplicadas
-- ✅ Archivos duplicados en raíz
-
-### Consideraciones de Rendimiento:
-- Sistema optimizado para hasta 1000 ventas/día
-- Base de datos indexada correctamente
-- Consultas optimizadas para dashboard
-
----
-
-## 📝 CHANGELOG
-
-### Agosto 14, 2025 - Análisis Integral y Planificación de Mejoras:
-- ✅ **CONTROL DE ACCESO DOCUMENTADO**: Sistema de permisos existente completamente analizado
-  - **Seguridad implementada**: Información sensible protegida con `@if (Auth::user()->role_as != 1)`
-  - **Vistas auditadas**: Listado ventas, detalle ventas, PDFs con restricciones operativas
-  - **Información protegida**: Costos, ganancias netas, márgenes, totales fiscales
-  - **Roles definidos**: Administrador (acceso total) vs Vendedor (acceso limitado)
-
-- 📋 **PLANIFICACIÓN MÓDULO SUELDOS**: Sistema separado de pagos de empleados
-  - **Enfoque**: Sistema independiente de lotes de comisiones
-  - **Funcionalidades**: Lotes mensuales, control de períodos, PDFs diferenciados
-  - **Seguridad**: Solo administradores pueden gestionar sueldos
-  - **Integración**: Trabajadores + Usuarios con cálculos automáticos
-
-- 🔍 **ÁREAS DE MEJORA IDENTIFICADAS**: 
-  - **Auditoría pendiente**: Reportes de artículos, dashboard ejecutivo, inventario
-  - **Control granular**: Verificar acceso cruzado en comisiones y compras
-  - **Middleware**: Implementar protección adicional en rutas sensibles
-- 🚨 **ANÁLISIS CRÍTICO COMPLETADO**: Detección de 4 módulos principales NO documentados
-  - **Problema detectado**: PRD incompleto con módulos funcionales no documentados
-  - **Solución aplicada**: Documentación completa de todos los módulos faltantes
-
-- ✅ **MÓDULOS FALTANTES DOCUMENTADOS:**
-  - **📦 Sistema de Compras e Ingresos**: Módulo completo con ProveedorController + IngresoController
-  - **💰 Sistema de Descuentos**: DescuentoController operativo con CRUD completo
-  - **🔍 Sistema de Prevención de Inconsistencias**: PrevencionInconsistenciasController funcional
-  - **📊 Gestión de Ventas Detallada**: VentaController expandido con todas sus funcionalidades
-
-- ✅ **CORRECCIONES ESTRUCTURALES PRD:**
-  - **Numeración corregida**: Reorganización de secciones 1-10 (anteriormente duplicadas)
-  - **URLs actualizadas**: Agregadas 20+ URLs de módulos no documentados
-  - **Funcionalidades detalladas**: Documentación precisa de cada módulo real
-  - **Estado actualizado**: Versión 1.8 - Documentación completamente actualizada
-
-- ✅ **VERIFICACIÓN SISTEMA DE PAGOS (Validado previamente):**
-  - **Sistema de lotes de pago**: COMPLETAMENTE OPERATIVO `/lotes-pago`
-  - **Interfaz avanzada**: 15+ filtros para selección precisa de comisiones
-  - **Workflow automático**: Estados (pendiente → completado → anulado) funcional
-  - **Comprobantes**: Upload de imágenes de comprobantes operativo
-  - **PDFs profesionales**: Listados generales e individuales por lote
-  - **Numeración inteligente**: Formato `LP-YYYYMMDD-XXX` con anti-duplicados
-  - **Base de datos completa**: 3 tablas interrelacionadas completamente funcionales
-  - **Controladores completos**: LotePagoController (533 líneas) + PagoComisionController (425 líneas)
-
-### Agosto 13, 2025:
-- ✅ **SISTEMA DE NOTIFICACIONES INTELIGENTES:** Implementación completa
-  - **Centro de notificaciones**: `/notificaciones` con 7 tipos de alertas automatizadas
-  - **Notificaciones por categoría**: Stock crítico/bajo, ventas importantes, clientes nuevos, comisiones vencidas, metas incumplidas, objetivos alcanzados
-  - **Filtros avanzados**: Por tipo, prioridad y estado con persistencia en localStorage
-  - **Estados visuales**: Diferenciación clara entre notificaciones leídas/no leídas
-  - **Fechas realistas**: Basadas en eventos reales con ordenamiento cronológico
-  - **Badge del sidebar**: Contador rojo con actualización en tiempo real
-  - **API REST**: Endpoints para marcar leídas, resumen y gestión de estados
-  - **Performance**: Sin recargas, actualización AJAX cada 60 segundos
-  - **Arquitectura**: Sistema basado en sesiones Laravel con sincronización frontend
-- ✅ **CORRECCIÓN DE PROBLEMAS MENORES DEL SIDEBAR:** Resolución de z-index y navegación
-  - Ajustes de CSS para evitar solapamiento de elementos
-  - Optimización de la navegación móvil y desktop
-  - Mejoras en la experiencia de usuario del menú lateral
-- ✅ **REPORTES PDF LOTES DE PAGO:** Implementación completa
-  - PDF listado general con filtros aplicados y estadísticas
-  - PDF individual por lote con cabecera completa y comisiones incluidas
-  - Seguimiento de estructura de metas-general.blade.php para consistencia
-  - Botones integrados en vistas index y show
-- ✅ **CORRECCIÓN FILTROS METAS DE VENTAS:** Funcionalidad restaurada
-  - Corregido método `index` en `MetaVentaController` para pasar variable `$filtroAplicado`
-  - Botones de filtro por período funcionando correctamente
-  - Indicadores visuales activos (botón sólido vs outline)
-  - Badge informativo con botón quitar filtro funcional
-- ✅ **ORGANIZACIÓN COMPLETA DEL PROYECTO:** Limpieza final de archivos
-  - Movidos todos los archivos de documentación de la raíz a `tools/`
-  - Creadas subcarpetas categorizadas: `DOCUMENTACION_CAMBIOS_TRABAJADORES/`, `TESTING_DESARROLLO/scripts/`
-  - Archivo de registro: `tools/LIMPIEZA_FINAL_AGOSTO_13_2025.md`
-  - **Raíz del proyecto completamente limpia** - Solo archivos esenciales de Laravel
-  - **Proyecto listo para producción** con estructura profesional
-
-### Agosto 12, 2025:
-- ✅ **SISTEMA DE REPORTES DE METAS COMPLETADO:** Implementación final
-  - PDFs individuales por trabajador con estadísticas horizontales
-  - Corrección de alineación de columnas (fecha centrada, montos a la derecha)
-  - Nombres de clientes reales mostrados correctamente
-  - Símbolo de moneda dinámico desde configuración
-  - Sistema completamente genérico y funcional
-
-### Agosto 8, 2025:
-- ✅ **MEJORA UX:** Nueva columna "Venta" en gestión de comisiones
-  - Vínculos directos desde comisión hacia venta origen
-  - Navegación eficiente con botones estilizados
-  - Consistencia visual en todas las vistas de comisiones
-- ✅ **MEJORA UX:** Visualización completa de trabajadores en vista de venta
-  - Trabajadores carwash: Badge azul con icono de auto (bi-car-front)
-  - Mecánicos: Badge amarillo con icono de engranaje (bi-gear)
-  - Interfaz limpia sin valores de comisión expuestos
-  - Identificación visual inmediata por tipo de trabajador
-- ✅ **MEJORA UX:** PDF de venta actualizado con mecánicos
-  - Trabajadores carwash: Badge azul (sin iconos para compatibilidad)
-  - Mecánicos: Badge amarillo (diferenciación por color)
-  - Consistencia entre vista web y PDF en información
-  - Formato optimizado para impresión sin problemas de renderizado
-- ✅ **MEJORA TÉCNICA:** Controladores optimizados
-  - VentaController carga relaciones mecanico y trabajadoresCarwash
-  - API ComisionController incluye venta_id
-  - Método exportSinglePdf incluye relación mecanico
+### Agosto 7, 2025:
+- ✅ **ANÁLISIS QUIRÚRGICO DEL SISTEMA DE COMISIONES:** Identificación de áreas críticas
+  - ✅ Confirmado: Cálculo de comisiones funcional para 3 tipos de trabajadores
+  - ✅ Confirmado: Dashboard y filtros operativos  
+  - ✅ **RESUELTO:** Campo `estado` agregado a migración `pagos_comisiones`
+  - ❌ **CRÍTICO:** Sistema de pagos de comisiones incompleto
+  - ❌ **PENDIENTE:** Crear controlador y vistas para pagos mensuales
+  - ❌ **PENDIENTE:** Unificar workflow de estados (pendiente → completado → anulado)
 
 ### Agosto 6, 2025:
 - ✅ Limpieza final de organización de proyecto
@@ -1766,4 +1600,13 @@ metas_ventas.periodo determina evaluación (mensual/semestral/anual)
 
 **📌 Este documento PRD refleja el estado REAL y ACTUAL del proyecto Jireh - Sistema 100% COMPLETADO y LISTO PARA PRODUCCIÓN.**
 
-**🎉 TODOS LOS MÓDULOS IMPLEMENTADOS - PROYECTO FINALIZADO EXITOSAMENTE**
+**🎉 TODOS LOS MÓDULOS IMPLEMENTADOS - PROYECTO FINALIZADO EXITOSAMENTE
+
+---
+
+## 📝 Actualización 19/08/2025: Pagos de Ventas y Separación de Sueldos/Permisos
+
+- Se reactivaron y corrigieron las rutas para registrar, editar y eliminar pagos de ventas, asegurando que los formularios de pagos de ventas funcionen correctamente y de forma independiente.
+- Se validó que los módulos de sueldos y permisos no se ven afectados por los cambios en pagos de ventas.
+- Se garantiza la separación de lógica y rutas entre pagos de ventas y otros tipos de pagos (sueldos, comisiones, lotes).
+- Ver detalles en `tools/RESUMEN_TRABAJO/PLAN_TRABAJO_SUELDOS_PERMISOS_2025-08-19.md`.
