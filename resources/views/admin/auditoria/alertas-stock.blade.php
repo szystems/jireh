@@ -88,6 +88,7 @@
                         <thead>
                             <tr>
                                 <th>Artículo</th>
+                                <th>Categoría</th>
                                 <th>Stock Actual</th>
                                 <th>Stock Teórico</th>
                                 <th>Diferencia</th>
@@ -101,9 +102,11 @@
                                     <td>
                                         <strong>{{ $alerta['articulo']->codigo }}</strong><br>
                                         {{ $alerta['articulo']->nombre }}
-                                        @if($alerta['articulo']->marca)
-                                            <br><small class="text-muted">{{ $alerta['articulo']->marca }}</small>
-                                        @endif
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">
+                                            {{ $alerta['articulo']->categoria->nombre ?? 'Sin categoría' }}
+                                        </small>
                                     </td>
                                     <td>
                                         <span class="badge bg-danger fs-6">{{ $alerta['stock_actual'] }}</span>
@@ -164,6 +167,7 @@
                         <thead>
                             <tr>
                                 <th>Artículo</th>
+                                <th>Categoría</th>
                                 <th>Stock Actual</th>
                                 <th>Stock Teórico</th>
                                 <th>Consistente</th>
@@ -177,9 +181,11 @@
                                     <td>
                                         <strong>{{ $alerta['articulo']->codigo }}</strong><br>
                                         {{ $alerta['articulo']->nombre }}
-                                        @if($alerta['articulo']->marca)
-                                            <br><small class="text-muted">{{ $alerta['articulo']->marca }}</small>
-                                        @endif
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">
+                                            {{ $alerta['articulo']->categoria->nombre ?? 'Sin categoría' }}
+                                        </small>
                                     </td>
                                     <td>
                                         <span class="badge bg-warning">{{ $alerta['stock_actual'] }}</span>

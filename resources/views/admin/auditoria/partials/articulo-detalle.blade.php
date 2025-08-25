@@ -14,12 +14,6 @@
                         <th>Nombre:</th>
                         <td>{{ $articulo->nombre }}</td>
                     </tr>
-                    @if($articulo->marca)
-                    <tr>
-                        <th>Marca:</th>
-                        <td>{{ $articulo->marca }}</td>
-                    </tr>
-                    @endif
                     <tr>
                         <th>Stock Actual:</th>
                         <td>

@@ -260,19 +260,51 @@ trait StockValidation
      */
     private function calcularStockTeoricoPorMovimientos($articuloId)
     {
-        // Calcular ENTRADAS: Sumar todos los ingresos de este artículo
-        $totalIngresos = \App\Models\DetalleIngreso::where('articulo_id', $articuloId)
-            ->sum('cantidad');
-        
-        // Calcular SALIDAS: Sumar todas las ventas activas de este artículo
-        $totalVentas = \App\Models\DetalleVenta::whereHas('venta', function($query) {
-                $query->where('estado', true); // Solo ventas activas
-            })
+        // Primero obtener todos los movimientos de stock registrados
+        $movimientos = \Illuminate\Support\Facades\DB::table('movimientos_stock')
             ->where('articulo_id', $articuloId)
-            ->sum('cantidad');
+            ->orderBy('created_at', 'asc')
+            ->get();
         
-        // Stock teórico = Ingresos - Ventas
-        return $totalIngresos - $totalVentas;
+        $stockTeorico = 0;
+        
+        // Procesar cada movimiento según su tipo
+        foreach ($movimientos as $movimiento) {
+            switch ($movimiento->tipo) {
+                case 'CREACION':
+                case 'AJUSTE_INICIAL':
+                case 'AJUSTE_MANUAL':
+                case 'CORRECCION_AUTOMATICA':
+                    // Estos tipos establecen el stock directamente o agregan cantidad
+                    $stockTeorico += $movimiento->cantidad;
+                    break;
+                case 'INGRESO':
+                    $stockTeorico += $movimiento->cantidad;
+                    break;
+                case 'VENTA':
+                    $stockTeorico -= $movimiento->cantidad;
+                    break;
+            }
+        }
+        
+        // Si no hay movimientos registrados, calcular usando el método anterior (ingresos - ventas)
+        if ($movimientos->count() == 0) {
+            // Calcular ENTRADAS: Sumar todos los ingresos de este artículo
+            $totalIngresos = \App\Models\DetalleIngreso::where('articulo_id', $articuloId)
+                ->sum('cantidad');
+            
+            // Calcular SALIDAS: Sumar todas las ventas activas de este artículo
+            $totalVentas = \App\Models\DetalleVenta::whereHas('venta', function($query) {
+                    $query->where('estado', true); // Solo ventas activas
+                })
+                ->where('articulo_id', $articuloId)
+                ->sum('cantidad');
+            
+            // Stock teórico = Ingresos - Ventas
+            $stockTeorico = $totalIngresos - $totalVentas;
+        }
+        
+        return $stockTeorico;
     }
     
     /**

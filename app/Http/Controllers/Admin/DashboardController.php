@@ -18,23 +18,12 @@ use App\Models\Comision;
 use App\Models\LotePago;
 use App\Models\MetaVenta;
 use App\Models\Ingreso;
-use App\Services\PrevencionInconsistencias;
-use App\Services\MonitoreoAutocorreccion;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class DashboardController extends Controller
 {
-    protected $prevencionService;
-    protected $monitoreoService;
-
-    public function __construct(PrevencionInconsistencias $prevencionService, MonitoreoAutocorreccion $monitoreoService)
-    {
-        $this->prevencionService = $prevencionService;
-        $this->monitoreoService = $monitoreoService;
-    }
-
     public function index()
     {
         $config = Config::first();

@@ -5,12 +5,17 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Traits\StockValidation;
 use App\Models\Articulo;
+use App\Models\Categoria;
 use App\Models\Venta;
 use App\Models\DetalleVenta;
+use App\Exports\StockTiempoRealExport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 
 class AuditoriaController extends Controller
@@ -31,11 +36,12 @@ class AuditoriaController extends Controller
         return view('admin.auditoria.index', compact('estadisticas', 'ultimosReportes', 'alertasStock'));
     }
 
-    public function reporteStockTiempoReal()
+    public function reporteStockTiempoReal(Request $request)
     {
-        $reporteStock = $this->generarReporteStockTiempoReal();
+        $reporteStock = $this->generarReporteStockTiempoReal($request);
+        $categorias = Categoria::orderBy('nombre')->get();
         
-        return view('admin.auditoria.stock-tiempo-real', compact('reporteStock'));
+        return view('admin.auditoria.stock-tiempo-real', compact('reporteStock', 'categorias'));
     }
 
     public function ejecutarAuditoria(Request $request)
@@ -45,35 +51,86 @@ class AuditoriaController extends Controller
         $articuloEspecifico = $request->input('articulo_id');
 
         try {
-            // Ejecutar comando de auditoría
-            $comando = "ventas:auditoria --dias={$dias}";
+            // Logging detallado del inicio de auditoría
+            Log::info("Iniciando auditoría de inventario", [
+                'usuario' => auth()->user()->name ?? 'Sistema',
+                'parametros' => [
+                    'dias' => $dias,
+                    'aplicar_correcciones' => $aplicarCorrecciones,
+                    'articulo_especifico' => $articuloEspecifico
+                ]
+            ]);
+
+            // Generar fecha actual para el reporte
+            $fechaReporte = Carbon::now()->format('Y-m-d_H-i-s');
             
-            if ($aplicarCorrecciones) {
-                $comando .= " --fix";
+            // Ejecutar auditoría manual (sin comando Artisan para mayor control)
+            $inconsistencias = $this->ejecutarAuditoriaManual($dias, $aplicarCorrecciones, $articuloEspecifico);
+            
+            // Logging de resultados
+            Log::info("Auditoría completada", [
+                'inconsistencias_encontradas' => count($inconsistencias),
+                'correcciones_aplicadas' => $aplicarCorrecciones,
+                'tiempo_ejecucion' => Carbon::now()->format('H:i:s')
+            ]);
+
+            // Crear contenido del reporte
+            $contenidoReporte = [
+                'fecha_auditoria' => Carbon::now()->format('Y-m-d H:i:s'),
+                'parametros' => [
+                    'dias' => $dias,
+                    'aplicar_correcciones' => $aplicarCorrecciones,
+                    'correcciones_aplicadas' => $aplicarCorrecciones,
+                    'articulo_especifico' => $articuloEspecifico
+                ],
+                'estadisticas' => [
+                    'ventas_auditadas' => Venta::where('created_at', '>=', Carbon::now()->subDays($dias))->count(),
+                    'detalles_auditados' => DetalleVenta::whereHas('venta', function($q) use ($dias) {
+                        $q->where('created_at', '>=', Carbon::now()->subDays($dias));
+                    })->count(),
+                    'total_inconsistencias' => count($inconsistencias)
+                ],
+                'inconsistencias' => $inconsistencias
+            ];
+            
+            // Guardar reporte en archivo JSON
+            $rutaAuditorias = storage_path('app/auditorias');
+            if (!is_dir($rutaAuditorias)) {
+                mkdir($rutaAuditorias, 0755, true);
             }
             
-            if ($articuloEspecifico) {
-                $comando .= " --articulo={$articuloEspecifico}";
-            }
-
-            $exitCode = Artisan::call($comando);
-            $output = Artisan::output();
-
-            if ($exitCode === 0) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Auditoría ejecutada exitosamente',
-                    'output' => $output
-                ]);
+            $archivoReporte = $rutaAuditorias . "/auditoria_ventas_{$fechaReporte}.json";
+            file_put_contents($archivoReporte, json_encode($contenidoReporte, JSON_PRETTY_PRINT));
+            
+            // Preparar output para mostrar
+            $output = "=== AUDITORÍA DE VENTAS COMPLETADA ===\n";
+            $output .= "Fecha: " . Carbon::now()->format('d/m/Y H:i:s') . "\n";
+            $output .= "Período analizado: Últimos {$dias} días\n";
+            $output .= "Ventas auditadas: " . $contenidoReporte['estadisticas']['ventas_auditadas'] . "\n";
+            $output .= "Detalles auditados: " . $contenidoReporte['estadisticas']['detalles_auditados'] . "\n";
+            $output .= "Inconsistencias encontradas: " . count($inconsistencias) . "\n\n";
+            
+            if (count($inconsistencias) > 0) {
+                $output .= "INCONSISTENCIAS DETECTADAS:\n";
+                foreach ($inconsistencias as $inconsistencia) {
+                    $output .= "- Artículo: {$inconsistencia['articulo']['nombre']} (ID: {$inconsistencia['articulo']['id']})\n";
+                    $output .= "  Stock actual: {$inconsistencia['stock_actual']}, Teórico: {$inconsistencia['stock_teorico']}\n";
+                    $output .= "  Diferencia: " . ($inconsistencia['stock_actual'] - $inconsistencia['stock_teorico']) . "\n\n";
+                }
             } else {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Error al ejecutar la auditoría',
-                    'output' => $output
-                ], 500);
+                $output .= "¡Sistema consistente! No se encontraron inconsistencias de stock.\n";
             }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Auditoría ejecutada exitosamente',
+                'output' => $output,
+                'inconsistencias' => count($inconsistencias),
+                'reporte_url' => url("admin/auditoria/reporte/{$fechaReporte}")
+            ]);
 
         } catch (\Exception $e) {
+            Log::error('Error en auditoría: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Error: ' . $e->getMessage()
@@ -113,31 +170,35 @@ class AuditoriaController extends Controller
 
     private function obtenerEstadisticasGenerales()
     {
-        $ventasUltimos30Dias = Venta::where('fecha', '>=', Carbon::now()->subDays(30))
-                                   ->where('estado', true)
-                                   ->count();
+        // Cache de estadísticas por 5 minutos para mejorar rendimiento
+        return Cache::remember('auditoria_estadisticas_generales', 300, function() {
+            $ventasUltimos30Dias = Venta::where('fecha', '>=', Carbon::now()->subDays(30))
+                                       ->where('estado', true)
+                                       ->count();
 
-        $articulosStockNegativo = Articulo::where('stock', '<', 0)->count();
-        $articulosStockBajo = Articulo::where('stock', '>', 0)
-                                     ->where('stock', '<=', 10)
-                                     ->count();
+            $articulosStockNegativo = Articulo::where('stock', '<', 0)->count();
+            $articulosStockBajo = Articulo::where('stock', '>', 0)
+                                         ->where('stock', '<=', 10)
+                                         ->count();
 
-        $ventasHoy = Venta::whereDate('fecha', Carbon::today())
-                          ->where('estado', true)
-                          ->count();
+            $ventasHoy = Venta::whereDate('fecha', Carbon::today())
+                              ->where('estado', true)
+                              ->count();
 
-        $detallesVentaHoy = DetalleVenta::whereHas('venta', function($query) {
-                                         $query->whereDate('fecha', Carbon::today())
-                                               ->where('estado', true);
-                                     })->count();
+            $detallesVentaHoy = DetalleVenta::whereHas('venta', function($query) {
+                                             $query->whereDate('fecha', Carbon::today())
+                                                   ->where('estado', true);
+                                         })->count();
 
-        return [
-            'ventas_ultimos_30_dias' => $ventasUltimos30Dias,
-            'articulos_stock_negativo' => $articulosStockNegativo,
-            'articulos_stock_bajo' => $articulosStockBajo,
-            'ventas_hoy' => $ventasHoy,
-            'detalles_venta_hoy' => $detallesVentaHoy
-        ];
+            return [
+                'ventas_ultimos_30_dias' => $ventasUltimos30Dias,
+                'articulos_stock_negativo' => $articulosStockNegativo,
+                'articulos_stock_bajo' => $articulosStockBajo,
+                'ventas_hoy' => $ventasHoy,
+                'detalles_venta_hoy' => $detallesVentaHoy,
+                'cache_generado' => Carbon::now()->format('H:i:s')
+            ];
+        });
     }
 
     private function obtenerUltimosReportes()
@@ -180,7 +241,9 @@ class AuditoriaController extends Controller
 
     private function obtenerAlertasStock()
     {
-        return Articulo::where(function($query) {
+        return Articulo::with('categoria')
+            ->where('estado', true)
+            ->where(function($query) {
                 $query->where('stock', '<', 0)
                       ->orWhere('stock', '<=', 10);
             })
@@ -200,7 +263,9 @@ class AuditoriaController extends Controller
 
     private function obtenerAlertasStockDetalladas()
     {
-        $articulosProblematicos = Articulo::where(function($query) {
+        $articulosProblematicos = Articulo::with('categoria')
+            ->where('estado', true)
+            ->where(function($query) {
                 $query->where('stock', '<', 0)
                       ->orWhere('stock', '<=', 10);
             })
@@ -302,12 +367,59 @@ class AuditoriaController extends Controller
         ", [$fechaInicio]);
     }
 
-    public function generarReporteStockTiempoReal()
+    public function generarReporteStockTiempoReal($request = null)
     {
-        $articulos = Articulo::select('id', 'codigo', 'nombre', 'marca', 'stock')
-            ->where('estado', true)
-            ->orderBy('stock', 'asc')
-            ->get();
+        $query = Articulo::with('categoria')
+            ->select('id', 'codigo', 'nombre', 'stock', 'categoria_id', 'tipo')
+            ->where('estado', true);
+
+        // Aplicar filtros si se proporcionan
+        if ($request) {
+            if ($request->filled('categoria')) {
+                $query->where('categoria_id', $request->categoria);
+            }
+            
+            if ($request->filled('estado_stock')) {
+                switch ($request->estado_stock) {
+                    case 'negativo':
+                        $query->where('stock', '<', 0);
+                        break;
+                    case 'bajo':
+                        $query->where('stock', '>=', 0)->where('stock', '<=', 10);
+                        break;
+                    case 'normal':
+                        $query->where('stock', '>', 10);
+                        break;
+                }
+            }
+
+            // Nuevo filtro: por fecha de última venta
+            if ($request->filled('sin_ventas_dias')) {
+                $diasSinVentas = (int)$request->sin_ventas_dias;
+                $fechaLimite = Carbon::now()->subDays($diasSinVentas);
+                
+                $query->whereDoesntHave('detallesVenta', function($subQuery) use ($fechaLimite) {
+                    $subQuery->whereHas('venta', function($ventaQuery) use ($fechaLimite) {
+                        $ventaQuery->where('fecha', '>=', $fechaLimite)
+                                   ->where('estado', true);
+                    });
+                });
+            }
+            
+            if ($request->filled('consistencia')) {
+                // Este filtro se aplicará después del cálculo
+            }
+            
+            if ($request->filled('busqueda')) {
+                $busqueda = $request->busqueda;
+                $query->where(function($q) use ($busqueda) {
+                    $q->where('codigo', 'LIKE', "%{$busqueda}%")
+                      ->orWhere('nombre', 'LIKE', "%{$busqueda}%");
+                });
+            }
+        }
+
+        $articulos = $query->orderBy('stock', 'asc')->get();
 
         $reporteStock = [
             'estadisticas' => [
@@ -319,11 +431,15 @@ class AuditoriaController extends Controller
             'articulos' => []
         ];
 
+        // Optimización: Pre-cargar últimas ventas para evitar N+1 queries
+        $articuloIds = $articulos->pluck('id');
+        $ultimasVentas = $this->obtenerUltimasVentasOptimizado($articuloIds);
+
         foreach ($articulos as $articulo) {
             $consistencia = $this->verificarConsistenciaStock($articulo->id);
-            $ultimaVenta = $this->obtenerUltimaVentaArticulo($articulo->id);
+            $ultimaVenta = $ultimasVentas[$articulo->id] ?? null;
 
-            $reporteStock['articulos'][] = [
+            $item = [
                 'articulo' => $articulo,
                 'stock_actual' => $articulo->stock,
                 'stock_teorico' => $consistencia['stock_teorico'],
@@ -331,9 +447,57 @@ class AuditoriaController extends Controller
                 'consistente' => $consistencia['consistente'],
                 'ultima_venta' => $ultimaVenta
             ];
+
+            // Aplicar filtro de consistencia si se especifica
+            if ($request && $request->filled('consistencia')) {
+                if ($request->consistencia === 'consistente' && !$item['consistente']) {
+                    continue;
+                }
+                if ($request->consistencia === 'inconsistente' && $item['consistente']) {
+                    continue;
+                }
+            }
+
+            $reporteStock['articulos'][] = $item;
         }
 
         return $reporteStock;
+    }
+
+    /**
+     * Optimización: Obtener últimas ventas de múltiples artículos en una sola consulta optimizada
+     */
+    private function obtenerUltimasVentasOptimizado($articuloIds)
+    {
+        if (empty($articuloIds) || !is_array($articuloIds)) {
+            return [];
+        }
+
+        // Asegurar que todos los IDs sean enteros
+        $articuloIds = array_map('intval', $articuloIds);
+        $idsString = implode(',', $articuloIds);
+
+        // Consulta optimizada usando window function para obtener la última venta de cada artículo
+        $ultimasVentas = DB::select("
+            SELECT dv.*
+            FROM (
+                SELECT dv.*,
+                       ROW_NUMBER() OVER (PARTITION BY dv.articulo_id ORDER BY dv.created_at DESC) as rn
+                FROM detalle_ventas dv
+                INNER JOIN ventas v ON dv.venta_id = v.id
+                WHERE dv.articulo_id IN ({$idsString})
+                  AND v.estado = 1
+            ) dv
+            WHERE dv.rn = 1
+        ");
+
+        // Convertir a array indexado por articulo_id
+        $resultado = [];
+        foreach ($ultimasVentas as $venta) {
+            $resultado[$venta->articulo_id] = (array) $venta;
+        }
+
+        return $resultado;
     }
 
     private function obtenerUltimaVentaArticulo($articuloId)
@@ -566,10 +730,10 @@ class AuditoriaController extends Controller
         }
     }
 
-    public function exportarStock($formato)
+    public function exportarStock($formato, Request $request)
     {
         try {
-            $reporteStock = $this->generarReporteStockTiempoReal();
+            $reporteStock = $this->generarReporteStockTiempoReal($request);
             
             if ($formato === 'excel') {
                 return $this->exportarStockExcel($reporteStock);
@@ -592,55 +756,25 @@ class AuditoriaController extends Controller
 
     private function exportarStockExcel($reporteStock)
     {
-        // Implementación básica de exportación Excel
-        $filename = 'reporte_stock_' . now()->format('Y-m-d_H-i-s') . '.csv';
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
-        ];
-
-        $callback = function() use ($reporteStock) {
-            $file = fopen('php://output', 'w');
-            
-            // Headers
-            fputcsv($file, [
-                'Código', 'Artículo', 'Marca', 'Stock Actual', 
-                'Stock Teórico', 'Diferencia', 'Consistente', 'Última Venta'
-            ]);
-            
-            // Data
-            foreach ($reporteStock['articulos'] as $item) {
-                fputcsv($file, [
-                    $item['articulo']->codigo,
-                    $item['articulo']->nombre,
-                    $item['articulo']->marca,
-                    $item['stock_actual'],
-                    $item['stock_teorico'],
-                    $item['diferencia'],
-                    $item['consistente'] ? 'Sí' : 'No',
-                    $item['ultima_venta'] ? $item['ultima_venta']->format('d/m/Y') : 'Sin ventas'
-                ]);
-            }
-            
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
+        $filename = 'reporte_stock_tiempo_real_' . now()->format('Y-m-d_H-i-s') . '.xlsx';
+        
+        return Excel::download(new StockTiempoRealExport($reporteStock), $filename);
     }
 
     private function exportarStockPDF($reporteStock)
     {
-        // Implementación básica de exportación PDF
-        $html = view('admin.auditoria.exports.stock-pdf', compact('reporteStock'))->render();
+        $filename = 'reporte_stock_tiempo_real_' . now()->format('Y-m-d_H-i-s') . '.pdf';
         
-        // Si tienes DomPDF instalado
-        // $pdf = PDF::loadHTML($html);
-        // return $pdf->download('reporte_stock_' . now()->format('Y-m-d_H-i-s') . '.pdf');
-
-        // Alternativa simple: devolver HTML
-        return response($html)
-            ->header('Content-Type', 'text/html')
-            ->header('Content-Disposition', 'attachment; filename="reporte_stock_' . now()->format('Y-m-d_H-i-s') . '.html"');
+        $pdf = Pdf::loadView('admin.auditoria.exports.stock-pdf', compact('reporteStock'))
+            ->setPaper('a4', 'landscape')
+            ->setOptions([
+                'dpi' => 150,
+                'defaultFont' => 'sans-serif',
+                'isHtml5ParserEnabled' => true,
+                'isPhpEnabled' => true
+            ]);
+        
+        return $pdf->download($filename);
     }    public function exportarReporte($fecha)
     {
         try {
@@ -1199,6 +1333,159 @@ class AuditoriaController extends Controller
                 'success' => false,
                 'message' => 'Error al eliminar venta: ' . $e->getMessage()
             ], 500);
+        }
+    }
+
+    /**
+     * Ejecuta auditoría manual de inconsistencias de stock
+     */
+    private function ejecutarAuditoriaManual($dias = 30, $aplicarCorrecciones = false, $articuloEspecifico = null)
+    {
+        $inconsistencias = [];
+        
+        // Obtener artículos a auditar (incluye artículos y servicios con stock)
+        $query = Articulo::where('estado', 1)->whereIn('tipo', ['articulo', 'servicio']);
+        
+        if ($articuloEspecifico) {
+            $query->where('id', $articuloEspecifico);
+        }
+        
+        $articulos = $query->get();
+        
+        foreach ($articulos as $articulo) {
+            // Calcular stock teórico basado en movimientos
+            $stockTeorico = $this->calcularStockTeorico($articulo->id);
+            
+            // Comparar con stock actual
+            if ($articulo->stock != $stockTeorico) {
+                $inconsistencias[] = [
+                    'articulo' => [
+                        'id' => $articulo->id,
+                        'codigo' => $articulo->codigo,
+                        'nombre' => $articulo->nombre
+                    ],
+                    'stock_actual' => $articulo->stock,
+                    'stock_teorico' => $stockTeorico,
+                    'diferencia' => $articulo->stock - $stockTeorico,
+                    'severidad' => abs($articulo->stock - $stockTeorico) > 10 ? 'ALTA' : 'MEDIA',
+                    'fecha_deteccion' => Carbon::now()->format('Y-m-d H:i:s')
+                ];
+                
+                // Aplicar corrección si se solicita
+                if ($aplicarCorrecciones && !$articuloEspecifico) {
+                    $this->corregirInconsistenciaStock($articulo->id, $stockTeorico);
+                }
+            }
+        }
+        
+        return $inconsistencias;
+    }
+    
+    /**
+     * Calcula el stock teórico de un artículo basado en sus movimientos
+     */
+    /**
+     * Limpiar cache de estadísticas cuando se realizan cambios importantes
+     */
+    private function limpiarCacheEstadisticas()
+    {
+        Cache::forget('auditoria_estadisticas_generales');
+    }
+
+    private function calcularStockTeorico($articuloId)
+    {
+        // Obtener todos los movimientos de stock del artículo
+        $movimientos = DB::table('movimientos_stock')
+            ->where('articulo_id', $articuloId)
+            ->orderBy('created_at', 'asc')
+            ->get();
+        
+        $stockTeorico = 0;
+        
+        foreach ($movimientos as $movimiento) {
+            switch ($movimiento->tipo) {
+                case 'CREACION':
+                case 'AJUSTE_INICIAL':
+                case 'AJUSTE_MANUAL':
+                case 'CORRECCION_AUTOMATICA':
+                case 'INGRESO':
+                    $stockTeorico += $movimiento->cantidad;
+                    break;
+                case 'VENTA':
+                    $stockTeorico -= $movimiento->cantidad;
+                    break;
+            }
+        }
+        
+        return $stockTeorico;
+    }
+    
+    /**
+     * Corrige una inconsistencia de stock actualizando el stock real
+     */
+    private function corregirInconsistenciaStock($articuloId, $stockTeorico)
+    {
+        try {
+            $articulo = Articulo::find($articuloId);
+            if (!$articulo) return false;
+            
+            $stockActual = $articulo->stock;
+            
+            // Verificar si el artículo tiene movimientos registrados
+            $tieneMovimientos = DB::table('movimientos_stock')
+                ->where('articulo_id', $articuloId)
+                ->exists();
+            
+            if (!$tieneMovimientos && $stockActual > 0) {
+                // Caso especial: artículo sin movimientos pero con stock positivo
+                // Crear un movimiento AJUSTE_INICIAL para establecer una línea base
+                DB::table('movimientos_stock')->insert([
+                    'articulo_id' => $articuloId,
+                    'tipo' => 'AJUSTE_INICIAL',
+                    'stock_anterior' => 0,
+                    'stock_nuevo' => $stockActual,
+                    'cantidad' => $stockActual,
+                    'referencia_tipo' => 'AJUSTE_INICIAL',
+                    'referencia_id' => $articuloId,
+                    'observaciones' => 'Ajuste inicial automático para establecer línea base de stock',
+                    'user_id' => auth()->id() ?? 1,
+                    'created_at' => Carbon::now(),
+                    'updated_at' => Carbon::now()
+                ]);
+                
+                Log::info("Creado movimiento AJUSTE_INICIAL para artículo {$articulo->codigo} con stock {$stockActual}");
+                
+            } else {
+                // Caso normal: corregir stock basado en movimientos existentes
+                $articulo->stock = $stockTeorico;
+                $articulo->save();
+                
+                // Registrar el movimiento de corrección
+                DB::table('movimientos_stock')->insert([
+                    'articulo_id' => $articuloId,
+                    'tipo' => 'CORRECCION_AUTOMATICA',
+                    'stock_anterior' => $stockActual,
+                    'stock_nuevo' => $stockTeorico,
+                    'cantidad' => $stockTeorico - $stockActual,
+                    'referencia_tipo' => 'CORRECCION_AUTOMATICA',
+                    'referencia_id' => $articuloId,
+                    'observaciones' => 'Corrección automática por inconsistencia detectada en auditoría',
+                    'user_id' => auth()->id() ?? 1,
+                    'created_at' => Carbon::now(),
+                    'updated_at' => Carbon::now()
+                ]);
+                
+                // Limpiar cache ya que cambió el stock
+                $this->limpiarCacheEstadisticas();
+                
+                Log::info("Corregido stock del artículo {$articulo->codigo} de {$stockActual} a {$stockTeorico}");
+            }
+            
+            return true;
+            
+        } catch (\Exception $e) {
+            Log::error("Error al corregir inconsistencia de stock para artículo {$articuloId}: " . $e->getMessage());
+            return false;
         }
     }
 }

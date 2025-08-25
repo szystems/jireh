@@ -4,7 +4,11 @@
 <div class="content-wrapper">
     <!-- Header -->
     <div class="row mb-4">
-        <div class="col-12">
+                                <a href="{{ url('/admin/auditoria') }}" class="btn btn-primary">
+                            <i class="bi bi-shield-check me-2"></i>
+                            Sistema de Auditoría
+                        </a>
+                    </div>s="col-12">
             <div class="page-header">
                 <h3 class="page-title">Sistema de Alertas y Monitoreo</h3>
                 <p class="text-muted">Dashboard de monitoreo en tiempo real</p>

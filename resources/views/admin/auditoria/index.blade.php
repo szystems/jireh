@@ -107,15 +107,10 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-12 mb-3">
                                 <a href="{{ url('admin/auditoria/inconsistencias-ventas') }}" class="btn btn-danger w-100">
                                     <i class="bi bi-exclamation-triangle"></i> Inconsistencias de Ventas
                                 </a>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <button class="btn btn-secondary w-100" onclick="exportarReporteAuditoria()">
-                                    <i class="bi bi-download"></i> Exportar Reporte Completo
-                                </button>
                             </div>
                         </div>
                     </div>
@@ -297,6 +292,9 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="location.reload()">
+                    <i class="bi bi-arrow-clockwise"></i> Actualizar Dashboard
+                </button>
             </div>
         </div>
     </div>
@@ -336,16 +334,21 @@ function ejecutarAuditoria() {
             // Mostrar resultados
             document.getElementById('resultadosContent').innerHTML = 
                 '<div class="alert alert-success">' +
-                '<h6>Auditoría completada exitosamente</h6>' +
-                '<pre>' + data.output + '</pre>' +
+                '<h6><i class="bi bi-check-circle"></i> Auditoría completada exitosamente</h6>' +
+                '<div class="mt-3">' +
+                '<strong>Fecha:</strong> ' + new Date().toLocaleString() + '<br>' +
+                '<strong>Inconsistencias encontradas:</strong> ' + (data.inconsistencias || 0) + '<br>' +
+                '<strong>Estado:</strong> ' + (data.inconsistencias > 0 ? '<span class="text-warning">Requiere atención</span>' : '<span class="text-success">Sistema consistente</span>') +
+                '</div>' +
+                '<hr>' +
+                '<pre class="bg-dark text-light p-3 rounded" style="color: #ffffff !important; background-color: #212529 !important; max-height: 400px; overflow-y: auto;">' + data.output + '</pre>' +
+                '<div class="mt-3">' +
+                '<button type="button" class="btn btn-primary me-2" onclick="location.reload()"><i class="bi bi-arrow-clockwise"></i> Actualizar Dashboard</button>' +
+                (data.reporte_url ? '<a href="' + data.reporte_url + '" class="btn btn-info"><i class="bi bi-file-text"></i> Ver Reporte Detallado</a>' : '') +
+                '</div>' +
                 '</div>';
             
             new bootstrap.Modal(document.getElementById('resultadosModal')).show();
-            
-            // Recargar la página después de unos segundos
-            setTimeout(() => {
-                location.reload();
-            }, 3000);
         } else {
             alert('Error: ' + data.message);
         }
@@ -355,11 +358,6 @@ function ejecutarAuditoria() {
         button.disabled = false;
         alert('Error de conexión: ' + error.message);
     });
-}
-
-function exportarReporteAuditoria() {
-    // Implementar exportación de reporte
-    alert('Función de exportación en desarrollo');
 }
 </script>
 @endsection

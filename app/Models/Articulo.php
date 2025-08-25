@@ -164,4 +164,12 @@ class Articulo extends Model
 
         return null;
     }
+
+    /**
+     * Relación con detalles de venta para auditorías
+     */
+    public function detallesVenta()
+    {
+        return $this->hasMany(DetalleVenta::class);
+    }
 }

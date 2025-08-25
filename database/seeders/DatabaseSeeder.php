@@ -13,20 +13,35 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        $this->call(UsersTableSeeder::class);
-        $this->call(ConfigsTableSeeder::class);
-        $this->call(ClientesTableSeeder::class);
-        $this->call(VehiculosTableSeeder::class);
-        $this->call(CategoriasTableSeeder::class);
-        $this->call(ProveedoresTableSeeder::class);
-        $this->call(UnidadsTableSeeder::class);
-        $this->call(ArticuloSeeder::class);
-        $this->call(TrabajadorSeeder::class);
-        $this->call(MetaVentaSeeder::class);
+        // ============================================================================
+        // SEEDERS ESENCIALES PARA PRODUCCIÓN - Solo datos necesarios para funcionar
+        // ============================================================================
         
-        // Para datos de prueba específicos de comisiones
-        // Ejecutar con: php artisan db:seed --class=ComisionesTestSeeder
-        // $this->call(ComisionesTestSeeder::class);
+        $this->call(ConfigsTableSeeder::class);    // Configuración básica del sistema
+        $this->call(UsersTableSeeder::class);      // Usuario administrador principal
+        $this->call(UnidadsTableSeeder::class);    // Unidades de medida básicas
+        $this->call(TipoTrabajadorSeeder::class);  // Tipos de trabajador esenciales
+        
+        // ============================================================================
+        // SEEDERS DESHABILITADOS - Base de datos limpia para producción
+        // ============================================================================
+        // $this->call(ClientesTableSeeder::class);     // Clientes de prueba - NO NECESARIO
+        // $this->call(VehiculosTableSeeder::class);    // Vehículos de prueba - NO NECESARIO
+        // $this->call(CategoriasTableSeeder::class);   // Categorías de prueba - NO NECESARIO
+        // $this->call(ProveedoresTableSeeder::class);  // Proveedores de prueba - NO NECESARIO
+        // $this->call(ArticuloSeeder::class);          // Artículos de prueba - NO NECESARIO
+        // $this->call(TrabajadorSeeder::class);        // Trabajadores de prueba - NO NECESARIO
+        // $this->call(MetaVentaSeeder::class);         // Metas de prueba - NO NECESARIO
+        
+        echo "\n✅ Base de datos inicializada para PRODUCCIÓN";
+        echo "\n📋 Datos creados:";
+        echo "\n   - Configuración básica del sistema";
+        echo "\n   - Usuario administrador: Emilio Rodriguez";
+        echo "\n   - Usuario desarrollador: Otto Szarata";
+        echo "\n   - 6 unidades de medida básicas";
+        echo "\n   - 2 tipos de trabajador esenciales (Mecánico, Car Wash)";
+        echo "\n";
+        echo "\n🚀 El sistema está listo para que Jireh Automotriz ingrese sus datos reales.\n";
     }
 
     /**

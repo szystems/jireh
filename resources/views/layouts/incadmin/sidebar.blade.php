@@ -127,9 +127,10 @@
                             <li class="{{ Request::is('trabajadores','show-trabajador/*','add-trabajador','edit-trabajador/*') ? 'active-page-link':''  }}">
                                 <a href="{{ url('trabajadores') }}"><i class="bi bi-person-badge"></i> Trabajadores</a>
                             </li>
-                            <li class="{{ Request::is('tipo-trabajador','show-tipo-trabajador/*','add-tipo-trabajador','edit-tipo-trabajador/*') ? 'active-page-link':''  }}">
+                            {{-- MÓDULO OCULTO: Los tipos de trabajador son fijos (Mecánico y Car Wash) --}}
+                            {{-- <li class="{{ Request::is('tipo-trabajador','show-tipo-trabajador/*','add-tipo-trabajador','edit-tipo-trabajador/*') ? 'active-page-link':''  }}">
                                 <a href="{{ url('tipo-trabajador') }}"><i class="bi bi-tags"></i> Tipos</a>
-                            </li>
+                            </li> --}}
                             <li class="{{ Request::is('admin/pago-sueldo*') ? 'active-page-link':''  }}">
                                 <a href="{{ route('admin.pago-sueldo.index') }}"><i class="bi bi-wallet2"></i> Pagos de Sueldos</a>
                             </li>
@@ -221,9 +222,6 @@
                             </li>
                             <li class="{{ Request::is('admin/auditoria*') ? 'active-page-link':''  }}">
                                 <a href="{{ url('admin/auditoria') }}"><i class="bi bi-shield-check"></i> Auditoría de Ventas</a>
-                            </li>
-                            <li class="{{ Request::is('admin/prevencion*') ? 'active-page-link':''  }}">
-                                <a href="{{ url('admin/prevencion/dashboard') }}"><i class="bi bi-shield-exclamation"></i> Prevención de Inconsistencias</a>
                             </li>
                             @endif
                         </ul>

@@ -10,6 +10,8 @@ use App\Models\Trabajador;
 use App\Models\Unidad;
 use Illuminate\Http\Request;
 use App\Models\Config;
+use App\Models\MovimientoStock;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -244,6 +246,21 @@ class ArticuloController extends Controller
 
         $articulo->save();
 
+        // Registrar movimiento_stock si el stock inicial es mayor a 0
+        if ($articulo->stock > 0) {
+            MovimientoStock::create([
+                'articulo_id' => $articulo->id,
+                'tipo' => 'CREACION',
+                'stock_anterior' => 0,
+                'stock_nuevo' => $articulo->stock,
+                'cantidad' => $articulo->stock,
+                'referencia_tipo' => 'CREACION',
+                'referencia_id' => $articulo->id,
+                'observaciones' => 'Stock inicial al crear artículo',
+                'user_id' => Auth::check() ? Auth::id() : null,
+            ]);
+        }
+
         // Si el tipo es servicio, guardar los artículos del servicio
         if ($request->tipo == 'servicio' && isset($request->articulos_servicio)) {
             foreach ($request->articulos_servicio as $articulo_id => $cantidad) {
@@ -363,8 +380,9 @@ class ArticuloController extends Controller
         }
 
         $articulo = Articulo::find($id);
-        // Guardar el tipo original antes de aplicar los cambios
+        // Guardar el tipo original y stock anterior antes de aplicar los cambios
         $tipoOriginal = $articulo->tipo;
+        $stockAnterior = $articulo->stock;
         $articulo->fill($request->all());
 
         // Si no es un servicio, asegurarse que los campos de mecánico estén vacíos
@@ -381,6 +399,21 @@ class ArticuloController extends Controller
         }
 
         $articulo->save();
+
+        // Registrar movimiento_stock solo si el stock cambió
+        if ($articulo->stock != $stockAnterior) {
+            MovimientoStock::create([
+                'articulo_id' => $articulo->id,
+                'tipo' => 'AJUSTE_MANUAL',
+                'stock_anterior' => $stockAnterior,
+                'stock_nuevo' => $articulo->stock,
+                'cantidad' => $articulo->stock - $stockAnterior,
+                'referencia_tipo' => 'AJUSTE_MANUAL',
+                'referencia_id' => $articulo->id,
+                'observaciones' => 'Ajuste manual de stock desde edición de artículo',
+                'user_id' => Auth::check() ? Auth::id() : null,
+            ]);
+        }
 
         // Si el tipo es servicio, actualizar los artículos del servicio
         if ($request->tipo == 'servicio') {

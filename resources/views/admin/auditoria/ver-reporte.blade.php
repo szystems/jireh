@@ -99,7 +99,7 @@
                             </div>
                             <div>
                                 <small class="text-muted">Período Auditado</small>
-                                <div><strong>{{ $contenido['parametros']['dias_auditados'] ?? 'N/A' }} días</strong></div>
+                                <div><strong>{{ $contenido['parametros']['dias'] ?? $contenido['parametros']['dias_auditados'] ?? 'N/A' }} días</strong></div>
                             </div>
                         </div>
                     </div>
@@ -127,7 +127,7 @@
                             </div>
                             <div>
                                 <small class="text-muted">Correcciones</small>
-                                <div><strong>{{ $contenido['parametros']['correcciones_aplicadas'] ? 'Habilitadas' : 'Solo detección' }}</strong></div>
+                                <div><strong>{{ ($contenido['parametros']['correcciones_aplicadas'] ?? $contenido['parametros']['aplicar_correcciones'] ?? false) ? 'Habilitadas' : 'Solo detección' }}</strong></div>
                             </div>
                         </div>
                     </div>
@@ -154,21 +154,21 @@
                 </div>
             </div>
         </div>
-        @else        <!-- Resumen de Inconsistencias por Tipo -->
+        @else        
+        <!-- Resumen de Inconsistencias por Severidad -->
         <div class="row mb-4">
             @php
-                $tiposInconsistencias = collect($contenido['inconsistencias'])->groupBy('tipo');
+                $tiposInconsistencias = collect($contenido['inconsistencias'])->groupBy('severidad');
                 $coloresCards = [
-                    'STOCK_INCONSISTENTE' => ['bg' => 'warning', 'icon' => 'exclamation-triangle-fill', 'color' => 'warning'],
-                    'STOCK_NEGATIVO' => ['bg' => 'danger', 'icon' => 'x-circle-fill', 'color' => 'danger'],
-                    'VENTA_DUPLICADA' => ['bg' => 'info', 'icon' => 'files', 'color' => 'info'],
-                    'VENTAS_DUPLICADAS' => ['bg' => 'info', 'icon' => 'files', 'color' => 'info']
+                    'ALTA' => ['bg' => 'danger', 'icon' => 'exclamation-triangle-fill', 'color' => 'danger'],
+                    'MEDIA' => ['bg' => 'warning', 'icon' => 'exclamation-circle-fill', 'color' => 'warning'],
+                    'BAJA' => ['bg' => 'info', 'icon' => 'info-circle-fill', 'color' => 'info']
                 ];
             @endphp
             
-            @foreach($tiposInconsistencias as $tipo => $items)
+            @foreach($tiposInconsistencias as $severidad => $items)
                 @php
-                    $config = $coloresCards[$tipo] ?? ['bg' => 'secondary', 'icon' => 'question-circle', 'color' => 'secondary'];
+                    $config = $coloresCards[$severidad] ?? ['bg' => 'secondary', 'icon' => 'question-circle', 'color' => 'secondary'];
                 @endphp
                 <div class="col-lg-4 col-md-6 mb-3">
                     <div class="card border-{{ $config['color'] }} h-100">
@@ -176,17 +176,7 @@
                             <div class="d-flex justify-content-between align-items-start">
                                 <div>
                                     <h3 class="text-{{ $config['color'] }} mb-1">{{ count($items) }}</h3>
-                                    <h6 class="text-muted mb-2">
-                                        @if($tipo == 'STOCK_INCONSISTENTE')
-                                            Inconsistencias de Stock
-                                        @elseif($tipo == 'STOCK_NEGATIVO')
-                                            Stock Negativo
-                                        @elseif(in_array($tipo, ['VENTA_DUPLICADA', 'VENTAS_DUPLICADAS']))
-                                            Ventas Duplicadas
-                                        @else
-                                            {{ ucwords(str_replace('_', ' ', $tipo)) }}
-                                        @endif
-                                    </h6>
+                                    <h6 class="text-muted mb-2">Severidad: {{ $severidad }}</h6>
                                     <small class="text-muted">
                                         {{ count($items) == 1 ? 'problema detectado' : 'problemas detectados' }}
                                     </small>
@@ -198,11 +188,7 @@
                         </div>
                         <div class="card-footer bg-{{ $config['color'] }} bg-opacity-10 text-center">
                             <small class="text-{{ $config['color'] }} fw-bold">
-                                Severidad: 
-                                @php
-                                    $severidades = collect($items)->pluck('severidad')->unique();
-                                @endphp
-                                {{ $severidades->join(', ') }}
+                                {{ $severidad }}
                             </small>
                         </div>
                     </div>
@@ -211,30 +197,21 @@
         </div>
 
         <!-- Detalles de Inconsistencias -->
-        @foreach($tiposInconsistencias as $tipo => $items)
+        @foreach($tiposInconsistencias as $severidad => $items)
             @php
-                $config = $coloresCards[$tipo] ?? ['bg' => 'secondary', 'icon' => 'question-circle', 'color' => 'secondary'];
+                $config = $coloresCards[$severidad] ?? ['bg' => 'secondary', 'icon' => 'question-circle', 'color' => 'secondary'];
             @endphp
             <div class="card mb-4">
                 <div class="card-header bg-{{ $config['color'] }} text-white">
                     <div class="d-flex justify-content-between align-items-center">
                         <h5 class="card-title mb-0">
                             <i class="bi bi-{{ $config['icon'] }}"></i>
-                            @if($tipo == 'STOCK_INCONSISTENTE')
-                                Inconsistencias de Stock
-                            @elseif($tipo == 'STOCK_NEGATIVO')
-                                Stock Negativo Detectado
-                            @elseif(in_array($tipo, ['VENTA_DUPLICADA', 'VENTAS_DUPLICADAS']))
-                                Ventas Duplicadas
-                            @else
-                                {{ ucwords(str_replace('_', ' ', $tipo)) }}
-                            @endif
+                            Inconsistencias de Stock - Severidad {{ $severidad }}
                         </h5>
                         <span class="badge bg-light text-dark">{{ count($items) }} {{ count($items) == 1 ? 'caso' : 'casos' }}</span>
                     </div>
                 </div>
                 <div class="card-body p-0">
-                    @if($tipo == 'STOCK_INCONSISTENTE')                        <!-- Vista para Inconsistencias de Stock -->
                         <div class="table-responsive">
                             <table class="table table-hover mb-0">
                                 <thead class="table-light">
@@ -257,12 +234,12 @@
                                                     <i class="bi bi-box text-warning"></i>
                                                 </div>
                                                 <div>
-                                                    <div class="fw-bold">{{ $item['articulo_nombre'] ?? 'N/A' }}</div>
-                                                    <small class="text-muted">ID: {{ $item['articulo_id'] ?? 'N/A' }}</small>
+                                                    <div class="fw-bold">{{ $item['articulo']['nombre'] ?? 'N/A' }}</div>
+                                                    <small class="text-muted">ID: {{ $item['articulo']['id'] ?? 'N/A' }}</small>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td><code class="bg-light px-2 py-1 rounded">{{ $item['articulo_codigo'] ?? 'N/A' }}</code></td>
+                                        <td><code class="bg-light px-2 py-1 rounded">{{ $item['articulo']['codigo'] ?? 'N/A' }}</code></td>
                                         <td>
                                             <span class="badge bg-primary fs-6">{{ $item['stock_actual'] ?? 'N/A' }}</span>
                                         </td>
@@ -284,16 +261,16 @@
                                         <td>
                                             <div class="btn-group" role="group">
                                                 <button type="button" class="btn btn-sm btn-success" 
-                                                        onclick="corregirStock({{ $item['articulo_id'] ?? 0 }}, {{ $item['stock_teorico'] ?? 0 }})"
+                                                        onclick="corregirStock({{ $item['articulo']['id'] ?? 0 }}, {{ $item['stock_teorico'] ?? 0 }})"
                                                         title="Corregir automáticamente">
                                                     <i class="bi bi-check-circle"></i>
                                                 </button>
                                                 <button type="button" class="btn btn-sm btn-warning" 
-                                                        onclick="mostrarModalCorreccionManual({{ $item['articulo_id'] ?? 0 }}, '{{ $item['articulo_nombre'] ?? 'N/A' }}', {{ $item['stock_actual'] ?? 0 }}, {{ $item['stock_teorico'] ?? 0 }})"
+                                                        onclick="mostrarModalCorreccionManual({{ $item['articulo']['id'] ?? 0 }}, '{{ $item['articulo']['nombre'] ?? 'N/A' }}', {{ $item['stock_actual'] ?? 0 }}, {{ $item['stock_teorico'] ?? 0 }})"
                                                         title="Corregir manualmente">
                                                     <i class="bi bi-pencil"></i>
                                                 </button>
-                                                <a href="{{ url('articulos/show-articulo/' . ($item['articulo_id'] ?? 0)) }}" 
+                                                <a href="{{ url('articulos/show-articulo/' . ($item['articulo']['id'] ?? 0)) }}" 
                                                    class="btn btn-sm btn-info" title="Ver artículo" target="_blank">
                                                     <i class="bi bi-eye"></i>
                                                 </a>
@@ -303,126 +280,6 @@
                                     @endforeach
                                 </tbody>
                             </table>
-                        </div>
-                    @elseif($tipo == 'STOCK_NEGATIVO')                        <!-- Vista para Stock Negativo -->
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th><i class="bi bi-box"></i> Artículo</th>
-                                        <th><i class="bi bi-upc"></i> Código</th>
-                                        <th><i class="bi bi-exclamation-triangle"></i> Stock Actual</th>
-                                        <th><i class="bi bi-chat-text"></i> Observaciones</th>
-                                        <th><i class="bi bi-flag"></i> Severidad</th>
-                                        <th><i class="bi bi-tools"></i> Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($items as $item)
-                                    <tr class="table-danger">
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <div class="me-2">
-                                                    <i class="bi bi-exclamation-triangle text-danger"></i>
-                                                </div>
-                                                <div>
-                                                    <div class="fw-bold">{{ $item['articulo']['nombre'] ?? 'N/A' }}</div>
-                                                    <small class="text-muted">ID: {{ $item['articulo_id'] ?? 'N/A' }}</small>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td><code class="bg-light px-2 py-1 rounded">{{ $item['articulo']['codigo'] ?? 'N/A' }}</code></td>
-                                        <td>
-                                            <span class="badge bg-danger fs-6">{{ $item['stock_actual'] ?? 'N/A' }}</span>
-                                        </td>
-                                        <td>
-                                            <small class="text-muted">{{ $item['mensaje'] ?? 'Stock negativo detectado' }}</small>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-danger fs-6">{{ $item['severidad'] ?? 'ALTA' }}</span>
-                                        </td>
-                                        <td>
-                                            <div class="btn-group" role="group">
-                                                <button type="button" class="btn btn-sm btn-warning" 
-                                                        onclick="mostrarModalCorreccionStockNegativo({{ $item['articulo_id'] ?? 0 }}, '{{ $item['articulo']['nombre'] ?? 'N/A' }}', {{ $item['stock_actual'] ?? 0 }})"
-                                                        title="Corregir stock negativo">
-                                                    <i class="bi bi-exclamation-triangle"></i> Corregir
-                                                </button>
-                                                <a href="{{ url('articulos/show-articulo/' . ($item['articulo_id'] ?? 0)) }}" 
-                                                   class="btn btn-sm btn-info" title="Ver artículo" target="_blank">
-                                                    <i class="bi bi-eye"></i>
-                                                </a>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    @elseif(in_array($tipo, ['VENTA_DUPLICADA', 'VENTAS_DUPLICADAS']))
-                        <!-- Vista para Ventas Duplicadas -->
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0">                                <thead class="table-light">
-                                    <tr>
-                                        <th><i class="bi bi-receipt"></i> Ventas Involucradas</th>
-                                        <th><i class="bi bi-person"></i> Cliente</th>
-                                        <th><i class="bi bi-calendar"></i> Fecha</th>
-                                        <th><i class="bi bi-list-ul"></i> Detalles Similares</th>
-                                        <th><i class="bi bi-flag"></i> Severidad</th>
-                                        <th><i class="bi bi-gear"></i> Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($items as $item)
-                                    <tr class="table-warning">
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <div class="me-2">
-                                                    <i class="bi bi-files text-warning"></i>
-                                                </div>
-                                                <div>
-                                                    <div class="fw-bold">
-                                                        Venta #{{ $item['venta1_id'] ?? 'N/A' }} 
-                                                        <span class="mx-1">↔</span> 
-                                                        Venta #{{ $item['venta2_id'] ?? 'N/A' }}
-                                                    </div>
-                                                    <small class="text-muted">Posible duplicación</small>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-info fs-6">Cliente #{{ $item['cliente_id'] ?? 'N/A' }}</span>
-                                        </td>                                        <td>
-                                            <small>{{ \Carbon\Carbon::parse($item['fecha'] ?? now())->format('d/m/Y') }}</small>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-warning fs-6">{{ $item['detalles_similares'] ?? 0 }} coincidencias</span>
-                                        </td>                                        <td>
-                                            <span class="badge bg-warning fs-6">{{ $item['severidad'] ?? 'MEDIA' }}</span>
-                                        </td>
-                                        <td>
-                                            <div class="btn-group" role="group">
-                                                <button type="button" class="btn btn-sm btn-danger" 
-                                                        onclick="corregirVentaDuplicada({{ $item['venta1_id'] ?? 0 }}, {{ $item['venta2_id'] ?? 0 }})"
-                                                        title="Resolver duplicación">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
-                                                <a href="{{ url('admin/show-venta/' . ($item['venta1_id'] ?? 0)) }}" 
-                                                   class="btn btn-sm btn-info" title="Ver Venta #{{ $item['venta1_id'] ?? 0 }}" target="_blank">
-                                                    <i class="bi bi-eye"></i>
-                                                </a>
-                                                <a href="{{ url('admin/show-venta/' . ($item['venta2_id'] ?? 0)) }}" 
-                                                   class="btn btn-sm btn-outline-info" title="Ver Venta #{{ $item['venta2_id'] ?? 0 }}" target="_blank">
-                                                    <i class="bi bi-eye"></i>
-                                                </a>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    @endif
                 </div>
             </div>
         @endforeach

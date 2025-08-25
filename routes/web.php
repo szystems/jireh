@@ -30,7 +30,6 @@ use App\Http\Controllers\Admin\ReporteMetasController; // Controlador de reporte
 use App\Http\Controllers\Admin\TestController; // Controlador de pruebas
 use App\Http\Controllers\Admin\DatosInicialesController; // Controlador para generar datos iniciales
 use App\Http\Controllers\Admin\AuditoriaController; // Controlador de auditoría
-use App\Http\Controllers\Admin\PrevencionInconsistenciasController; // Controlador de prevención
 use App\Http\Controllers\Admin\DashboardController; // Nuevo controlador de dashboard mejorado
 use App\Http\Controllers\Admin\NotificacionController; // Controlador de notificaciones
 
@@ -371,26 +370,6 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/eliminar-venta/{ventaId}', [AuditoriaController::class, 'eliminarVenta'])->name('eliminar_venta');
     });
 
-    // 🆕 RUTAS PARA PREVENCIÓN DE INCONSISTENCIAS
-    Route::prefix('admin/prevencion')->name('admin.prevencion.')->group(function () {
-        Route::get('/test', [PrevencionInconsistenciasController::class, 'test'])->name('test');
-        Route::get('/dashboard', [PrevencionInconsistenciasController::class, 'dashboard'])->name('dashboard');
-        Route::get('/estado-sistema', [PrevencionInconsistenciasController::class, 'estadoSistema'])->name('estado_sistema');
-        
-        // OPCIÓN 1: Validación preventiva en tiempo real
-        Route::post('/validacion-preventiva', [PrevencionInconsistenciasController::class, 'ejecutarValidacionPreventiva'])->name('validacion_preventiva');
-        
-        // OPCIÓN 2: Transacciones atómicas
-        Route::post('/venta-atomica', [PrevencionInconsistenciasController::class, 'ejecutarVentaAtomica'])->name('venta_atomica');
-        
-        // OPCIÓN 3: Monitoreo continuo y auto-corrección
-        Route::post('/monitoreo-continuo', [PrevencionInconsistenciasController::class, 'ejecutarMonitoreoContinuo'])->name('monitoreo_continuo');
-        Route::post('/configurar-monitoreo', [PrevencionInconsistenciasController::class, 'configurarMonitoreoAutomatico'])->name('configurar_monitoreo');
-        
-        // Reportes y análisis
-        Route::get('/reporte-inconsistencias', [PrevencionInconsistenciasController::class, 'generarReporteInconsistencias'])->name('reporte_inconsistencias');
-    });
-
     // Rutas para metas de ventas
     Route::prefix('metas-ventas')->name('metas-ventas.')->group(function() {
         Route::get('/', [App\Http\Controllers\Admin\MetaVentaController::class, 'index'])->name('index');
@@ -418,11 +397,6 @@ Route::get('test-dashboard-pro', [DashboardController::class, 'index']);
 Route::get('test-notificaciones', [NotificacionController::class, 'index']);
 
 // Ruta de prueba para dashboard de prevención sin autenticación
-Route::get('prevencion-test', [PrevencionInconsistenciasController::class, 'dashboard'])->name('prevencion.test');
-Route::get('prevencion-test/estado', [PrevencionInconsistenciasController::class, 'estadoSistema'])->name('prevencion.test.estado');
-Route::post('prevencion-test/validacion', [PrevencionInconsistenciasController::class, 'ejecutarValidacionPreventiva'])->name('prevencion.test.validacion');
-Route::post('prevencion-test/transaccion', [PrevencionInconsistenciasController::class, 'ejecutarVentaAtomica'])->name('prevencion.test.transaccion');
-Route::post('prevencion-test/monitoreo', [PrevencionInconsistenciasController::class, 'ejecutarMonitoreoContinuo'])->name('prevencion.test.monitoreo');
 Route::get('test/venta-completa', [TestController::class, 'testVentaCompleta']);
 Route::get('test/ver-comisiones/{ventaId}', [App\Http\Controllers\Admin\ComisionController::class, 'verComisiones']);
 Route::get('test/eliminar-venta/{ventaId}', [TestController::class, 'testEliminarVenta']);

@@ -14,11 +14,22 @@ class ConfigsTableSeeder extends Seeder
      */
     public function run()
     {
+        // ============================================================================
+        // CONFIGURACIÓN BÁSICA DEL SISTEMA - DATOS ESENCIALES PARA FUNCIONAR
+        // ============================================================================
         Config::create([
             'email' => 'info@jirehautomotriz.com',
             'time_zone' => 'America/Guatemala',
             'currency' => 'GTQ Q',
-            'currency_iso' => 'Q',
+            'currency_simbol' => 'Q',
+            'currency_iso' => 'GTQ',
+            'descuento_maximo' => 0.00,  // El cliente podrá configurar esto
+            'impuesto' => 0.00,          // El cliente podrá configurar esto
         ]);
+        
+        echo "\n✅ Configuración básica del sistema creada";
+        echo "\n   - Email: info@jirehautomotriz.com";
+        echo "\n   - Zona horaria: America/Guatemala";
+        echo "\n   - Moneda: Quetzal (GTQ Q)\n";
     }
 }

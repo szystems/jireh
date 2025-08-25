@@ -27,38 +27,81 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-body">
-                        <form id="filtrosForm" class="row g-3">
-                            <div class="col-md-3">
+                        <form id="filtrosForm" class="row g-3" method="GET">
+                            <div class="col-md-2">
                                 <label for="filtro_categoria" class="form-label">Categoría</label>
                                 <select class="form-select" id="filtro_categoria" name="categoria">
                                     <option value="">Todas las categorías</option>
-                                    <!-- Se puede poblar dinámicamente -->
+                                    @foreach($categorias as $categoria)
+                                        <option value="{{ $categoria->id }}" {{ request('categoria') == $categoria->id ? 'selected' : '' }}>
+                                            {{ $categoria->nombre }}
+                                        </option>
+                                    @endforeach
                                 </select>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <label for="filtro_stock" class="form-label">Estado de Stock</label>
                                 <select class="form-select" id="filtro_stock" name="estado_stock">
                                     <option value="">Todos</option>
-                                    <option value="negativo">Stock Negativo</option>
-                                    <option value="bajo">Stock Bajo (≤10)</option>
-                                    <option value="normal">Stock Normal</option>
+                                    <option value="negativo" {{ request('estado_stock') == 'negativo' ? 'selected' : '' }}>Stock Negativo</option>
+                                    <option value="bajo" {{ request('estado_stock') == 'bajo' ? 'selected' : '' }}>Stock Bajo (≤10)</option>
+                                    <option value="normal" {{ request('estado_stock') == 'normal' ? 'selected' : '' }}>Stock Normal</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="filtro_consistencia" class="form-label">Consistencia</label>
+                                <select class="form-select" id="filtro_consistencia" name="consistencia">
+                                    <option value="">Todos</option>
+                                    <option value="consistente" {{ request('consistencia') == 'consistente' ? 'selected' : '' }}>Consistentes</option>
+                                    <option value="inconsistente" {{ request('consistencia') == 'inconsistente' ? 'selected' : '' }}>Inconsistentes</option>
                                 </select>
                             </div>
                             <div class="col-md-3">
                                 <label for="filtro_busqueda" class="form-label">Buscar Artículo</label>
                                 <input type="text" class="form-control" id="filtro_busqueda" 
-                                       placeholder="Código o nombre..." name="busqueda">
+                                       placeholder="Código o nombre..." name="busqueda" value="{{ request('busqueda') }}">
                             </div>
                             <div class="col-md-3 d-flex align-items-end">
-                                <button type="button" class="btn btn-primary w-100" onclick="aplicarFiltros()">
-                                    <i class="bi bi-search"></i> Filtrar
-                                </button>
+                                <div class="d-flex gap-2 w-100">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-funnel"></i> Filtrar
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary" onclick="limpiarFiltros()">
+                                        <i class="bi bi-x-circle"></i> Limpiar
+                                    </button>
+                                </div>
                             </div>
                         </form>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Filtros Activos -->
+        @if(request()->hasAny(['categoria', 'estado_stock', 'consistencia', 'busqueda']))
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <i class="bi bi-funnel"></i> <strong>Filtros activos:</strong>
+                    @if(request('categoria'))
+                        <span class="badge bg-primary me-2">Categoría: {{ $categorias->find(request('categoria'))->nombre ?? 'N/A' }}</span>
+                    @endif
+                    @if(request('estado_stock'))
+                        <span class="badge bg-secondary me-2">Stock: {{ ucfirst(request('estado_stock')) }}</span>
+                    @endif
+                    @if(request('consistencia'))
+                        <span class="badge bg-success me-2">Consistencia: {{ ucfirst(request('consistencia')) }}</span>
+                    @endif
+                    @if(request('busqueda'))
+                        <span class="badge bg-warning me-2">Búsqueda: "{{ request('busqueda') }}"</span>
+                    @endif
+                    <button type="button" class="btn btn-sm btn-outline-secondary ms-2" onclick="limpiarFiltros()">
+                        <i class="bi bi-x"></i> Limpiar filtros
+                    </button>
+                </div>
+            </div>
+        </div>
+        @endif
 
         <!-- Resumen de Stock -->
         <div class="row mb-4">
@@ -164,9 +207,6 @@
                                     </td>
                                     <td>
                                         {{ $item['articulo']->nombre }}
-                                        @if($item['articulo']->marca)
-                                            <br><small class="text-muted">{{ $item['articulo']->marca }}</small>
-                                        @endif
                                     </td>
                                     <td>
                                         <span class="badge {{ $item['stock_actual'] < 0 ? 'bg-danger' : ($item['stock_actual'] <= 10 ? 'bg-warning' : 'bg-success') }}">
@@ -248,10 +288,18 @@ function actualizarStock() {
 
 function aplicarFiltros() {
     const form = document.getElementById('filtrosForm');
-    const formData = new FormData(form);
-    const params = new URLSearchParams(formData);
+    form.submit();
+}
+
+function limpiarFiltros() {
+    // Limpiar todos los campos del formulario
+    document.getElementById('filtro_categoria').value = '';
+    document.getElementById('filtro_stock').value = '';
+    document.getElementById('filtro_consistencia').value = '';
+    document.getElementById('filtro_busqueda').value = '';
     
-    window.location.href = window.location.pathname + '?' + params.toString();
+    // Recargar la página sin parámetros
+    window.location.href = window.location.pathname;
 }
 
 function verDetalleArticulo(articuloId) {
@@ -291,11 +339,15 @@ function corregirStock(articuloId) {
 }
 
 function exportarExcel() {
-    window.open('{{ url("admin/auditoria/exportar-stock/excel") }}', '_blank');
+    const params = new URLSearchParams(window.location.search);
+    const url = '{{ url("admin/auditoria/exportar-stock/excel") }}' + '?' + params.toString();
+    window.open(url, '_blank');
 }
 
 function exportarPDF() {
-    window.open('{{ url("admin/auditoria/exportar-stock/pdf") }}', '_blank');
+    const params = new URLSearchParams(window.location.search);
+    const url = '{{ url("admin/auditoria/exportar-stock/pdf") }}' + '?' + params.toString();
+    window.open(url, '_blank');
 }
 
 // Auto-actualizar cada 5 minutos

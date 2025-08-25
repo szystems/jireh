@@ -14,6 +14,10 @@ class UnidadsTableSeeder extends Seeder
      */
     public function run()
     {
+        // ============================================================================
+        // UNIDADES DE MEDIDA BÁSICAS - ESENCIALES PARA EL SISTEMA DE INVENTARIO
+        // ============================================================================
+        
         Unidad::create([
             'nombre' => 'Unidad',
             'abreviatura' => 'UND',
@@ -55,5 +59,8 @@ class UnidadsTableSeeder extends Seeder
             'tipo' => 'decimal',
             'estado' => 1,
         ]);
+        
+        echo "\n✅ Unidades de medida básicas creadas (6 unidades)";
+        echo "\n   - Unidad, Kilogramo, Litro, Metro, Centímetro, Mililitro\n";
     }
 }

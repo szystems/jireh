@@ -13,20 +13,20 @@ class MovimientoStock extends Model
 
     protected $fillable = [
         'articulo_id',
-        'tipo_movimiento',
+        'tipo',
+        'stock_anterior',
+        'stock_nuevo',
         'cantidad',
-        'cantidad_anterior',
-        'cantidad_nueva',
         'referencia_tipo',
         'referencia_id',
         'observaciones',
-        'usuario_id'
+        'user_id'
     ];
 
     protected $casts = [
         'cantidad' => 'decimal:2',
-        'cantidad_anterior' => 'decimal:2',
-        'cantidad_nueva' => 'decimal:2',
+        'stock_anterior' => 'decimal:2',
+        'stock_nuevo' => 'decimal:2',
         'created_at' => 'datetime',
         'updated_at' => 'datetime'
     ];
@@ -39,7 +39,7 @@ class MovimientoStock extends Model
 
     public function usuario()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     // Scopes
@@ -50,7 +50,7 @@ class MovimientoStock extends Model
 
     public function scopePorTipo($query, $tipo)
     {
-        return $query->where('tipo_movimiento', $tipo);
+        return $query->where('tipo', $tipo);
     }
 
     public function scopeRecientes($query, $dias = 7)

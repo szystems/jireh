@@ -78,20 +78,6 @@ class CreateTrabajadorsTable extends Migration
                 'created_at' => now(),
                 'updated_at' => now()
             ],
-            [
-                'nombre' => 'Administrativo',
-                'descripcion' => 'Personal administrativo',
-                'aplica_comision' => false,
-                'requiere_asignacion' => false,
-                'tipo_comision' => null,
-                'valor_comision' => null,
-                'porcentaje_comision' => null,
-                'permite_multiples_trabajadores' => false,
-                'configuracion_adicional' => null,
-                'estado' => 'activo',
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
         ]);
 
         // Agregar foreign key para mecanico_id en articulos después de crear trabajadors
