@@ -366,6 +366,66 @@
 
             // Actualiza la hora y la fecha cada segundo
             setInterval(actualizarReloj, 1000);
+            
+            // ==========================================
+            // SOLUCIÓN PARA ERROR 419 PAGE EXPIRED
+            // ==========================================
+            
+            // Función para refrescar el token CSRF automáticamente
+            function refreshCSRFToken() {
+                fetch('{{ route("refresh-csrf") }}', {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.csrf_token) {
+                        // Actualizar el meta tag
+                        document.querySelector('meta[name="csrf-token"]').setAttribute('content', data.csrf_token);
+                        
+                        // Actualizar jQuery setup si existe
+                        if (typeof $ !== 'undefined') {
+                            $.ajaxSetup({
+                                headers: {
+                                    'X-CSRF-TOKEN': data.csrf_token
+                                }
+                            });
+                        }
+                        
+                        // Actualizar todos los inputs _token en formularios
+                        document.querySelectorAll('input[name="_token"]').forEach(input => {
+                            input.value = data.csrf_token;
+                        });
+                        
+                        console.log('Token CSRF actualizado automáticamente');
+                    }
+                })
+                .catch(error => {
+                    console.log('Error al refrescar token CSRF:', error);
+                });
+            }
+            
+            // Refrescar token cada 10 minutos (600000ms) para prevenir expiraciones
+            setInterval(refreshCSRFToken, 600000);
+            
+            // También refrescar token al hacer focus en la ventana (usuario regresa)
+            window.addEventListener('focus', refreshCSRFToken);
+            
+            // Interceptar errores 419 en peticiones AJAX
+            $(document).ajaxError(function(event, xhr, settings) {
+                if (xhr.status === 419) {
+                    Swal.fire({
+                        title: 'Sesión Expirada',
+                        text: 'Tu sesión ha expirado. La página se recargará automáticamente.',
+                        icon: 'warning',
+                        confirmButtonText: 'OK'
+                    }).then(function() {
+                        window.location.reload();
+                    });
+                }
+            });
         </script>
 
 	</body>

@@ -1,0 +1,72 @@
+# Contexto Automático del Proyecto Jireh
+
+Eres un asistente experto en proyectos Laravel 8. Tu tarea es cargar inmediatamente todo el contexto del repositorio jireh para poder generar código, crear o modificar archivos y mantener coherencia sin perder el hilo de lo ya realizado.
+
+## Estructura del Proyecto Laravel 8 "Jireh/BuroSoft"
+
+### Stack Tecnológico
+- Framework: Laravel 8.x
+- PHP: ^7.3|^8.0
+- Base de Datos: MySQL
+- Frontend: Blade Templates + Laravel UI + Bootstrap
+- Autenticación: Laravel Sanctum + Laravel UI Auth
+
+### Módulos Implementados
+1. **Admin** - Administración general del sistema
+2. **Inventario** - Gestión de artículos, categorías, proveedores, stock
+3. **Ventas** - Gestión de clientes, ventas, facturación
+4. **Personal** - Trabajadores, tipos, comisiones, sueldos
+5. **Finanzas** - Pagos, lotes de pago, control financiero
+
+### Controladores Principales (app/Http/Controllers/Admin/)
+- AdminController, UsersController, ClienteController, VehiculosController
+- CategoriaController, ProveedorController, UnidadController, ArticuloController
+- IngresoController, TrabajadorController, TipoTrabajadorController
+- InventarioController, DescuentoController, ComisionController
+- PagoComisionController, PagoSueldoController, VentaController
+- PagoController, ReporteArticuloController, ReporteMetasController
+
+### Modelos Principales (app/Models/)
+- **Inventario**: Articulo, Categoria, Unidad, Proveedor, MovimientoStock
+- **Comercial**: Cliente, Vehiculo, Venta, DetalleVenta, Pago
+- **Personal**: Trabajador, TipoTrabajador, Comision, PagoComision, PagoSueldo, DetallePagoSueldo, LotePago
+- **Sistema**: User, Config, MetaVenta
+
+### Base de Datos (30+ migraciones)
+- Sistema completo con relaciones foreign key
+- Timestamps automáticos
+- Trazabilidad completa de operaciones
+- Optimizado para consultas frecuentes
+
+### Documentación Disponible
+- docs/README.md - Documentación general y guía rápida
+- docs/core/ARCHITECTURE.md - Arquitectura detallada del sistema
+- docs/core/PRD.md - Product Requirements Document completo
+- docs/core/API.md - Documentación de API (en desarrollo)
+
+### Convenciones del Proyecto
+- PSR-4 autoloading
+- CamelCase para clases PHP
+- snake_case para nombres de BD
+- Blade templates organizados por módulo
+- Rutas organizadas con middleware auth para admin
+- Services para lógica de negocio compleja
+- Traits para funcionalidades reutilizables
+
+### Rutas Principales
+- /admin/* - Módulos administrativos
+- /login, /register - Autenticación
+- API REST en desarrollo (/api/*)
+
+### Estado Actual
+- Sistema estable en producción
+- Todas las funcionalidades core implementadas
+- Estructura profesional con tools/ organizados
+- Documentación completa actualizada
+
+## Objetivo Inmediato
+Mantener este contexto vivo para cada sugerencia o generación de código, actualizar o extender la documentación sin duplicar ni romper la estructura existente, proponer mejoras respetando las convenciones del proyecto.
+
+---
+**Última actualización**: Septiembre 16, 2025
+**Estado**: Producción activa

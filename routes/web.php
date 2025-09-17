@@ -50,6 +50,13 @@ Route::get('/', function () {
 
 Auth::routes();
 
+// Ruta para refrescar token CSRF - SOLUCIÓN ERROR 419
+Route::get('/refresh-csrf', function () {
+    return response()->json([
+        'csrf_token' => csrf_token()
+    ]);
+})->name('refresh-csrf');
+
 // Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
 //Admin Dashboard

@@ -42,17 +42,28 @@ return [
             'prefix' => '',
             'prefix_indexes' => true,
             
-            'strict' => true,
-            'engine' => null,
+            // ==========================================
+            // CONFIGURACIÓN OPTIMIZADA PARA IPAGE + MySQL 5.7
+            // ==========================================
+            'strict' => false, // Cambiado a false para mayor compatibilidad
+            'engine' => 'InnoDB',
             
+            // Modos SQL más permisivos para iPage
             'modes' => [
                 'STRICT_TRANS_TABLES',
-                'NO_ZERO_DATE',
-                'NO_ZERO_IN_DATE',
                 'ERROR_FOR_DIVISION_BY_ZERO',
+                'NO_AUTO_CREATE_USER',
+                'NO_ENGINE_SUBSTITUTION',
             ],
+            
+            // Opciones PDO optimizadas para iPage
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                PDO::ATTR_EMULATE_PREPARES => true,
+                PDO::ATTR_STRINGIFY_FETCHES => false,
+                PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
+                PDO::ATTR_TIMEOUT => 30,
+                PDO::ATTR_PERSISTENT => false, // Desactivar conexiones persistentes en hosting compartido
             ]) : [],
         ],
 

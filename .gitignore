@@ -13,3 +13,6 @@ npm-debug.log
 yarn-error.log
 /.idea
 /.vscode
+
+# Carpeta temporal para correcciones MySQL - no versionar
+/correcciones-mysql

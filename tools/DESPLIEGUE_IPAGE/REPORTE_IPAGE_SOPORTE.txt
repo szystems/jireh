@@ -1,0 +1,129 @@
+REPORTE TÉCNICO PARA SOPORTE iPAGE
+=====================================
+
+ASUNTO: Cambios críticos en servidor el 3 septiembre 2025 - Múltiples aplicaciones Laravel afectadas
+
+INFORMACIÓN DEL CLIENTE:
+- Usuario iPage: [TU_USUARIO_IPAGE]
+- Fecha del problema: 3 de septiembre de 2025
+- Aplicaciones afectadas: TODAS las aplicaciones Laravel en la cuenta
+
+DOMINIOS AFECTADOS:
+- software.burotributario.com
+- software.jirehautomotriz.com
+- clinicaselvalle.com
+- flebocenter.com
+- etc...
+
+DESCRIPCIÓN DEL PROBLEMA:
+==========================
+
+SÍNTOMA 1: ERRORES 419 "PAGE EXPIRED" GENERALIZADOS
+- Todas las aplicaciones Laravel empezaron a mostrar error 419 el 3 de septiembre
+- El error aparece en formularios de login y cualquier formulario con CSRF tokens
+- NUNCA había ocurrido este problema antes del 3 de septiembre
+- Afecta a TODAS las aplicaciones Laravel, no solo una
+
+SÍNTOMA 2: PROBLEMAS DE SESIONES
+- Las sesiones de usuario no se mantienen correctamente
+- Los usuarios son redirigidos al login después de autenticarse
+- El problema persiste incluso después de limpiar cache y cookies
+
+SÍNTOMA 3: ARCHIVOS PHP NUEVOS DAN 404
+- Los archivos PHP existentes funcionan normalmente
+- Los archivos PHP creados después del 3 de septiembre dan error 404
+- No es un problema de permisos locales, es del servidor
+
+DIAGNÓSTICO TÉCNICO REALIZADO:
+===============================
+
+✅ VERIFICAMOS:
+- Configuración de aplicaciones Laravel (correcta)
+- Permisos de archivos (correctos)
+- Configuración de base de datos (correcta)
+- Estructura de directorios (correcta)
+
+❌ PROBLEMAS IDENTIFICADOS:
+- Sesiones basadas en archivos dejaron de funcionar
+- CSRF tokens no se validan correctamente
+- Archivos PHP nuevos no son procesados por el servidor
+
+SOLUCIONES TEMPORALES APLICADAS:
+================================
+
+1. MIGRACIÓN DE SESIONES:
+   - Cambiamos de sesiones basadas en archivos a sesiones en base de datos
+   - Esto solucionó parcialmente el problema de errores 419
+
+2. ACTUALIZACIÓN DE MIDDLEWARE CSRF:
+   - Implementamos manejo mejorado de errores CSRF
+   - Los errores 419 ya no aparecen, pero persisten problemas de autenticación
+
+EVIDENCIA TÉCNICA:
+==================
+
+CONFIGURACIÓN PREVIA (funcionaba hasta el 2 sept):
+- SESSION_DRIVER=file (en .env)
+- Sesiones almacenadas en storage/framework/sessions/
+- CSRF tokens funcionando correctamente
+
+CONFIGURACIÓN ACTUAL (después del 3 sept):
+- SESSION_DRIVER=database (forzado por problemas del servidor)
+- Tabla 'sessions' creada en base de datos
+- Problemas persistentes con archivos PHP nuevos
+
+PREGUNTA ESPECÍFICA PARA iPAGE:
+===============================
+
+¿Hubo ALGÚN cambio en la configuración del servidor el 3 de septiembre de 2025?
+
+Específicamente:
+1. ¿Cambios en la configuración de PHP?
+2. ¿Actualizaciones de seguridad que afecten el manejo de sesiones?
+3. ¿Cambios en permisos de directorios de sesiones?
+4. ¿Modificaciones en la configuración de Apache/Nginx?
+5. ¿Cambios en la configuración de archivos .htaccess?
+
+IMPACTO EN EL NEGOCIO:
+======================
+
+- CRÍTICO: Clientes no pueden acceder a sus sistemas
+- CRÍTICO: Pérdida de funcionalidad en aplicaciones de producción
+- CRÍTICO: No puedo implementar correcciones porque archivos nuevos dan 404
+
+ASISTENCIA SOLICITADA:
+======================
+
+1. Revisar logs del servidor del 3 de septiembre
+2. Verificar si hubo cambios de configuración ese día
+3. Restaurar configuración que permita:
+   - Sesiones basadas en archivos funcionen correctamente
+   - Archivos PHP nuevos sean procesados normalmente
+   - CSRF tokens funcionen sin problemas
+
+INFORMACIÓN ADICIONAL:
+======================
+
+- Framework: Laravel (múltiples versiones)
+- PHP: Funciona correctamente para archivos existentes
+- Base de datos: MySQL (conexiones funcionan)
+- Problema: ESPECÍFICAMENTE con sesiones y archivos nuevos
+
+URGENCIA: ALTA
+- Múltiples aplicaciones de producción afectadas
+- Clientes sin acceso a sus sistemas desde hace varios días
+- Necesito resolución urgente para restaurar servicios
+
+Gracias por su asistencia.
+
+ADJUNTOS TÉCNICOS:
+==================
+- Archivos de configuración Laravel (.env, session.php)
+- Screenshots de errores 419
+- Logs de errores de aplicaciones Laravel
+
+---
+
+NOTA PARA EL TÉCNICO DE iPAGE:
+Este es un problema sistemático que afecta específicamente a aplicaciones Laravel.
+Si necesitan acceso temporal a alguna aplicación para diagnosticar, puedo proporcionarlo.

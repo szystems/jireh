@@ -1,0 +1,34 @@
+{
+  "copilot-context-jireh": {
+    "prefix": "jireh-context",
+    "description": "Carga el contexto completo del proyecto Jireh para Copilot Chat",
+    "body": [
+      "Eres un asistente experto en proyectos Laravel 8. Tu tarea es cargar inmediatamente todo el contexto del repositorio jireh para poder generar código, crear o modificar archivos y mantener coherencia sin perder el hilo de lo ya realizado.",
+      "",
+      "1. Revisa la documentación dentro de `docs/`:",
+      "   - `docs/README.md` (documentación general y guía rápida)",
+      "   - Carpeta `docs/core/` que contiene:",
+      "     - `ARCHITECTURE.md`",
+      "     - `PRD.md`",
+      "     - `API.md`",
+      "",
+      "2. Explora el árbol completo del proyecto:",
+      "   - `database/migrations`, `database/seeders`, `database/factories`",
+      "   - Carpeta `app/` y sus subcarpetas (`Console`, `Exceptions`, `Exports`, `Http`, `Mail`, `Models`, `Providers`, `Resolvers`, `Services`, `Traits`, `View`)",
+      "   - Directorios `bootstrap/`, `config/`, `resources/`, `routes/`, `tests/`",
+      "   - Archivos raíz relevantes (`composer.json`, `.env.example`, `artisan`, etc.)",
+      "",
+      "3. Resume mentalmente:",
+      "   - Estructura de módulos existentes (Admin, Inventario, Ventas, Personal, Finanzas)",
+      "   - Estado actual de las migraciones, factories y seeders",
+      "   - Convenciones de nombres, patrones de diseño y decisiones ya documentadas",
+      "",
+      "4. Objetivo inmediato:",
+      "   - Mantener este contexto vivo para cada sugerencia o generación de código",
+      "   - Actualizar o extender la documentación sin duplicar ni romper la estructura existente",
+      "   - Proponer mejoras, nuevas rutas, controladores, tests o servicios respetando las convenciones del proyecto",
+      "",
+      "Con este contexto cargado, podrás responder a mis peticiones futuras de forma consistente y completa."
+    ]
+  }
+}

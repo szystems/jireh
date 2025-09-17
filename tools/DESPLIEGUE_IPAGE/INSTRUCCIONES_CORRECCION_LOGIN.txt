@@ -1,0 +1,27 @@
+// === INSTRUCCIONES PARA CORREGIR LOGIN ===
+// 1. Conéctate a tu BD con HeidiSQL
+// 2. Ve a la tabla 'users' 
+// 3. Busca el usuario con email: szystems@hotmail.com
+// 4. EJECUTA esta query para corregir la contraseña:
+
+UPDATE users 
+SET password = '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 
+    updated_at = NOW() 
+WHERE email = 'szystems@hotmail.com';
+
+// Esta query establece la contraseña como "password" (para prueba)
+// Después puedes cambiarla desde el sistema
+
+// === ALTERNATIVA: Cambiar a tu contraseña actual ===
+// Ejecuta este PHP en HeidiSQL para generar el hash correcto:
+
+SELECT PASSWORD('SPP7007aaa@@@') as mysql_hash;
+
+// Pero usa mejor bcrypt. En cualquier herramienta PHP online ejecuta:
+// echo password_hash('SPP7007aaa@@@', PASSWORD_BCRYPT);
+// Y usa ese resultado en la query UPDATE
+
+// === DESPUÉS DE CORREGIR ===
+// 1. Ve a software.burotributario.com/login
+// 2. Usa: szystems@hotmail.com / password (o tu contraseña si usaste bcrypt)
+// 3. Si entra, cambia la contraseña desde el perfil
