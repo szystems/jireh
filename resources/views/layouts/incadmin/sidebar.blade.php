@@ -228,6 +228,14 @@
                     </div>
                 </li>
 
+                <!-- Cotizaciones -->
+                <li class="{{ Request::is('cotizaciones*') ? 'active-page-link':''  }}">
+                    <a href="{{ route('admin.cotizaciones.index') }}">
+                        <i class="bi bi-file-earmark-text"></i>
+                        <span class="menu-text">Cotizaciones</span>
+                    </a>
+                </li>
+
                 <!-- Administración -->
                 @if(Auth::user()->role_as != 1)
                 <li class="menu-category">Administración</li>

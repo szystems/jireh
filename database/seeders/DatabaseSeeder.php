@@ -23,25 +23,31 @@ class DatabaseSeeder extends Seeder
         $this->call(TipoTrabajadorSeeder::class);  // Tipos de trabajador esenciales
         
         // ============================================================================
-        // SEEDERS DESHABILITADOS - Base de datos limpia para producción
+        // SEEDERS DE DESARROLLO - Datos de prueba para testing
         // ============================================================================
-        // $this->call(ClientesTableSeeder::class);     // Clientes de prueba - NO NECESARIO
-        // $this->call(VehiculosTableSeeder::class);    // Vehículos de prueba - NO NECESARIO
-        // $this->call(CategoriasTableSeeder::class);   // Categorías de prueba - NO NECESARIO
-        // $this->call(ProveedoresTableSeeder::class);  // Proveedores de prueba - NO NECESARIO
-        // $this->call(ArticuloSeeder::class);          // Artículos de prueba - NO NECESARIO
-        // $this->call(TrabajadorSeeder::class);        // Trabajadores de prueba - NO NECESARIO
-        // $this->call(MetaVentaSeeder::class);         // Metas de prueba - NO NECESARIO
+        $this->call(ClientesTableSeeder::class);     // Clientes de prueba
+        $this->call(VehiculosTableSeeder::class);    // Vehículos de prueba
+        $this->call(CategoriasTableSeeder::class);   // Categorías de prueba
+        $this->call(ProveedoresTableSeeder::class);  // Proveedores de prueba
+        $this->call(ArticuloSeeder::class);          // Artículos de prueba
+        $this->call(TrabajadorSeeder::class);        // Trabajadores de prueba
+        $this->call(MetaVentaSeeder::class);         // Metas de prueba
         
-        echo "\n✅ Base de datos inicializada para PRODUCCIÓN";
+        echo "\n✅ Base de datos inicializada para DESARROLLO";
         echo "\n📋 Datos creados:";
         echo "\n   - Configuración básica del sistema";
         echo "\n   - Usuario administrador: Emilio Rodriguez";
         echo "\n   - Usuario desarrollador: Otto Szarata";
         echo "\n   - 6 unidades de medida básicas";
         echo "\n   - 2 tipos de trabajador esenciales (Mecánico, Car Wash)";
+        echo "\n   - Clientes de prueba";
+        echo "\n   - Vehículos de prueba";
+        echo "\n   - Categorías y artículos de prueba";
+        echo "\n   - Proveedores de prueba";
+        echo "\n   - Trabajadores de prueba";
+        echo "\n   - Metas de venta de prueba";
         echo "\n";
-        echo "\n🚀 El sistema está listo para que Jireh Automotriz ingrese sus datos reales.\n";
+        echo "\n🚀 El sistema está listo para desarrollo y pruebas.\n";
     }
 
     /**

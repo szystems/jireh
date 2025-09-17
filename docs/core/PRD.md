@@ -3,17 +3,18 @@
 ## 1. Resumen Ejecutivo
 
 ### 1.1 Visión del Producto
-**Jireh** es un sistema integral de gestión empresarial diseñado para pequeñas y medianas empresas que requieren control sobre inventario, ventas, personal y finanzas en una solución unificada.
+**Jireh** es un sistema integral de gestión empresarial diseñado para pequeñas y medianas empresas que requieren control sobre inventario, ventas, cotizaciones, personal y finanzas en una solución unificada. **Actualizado con módulo de Cotizaciones completo (Septiembre 2025)**.
 
 ### 1.2 Objetivos del Producto
 - Centralizar la gestión empresarial en una plataforma única
+- **🆕 Gestionar cotizaciones con estados inteligentes y regeneración automática**
 - Automatizar cálculos de comisiones y pagos de personal
 - Proporcionar trazabilidad completa de inventario y ventas
 - Generar reportes ejecutivos para toma de decisiones
 - Optimizar procesos administrativos y financieros
 
 ### 1.3 Alcance
-**Incluye**: Gestión de inventario, ventas, personal, comisiones, pagos, reportes  
+**Incluye**: Gestión de inventario, ventas, **cotizaciones avanzadas**, personal, comisiones, pagos, reportes  
 **Excluye**: Contabilidad completa, nómina avanzada, CRM completo, e-commerce
 
 ## 2. Usuarios Objetivo
@@ -52,7 +53,42 @@
 - Reportes de stock disponible
 - Integración con módulo de ventas
 
-### 3.2 Módulo de Ventas
+### 3.2 Módulo de Cotizaciones ⭐ **NUEVO - COMPLETADO 100%**
+**Objetivo**: Gestión avanzada de cotizaciones con estados inteligentes
+
+#### Funcionalidades Implementadas
+- ✅ **CRUD completo** de cotizaciones
+- ✅ **Estados inteligentes**: Generado/Aprobado con transiciones automáticas
+- ✅ **Vigencia automática**: Cálculo de +15 días desde creación
+- ✅ **Regeneración avanzada**: Aprobado → Generado + nueva vigencia
+- ✅ **5 pestañas especializadas**: Todas/Generadas/Vigentes/Vencidas/Aprobadas
+- ✅ **PDF dinámico** con configuración de moneda
+- ✅ **AJAX para cambios de estado** sin recargar página
+- ✅ **DataTables con filtros** automáticos por estado
+- ✅ **Detalles de cotización** con productos y cálculos automáticos
+
+#### Criterios de Aceptación ✅ **CUMPLIDOS**
+- ✅ Proceso de cotización fluido e intuitivo
+- ✅ Estados reflejan ciclo de vida real de cotizaciones
+- ✅ Vigencia calculada automáticamente sin intervención manual
+- ✅ Regeneración preserva datos y renueva solo vigencia
+- ✅ Interfaz responsive con 5 pestañas para mejor organización
+- ✅ PDFs profesionales con configuración de moneda
+- ✅ Cambios de estado instantáneos con retroalimentación visual
+- ✅ Filtrado automático mejora experiencia de usuario
+
+#### Flujo de Trabajo Implementado
+```
+1. Cliente solicita cotización → Estado: Generado
+2. Se agregan productos y detalles
+3. Sistema calcula vigencia (+15 días automático)
+4. PDF generado con datos actuales
+5. Cliente aprueba → Estado: Aprobado
+6. Regeneración disponible → Nuevo estado Generado + vigencia fresca
+7. Filtros automáticos en 5 pestañas para gestión eficiente
+```
+
+### 3.3 Módulo de Ventas
 **Objetivo**: Gestión completa del proceso de ventas
 
 #### Funcionalidades
@@ -71,7 +107,7 @@
 - Registro de comisiones por venta
 - Trazabilidad completa de transacciones
 
-### 3.3 Módulo de Personal
+### 3.4 Módulo de Personal
 **Objetivo**: Gestión de trabajadores y tipos de empleados
 
 #### Funcionalidades
@@ -88,7 +124,7 @@
 - Tracking de metas individuales
 - Reportes de desempeño
 
-### 3.4 Módulo de Comisiones
+### 3.5 Módulo de Comisiones
 **Objetivo**: Cálculo y pago automatizado de comisiones
 
 #### Funcionalidades
@@ -134,6 +170,7 @@
 - ✅ Reportes de ventas por período
 - ✅ Reportes de comisiones
 - ✅ Reportes de metas de ventas
+- ✅ **Reportes de cotizaciones** por estado y vigencia
 - ✅ Exportación a Excel/PDF
 
 ### 4.3 Sistema de Descuentos
@@ -141,12 +178,20 @@
 - ✅ Configuración de tipos de descuento
 - ✅ Impacto en cálculo de comisiones
 
+### 4.4 Generación de Documentos ⭐ **ACTUALIZADO**
+- ✅ **PDFs de cotizaciones** con configuración dinámica de moneda
+- ✅ Comprobantes de venta
+- ✅ Reportes de comisiones
+- ✅ Documentos de pago
+
 ## 5. Requisitos No Funcionales
 
 ### 5.1 Performance
 - Tiempo de respuesta < 2 segundos para operaciones CRUD
+- **🆕 Cambios de estado de cotizaciones instantáneos con AJAX**
 - Soporte para hasta 10,000 productos
 - Soporte para hasta 1,000 transacciones diarias
+- **🆕 Filtros DataTables con carga optimizada por pestañas**
 - Reportes generados en < 10 segundos
 
 ### 5.2 Seguridad
@@ -155,12 +200,16 @@
 - Protección CSRF en formularios
 - Validación de entrada de datos
 - Logs de auditoría para operaciones críticas
+- **🆕 Validación de estados de cotizaciones**
 
-### 5.3 Usabilidad
+### 5.3 Usabilidad ⭐ **MEJORADA CON COTIZACIONES**
 - Interfaz intuitiva y responsive
+- **🆕 5 pestañas especializadas para gestión eficiente de cotizaciones**
 - Navegación clara entre módulos
+- **🆕 Cambios de estado visuales con retroalimentación inmediata**
 - Mensajes de error descriptivos
 - Confirmaciones para operaciones críticas
+- **🆕 Filtrado automático mejora experiencia de usuario**
 
 ### 5.4 Compatibilidad
 - Navegadores modernos (Chrome, Firefox, Safari, Edge)

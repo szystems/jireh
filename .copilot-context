@@ -8,15 +8,23 @@ Eres un asistente experto en proyectos Laravel 8. Tu tarea es cargar inmediatame
 - Framework: Laravel 8.x
 - PHP: ^7.3|^8.0
 - Base de Datos: MySQL
-- Frontend: Blade Templates + Laravel UI + Bootstrap
+- Frontend: Blade Templates + Laravel UI + Bootstrap 5
 - Autenticación: Laravel Sanctum + Laravel UI Auth
+- PDF Generation: DomPDF
+- Tablas Interactivas: DataTables + jQuery
 
-### Módulos Implementados
+### Módulos Implementados ✅ ACTUALIZADOS
 1. **Admin** - Administración general del sistema
 2. **Inventario** - Gestión de artículos, categorías, proveedores, stock
 3. **Ventas** - Gestión de clientes, ventas, facturación
 4. **Personal** - Trabajadores, tipos, comisiones, sueldos
 5. **Finanzas** - Pagos, lotes de pago, control financiero
+6. **📋 Cotizaciones** ⭐ **MÓDULO COMPLETO (Sep 2025)** - Sistema avanzado de cotizaciones con:
+   - Estados inteligentes (Generado/Aprobado + vigencia automática)
+   - 5 pestañas especializadas (Todas, Generadas, Vigentes, Vencidas, Aprobadas)
+   - Regeneración inteligente con tiempo fresco
+   - PDF optimizado con monedas dinámicas
+   - CRUD completo con validaciones robustas
 
 ### Controladores Principales (app/Http/Controllers/Admin/)
 - AdminController, UsersController, ClienteController, VehiculosController
@@ -25,24 +33,35 @@ Eres un asistente experto en proyectos Laravel 8. Tu tarea es cargar inmediatame
 - InventarioController, DescuentoController, ComisionController
 - PagoComisionController, PagoSueldoController, VentaController
 - PagoController, ReporteArticuloController, ReporteMetasController
+- **CotizacionController** ⭐ **COMPLETO** - CRUD + cambio estados + PDF + regeneración
 
 ### Modelos Principales (app/Models/)
 - **Inventario**: Articulo, Categoria, Unidad, Proveedor, MovimientoStock
 - **Comercial**: Cliente, Vehiculo, Venta, DetalleVenta, Pago
 - **Personal**: Trabajador, TipoTrabajador, Comision, PagoComision, PagoSueldo, DetallePagoSueldo, LotePago
 - **Sistema**: User, Config, MetaVenta
+- **📋 Cotizaciones**: Cotizacion, DetalleCotizacion ⭐ **MODELOS COMPLETOS**
+  - Accessor: esta_vigente (cálculo automático de vigencia)
+  - Relaciones: cliente, usuario, detalleCotizaciones, articulos, descuentos
+  - Estados: ENUM('Generado', 'Aprobado')
+  - Vigencia: Calculada por fecha_vencimiento vs fecha actual
 
-### Base de Datos (30+ migraciones)
+### Base de Datos (35+ migraciones)
 - Sistema completo con relaciones foreign key
 - Timestamps automáticos
 - Trazabilidad completa de operaciones
 - Optimizado para consultas frecuentes
+- **📋 Tablas Cotizaciones**:
+  - `cotizaciones`: id, numero_cotizacion, fecha_cotizacion, fecha_vencimiento, estado ENUM('Generado','Aprobado'), cliente_id, usuario_id, observaciones
+  - `detalle_cotizaciones`: id, cotizacion_id, articulo_id, cantidad, precio_venta, sub_total, descuento_id
 
 ### Documentación Disponible
 - docs/README.md - Documentación general y guía rápida
 - docs/core/ARCHITECTURE.md - Arquitectura detallada del sistema
 - docs/core/PRD.md - Product Requirements Document completo
 - docs/core/API.md - Documentación de API (en desarrollo)
+- **tools/DOCUMENTACION_PROYECTO/MODULO_COTIZACIONES_COMPLETO.md** ⭐ **NUEVO** - Documentación completa del módulo de cotizaciones
+- **tools/RESUMEN_TRABAJO/ESTADO_PROYECTO_SEPTIEMBRE_2025.md** ⭐ **NUEVO** - Estado actual del proyecto
 
 ### Convenciones del Proyecto
 - PSR-4 autoloading
@@ -55,18 +74,28 @@ Eres un asistente experto en proyectos Laravel 8. Tu tarea es cargar inmediatame
 
 ### Rutas Principales
 - /admin/* - Módulos administrativos
+- /admin/cotizaciones/* ⭐ **NUEVO** - CRUD completo de cotizaciones + PDF + cambio estados
 - /login, /register - Autenticación
 - API REST en desarrollo (/api/*)
 
-### Estado Actual
+### Estado Actual ⭐ **ACTUALIZADO SEPTIEMBRE 2025**
 - Sistema estable en producción
+- **Módulo de Cotizaciones 100% FUNCIONAL** con características avanzadas
 - Todas las funcionalidades core implementadas
 - Estructura profesional con tools/ organizados
 - Documentación completa actualizada
+- **Funcionalidades Cotizaciones**:
+  - ✅ CRUD completo con validaciones robustas
+  - ✅ Estados inteligentes (Generado/Aprobado + vigencia automática)
+  - ✅ 5 pestañas especializadas en dashboard
+  - ✅ Regeneración inteligente (Aprobado → Generado + 15 días)
+  - ✅ PDF optimizado con monedas dinámicas
+  - ✅ UX moderna con DataTables + AJAX
 
 ## Objetivo Inmediato
 Mantener este contexto vivo para cada sugerencia o generación de código, actualizar o extender la documentación sin duplicar ni romper la estructura existente, proponer mejoras respetando las convenciones del proyecto.
 
 ---
 **Última actualización**: Septiembre 16, 2025
-**Estado**: Producción activa
+**Estado**: Producción activa con módulo Cotizaciones 100% funcional
+**Módulo Reciente**: Cotizaciones (Sistema completo con estados avanzados y regeneración inteligente)

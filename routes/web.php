@@ -24,6 +24,7 @@ use App\Http\Controllers\Admin\PagoComisionController;
 use App\Http\Controllers\Admin\PagoSueldoController; // Nuevo controlador de pagos de sueldos
 use App\Http\Controllers\LotePagoController;
 use App\Http\Controllers\Admin\VentaController;
+use App\Http\Controllers\Admin\CotizacionController; // Nuevo controlador de cotizaciones
 use App\Http\Controllers\Admin\PagoController;
 use App\Http\Controllers\Admin\ReporteArticuloController;
 use App\Http\Controllers\Admin\ReporteMetasController; // Controlador de reportes de metas
@@ -252,6 +253,18 @@ Route::middleware(['auth'])->group(function () {
     Route::put('pagos/{id}', [PagoController::class, 'update'])->name('pagos.update');
     // Reactivado: Ruta para eliminar pagos de ventas
     Route::delete('pagos/{id}', [PagoController::class, 'destroy'])->name('pagos.destroy');
+
+    //Cotizaciones
+    Route::get('cotizaciones', [CotizacionController::class, 'index'])->name('admin.cotizaciones.index');
+    Route::get('add-cotizacion', [CotizacionController::class, 'create'])->name('admin.cotizaciones.create');
+    Route::post('insert-cotizacion', [CotizacionController::class, 'store'])->name('admin.cotizaciones.store');
+    Route::get('show-cotizacion/{id}', [CotizacionController::class, 'show'])->name('admin.cotizaciones.show');
+    Route::get('edit-cotizacion/{id}', [CotizacionController::class, 'edit'])->name('admin.cotizaciones.edit');
+    Route::put('update-cotizacion/{id}', [CotizacionController::class, 'update'])->name('admin.cotizaciones.update');
+    Route::get('delete-cotizacion/{id}', [CotizacionController::class, 'destroy'])->name('admin.cotizaciones.destroy');
+    Route::get('cotizacion/export/single/pdf/{id}', [CotizacionController::class, 'exportSinglePdf'])->name('admin.cotizaciones.export.single.pdf');
+    Route::put('cotizacion/{id}/cambiar-estado', [CotizacionController::class, 'cambiarEstado'])->name('admin.cotizaciones.cambiar.estado');
+
     //Reportes Articulos
     Route::get('reportearticulos', [ReporteArticuloController::class, 'index']);
     Route::get('reportearticulos/export/pdf', [ReporteArticuloController::class, 'exportPdf'])->name('reportearticulo.export.pdf');

@@ -2,7 +2,15 @@
 
 ## Visión General
 
-Jireh es un sistema de gestión empresarial construido en Laravel 8 que implementa una arquitectura MVC modular con separación clara de responsabilidades.
+Jireh es un sistema de gestión empresarial construido en Laravel 8 que implementa una arquitectura MVC modular con separación clara de responsabilidades. **Actualizado con módulo de Cotizaciones completo (Septiembre 2025)**.
+
+## 🎯 Estado Actual de Módulos
+
+### ✅ **Módulos Completados al 100%**
+- **📋 Cotizaciones** ⭐ **RECIÉN COMPLETADO** - Sistema avanzado con estados inteligentes
+- **👥 Trabajadores** - Gestión completa implementada
+- **🚗 Vehículos** - Funcional
+- **⚙️ Configuración** - Sistema centralizado
 
 ## Patrones de Diseño Implementados
 
@@ -48,6 +56,7 @@ app/Http/Controllers/Admin/
 ├── DescuentoController.php      # Gestión descuentos
 ├── ComisionController.php       # Cálculo comisiones
 ├── PagoComisionController.php   # Pagos comisiones
+├── CotizacionController.php     # ⭐ CRUD completo + PDF + estados
 ├── PagoSueldoController.php     # Pagos sueldos
 ├── VentaController.php          # Gestión ventas
 ├── PagoController.php           # Gestión pagos
@@ -72,7 +81,7 @@ app/Http/Controllers/Auth/
 
 ### Entidades Core del Negocio
 
-#### Gestión Comercial
+#### Gestión Comercial ⭐ **ACTUALIZADO SEPTIEMBRE 2025**
 ```mermaid
 graph TD
     A[Cliente] --> B[Vehiculo]
@@ -80,6 +89,32 @@ graph TD
     C --> D[DetalleVenta]
     D --> E[Articulo]
     F[Pago] --> C
+    G[Cotizacion] --> A
+    G --> H[DetalleCotizacion]
+    H --> E
+    G -.->|puede convertirse| C
+```
+
+#### 📋 **Módulo Cotizaciones - Arquitectura Detallada**
+```
+Cotizacion {
+    - Estado: ENUM (Generado, Aprobado)
+    - Vigencia: Calculada automáticamente (+15 días)
+    - Regeneración: Aprobado → Generado + Nueva vigencia
+}
+
+DetalleCotizacion {
+    - Productos con cantidad y precios
+    - Cálculos automáticos subtotal/total
+    - Vinculación con inventario
+}
+
+Características Avanzadas:
+✅ 5 Pestañas especializadas (Todas/Generadas/Vigentes/Vencidas/Aprobadas)
+✅ Cambio de estados con AJAX
+✅ Regeneración inteligente (preserva datos, renueva vigencia)
+✅ PDF dinámico con configuración de moneda
+✅ DataTables con filtros automáticos por estado
 ```
 
 #### Gestión de Inventario
@@ -162,6 +197,16 @@ database/factories/     # Generación datos prueba
 3. Se actualiza **Stock** de artículos
 4. Se calculan **Comisiones** para trabajadores
 5. Se registran **Pagos**
+
+### Flujo de Cotizaciones ⭐ **NUEVO**
+1. **Cliente** solicita cotización de productos
+2. Se crea **Cotización** con estado "Generado"
+3. Se agregan **DetalleCotizacion** con productos
+4. **Sistema calcula vigencia** automáticamente (+15 días)
+5. Cliente puede **aprobar** (cambio a estado "Aprobado")
+6. **Regeneración disponible**: Aprobado → Generado + nueva vigencia
+7. **PDF generado** con configuración de moneda dinámica
+8. **Filtros automáticos** por estado en interfaz de 5 pestañas
 
 ### Flujo de Inventario
 1. **Proveedor** suministra productos
