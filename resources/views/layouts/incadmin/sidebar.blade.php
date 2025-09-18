@@ -3,7 +3,15 @@
     <!-- Sidebar header starts -->
     <div class="sidebar-header">
         {{-- <div class="sidebar-logo">
-            <a href="{{ url('/dashboard') }}">
+                                </ul>
+                    </div>
+                </li>
+
+                <!-- Ventas -->
+                <li class="sidebar-dropdown">
+                    <a href="#" class="{{ Request::is('ventas','reportearticulos','inventario','descuentos','show-venta/*','show-descuento/*','admin/auditoria*') ? 'active-dropdown':''  }}" title="Gestión de Ventas">
+                        <i class="bi bi-cash-stack"></i>
+                        <span class="menu-text">Ventas</span>f="{{ url('/dashboard') }}">
                 <img src="{{ asset('img/logo.png') }}" alt="Logo" class="img-fluid" width="120">
             </a>
         </div> --}}
@@ -86,13 +94,12 @@
                 </li>
 
                 <!-- Almacén -->
-                @if(Auth::user()->role_as != 1)
-                    <li class="menu-category">Inventario y Catálogos</li>
-                    <li class="sidebar-dropdown">
-                        <a href="#" class="{{ Request::is('categorias','articulos','unidades','tipo-comisiones', 'show-categoria/*', 'show-articulo/*', 'show-unidad/*', 'show-tipo-comision/*') ? 'active-dropdown':''  }}" title="Inventario y Catálogos">
-                            <i class="bi bi-boxes"></i>
-                            <span class="menu-text">Almacén</span>
-                            <i class="bi bi-chevron-down menu-arrow"></i>
+                <li class="menu-category">Inventario y Catálogos</li>
+                <li class="sidebar-dropdown">
+                    <a href="#" class="{{ Request::is('categorias','articulos','unidades','tipo-comisiones', 'show-categoria/*', 'show-articulo/*', 'show-unidad/*', 'show-tipo-comision/*') ? 'active-dropdown':''  }}" title="Inventario y Catálogos">
+                        <i class="bi bi-boxes"></i>
+                        <span class="menu-text">Almacén</span>
+                        <i class="bi bi-chevron-down menu-arrow"></i>
                         </a>
                         <div class="sidebar-submenu">
                             <ul>
@@ -111,10 +118,8 @@
                             </ul>
                         </div>
                     </li>
-                @endif
 
                 <!-- Trabajadores -->
-                @if(Auth::user()->role_as != 1)
                 <li class="menu-category">Gestión de Personal</li>
                 <li class="sidebar-dropdown">
                     <a href="#" class="{{ Request::is('trabajadores','tipotrabajador','show-trabajador/*','edit-trabajador/*','add-trabajador','admin/pago-sueldo*') ? 'active-dropdown':''  }}" title="Gestión de Personal">
@@ -131,13 +136,14 @@
                             {{-- <li class="{{ Request::is('tipo-trabajador','show-tipo-trabajador/*','add-tipo-trabajador','edit-tipo-trabajador/*') ? 'active-page-link':''  }}">
                                 <a href="{{ url('tipo-trabajador') }}"><i class="bi bi-tags"></i> Tipos</a>
                             </li> --}}
+                            @if(Auth::user()->role_as != 1)
                             <li class="{{ Request::is('admin/pago-sueldo*') ? 'active-page-link':''  }}">
                                 <a href="{{ route('admin.pago-sueldo.index') }}"><i class="bi bi-wallet2"></i> Pagos de Sueldos</a>
                             </li>
+                            @endif
                         </ul>
                     </div>
                 </li>
-                @endif
 
                 <!-- Comisiones -->
                 @if(Auth::user()->role_as != 1)
@@ -175,26 +181,24 @@
                 @endif
 
                 <!-- Compras -->
-                @if(Auth::user()->role_as != 1)
-                    <li class="menu-category">Operaciones</li>
-                    <li class="sidebar-dropdown">
-                        <a href="#" class="{{ Request::is('ingresos','proveedores','show-ingreso/*','show-proveedor/*') ? 'active-dropdown':''  }}" title="Gestión de Compras">
-                            <i class="bi bi-cart4"></i>
-                            <span class="menu-text">Compras</span>
-                            <i class="bi bi-chevron-down menu-arrow"></i>
-                        </a>
-                        <div class="sidebar-submenu">
-                            <ul>
-                                <li class="{{ Request::is('ingresos','show-ingreso/*','add-ingreso','edit-ingreso/*') ? 'active-page-link':''  }}">
-                                    <a href="{{ url('ingresos') }}"><i class="bi bi-cart-plus"></i> Ingresos</a>
-                                </li>
-                                <li class="{{ Request::is('proveedores','show-proveedor/*','add-proveedor','edit-proveedor/*') ? 'active-page-link':''  }}">
-                                    <a href="{{ url('proveedores') }}"><i class="bi bi-person-badge-fill"></i> Proveedores</a>
-                                </li>
-                            </ul>
-                        </div>
-                    </li>
-                @endif
+                <li class="menu-category">Operaciones</li>
+                <li class="sidebar-dropdown">
+                    <a href="#" class="{{ Request::is('ingresos','proveedores','show-ingreso/*','show-proveedor/*') ? 'active-dropdown':''  }}" title="Gestión de Compras">
+                        <i class="bi bi-cart4"></i>
+                        <span class="menu-text">Compras</span>
+                        <i class="bi bi-chevron-down menu-arrow"></i>
+                    </a>
+                    <div class="sidebar-submenu">
+                        <ul>
+                            <li class="{{ Request::is('ingresos','show-ingreso/*','add-ingreso','edit-ingreso/*') ? 'active-page-link':''  }}">
+                                <a href="{{ url('ingresos') }}"><i class="bi bi-cart-plus"></i> Ingresos</a>
+                            </li>
+                            <li class="{{ Request::is('proveedores','show-proveedor/*','add-proveedor','edit-proveedor/*') ? 'active-page-link':''  }}">
+                                <a href="{{ url('proveedores') }}"><i class="bi bi-person-badge-fill"></i> Proveedores</a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
 
                 <!-- Ventas -->
                 <li class="sidebar-dropdown">
@@ -278,7 +282,7 @@
     <div class="sidebar-footer">
         <div class="d-flex align-items-center justify-content-between">
             <div>
-                <span class="small text-muted"><a class="text-white" href="https://szystems.com" target="_blank" rel="noopener noreferrer"><b>Szystems v1.7.0</b></a></span>
+                <span class="small text-muted"><a class="text-white" href="https://szystems.com" target="_blank" rel="noopener noreferrer"><b>Szystems v1.7.1</b></a></span>
             </div>
             <div>
                 <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"

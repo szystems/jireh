@@ -145,11 +145,13 @@
                                                                 <i class="bi bi-pencil-fill text-warning"></i> Editar
                                                             </a>
                                                         </li>
+                                                        @if(Auth::user()->role_as != 1)
                                                         <li>
                                                             <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#deleteModal-{{ $articulo->id }}">
                                                                 <i class="bi bi-trash-fill text-danger"></i> Eliminar
                                                             </button>
                                                         </li>
+                                                        @endif
                                                     </ul>
                                                 </div>
                                             </td>
@@ -235,11 +237,13 @@
                                                             <i class="bi bi-pencil-fill text-warning"></i> Editar
                                                         </a>
                                                     </li>
+                                                    @if(Auth::user()->role_as != 1)
                                                     <li>
                                                         <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#deleteModal-{{ $articulo->id }}">
                                                             <i class="bi bi-trash-fill text-danger"></i> Eliminar
                                                         </button>
                                                     </li>
+                                                    @endif
                                                 </ul>
                                             </div>
                                         </div>

@@ -98,7 +98,7 @@
                                     <li>Crea usuarios para tu equipo:
                                         <ul>
                                             <li><strong>Administradores:</strong> Acceso total al sistema</li>
-                                            <li><strong>Vendedores:</strong> Acceso limitado (sin costos ni ganancias)</li>
+                                            <li><strong>Vendedores:</strong> Acceso a ventas, inventario, compras y trabajadores (sin eliminación)</li>
                                         </ul>
                                     </li>
                                     <li>Asigna roles apropiados</li>
@@ -108,7 +108,7 @@
                             <div class="col-md-4">
                                 <div class="alert alert-warning">
                                     <i class="bi bi-shield-exclamation"></i>
-                                    <strong>Importante:</strong> Los vendedores no ven información de costos ni ganancias por seguridad.
+                                    <strong>Importante:</strong> Los vendedores tienen acceso a inventario, compras y trabajadores, pero no pueden eliminar registros ni ver costos/ganancias.
                                 </div>
                             </div>
                         </div>

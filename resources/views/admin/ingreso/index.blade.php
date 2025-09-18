@@ -197,9 +197,11 @@
                                                             <div class="btn-group btn-group-sm">
                                                                 <a href="{{ url('show-ingreso/'.$ingreso->id)  }}" class="btn btn-info" title="Ver detalles"><i class="bi bi-eye-fill"></i></a>
                                                                 <a href="{{ url('edit-ingreso/'.$ingreso->id)  }}" class="btn btn-warning" title="Editar"><i class="bi bi-pencil-fill"></i></a>
+                                                                @if(Auth::user()->role_as != 1)
                                                                 <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-{{ $ingreso->id }}" title="Eliminar">
                                                                     <i class="bi bi-trash-fill"></i>
                                                                 </button>
+                                                                @endif
                                                             </div>
                                                         </td>
                                                         <td><a href="{{ url('show-ingreso/'.$ingreso->id)  }}" class="text-primary">{{ \Carbon\Carbon::parse($ingreso->fecha)->format('d/m/Y') }}</a></td>

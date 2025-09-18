@@ -287,6 +287,20 @@
                                 </thead>
                                 <tbody>
                                     <tr class="table-success">
+                                        <td><strong>1.7.1</strong></td>
+                                        <td>Sep 18, 2025</td>
+                                        <td>
+                                            <strong>Expansión permisos vendedores:</strong>
+                                            <ul class="mb-0">
+                                                <li>Acceso completo a Inventario (sin eliminar)</li>
+                                                <li>Acceso completo a Compras (sin eliminar)</li>
+                                                <li>Acceso completo a Trabajadores (sin eliminar)</li>
+                                                <li>Centro de Ayuda actualizado con nuevos permisos</li>
+                                                <li>SuperAdminMiddleware para seguridad</li>
+                                            </ul>
+                                        </td>
+                                    </tr>
+                                    <tr>
                                         <td><strong>1.7.0</strong></td>
                                         <td>Sep 18, 2025</td>
                                         <td>
@@ -337,9 +351,9 @@
                         <div class="col-md-8">
                             <h5><i class="bi bi-info-circle text-primary"></i> Información del Sistema</h5>
                             <p class="mb-0">
-                                <strong>Sistema Jireh v1.7.0</strong> - Desarrollado por <a href="https://szystems.com" target="_blank" class="text-decoration-none">Szystems</a><br>
+                                <strong>Sistema Jireh v1.7.1</strong> - Desarrollado por <a href="https://szystems.com" target="_blank" class="text-decoration-none">Szystems</a><br>
                                 Plataforma: Laravel 8 | Base de datos: MySQL | Interfaz: Bootstrap 5<br>
-                                <small class="text-muted">Última actualización del Centro de Ayuda: Septiembre 18, 2025</small>
+                                <small class="text-muted">Última actualización: Septiembre 18, 2025 - Expansión permisos vendedores</small>
                             </p>
                         </div>
                         <div class="col-md-4 text-center">

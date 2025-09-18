@@ -133,6 +133,7 @@
                                                         <a href="{{ url('edit-trabajador/'.$trabajador->id) }}" class="btn btn-warning btn-sm" title="Editar">
                                                             <i class="bi bi-pencil-fill"></i>
                                                         </a>
+                                                        @if(Auth::user()->role_as != 1)
                                                         @if($trabajador->estado == 1)
                                                             <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#statusModal-{{ $trabajador->id }}" title="Desactivar">
                                                                 <i class="bi bi-toggle-on"></i>
@@ -141,6 +142,7 @@
                                                             <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#statusModal-{{ $trabajador->id }}" title="Activar">
                                                                 <i class="bi bi-toggle-off"></i>
                                                             </button>
+                                                        @endif
                                                         @endif
                                                     </div>
 

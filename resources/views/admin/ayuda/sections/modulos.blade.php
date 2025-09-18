@@ -140,20 +140,44 @@
         </div>
 
         @if($isAdmin)
-        <!-- Inventario y Catálogos -->
+        <!-- Inventario y Catálogos - Solo Administradores con permisos completos -->
         <div class="accordion-item">
             <h2 class="accordion-header">
                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInventario">
                     <i class="bi bi-boxes text-warning me-3"></i>
                     <div>
                         <strong>Inventario y Catálogos</strong>
-                        <span class="badge badge-role bg-danger ms-2">Solo Administradores</span>
+                        <span class="badge badge-role bg-danger ms-2">Administrador - Control Total</span>
                         <br><small class="text-muted">Control completo de productos, categorías y stock</small>
                     </div>
                 </button>
             </h2>
             <div id="collapseInventario" class="accordion-collapse collapse" data-bs-parent="#modulosAccordion">
                 <div class="accordion-body">
+                    <div class="alert alert-warning">
+                        <i class="bi bi-shield-check"></i>
+                        <strong>Vista de Administrador:</strong> Tienes control total sobre inventario, incluyendo eliminación de registros y gestión de precios de costo.
+                    </div>
+        @else
+        <!-- Inventario y Catálogos - Vendedores con acceso limitado -->
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInventario">
+                    <i class="bi bi-boxes text-warning me-3"></i>
+                    <div>
+                        <strong>Inventario y Catálogos</strong>
+                        <span class="badge badge-role bg-info ms-2">Vendedor - Acceso Limitado</span>
+                        <br><small class="text-muted">Consulta y gestión de productos, categorías y stock (sin eliminación)</small>
+                    </div>
+                </button>
+            </h2>
+            <div id="collapseInventario" class="accordion-collapse collapse" data-bs-parent="#modulosAccordion">
+                <div class="accordion-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i>
+                        <strong>Vista de Vendedor:</strong> Puedes consultar, crear y editar productos, categorías y unidades, pero NO puedes eliminar registros existentes.
+                    </div>
+        @endif
                     <div class="help-card">
                         <h5><i class="bi bi-diagram-3 text-info"></i> Categorías</h5>
                         <p><strong>Ruta:</strong> Inventario y Catálogos → Almacén → Categorías</p>
@@ -352,7 +376,6 @@
                 </div>
             </div>
         </div>
-        @endif
 
         <!-- Ventas y Cotizaciones -->
         <div class="accordion-item">
@@ -489,22 +512,58 @@
         </div>
 
         @if($isAdmin)
-        <!-- Personal y Comisiones -->
+        <!-- Personal y Comisiones - Solo Administradores -->
         <div class="accordion-item">
             <h2 class="accordion-header">
                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePersonal">
                     <i class="bi bi-people-fill text-info me-3"></i>
                     <div>
                         <strong>Gestión de Personal y Comisiones</strong>
-                        <span class="badge badge-role bg-danger ms-2">Solo Administradores</span>
-                        <br><small class="text-muted">Administración de empleados, sueldos y comisiones</small>
+                        <span class="badge badge-role bg-danger ms-2">Administrador - Control Total</span>
+                        <br><small class="text-muted">Control completo de empleados, sueldos y comisiones</small>
                     </div>
                 </button>
             </h2>
             <div id="collapsePersonal" class="accordion-collapse collapse" data-bs-parent="#modulosAccordion">
                 <div class="accordion-body">
+                    <div class="alert alert-warning">
+                        <i class="bi bi-shield-check"></i>
+                        <strong>Vista de Administrador:</strong> Tienes acceso completo a gestión de personal, incluyendo comisiones, sueldos y eliminación de registros.
+                    </div>
+        @endif
+
+        <!-- Trabajadores - Acceso tanto para Administradores como Vendedores -->
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTrabajadores">
+                    <i class="bi bi-person-badge text-info me-3"></i>
+                    <div>
+                        <strong>Módulo de Trabajadores</strong>
+                        @if($isAdmin)
+                        <span class="badge badge-role bg-danger ms-2">Administrador - Control Total</span>
+                        @else
+                        <span class="badge badge-role bg-info ms-2">Vendedor - Acceso Limitado</span>
+                        @endif
+                        <br><small class="text-muted">@if($isAdmin)Gestión completa de trabajadores@else Consulta y gestión de trabajadores (sin eliminación)@endif</small>
+                    </div>
+                </button>
+            </h2>
+            <div id="collapseTrabajadores" class="accordion-collapse collapse" data-bs-parent="#modulosAccordion">
+                <div class="accordion-body">
+                    @if($isAdmin)
+                    <div class="alert alert-warning">
+                        <i class="bi bi-shield-check"></i>
+                        <strong>Vista de Administrador:</strong> Tienes control total sobre trabajadores, incluyendo eliminación de registros.
+                    </div>
+                    @else
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i>
+                        <strong>Vista de Vendedor:</strong> Puedes consultar, crear y editar trabajadores, pero NO puedes eliminar registros existentes.
+                    </div>
+                    @endif
+
                     <div class="help-card">
-                        <h5><i class="bi bi-person-badge text-primary"></i> Módulo de Trabajadores</h5>
+                        <h5><i class="bi bi-person-badge text-primary"></i> Gestión de Trabajadores</h5>
                         <div class="row">
                             <div class="col-md-8">
                                 <p><strong>Ruta:</strong> Gestión de Personal → Trabajadores → Trabajadores</p>
@@ -532,6 +591,7 @@
                         </div>
                     </div>
 
+        @if($isAdmin)
                     <div class="help-card">
                         <h5><i class="bi bi-currency-dollar text-success"></i> Sistema de Comisiones</h5>
                         <p><strong>Ruta:</strong> Sistema de Comisiones → [Varios submódulos]</p>
@@ -576,21 +636,42 @@
                 </div>
             </div>
         </div>
+        @else
+                </div>
+            </div>
+        </div>
+        @endif
 
-        <!-- Compras y Proveedores -->
+        <!-- Compras y Proveedores - Acceso para Administradores y Vendedores -->
         <div class="accordion-item">
             <h2 class="accordion-header">
                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCompras">
                     <i class="bi bi-cart4 text-secondary me-3"></i>
                     <div>
                         <strong>Compras y Proveedores</strong>
-                        <span class="badge badge-role bg-danger ms-2">Solo Administradores</span>
-                        <br><small class="text-muted">Gestión de compras e ingresos al inventario</small>
+                        @if($isAdmin)
+                        <span class="badge badge-role bg-danger ms-2">Administrador - Control Total</span>
+                        @else
+                        <span class="badge badge-role bg-info ms-2">Vendedor - Acceso Limitado</span>
+                        @endif
+                        <br><small class="text-muted">@if($isAdmin)Control completo de compras e ingresos@else Gestión de compras e ingresos (sin eliminación)@endif</small>
                     </div>
                 </button>
             </h2>
             <div id="collapseCompras" class="accordion-collapse collapse" data-bs-parent="#modulosAccordion">
                 <div class="accordion-body">
+                    @if($isAdmin)
+                    <div class="alert alert-warning">
+                        <i class="bi bi-shield-check"></i>
+                        <strong>Vista de Administrador:</strong> Tienes control total sobre compras y proveedores, incluyendo eliminación de registros.
+                    </div>
+                    @else
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i>
+                        <strong>Vista de Vendedor:</strong> Puedes consultar, crear y editar compras y proveedores, pero NO puedes eliminar registros existentes.
+                    </div>
+                    @endif
+
                     <div class="help-card">
                         <h5><i class="bi bi-building text-info"></i> Módulo de Proveedores</h5>
                         <p><strong>Ruta:</strong> Operaciones → Compras → Proveedores</p>
@@ -612,7 +693,8 @@
                             <li><strong>Seleccionar proveedor</strong></li>
                             <li><strong>Agregar productos comprados</strong>
                                 <ul><li>Cantidad recibida</li>
-                                <li>Precio de costo unitario</li></ul>
+                                @if($isAdmin)<li>Precio de costo unitario</li>@endif
+                                </ul>
                             </li>
                             <li><strong>Registrar factura del proveedor</strong></li>
                             <li><strong>Confirmar ingreso</strong></li>
@@ -622,6 +704,13 @@
                             <i class="bi bi-arrow-up-circle"></i>
                             <strong>Actualización automática:</strong> El stock se incrementa automáticamente al confirmar el ingreso.
                         </div>
+
+                        @if(!$isAdmin)
+                        <div class="alert alert-warning">
+                            <i class="bi bi-eye-slash"></i>
+                            <strong>Restricción de Vendedor:</strong> No puedes ver ni editar precios de costo en los ingresos.
+                        </div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -684,7 +773,6 @@
                 </div>
             </div>
         </div>
-        @endif
     </div>
 
     <!-- Resumen final -->

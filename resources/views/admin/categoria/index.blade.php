@@ -106,9 +106,11 @@
                                                         <a href="{{ url('edit-categoria/'.$categoria->id) }}" class="btn btn-sm btn-warning" title="Editar">
                                                             <i class="bi bi-pencil-fill"></i>
                                                         </a>
+                                                        @if(Auth::user()->role_as != 1)
                                                         <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-{{ $categoria->id }}" title="Eliminar">
                                                             <i class="bi bi-trash-fill"></i>
                                                         </button>
+                                                        @endif
                                                     </div>
                                                 </td>
                                                 <td>

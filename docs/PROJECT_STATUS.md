@@ -1,14 +1,14 @@
-# 📊 Estado Actual del Proyecto - Sistema Jireh v1.7.0
+# 📊 Estado Actual del Proyecto - Sistema Jireh v1.7.1
 
 **Fecha de reporte**: 18 de septiembre, 2025  
-**Versión del sistema**: v1.7.0  
-**Estado**: Producción activa con Centro de Ayuda
+**Versión del sistema**: v1.7.1  
+**Estado**: Producción activa con permisos expandidos para vendedores
 
 ---
 
 ## 🎯 Resumen Ejecutivo
 
-El **Sistema Jireh** se encuentra en la versión **v1.7.0** con todas las funcionalidades core implementadas y operativas. La reciente incorporación del **Centro de Ayuda** completa el ecosistema de documentación del sistema, proporcionando soporte integral a usuarios administrativos y vendedores.
+El **Sistema Jireh** se encuentra en la versión **v1.7.1** con todas las funcionalidades core implementadas y operativas. Esta versión introduce una **expansión significativa de permisos para vendedores**, otorgándoles acceso completo a módulos de **Inventario, Compras y Trabajadores** manteniendo restricciones de seguridad para eliminación de registros.
 
 ---
 
@@ -102,18 +102,27 @@ docs/                          # Documentación completa
 
 ### **Tipos de Usuario**
 - **Administrador** (`role_as = 0`): Acceso completo al sistema
-- **Vendedor** (`role_as = 1`): Acceso limitado a ventas y consultas
+- **Vendedor** (`role_as = 1`): Acceso amplio con restricciones de eliminación
 
 ### **Permisos por Módulo**
 | Módulo | Administrador | Vendedor |
 |--------|---------------|----------|
 | **Dashboard** | ✅ Completo | ✅ Limitado |
-| **Inventario** | ✅ CRUD | ✅ Solo lectura |
+| **Inventario** | ✅ CRUD completo | ✅ Crear/Editar/Ver (sin eliminar) |
+| **Compras** | ✅ CRUD completo | ✅ Crear/Editar/Ver (sin eliminar) |
+| **Trabajadores** | ✅ CRUD completo + Comisiones | ✅ Crear/Editar/Ver (sin eliminar) |
 | **Ventas** | ✅ Completo | ✅ Crear/Ver |
 | **Cotizaciones** | ✅ Completo | ✅ Crear/Ver |
-| **Personal** | ✅ Completo | ❌ Sin acceso |
-| **Finanzas** | ✅ Completo | ✅ Solo reportes |
+| **Comisiones** | ✅ Completo | ❌ Sin acceso |
+| **Finanzas** | ✅ Completo | ❌ Sin acceso |
+| **Administración** | ✅ Completo | ❌ Sin acceso |
 | **Centro de Ayuda** | ✅ Contenido admin | ✅ Contenido vendedor |
+
+### **🔒 Restricciones de Seguridad para Vendedores**
+- ❌ **No pueden eliminar** ningún registro del sistema
+- ❌ **No ven precios de costo** ni información de ganancias
+- ❌ **No acceden a** módulos de comisiones, finanzas ni administración
+- ✅ **Acceso amplio** a operaciones diarias: inventario, compras, trabajadores y ventas
 
 ---
 

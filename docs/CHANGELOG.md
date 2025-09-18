@@ -6,6 +6,39 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
+## [v1.7.1] - 2025-09-18
+
+### 🔓 Expansión de Permisos de Vendedores
+- **Acceso completo a módulo de Compras** (Ingresos y Proveedores)
+- **Acceso completo a módulo de Inventario/Catálogos** (Artículos, Categorías, Unidades)
+- **Acceso completo a módulo de Trabajadores** (Gestión de Personal)
+- **Restricción de eliminación** mantenida para seguridad de datos
+
+### 🛡️ Seguridad Implementada
+- **SuperAdminMiddleware** creado para proteger operaciones de eliminación
+- **Protección dual**: UI (botones ocultos) + Servidor (middleware)
+- **Validación @if(Auth::user()->role_as != 1)** en todas las vistas con botones de eliminar
+
+### 🔄 Cambiado
+- **Sidebar navegación** actualizado para vendedores
+- **Centro de Ayuda** completamente actualizado con nuevos permisos
+- **FAQ** reescrita con detalles de permisos expandidos
+- **Documentación de módulos** diferenciada por rol
+
+### 🛠️ Técnico
+- **6 vistas actualizadas** con protección de botones eliminar:
+  - `ingreso/index.blade.php`
+  - `proveedor/index.blade.php` 
+  - `trabajador/index.blade.php`
+  - `categoria/index.blade.php`
+  - `unidad/index.blade.php`
+  - `articulo/index.blade.php`
+- **Middleware registrado** en `app/Http/Kernel.php`
+- **6 rutas protegidas** con middleware `superAdmin`
+- **Centro de Ayuda v1.7.1** con documentación actualizada
+
+---
+
 ## [v1.7.0] - 2025-09-18
 
 ### ✨ Añadido

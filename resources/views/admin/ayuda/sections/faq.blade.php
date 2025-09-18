@@ -178,16 +178,35 @@
 
                     @if(!$isAdmin)
                     <div class="help-card">
-                        <h5><i class="bi bi-eye-slash text-warning"></i> "¿Por qué no veo precios de costo ni ganancias?"</h5>
-                        <p>Como vendedor, esta información está protegida por políticas de seguridad de la empresa:</p>
-                        <ul>
-                            <li><strong>Información confidencial:</strong> Solo administradores ven costos</li>
-                            <li><strong>Enfoque en ventas:</strong> Tu trabajo es vender, no analizar rentabilidad</li>
-                            <li><strong>Seguridad:</strong> Evita que información sensible se comparta inadecuadamente</li>
-                        </ul>
-                        <div class="alert alert-info">
+                        <h5><i class="bi bi-eye-slash text-warning"></i> "¿Por qué no veo precios de costo ni puedo eliminar registros?"</h5>
+                        <p>Como vendedor, tienes acceso amplio al sistema con algunas restricciones de seguridad:</p>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="text-success">✅ Lo que SÍ puedes hacer:</h6>
+                                <ul>
+                                    <li><strong>Gestionar inventario completo:</strong> Ver, crear y editar productos</li>
+                                    <li><strong>Manejar compras:</strong> Registrar ingresos y proveedores</li>
+                                    <li><strong>Administrar trabajadores:</strong> Crear y editar personal</li>
+                                    <li><strong>Realizar ventas:</strong> Proceso completo de facturación</li>
+                                    <li><strong>Consultar todo:</strong> Acceso de lectura a todos los módulos</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-danger">❌ Restricciones de seguridad:</h6>
+                                <ul>
+                                    <li><strong>Eliminar registros:</strong> Solo administradores pueden eliminar</li>
+                                    <li><strong>Ver precios de costo:</strong> Información confidencial</li>
+                                    <li><strong>Ver ganancias:</strong> Análisis de rentabilidad</li>
+                                    <li><strong>Gestionar comisiones:</strong> Solo consulta tus propias comisiones</li>
+                                    <li><strong>Administrar usuarios:</strong> Función exclusiva de administradores</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info mt-3">
                             <i class="bi bi-shield-check"></i>
-                            <strong>Tranquilo:</strong> Tienes acceso a todo lo necesario para ser un vendedor exitoso.
+                            <strong>¡Excelente cobertura!</strong> Tienes acceso a casi todo lo necesario para ser un vendedor exitoso, con restricciones mínimas de seguridad.
                         </div>
                     </div>
                     @endif

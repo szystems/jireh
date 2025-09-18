@@ -134,7 +134,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('insert-categoria',[CategoriaController::class,'insert']);
     Route::get('edit-categoria/{id}',[CategoriaController::class,'edit']);
     Route::put('update-categoria/{id}', [CategoriaController::class, 'update']);
-    Route::get('delete-categoria/{id}', [CategoriaController::class, 'destroy']);
+    Route::get('delete-categoria/{id}', [CategoriaController::class, 'destroy'])->middleware('superAdmin');
 
     //Proveedores
     Route::get('proveedores', [ProveedorController::class, 'index']);
@@ -143,7 +143,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('insert-proveedor',[ProveedorController::class,'insert']);
     Route::get('edit-proveedor/{id}',[ProveedorController::class,'edit']);
     Route::put('update-proveedor/{id}', [ProveedorController::class, 'update']);
-    Route::get('delete-proveedor/{id}', [ProveedorController::class, 'destroy']);
+    Route::get('delete-proveedor/{id}', [ProveedorController::class, 'destroy'])->middleware('superAdmin');
     Route::get('pdf-proveedores', [ProveedorController::class, 'pdf']);
     Route::get('pdf-proveedor/{id}', [ProveedorController::class, 'pdfproveedor']);
 
@@ -154,7 +154,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('insert-unidad',[UnidadController::class,'insert']);
     Route::get('edit-unidad/{id}',[UnidadController::class,'edit']);
     Route::put('update-unidad/{id}', [UnidadController::class, 'update']);
-    Route::get('delete-unidad/{id}', [UnidadController::class, 'destroy']);
+    Route::get('delete-unidad/{id}', [UnidadController::class, 'destroy'])->middleware('superAdmin');
     Route::get('/api/articulos/{articulo}/unidad', [UnidadController::class, 'getUnidadTipo']);
 
     //Tipo comisiones
@@ -174,7 +174,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('show-articulo/{id}', [ArticuloController::class, 'show']);
     Route::get('edit-articulo/{id}', [ArticuloController::class, 'edit']);
     Route::put('update-articulo/{id}', [ArticuloController::class, 'update']);
-    Route::get('delete-articulo/{id}', [ArticuloController::class, 'destroy']);
+    Route::get('delete-articulo/{id}', [ArticuloController::class, 'destroy'])->middleware('superAdmin');
     Route::get('export-articulos-pdf', [ArticuloController::class, 'exportPdf']);
     Route::get('export-articulo-pdf/{id}', [ArticuloController::class, 'exportPdfSingle']); // Nueva ruta para exportar artículo individual
 
@@ -188,7 +188,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('show-ingreso/{id}', [IngresoController::class, 'show']);
     Route::get('edit-ingreso/{id}', [IngresoController::class, 'edit']);
     Route::put('update-ingreso/{id}', [IngresoController::class, 'update']);
-    Route::get('delete-ingreso/{id}', [IngresoController::class, 'destroy']);
+    Route::get('delete-ingreso/{id}', [IngresoController::class, 'destroy'])->middleware('superAdmin');
     Route::get('ingresos/export/pdf', [IngresoController::class, 'exportPdf'])->name('ingresos.export.pdf');
     Route::get('ingresos/export/excel', [IngresoController::class, 'exportExcel'])->name('ingresos.export.excel');
     Route::get('ingresos/export/single/pdf/{id}', [IngresoController::class, 'exportSinglePdf'])->name('ingresos.export.single.pdf');
@@ -201,7 +201,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('insert-trabajador',[TrabajadorController::class,'insert']);
     Route::get('edit-trabajador/{id}',[TrabajadorController::class,'edit']);
     Route::put('update-trabajador/{id}', [TrabajadorController::class, 'update']);
-    Route::get('delete-trabajador/{id}', [TrabajadorController::class, 'destroy']);
+    Route::get('delete-trabajador/{id}', [TrabajadorController::class, 'destroy'])->middleware('superAdmin');
 
     //Tipos de Trabajador (rutas estilo convencional)
     Route::get('tipo-trabajador', [TipoTrabajadorController::class, 'index']);
