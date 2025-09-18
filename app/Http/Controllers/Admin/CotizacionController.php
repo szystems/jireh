@@ -144,6 +144,35 @@ class CotizacionController extends Controller
             'detalles.*.sub_total' => 'required|numeric|min:0',
         ]);
 
+        // Validación personalizada de cantidades según tipo de unidad
+        foreach ($request->detalles as $index => $detalle) {
+            $articulo = Articulo::with('unidad')->find($detalle['articulo_id']);
+            
+            if ($articulo && $articulo->unidad) {
+                $cantidad = floatval($detalle['cantidad']);
+                
+                if ($articulo->unidad->tipo === 'unidad') {
+                    // Para unidades, debe ser un número entero >= 1
+                    if ($cantidad != intval($cantidad) || $cantidad < 1) {
+                        return redirect()->back()
+                                       ->withInput()
+                                       ->withErrors([
+                                           "detalles.{$index}.cantidad" => "Para el artículo '{$articulo->nombre}' de tipo unidad, la cantidad debe ser un número entero mayor o igual a 1."
+                                       ]);
+                    }
+                } elseif ($articulo->unidad->tipo === 'decimal') {
+                    // Para decimales, debe ser >= 0.01
+                    if ($cantidad < 0.01) {
+                        return redirect()->back()
+                                       ->withInput()
+                                       ->withErrors([
+                                           "detalles.{$index}.cantidad" => "Para el artículo '{$articulo->nombre}' de tipo decimal, la cantidad mínima es 0.01 (use punto decimal, ej: 1.50)."
+                                       ]);
+                    }
+                }
+            }
+        }
+
         try {
             DB::beginTransaction();
 
@@ -284,6 +313,35 @@ class CotizacionController extends Controller
                 'nuevos_detalles.*.cantidad' => 'required|numeric|min:0.01',
                 'nuevos_detalles.*.precio_venta' => 'required|numeric|min:0',
             ]);
+
+            // Validación personalizada de cantidades según tipo de unidad para nuevos detalles
+            foreach ($request->nuevos_detalles as $index => $detalle) {
+                $articulo = Articulo::with('unidad')->find($detalle['articulo_id']);
+                
+                if ($articulo && $articulo->unidad) {
+                    $cantidad = floatval($detalle['cantidad']);
+                    
+                    if ($articulo->unidad->tipo === 'unidad') {
+                        // Para unidades, debe ser un número entero >= 1
+                        if ($cantidad != intval($cantidad) || $cantidad < 1) {
+                            return redirect()->back()
+                                           ->withInput()
+                                           ->withErrors([
+                                               "nuevos_detalles.{$index}.cantidad" => "Para el artículo '{$articulo->nombre}' de tipo unidad, la cantidad debe ser un número entero mayor o igual a 1."
+                                           ]);
+                        }
+                    } elseif ($articulo->unidad->tipo === 'decimal') {
+                        // Para decimales, debe ser >= 0.01
+                        if ($cantidad < 0.01) {
+                            return redirect()->back()
+                                           ->withInput()
+                                           ->withErrors([
+                                               "nuevos_detalles.{$index}.cantidad" => "Para el artículo '{$articulo->nombre}' de tipo decimal, la cantidad mínima es 0.01 (use punto decimal, ej: 1.50)."
+                                           ]);
+                        }
+                    }
+                }
+            }
         }
 
         try {
