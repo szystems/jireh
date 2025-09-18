@@ -3,18 +3,19 @@
 ## 1. Resumen Ejecutivo
 
 ### 1.1 Visión del Producto
-**Jireh** es un sistema integral de gestión empresarial diseñado para pequeñas y medianas empresas que requieren control sobre inventario, ventas, cotizaciones, personal y finanzas en una solución unificada. **Actualizado con módulo de Cotizaciones completo (Septiembre 2025)**.
+**Jireh** es un sistema integral de gestión empresarial diseñado para pequeñas y medianas empresas que requieren control sobre inventario, ventas, cotizaciones, personal y finanzas en una solución unificada. **Actualizado con Centro de Ayuda v1.7.0 (Septiembre 18, 2025)**.
 
 ### 1.2 Objetivos del Producto
 - Centralizar la gestión empresarial en una plataforma única
 - **🆕 Gestionar cotizaciones con estados inteligentes y regeneración automática**
+- **🆕 Proporcionar documentación completa con Centro de Ayuda integrado**
 - Automatizar cálculos de comisiones y pagos de personal
 - Proporcionar trazabilidad completa de inventario y ventas
 - Generar reportes ejecutivos para toma de decisiones
 - Optimizar procesos administrativos y financieros
 
 ### 1.3 Alcance
-**Incluye**: Gestión de inventario, ventas, **cotizaciones avanzadas**, personal, comisiones, pagos, reportes  
+**Incluye**: Gestión de inventario, ventas, **cotizaciones avanzadas**, personal, comisiones, pagos, reportes, **Centro de Ayuda completo**  
 **Excluye**: Contabilidad completa, nómina avanzada, CRM completo, e-commerce
 
 ## 2. Usuarios Objetivo
@@ -158,6 +159,27 @@
 - Reportes financieros precisos
 - Auditoría completa de transacciones
 
+### 3.6 Módulo Centro de Ayuda ⭐ **NUEVO - v1.7.0 (Sep 18, 2025)**
+**Objetivo**: Proporcionar documentación completa y soporte integrado para usuarios del sistema
+
+#### Funcionalidades
+- ✅ Sistema de documentación con 4 secciones principales
+- ✅ Contenido diferenciado por roles (Administrador/Vendedor)
+- ✅ Guías paso a paso para cada módulo del sistema
+- ✅ Sección de preguntas frecuentes (FAQ)
+- ✅ Información de contacto y soporte técnico
+- ✅ Acceso rápido desde navegación principal
+- ✅ Documentación detallada de artículos vs servicios
+- ✅ Guías de configuración de unidades de medida
+
+#### Criterios de Aceptación
+- Acceso desde cualquier página del sistema
+- Contenido adaptado automáticamente según rol del usuario
+- Documentación actualizada y comprensible
+- Información de contacto Szystems actualizada
+- Navegación intuitiva entre secciones
+- Compatibilidad total con diseño del sistema
+
 ## 4. Funcionalidades Secundarias
 
 ### 4.1 Sistema de Configuración
@@ -255,24 +277,27 @@
 
 ## 8. Roadmap y Futuras Mejoras
 
-### 8.1 Versión Actual (v1.0)
+### 8.1 Versión Actual (v1.7.0) ⭐ **ACTUALIZADA**
 - ✅ Todas las funcionalidades core implementadas
 - ✅ Sistema estable en producción
+- ✅ **Módulo de Cotizaciones completo con estados inteligentes**
+- ✅ **Centro de Ayuda v1.7.0 con documentación completa**
 - ✅ Reportes básicos funcionando
+- ✅ **Integración UI completa con navegación optimizada**
 
 ### 8.2 Próximas Versiones
 
-#### v1.1 (Q4 2025)
+#### v1.8 (Q4 2025)
 - Dashboard con métricas en tiempo real
 - Notificaciones automáticas
 - Mejoras en reportes avanzados
 
-#### v1.2 (Q1 2026)
+#### v2.0 (Q1 2026)
 - API REST completa
 - Integración con sistemas externos
 - App móvil básica
 
-#### v1.3 (Q2 2026)
+#### v2.1 (Q2 2026)
 - Business Intelligence avanzado
 - Predicciones y análisis
 - Automatización de procesos
@@ -291,7 +316,8 @@
 
 ---
 
-**Documento Versión**: 1.0  
-**Última Actualización**: Septiembre 16, 2025  
+**Documento Versión**: 1.7.0 ⭐ **ACTUALIZADO**  
+**Última Actualización**: Septiembre 18, 2025  
 **Responsable**: Equipo de Desarrollo Jireh  
-**Estado**: Activo en Producción
+**Estado**: Activo en Producción con Centro de Ayuda  
+**Módulos Recientes**: Cotizaciones (Sep 2025) + Centro de Ayuda (Sep 18, 2025)

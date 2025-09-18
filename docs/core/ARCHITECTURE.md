@@ -2,15 +2,24 @@
 
 ## Visión General
 
-Jireh es un sistema de gestión empresarial construido en Laravel 8 que implementa una arquitectura MVC modular con separación clara de responsabilidades. **Actualizado con módulo de Cotizaciones completo (Septiembre 2025)**.
+Jireh es un sistema de gestión empresarial construido en Laravel 8 que implementa una arquitectura MVC modular con separación clara de responsabilidades. **Actualizado con Centro de Ayuda v1.7.0 (Septiembre 18, 2025)**.
 
-## 🎯 Estado Actual de Módulos
+## 🎯 Estado Actual de Módulos - v1.7.0
 
 ### ✅ **Módulos Completados al 100%**
-- **📋 Cotizaciones** ⭐ **RECIÉN COMPLETADO** - Sistema avanzado con estados inteligentes
-- **👥 Trabajadores** - Gestión completa implementada
+- **� Centro de Ayuda** ⭐ **v1.7.0 (Sep 18, 2025)** - Sistema completo de documentación con 4 secciones
+- **�📋 Cotizaciones** ⭐ **COMPLETO (Sep 2025)** - Sistema avanzado con estados inteligentes
+- **💰 Ventas** - Sistema de facturación completo
+- **📦 Inventario** - Gestión de artículos, categorías, stock
+- **👥 Personal** - Trabajadores, tipos, comisiones, sueldos
+- **� Finanzas** - Pagos, lotes de pago, control financiero
+- **�👥 Trabajadores** - Gestión completa implementada
 - **🚗 Vehículos** - Funcional
 - **⚙️ Configuración** - Sistema centralizado
+
+### 🚧 **En Desarrollo**
+- **API REST** - Endpoints básicos implementados
+- **Reportes Avanzados** - Módulo en expansión
 
 ## Patrones de Diseño Implementados
 
@@ -57,6 +66,7 @@ app/Http/Controllers/Admin/
 ├── ComisionController.php       # Cálculo comisiones
 ├── PagoComisionController.php   # Pagos comisiones
 ├── CotizacionController.php     # ⭐ CRUD completo + PDF + estados
+├── AyudaController.php          # ⭐ Centro de Ayuda v1.7.0 (Sep 18, 2025)
 ├── PagoSueldoController.php     # Pagos sueldos
 ├── VentaController.php          # Gestión ventas
 ├── PagoController.php           # Gestión pagos
@@ -115,6 +125,31 @@ Características Avanzadas:
 ✅ Regeneración inteligente (preserva datos, renueva vigencia)
 ✅ PDF dinámico con configuración de moneda
 ✅ DataTables con filtros automáticos por estado
+```
+
+#### 📚 **Módulo Centro de Ayuda - Arquitectura v1.7.0**
+```
+AyudaController {
+    - Middleware: auth (solo usuarios autenticados)
+    - Role Detection: Diferenciación Admin vs Vendedor
+    - 4 Secciones: Primeros Pasos, Módulos, FAQ, Soporte
+}
+
+Estructura de Vistas:
+resources/views/admin/ayuda/
+├── index.blade.php                    # Vista principal con tabs
+├── sections/
+    ├── primeros-pasos.blade.php      # Guía inicial por rol
+    ├── modulos.blade.php             # Documentación módulos
+    ├── faq.blade.php                 # Preguntas frecuentes
+    └── soporte.blade.php             # Contacto Szystems
+
+Características:
+✅ Contenido diferenciado por rol (Admin role_as=0 / Vendedor role_as=1)
+✅ Navegación por tabs Bootstrap 5
+✅ Documentación detallada de artículos vs servicios
+✅ Información de contacto actualizada (oszarata@szystems.com)
+✅ Acceso desde navegación principal (icono ayuda)
 ```
 
 #### Gestión de Inventario
@@ -208,6 +243,14 @@ database/factories/     # Generación datos prueba
 7. **PDF generado** con configuración de moneda dinámica
 8. **Filtros automáticos** por estado en interfaz de 5 pestañas
 
+### Flujo Centro de Ayuda ⭐ **v1.7.0 (Sep 18, 2025)**
+1. **Usuario autenticado** accede desde icono en navegación
+2. **Sistema detecta rol** (Admin vs Vendedor)
+3. **Contenido se adapta** según permisos del usuario
+4. **4 tabs disponibles**: Primeros Pasos, Módulos, FAQ, Soporte
+5. **Documentación específica** para cada módulo del sistema
+6. **Información de contacto** Szystems actualizada
+
 ### Flujo de Inventario
 1. **Proveedor** suministra productos
 2. Se registra **Ingreso** con detalles
@@ -276,3 +319,12 @@ database/factories/     # Generación datos prueba
 - CamelCase para clases
 - snake_case para BD
 - Blade templates organizados por módulo
+
+---
+
+**Información del Documento:**
+- **Última actualización**: Septiembre 18, 2025
+- **Versión del sistema**: v1.7.0
+- **Estado**: Producción activa con Centro de Ayuda
+- **Módulos recientes**: Cotizaciones (Sep 2025) + Centro de Ayuda (Sep 18, 2025)
+- **Próximas actualizaciones**: API REST, reportes avanzados
