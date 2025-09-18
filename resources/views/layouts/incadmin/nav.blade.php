@@ -37,6 +37,11 @@
                 data-bs-title="Inventario">
                 <i class="bi bi-box-seam fs-5"></i>
             </a>
+
+            <a href="{{ url('ayuda') }}" class="header-action-link" data-bs-toggle="tooltip" data-bs-placement="bottom"
+                data-bs-title="Centro de Ayuda">
+                <i class="bi bi-question-circle fs-5"></i>
+            </a>
         </div>
         <!-- Header actions end -->
 

@@ -2,7 +2,7 @@
 
 Eres un asistente experto en proyectos Laravel 8. Tu tarea es cargar inmediatamente todo el contexto del repositorio jireh para poder generar código, crear o modificar archivos y mantener coherencia sin perder el hilo de lo ya realizado.
 
-## Estructura del Proyecto Laravel 8 "Jireh/BuroSoft"
+## Estructura del Proyecto Laravel 8 "Jireh"
 
 ### Stack Tecnológico
 - Framework: Laravel 8.x
@@ -25,6 +25,12 @@ Eres un asistente experto en proyectos Laravel 8. Tu tarea es cargar inmediatame
    - Regeneración inteligente con tiempo fresco
    - PDF optimizado con monedas dinámicas
    - CRUD completo con validaciones robustas
+7. **📚 Centro de Ayuda** ⭐ **MÓDULO COMPLETO (Sep 18, 2025)** - Sistema completo de documentación con:
+   - 4 tabs organizadas (Primeros Pasos, Módulos, FAQ, Soporte)
+   - Contenido diferenciado por roles (Admin/Vendedor)
+   - Documentación detallada de todos los módulos
+   - Guías paso a paso con componentes visuales
+   - Información de contacto de Szystems actualizada
 
 ### Controladores Principales (app/Http/Controllers/Admin/)
 - AdminController, UsersController, ClienteController, VehiculosController
@@ -34,6 +40,7 @@ Eres un asistente experto en proyectos Laravel 8. Tu tarea es cargar inmediatame
 - PagoComisionController, PagoSueldoController, VentaController
 - PagoController, ReporteArticuloController, ReporteMetasController
 - **CotizacionController** ⭐ **COMPLETO** - CRUD + cambio estados + PDF + regeneración
+- **AyudaController** ⭐ **NUEVO (Sep 18, 2025)** - Centro de ayuda con roles diferenciados
 
 ### Modelos Principales (app/Models/)
 - **Inventario**: Articulo, Categoria, Unidad, Proveedor, MovimientoStock
@@ -62,6 +69,9 @@ Eres un asistente experto en proyectos Laravel 8. Tu tarea es cargar inmediatame
 - docs/core/API.md - Documentación de API (en desarrollo)
 - **tools/DOCUMENTACION_PROYECTO/MODULO_COTIZACIONES_COMPLETO.md** ⭐ **NUEVO** - Documentación completa del módulo de cotizaciones
 - **tools/RESUMEN_TRABAJO/ESTADO_PROYECTO_SEPTIEMBRE_2025.md** ⭐ **NUEVO** - Estado actual del proyecto
+- **docs/CENTRO_AYUDA_v1.7.0.md** ⭐ **NUEVO (Sep 18, 2025)** - Documentación del Centro de Ayuda
+- **docs/VERSION_MANAGEMENT_PROTOCOL.md** ⭐ **NUEVO (Sep 18, 2025)** - Protocolo de gestión de versiones
+- **.copilot-context/VERSION_MANAGEMENT.md** ⭐ **NUEVO (Sep 18, 2025)** - Guía de versionado para agentes
 
 ### Convenciones del Proyecto
 - PSR-4 autoloading
@@ -75,12 +85,14 @@ Eres un asistente experto en proyectos Laravel 8. Tu tarea es cargar inmediatame
 ### Rutas Principales
 - /admin/* - Módulos administrativos
 - /admin/cotizaciones/* ⭐ **NUEVO** - CRUD completo de cotizaciones + PDF + cambio estados
+- /admin/ayuda/* ⭐ **NUEVO (Sep 18, 2025)** - Centro de ayuda completo con 4 secciones
 - /login, /register - Autenticación
 - API REST en desarrollo (/api/*)
 
-### Estado Actual ⭐ **ACTUALIZADO SEPTIEMBRE 2025**
+### Estado Actual ⭐ **ACTUALIZADO SEPTIEMBRE 18, 2025**
 - Sistema estable en producción
 - **Módulo de Cotizaciones 100% FUNCIONAL** con características avanzadas
+- **Centro de Ayuda v1.7.0 IMPLEMENTADO** con documentación completa
 - Todas las funcionalidades core implementadas
 - Estructura profesional con tools/ organizados
 - Documentación completa actualizada
@@ -91,11 +103,19 @@ Eres un asistente experto en proyectos Laravel 8. Tu tarea es cargar inmediatame
   - ✅ Regeneración inteligente (Aprobado → Generado + 15 días)
   - ✅ PDF optimizado con monedas dinámicas
   - ✅ UX moderna con DataTables + AJAX
+- **Funcionalidades Centro de Ayuda**:
+  - ✅ 4 tabs organizadas (Primeros Pasos, Módulos, FAQ, Soporte)
+  - ✅ Contenido diferenciado por roles (Admin/Vendedor)
+  - ✅ Documentación detallada de artículos y servicios
+  - ✅ Información de contacto Szystems actualizada
+  - ✅ Historial de versiones automatizado
 
 ## Objetivo Inmediato
 Mantener este contexto vivo para cada sugerencia o generación de código, actualizar o extender la documentación sin duplicar ni romper la estructura existente, proponer mejoras respetando las convenciones del proyecto.
 
 ---
-**Última actualización**: Septiembre 16, 2025
-**Estado**: Producción activa con módulo Cotizaciones 100% funcional
-**Módulo Reciente**: Cotizaciones (Sistema completo con estados avanzados y regeneración inteligente)
+**Última actualización**: Septiembre 18, 2025
+**Versión del sistema**: v1.7.0 (Centro de Ayuda implementado)
+**Estado**: Producción activa con Centro de Ayuda funcional
+**Módulos Recientes**: Cotizaciones (Sep 2025) + Centro de Ayuda (Sep 18, 2025)
+**Protocolo de Versiones**: Documentado en .copilot-context/VERSION_MANAGEMENT.md

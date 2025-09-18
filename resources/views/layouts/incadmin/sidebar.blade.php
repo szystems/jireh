@@ -260,6 +260,15 @@
                     </a>
                 </li>
                 @endif
+
+                <!-- Centro de Ayuda -->
+                <li class="menu-category">Ayuda y Soporte</li>
+                <li class="{{ Request::is('ayuda*') ? 'active-page-link':''  }}">
+                    <a href="{{ route('ayuda.index') }}">
+                        <i class="bi bi-question-circle"></i>
+                        <span class="menu-text">Centro de Ayuda</span>
+                    </a>
+                </li>
             </ul>
         </div>
     </div>
@@ -269,7 +278,7 @@
     <div class="sidebar-footer">
         <div class="d-flex align-items-center justify-content-between">
             <div>
-                <span class="small text-muted"><a class="text-white" href="https://szystems.com" target="_blank" rel="noopener noreferrer"><b>Szystems v1.6.0</b></a></span>
+                <span class="small text-muted"><a class="text-white" href="https://szystems.com" target="_blank" rel="noopener noreferrer"><b>Szystems v1.7.0</b></a></span>
             </div>
             <div>
                 <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"

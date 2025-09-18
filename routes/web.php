@@ -33,6 +33,7 @@ use App\Http\Controllers\Admin\DatosInicialesController; // Controlador para gen
 use App\Http\Controllers\Admin\AuditoriaController; // Controlador de auditoría
 use App\Http\Controllers\Admin\DashboardController; // Nuevo controlador de dashboard mejorado
 use App\Http\Controllers\Admin\NotificacionController; // Controlador de notificaciones
+use App\Http\Controllers\Admin\AyudaController; // Controlador del Centro de Ayuda
 
 /*
 |--------------------------------------------------------------------------
@@ -76,6 +77,17 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/api/notificaciones/limpiar-leidas', [NotificacionController::class, 'limpiarNotificacionesLeidas'])->name('notificaciones.limpiar');
     Route::get('/api/notificaciones/resumen', [NotificacionController::class, 'obtenerResumen'])->name('notificaciones.resumen');
     Route::get('/api/notificaciones/reporte', [NotificacionController::class, 'generarReporteNotificaciones'])->name('notificaciones.reporte');
+
+    // ============================================================================
+    // CENTRO DE AYUDA - RUTAS
+    // ============================================================================
+    Route::prefix('ayuda')->name('ayuda.')->group(function() {
+        Route::get('/', [AyudaController::class, 'index'])->name('index');
+        Route::get('/primeros-pasos', [AyudaController::class, 'primerospasos'])->name('primeros_pasos');
+        Route::get('/modulos', [AyudaController::class, 'modulos'])->name('modulos');
+        Route::get('/faq', [AyudaController::class, 'faq'])->name('faq');
+        Route::get('/soporte', [AyudaController::class, 'soporte'])->name('soporte');
+    });
     
     // Dashboard Mejorado
     Route::get('/dashboard-pro',[DashboardController::class, 'index'])->name('dashboard.pro');
