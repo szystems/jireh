@@ -52,7 +52,7 @@
                     @php
                         $usuario = Auth::user()->name;
                         $nombre = explode(' ', trim($usuario));
-                        $rolUsuario = Auth::user()->role_as == 1 ? 'Administrador' : 'Usuario';
+                        $rolUsuario = Auth::user()->role_as == 1 ? 'Vendedor' : 'Administrador';
                     @endphp
                     <span class="user-name d-none d-md-block">{{ ucwords($nombre[0]) }} <small class="text-muted">({{ $rolUsuario }})</small></span>
                     <span class="avatar">

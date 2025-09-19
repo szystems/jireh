@@ -86,20 +86,20 @@
                                                 <label for="precio_compra" class="form-label"><i class="bi bi-currency-dollar me-1"></i> Precio Compra</label>
                                                 <div class="input-group">
                                                     <span class="input-group-text">{{ $config->currency_simbol }}</span>
-                                                    <input type="number" step="0.01" class="form-control" id="precio_compra">
+                                                    <input type="text" step="0.01" class="form-control" id="precio_compra" inputmode="decimal" pattern="[0-9]*\.?[0-9]*">
                                                 </div>
                                             </div>
                                             <div class="col-md-2">
                                                 <label for="precio_venta" class="form-label"><i class="bi bi-tag-fill me-1"></i> Precio Venta</label>
                                                 <div class="input-group">
                                                     <span class="input-group-text">{{ $config->currency_simbol }}</span>
-                                                    <input type="number" step="0.01" class="form-control" id="precio_venta">
+                                                    <input type="text" step="0.01" class="form-control" id="precio_venta" inputmode="decimal" pattern="[0-9]*\.?[0-9]*">
                                                 </div>
                                             </div>
                                             <div class="col-md-2">
                                                 <label for="cantidad" class="form-label"><i class="bi bi-123 me-1"></i> Cantidad</label>
                                                 <div class="input-group">
-                                                    <input type="number" class="form-control" id="cantidad" min="1" step="1">
+                                                    <input type="text" class="form-control" id="cantidad" min="1" step="1" inputmode="decimal" pattern="[0-9]*\.?[0-9]*">
                                                     <span class="input-group-text" id="unidad-abreviatura"></span>
                                                 </div>
                                             </div>
@@ -293,22 +293,96 @@
                     cantidadInput.min = "1";
                 }
                 cantidadInput.value = "";
+                
+                // Agregar atributo para identificar tipo (para validaciones)
+                cantidadInput.setAttribute('data-unidad-tipo', unidadTipo);
             });
 
-            // Validar input cantidad
+            // Validación no intrusiva para cantidad - permite escribir libremente
             cantidadInput.addEventListener('input', function (event) {
-                const unidadTipo = articuloSelect.options[articuloSelect.selectedIndex].getAttribute('data-unidad-tipo');
                 const value = event.target.value;
-                const cursorPosition = event.target.selectionStart;
-
-                if (unidadTipo === 'unidad') {
-                    event.target.value = value.replace(/[^0-9]/g, '');
-                } else if (unidadTipo === 'decimal') {
-                    const decimalValue = value.replace(/[^0-9.]/g, '');
-                    const parts = decimalValue.split('.');
-                    event.target.value = parts.length > 2 ? parts[0] + '.' + parts.slice(1).join('') : decimalValue;
+                
+                // Solo limpiar caracteres obviamente inválidos, pero permitir estados temporales
+                const cleanValue = value.replace(/[^0-9.]/g, '');
+                
+                // Evitar múltiples puntos decimales
+                const parts = cleanValue.split('.');
+                if (parts.length > 2) {
+                    event.target.value = parts[0] + '.' + parts.slice(1).join('');
+                } else {
+                    event.target.value = cleanValue;
                 }
-                event.target.setSelectionRange(cursorPosition, cursorPosition);
+            });
+
+            // Validación final cuando pierde el foco (blur)
+            cantidadInput.addEventListener('blur', function (event) {
+                const step = event.target.step || '1';
+                const min = event.target.min || '1';
+                let value = event.target.value.trim();
+                
+                // Si está vacío, establecer valor por defecto
+                if (value === '' || value === '.') {
+                    value = step === '1' ? '1' : '1.00';
+                    event.target.value = value;
+                    return;
+                }
+                
+                const numValue = parseFloat(value);
+                
+                if (step === '1') {
+                    // Para unidades, convertir a entero y validar mínimo
+                    const intValue = Math.floor(numValue);
+                    if (intValue < 1) {
+                        event.target.value = '1';
+                    } else {
+                        event.target.value = intValue.toString();
+                    }
+                } else {
+                    // Para decimales, validar mínimo y formato
+                    if (numValue < 0.01) {
+                        event.target.value = '0.01';
+                    } else {
+                        // Limitar a 2 decimales
+                        event.target.value = numValue.toFixed(2);
+                    }
+                }
+            });
+
+            // Validación no intrusiva para precios
+            ['precio_compra', 'precio_venta'].forEach(function(fieldId) {
+                const input = document.getElementById(fieldId);
+                
+                input.addEventListener('input', function(event) {
+                    const value = event.target.value;
+                    
+                    // Solo limpiar caracteres obviamente inválidos
+                    const cleanValue = value.replace(/[^0-9.]/g, '');
+                    
+                    // Evitar múltiples puntos decimales
+                    const parts = cleanValue.split('.');
+                    if (parts.length > 2) {
+                        event.target.value = parts[0] + '.' + parts.slice(1).join('');
+                    } else {
+                        event.target.value = cleanValue;
+                    }
+                });
+
+                input.addEventListener('blur', function(event) {
+                    let value = event.target.value.trim();
+                    
+                    if (value === '' || value === '.') {
+                        event.target.value = '0.00';
+                        return;
+                    }
+                    
+                    const numValue = parseFloat(value);
+                    if (isNaN(numValue) || numValue < 0) {
+                        event.target.value = '0.00';
+                    } else {
+                        // Formatear a 2 decimales
+                        event.target.value = numValue.toFixed(2);
+                    }
+                });
             });
 
             // Mejora: Mostrar/ocultar mensaje de "no hay artículos"
@@ -341,11 +415,32 @@
                 const precioVenta = parseFloat(precioVentaInput.value);
                 const cantidad = parseFloat(cantidadInput.value);
                 const unidadAbreviatura = unidadAbreviaturaSpan.textContent;
+                const step = cantidadInput.step || '1';
 
-                if (isNaN(precioCompra) || isNaN(precioVenta) || isNaN(cantidad) ||
-                    cantidad < (cantidadInput.step === "1" ? 1 : 0.01)) {
+                // Validaciones básicas
+                if (isNaN(precioCompra) || isNaN(precioVenta) || isNaN(cantidad)) {
                     alert('Por favor, complete todos los campos correctamente.');
                     return;
+                }
+
+                // Validación específica según tipo de unidad
+                if (step === '1') {
+                    if (cantidad % 1 !== 0) {
+                        alert('Para artículos de tipo "unidad", la cantidad debe ser un número entero');
+                        cantidadInput.focus();
+                        return;
+                    }
+                    if (cantidad < 1) {
+                        alert('Para artículos de tipo "unidad", la cantidad mínima es 1');
+                        cantidadInput.focus();
+                        return;
+                    }
+                } else {
+                    if (cantidad < 0.01) {
+                        alert('Para artículos de tipo "decimal", la cantidad mínima es 0.01 (use punto decimal, ej: 1.50)');
+                        cantidadInput.focus();
+                        return;
+                    }
                 }
 
                 const subtotal = precioCompra * cantidad;

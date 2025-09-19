@@ -96,7 +96,7 @@
                                             <div class="col-md-2">
                                                 <label for="cantidad" class="form-label"><i class="bi bi-123 me-1"></i> Cantidad</label>
                                                 <div class="input-group">
-                                                    <input type="number" class="form-control" id="cantidad" min="1" step="1">
+                                                    <input type="text" class="form-control" id="cantidad" min="1" step="1" inputmode="decimal" pattern="[0-9]*\.?[0-9]*">
                                                     <span class="input-group-text" id="unidad-abreviatura"></span>
                                                 </div>
                                             </div>
@@ -104,14 +104,14 @@
                                                 <label for="precio_compra" class="form-label"><i class="bi bi-currency-dollar me-1"></i> Precio Compra</label>
                                                 <div class="input-group">
                                                     <span class="input-group-text">{{ $config->currency_simbol }}</span>
-                                                    <input type="number" step="0.01" class="form-control" id="precio_compra">
+                                                    <input type="text" step="0.01" class="form-control" id="precio_compra" inputmode="decimal" pattern="[0-9]*\.?[0-9]*">
                                                 </div>
                                             </div>
                                             <div class="col-md-2">
                                                 <label for="precio_venta" class="form-label"><i class="bi bi-tag-fill me-1"></i> Precio Venta</label>
                                                 <div class="input-group">
                                                     <span class="input-group-text">{{ $config->currency_simbol }}</span>
-                                                    <input type="number" step="0.01" class="form-control" id="precio_venta">
+                                                    <input type="text" step="0.01" class="form-control" id="precio_venta" inputmode="decimal" pattern="[0-9]*\.?[0-9]*">
                                                 </div>
                                             </div>
                                             <div class="col-md-2 d-flex align-items-end">
@@ -151,20 +151,20 @@
                                                                 </td>
                                                                 <td>
                                                                     <div class="input-group">
-                                                                        <input type="number" name="detalles[{{ $index }}][cantidad]" class="form-control cantidad-input" value="{{ is_array($detalle) ? $detalle['cantidad'] : '' }}" data-tipo="{{ is_array($detalle) ? $detalle['unidad_tipo'] ?? '' : '' }}">
+                                                                        <input type="text" name="detalles[{{ $index }}][cantidad]" class="form-control cantidad-input" value="{{ is_array($detalle) ? $detalle['cantidad'] : '' }}" data-tipo="{{ is_array($detalle) ? $detalle['unidad_tipo'] ?? '' : '' }}" inputmode="decimal" pattern="[0-9]*\.?[0-9]*">
                                                                         <span class="input-group-text">{{ is_array($detalle) ? $detalle['unidad_abreviatura'] ?? '' : '' }}</span>
                                                                     </div>
                                                                 </td>
                                                                 <td>
                                                                     <div class="input-group">
                                                                         <span class="input-group-text">{{ $config->currency_simbol }}</span>
-                                                                        <input type="number" step="0.01" name="detalles[{{ $index }}][precio_compra]" class="form-control precio-compra" value="{{ is_array($detalle) ? $detalle['precio_compra'] : '' }}">
+                                                                        <input type="text" step="0.01" name="detalles[{{ $index }}][precio_compra]" class="form-control precio-compra" value="{{ is_array($detalle) ? $detalle['precio_compra'] : '' }}" inputmode="decimal" pattern="[0-9]*\.?[0-9]*">
                                                                     </div>
                                                                 </td>
                                                                 <td>
                                                                     <div class="input-group">
                                                                         <span class="input-group-text">{{ $config->currency_simbol }}</span>
-                                                                        <input type="number" step="0.01" name="detalles[{{ $index }}][precio_venta]" class="form-control" value="{{ is_array($detalle) ? $detalle['precio_venta'] : '' }}">
+                                                                        <input type="text" step="0.01" name="detalles[{{ $index }}][precio_venta]" class="form-control" value="{{ is_array($detalle) ? $detalle['precio_venta'] : '' }}" inputmode="decimal" pattern="[0-9]*\.?[0-9]*">
                                                                     </div>
                                                                 </td>
                                                                 <td class="subtotal">
@@ -185,20 +185,20 @@
                                                                 </td>
                                                                 <td>
                                                                     <div class="input-group">
-                                                                        <input type="number" name="detalles[{{ $detalle->id }}][cantidad]" class="form-control cantidad-input" value="{{ $detalle->cantidad }}" data-tipo="{{ $detalle->articulo->unidad->tipo }}">
+                                                                        <input type="text" name="detalles[{{ $detalle->id }}][cantidad]" class="form-control cantidad-input" value="{{ $detalle->cantidad }}" data-tipo="{{ $detalle->articulo->unidad->tipo }}" inputmode="decimal" pattern="[0-9]*\.?[0-9]*">
                                                                         <span class="input-group-text">{{ $detalle->articulo->unidad->abreviatura }}</span>
                                                                     </div>
                                                                 </td>
                                                                 <td>
                                                                     <div class="input-group">
                                                                         <span class="input-group-text">{{ $config->currency_simbol }}</span>
-                                                                        <input type="number" step="0.01" name="detalles[{{ $detalle->id }}][precio_compra]" class="form-control precio-compra" value="{{ $detalle->precio_compra }}">
+                                                                        <input type="text" step="0.01" name="detalles[{{ $detalle->id }}][precio_compra]" class="form-control precio-compra" value="{{ $detalle->precio_compra }}" inputmode="decimal" pattern="[0-9]*\.?[0-9]*">
                                                                     </div>
                                                                 </td>
                                                                 <td>
                                                                     <div class="input-group">
                                                                         <span class="input-group-text">{{ $config->currency_simbol }}</span>
-                                                                        <input type="number" step="0.01" name="detalles[{{ $detalle->id }}][precio_venta]" class="form-control" value="{{ $detalle->precio_venta }}">
+                                                                        <input type="text" step="0.01" name="detalles[{{ $detalle->id }}][precio_venta]" class="form-control" value="{{ $detalle->precio_venta }}" inputmode="decimal" pattern="[0-9]*\.?[0-9]*">
                                                                     </div>
                                                                 </td>
                                                                 <td class="subtotal">
@@ -289,26 +289,97 @@
                     cantidadInput.min = "1";
                 }
                 cantidadInput.value = "";
+                
+                // Agregar atributo para identificar tipo (para validaciones)
+                cantidadInput.setAttribute('data-unidad-tipo', unidadTipo);
             }
         });
 
-        // Validación de entrada para cantidad
+        // Validación no intrusiva para cantidad - permite escribir libremente
         cantidadInput.addEventListener('input', function (event) {
-            const selectedOption = articuloSelect.options[articuloSelect.selectedIndex];
-            if (!selectedOption) return;
-
-            const unidadTipo = selectedOption.getAttribute('data-unidad-tipo');
             const value = event.target.value;
-            const cursorPosition = event.target.selectionStart;
-
-            if (unidadTipo === 'unidad') {
-                event.target.value = value.replace(/[^0-9]/g, '');
-            } else if (unidadTipo === 'decimal') {
-                const decimalValue = value.replace(/[^0-9.]/g, '');
-                const parts = decimalValue.split('.');
-                event.target.value = parts.length > 2 ? parts[0] + '.' + parts.slice(1).join('') : decimalValue;
+            
+            // Solo limpiar caracteres obviamente inválidos, pero permitir estados temporales
+            const cleanValue = value.replace(/[^0-9.]/g, '');
+            
+            // Evitar múltiples puntos decimales
+            const parts = cleanValue.split('.');
+            if (parts.length > 2) {
+                event.target.value = parts[0] + '.' + parts.slice(1).join('');
+            } else {
+                event.target.value = cleanValue;
             }
-            event.target.setSelectionRange(cursorPosition, cursorPosition);
+        });
+
+        // Validación final cuando pierde el foco (blur)
+        cantidadInput.addEventListener('blur', function (event) {
+            const step = event.target.step || '1';
+            const min = event.target.min || '1';
+            let value = event.target.value.trim();
+            
+            // Si está vacío, establecer valor por defecto
+            if (value === '' || value === '.') {
+                value = step === '1' ? '1' : '1.00';
+                event.target.value = value;
+                return;
+            }
+            
+            const numValue = parseFloat(value);
+            
+            if (step === '1') {
+                // Para unidades, convertir a entero y validar mínimo
+                const intValue = Math.floor(numValue);
+                if (intValue < 1) {
+                    event.target.value = '1';
+                } else {
+                    event.target.value = intValue.toString();
+                }
+            } else {
+                // Para decimales, validar mínimo y formato
+                if (numValue < 0.01) {
+                    event.target.value = '0.01';
+                } else {
+                    // Limitar a 2 decimales
+                    event.target.value = numValue.toFixed(2);
+                }
+            }
+        });
+
+        // Validación no intrusiva para precios
+        ['precio_compra', 'precio_venta'].forEach(function(fieldId) {
+            const input = document.getElementById(fieldId);
+            
+            input.addEventListener('input', function(event) {
+                const value = event.target.value;
+                
+                // Solo limpiar caracteres obviamente inválidos
+                const cleanValue = value.replace(/[^0-9.]/g, '');
+                
+                // Evitar múltiples puntos decimales
+                const parts = cleanValue.split('.');
+                if (parts.length > 2) {
+                    event.target.value = parts[0] + '.' + parts.slice(1).join('');
+                } else {
+                    event.target.value = cleanValue;
+                }
+            });
+
+            input.addEventListener('blur', function(event) {
+                let value = event.target.value.trim();
+                
+                if (value === '' || value === '.') {
+                    event.target.value = '0.00';
+                    return;
+                }
+                
+                const numValue = parseFloat(value);
+                if (isNaN(numValue) || numValue < 0) {
+                    event.target.value = '0.00';
+                } else {
+                    // Formatear a 2 decimales
+                    event.target.value = numValue.toFixed(2);
+                }
+            });
         });
 
         // Evento para agregar un artículo a la tabla
@@ -332,12 +403,33 @@
             const precioVenta = parseFloat(precioVentaInput.value);
             const cantidad = parseFloat(cantidadInput.value);
             const unidadAbreviatura = unidadAbreviaturaSpan.textContent;
-            const unidadTipo = selectedOption.getAttribute('data-unidad-tipo');
+            const step = cantidadInput.step || '1';
+            const unidadTipo = selectedOption.getAttribute('data-unidad-tipo') || 'unidad';
 
-            if (isNaN(precioCompra) || isNaN(precioVenta) || isNaN(cantidad) ||
-                cantidad < (unidadTipo === 'unidad' ? 1 : 0.01)) {
+            // Validaciones básicas
+            if (isNaN(precioCompra) || isNaN(precioVenta) || isNaN(cantidad)) {
                 alert('Por favor, complete todos los campos correctamente.');
                 return;
+            }
+
+            // Validación específica según tipo de unidad
+            if (step === '1') {
+                if (cantidad % 1 !== 0) {
+                    alert('Para artículos de tipo "unidad", la cantidad debe ser un número entero');
+                    cantidadInput.focus();
+                    return;
+                }
+                if (cantidad < 1) {
+                    alert('Para artículos de tipo "unidad", la cantidad mínima es 1');
+                    cantidadInput.focus();
+                    return;
+                }
+            } else {
+                if (cantidad < 0.01) {
+                    alert('Para artículos de tipo "decimal", la cantidad mínima es 0.01 (use punto decimal, ej: 1.50)');
+                    cantidadInput.focus();
+                    return;
+                }
             }
 
             // Usar un identificador único para cada nuevo artículo
@@ -351,7 +443,7 @@
                 </td>
                 <td>
                     <div class="input-group">
-                        <input type="number" name="detalles[${newIndex}][cantidad]" class="form-control cantidad-input" value="${cantidad}" data-tipo="${unidadTipo}">
+                        <input type="text" name="detalles[${newIndex}][cantidad]" class="form-control cantidad-input" value="${cantidad}" data-tipo="${unidadTipo}" inputmode="decimal" pattern="[0-9]*\.?[0-9]*">
                         <span class="input-group-text unidad-abreviatura">${unidadAbreviatura}</span>
                         <input type="hidden" name="detalles[${newIndex}][unidad_tipo]" value="${unidadTipo}">
                         <input type="hidden" name="detalles[${newIndex}][unidad_abreviatura]" value="${unidadAbreviatura}">
@@ -360,13 +452,13 @@
                 <td>
                     <div class="input-group">
                         <span class="input-group-text">${currencySymbol}</span>
-                        <input type="number" step="0.01" name="detalles[${newIndex}][precio_compra]" class="form-control" value="${precioCompra.toFixed(2)}">
+                        <input type="text" step="0.01" name="detalles[${newIndex}][precio_compra]" class="form-control precio-compra" value="${precioCompra.toFixed(2)}" inputmode="decimal" pattern="[0-9]*\.?[0-9]*">
                     </div>
                 </td>
                 <td>
                     <div class="input-group">
                         <span class="input-group-text">${currencySymbol}</span>
-                        <input type="number" step="0.01" name="detalles[${newIndex}][precio_venta]" class="form-control" value="${precioVenta.toFixed(2)}">
+                        <input type="text" step="0.01" name="detalles[${newIndex}][precio_venta]" class="form-control" value="${precioVenta.toFixed(2)}" inputmode="decimal" pattern="[0-9]*\.?[0-9]*">
                     </div>
                 </td>
                 <td class="subtotal">
@@ -585,7 +677,125 @@
         setTimeout(function() {
             actualizarTotal();
             actualizarEstadoTabla();
+            
+            // Aplicar validaciones no intrusivas a campos de cantidad existentes
+            aplicarValidacionesCantidad();
         }, 100);
+        
+        // Función para aplicar validaciones no intrusivas a campos de cantidad
+        function aplicarValidacionesCantidad() {
+            const cantidadInputs = document.querySelectorAll('.cantidad-input');
+            const precioInputs = document.querySelectorAll('.precio-compra, input[name*="precio_venta"]');
+            
+            cantidadInputs.forEach(function(input) {
+                // Remover listeners existentes para evitar duplicados
+                input.removeEventListener('input', validarInputCantidad);
+                input.removeEventListener('blur', validarBlurCantidad);
+                
+                // Agregar nuevos listeners
+                input.addEventListener('input', validarInputCantidad);
+                input.addEventListener('blur', validarBlurCantidad);
+            });
+            
+            precioInputs.forEach(function(input) {
+                // Remover listeners existentes para evitar duplicados
+                input.removeEventListener('input', validarInputPrecio);
+                input.removeEventListener('blur', validarBlurPrecio);
+                
+                // Agregar nuevos listeners
+                input.addEventListener('input', validarInputPrecio);
+                input.addEventListener('blur', validarBlurPrecio);
+            });
+        }
+        
+        // Función de validación de input para cantidad
+        function validarInputCantidad(event) {
+            const value = event.target.value;
+            
+            // Solo limpiar caracteres obviamente inválidos, pero permitir estados temporales
+            const cleanValue = value.replace(/[^0-9.]/g, '');
+            
+            // Evitar múltiples puntos decimales
+            const parts = cleanValue.split('.');
+            if (parts.length > 2) {
+                event.target.value = parts[0] + '.' + parts.slice(1).join('');
+            } else {
+                event.target.value = cleanValue;
+            }
+        }
+        
+        // Función de validación de blur para cantidad
+        function validarBlurCantidad(event) {
+            const unidadTipo = event.target.getAttribute('data-tipo') || 'unidad';
+            let value = event.target.value.trim();
+            
+            // Si está vacío, establecer valor por defecto
+            if (value === '' || value === '.') {
+                value = unidadTipo === 'unidad' ? '1' : '1.00';
+                event.target.value = value;
+                return;
+            }
+            
+            const numValue = parseFloat(value);
+            
+            if (unidadTipo === 'unidad') {
+                // Para unidades, convertir a entero y validar mínimo
+                const intValue = Math.floor(numValue);
+                if (intValue < 1) {
+                    event.target.value = '1';
+                } else {
+                    event.target.value = intValue.toString();
+                }
+            } else {
+                // Para decimales, validar mínimo y formato
+                if (numValue < 0.01) {
+                    event.target.value = '0.01';
+                } else {
+                    // Limitar a 2 decimales
+                    event.target.value = numValue.toFixed(2);
+                }
+            }
+            
+            // Recalcular total después de modificar el valor
+            setTimeout(actualizarTotal, 10);
+        }
+        
+        // Función de validación de input para precios
+        function validarInputPrecio(event) {
+            const value = event.target.value;
+            
+            // Solo limpiar caracteres obviamente inválidos, pero permitir estados temporales
+            const cleanValue = value.replace(/[^0-9.]/g, '');
+            
+            // Evitar múltiples puntos decimales
+            const parts = cleanValue.split('.');
+            if (parts.length > 2) {
+                event.target.value = parts[0] + '.' + parts.slice(1).join('');
+            } else {
+                event.target.value = cleanValue;
+            }
+        }
+        
+        // Función de validación de blur para precios
+        function validarBlurPrecio(event) {
+            let value = event.target.value.trim();
+            
+            if (value === '' || value === '.') {
+                event.target.value = '0.00';
+                return;
+            }
+            
+            const numValue = parseFloat(value);
+            if (isNaN(numValue) || numValue < 0) {
+                event.target.value = '0.00';
+            } else {
+                // Formatear a 2 decimales
+                event.target.value = numValue.toFixed(2);
+            }
+            
+            // Recalcular total después de modificar el valor
+            setTimeout(actualizarTotal, 10);
+        }
     });
 </script>
 @endsection

@@ -202,14 +202,15 @@
                                                                 </td>
                                                                 <td>
                                                                     <div class="input-group">
-                                                                        <input type="number" class="form-control cantidad-input"
+                                                                        <input type="text" class="form-control cantidad-input"
                                                                             name="detalles[{{ $detalle->id }}][cantidad]"
                                                                             value="{{ old('detalles.'.$detalle->id.'.cantidad', $detalle->cantidad) }}"
                                                                             min="{{ $min }}" step="{{ $step }}"
                                                                             data-detalle-id="{{ $detalle->id }}"
                                                                             data-precio="{{ $precioUnitario }}"
                                                                             data-descuento-id="{{ $detalle->descuento_id }}"
-                                                                            data-unidad-tipo="{{ $unidadTipo }}">
+                                                                            data-unidad-tipo="{{ $unidadTipo }}"
+                                                                            inputmode="decimal" pattern="[0-9]*\.?[0-9]*">
                                                                         <span class="input-group-text">
                                                                             {{ ($detalle->articulo && $detalle->articulo->unidad) ? $detalle->articulo->unidad->abreviatura : '' }}
                                                                         </span>
@@ -319,7 +320,7 @@
                                                 <div class="col-md-2 mb-2">
                                                     <label for="cantidad-nuevo">Cantidad</label>
                                                     <div class="input-group">
-                                                        <input type="number" id="cantidad-nuevo" class="form-control" min="0.01" step="0.01">
+                                                        <input type="text" id="cantidad-nuevo" class="form-control" min="0.01" step="0.01" inputmode="decimal" pattern="[0-9]*\.?[0-9]*">
                                                         <span class="input-group-text" id="unidad-cantidad"></span>
                                                     </div>
                                                 </div>
@@ -532,15 +533,13 @@
                 $('#mensaje-guardando').addClass('d-none');
             @endif
             
-            // Fix para el error de setSelectionRange en inputs number
-            $(document).on('input focus blur', 'input[type="number"]', function(e) {
+            // Fix para inputs de cantidad (ahora son type="text")
+            $(document).on('input focus blur', '.cantidad-input, #cantidad-nuevo', function(e) {
                 try {
-                    // Prevenir el error de setSelectionRange en inputs number
-                    if (this.type === 'number' && typeof this.setSelectionRange === 'function') {
-                        // No hacer nada - evitar setSelectionRange en inputs number
-                    }
+                    // Los inputs ahora son type="text" con validaciones no intrusivas
+                    console.log('Evento en input de cantidad:', e.type);
                 } catch (error) {
-                    console.warn('Error evitado en input number:', error);
+                    console.warn('Error en input de cantidad:', error);
                 }
             });
 
@@ -1450,7 +1449,78 @@
             };
 
             console.log('✅ Todos los eventos JavaScript inicializados correctamente');
+            
+            // Aplicar validaciones no intrusivas a campos de cantidad
+            aplicarValidacionesVentas();
         });
+        
+        // Función para aplicar validaciones no intrusivas a campos de cantidad
+        function aplicarValidacionesVentas() {
+            const cantidadInputs = document.querySelectorAll('.cantidad-input, #cantidad-nuevo');
+            
+            cantidadInputs.forEach(function(input) {
+                // Remover listeners existentes para evitar duplicados
+                input.removeEventListener('input', validarInputCantidadVenta);
+                input.removeEventListener('blur', validarBlurCantidadVenta);
+                
+                // Agregar nuevos listeners
+                input.addEventListener('input', validarInputCantidadVenta);
+                input.addEventListener('blur', validarBlurCantidadVenta);
+            });
+        }
+        
+        // Función de validación de input para cantidad en ventas
+        function validarInputCantidadVenta(event) {
+            const value = event.target.value;
+            
+            // Solo limpiar caracteres obviamente inválidos, pero permitir estados temporales
+            const cleanValue = value.replace(/[^0-9.]/g, '');
+            
+            // Evitar múltiples puntos decimales
+            const parts = cleanValue.split('.');
+            if (parts.length > 2) {
+                event.target.value = parts[0] + '.' + parts.slice(1).join('');
+            } else {
+                event.target.value = cleanValue;
+            }
+        }
+        
+        // Función de validación de blur para cantidad en ventas
+        function validarBlurCantidadVenta(event) {
+            const step = event.target.step || '1';
+            const min = event.target.min || '1';
+            let value = event.target.value.trim();
+            
+            // Si está vacío, establecer valor por defecto
+            if (value === '' || value === '.') {
+                value = step === '1' ? '1' : '1.00';
+                event.target.value = value;
+                return;
+            }
+            
+            const numValue = parseFloat(value);
+            
+            if (step === '1') {
+                // Para unidades, convertir a entero y validar mínimo
+                const intValue = Math.floor(numValue);
+                if (intValue < 1) {
+                    event.target.value = '1';
+                } else {
+                    event.target.value = intValue.toString();
+                }
+            } else {
+                // Para decimales, validar mínimo y formato
+                if (numValue < 0.01) {
+                    event.target.value = '0.01';
+                } else {
+                    // Limitar a 2 decimales
+                    event.target.value = numValue.toFixed(2);
+                }
+            }
+            
+            // Disparar evento de cambio para recalcular totales
+            $(event.target).trigger('input');
+        }
     </script>
     
     <!-- Script de debugging integrado -->

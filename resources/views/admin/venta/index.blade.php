@@ -4,6 +4,39 @@
 @section('content')
     <!-- Incluir Chart.js para los gráficos -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    
+    <!-- Estilos para mejorar el scroll horizontal en tabla de ventas -->
+    <style>
+        .table-responsive {
+            -webkit-overflow-scrolling: touch; /* Scroll suave en iOS */
+        }
+        
+        /* Mejorar la visibilidad del scrollbar en móviles */
+        @media (max-width: 768px) {
+            .table-responsive {
+                border: 1px solid #dee2e6;
+                border-radius: 0.375rem;
+            }
+            
+            .table-responsive::-webkit-scrollbar {
+                height: 8px;
+            }
+            
+            .table-responsive::-webkit-scrollbar-track {
+                background: #f1f1f1;
+                border-radius: 4px;
+            }
+            
+            .table-responsive::-webkit-scrollbar-thumb {
+                background: #888;
+                border-radius: 4px;
+            }
+            
+            .table-responsive::-webkit-scrollbar-thumb:hover {
+                background: #555;
+            }
+        }
+    </style>
 
     <div class="content-wrapper-scroll">
         <div class="main-header d-flex align-items-center justify-content-between position-relative">
@@ -217,7 +250,8 @@
                                                     <a href="{{ route('ventas.export.excel', request()->query()) }}" class="btn btn-success"><i class="bi bi-file-earmark-excel"></i> Excel</a>
                                                 </div> --}}
                                             </div>
-                                            <table class="table table-striped">
+                                            <div class="table-responsive">
+                                                <table class="table table-striped">
                                                 <thead>
                                                     <tr>
                                                         <th>Acciones</th>
@@ -601,6 +635,7 @@
 
                                                 </tfoot>
                                             </table>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

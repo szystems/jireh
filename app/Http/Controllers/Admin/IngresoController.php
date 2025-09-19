@@ -81,6 +81,31 @@ class IngresoController extends Controller
         // dd($request->all());
         $validated = $request->validated();
 
+        // Validar cantidades según tipo de unidad de medida
+        foreach ($validated['detalles'] as $detalle) {
+            $articulo = Articulo::with('unidad')->find($detalle['articulo_id']);
+            if ($articulo && $articulo->unidad) {
+                $cantidad = (float) $detalle['cantidad'];
+                $tipoUnidad = $articulo->unidad->tipo;
+                
+                if ($tipoUnidad === 'unidad') {
+                    // Para unidades de tipo "unidad", debe ser número entero >= 1
+                    if ($cantidad != floor($cantidad) || $cantidad < 1) {
+                        return back()->withErrors([
+                            'detalles' => "Para el artículo '{$articulo->descripcion}' (tipo unidad), la cantidad debe ser un número entero mayor o igual a 1."
+                        ])->withInput();
+                    }
+                } else {
+                    // Para unidades de tipo "decimal", debe ser >= 0.01
+                    if ($cantidad < 0.01) {
+                        return back()->withErrors([
+                            'detalles' => "Para el artículo '{$articulo->descripcion}' (tipo decimal), la cantidad mínima es 0.01."
+                        ])->withInput();
+                    }
+                }
+            }
+        }
+
         $ingreso = Ingreso::create(array_merge(
             $request->only('numero_factura', 'fecha', 'proveedor_id', 'tipo_compra'),
             ['usuario_id' => Auth::user()->id]
@@ -122,6 +147,37 @@ class IngresoController extends Controller
     public function update(IngresoEditFormRequest $request, $id)
     {
         $validated = $request->validated();
+
+        // Validar cantidades según tipo de unidad de medida
+        foreach ($validated['detalles'] as $detalleId => $detalleData) {
+            // Solo validar si no se está eliminando el detalle
+            if (!isset($detalleData['eliminar']) || $detalleData['eliminar'] != 1) {
+                $articuloId = $detalleData['articulo_id'] ?? null;
+                if ($articuloId) {
+                    $articulo = Articulo::with('unidad')->find($articuloId);
+                    if ($articulo && $articulo->unidad) {
+                        $cantidad = (float) $detalleData['cantidad'];
+                        $tipoUnidad = $articulo->unidad->tipo;
+                        
+                        if ($tipoUnidad === 'unidad') {
+                            // Para unidades de tipo "unidad", debe ser número entero >= 1
+                            if ($cantidad != floor($cantidad) || $cantidad < 1) {
+                                return back()->withErrors([
+                                    'detalles' => "Para el artículo '{$articulo->descripcion}' (tipo unidad), la cantidad debe ser un número entero mayor o igual a 1."
+                                ])->withInput();
+                            }
+                        } else {
+                            // Para unidades de tipo "decimal", debe ser >= 0.01
+                            if ($cantidad < 0.01) {
+                                return back()->withErrors([
+                                    'detalles' => "Para el artículo '{$articulo->descripcion}' (tipo decimal), la cantidad mínima es 0.01."
+                                ])->withInput();
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         $ingreso = Ingreso::findOrFail($id);
         $ingreso->update($request->only('numero_factura', 'fecha', 'proveedor_id', 'tipo_compra'));

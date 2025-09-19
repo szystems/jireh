@@ -97,7 +97,7 @@
                                                 <div class="col-md-3">
                                                     <label for="cantidad" class="form-label">Cantidad</label>
                                                     <div class="input-group">
-                                                        <input type="number" class="form-control" id="cantidad" min="1" step="1">
+                                                        <input type="text" class="form-control" id="cantidad" min="1" step="1" inputmode="decimal" pattern="[0-9]*\.?[0-9]*">
                                                         <span class="input-group-text" id="unidad-abreviatura"></span>
                                                     </div>
                                                 </div>
@@ -105,7 +105,7 @@
                                                     <label for="precio_venta" class="form-label">Precio Venta</label>
                                                     <div class="input-group">
                                                         <span class="input-group-text">{{ $config->currency_simbol }}</span>
-                                                        <input type="number" step="0.01" class="form-control" id="precio_venta" readonly>
+                                                        <input type="text" step="0.01" class="form-control" id="precio_venta" readonly inputmode="decimal" pattern="[0-9]*\.?[0-9]*">
                                                     </div>
                                                 </div>
                                                 <div class="col-md-3">
@@ -379,40 +379,61 @@
                 cantidadInput.value = "";
             });
 
-            // Validar input cantidad
+            // Validación no intrusiva para cantidad - permite escribir libremente
             cantidadInput.addEventListener('input', function (event) {
-                const unidadTipo = articuloSelect.options[articuloSelect.selectedIndex].getAttribute('data-unidad-tipo');
-                const stock = parseFloat(stockInput.value);
                 const value = event.target.value;
-                const cantidad = parseFloat(value);
-                const cursorPosition = event.target.selectionStart;
-
-                if (unidadTipo === 'unidad') {
-                    // Para unidades, solo permitir números enteros
-                    event.target.value = value.replace(/[^0-9]/g, '');
-                    if (event.target.value === '') event.target.value = '1';
-                    if (parseInt(event.target.value) < 1) event.target.value = '1';
+                
+                // Solo limpiar caracteres obviamente inválidos, pero permitir estados temporales
+                const cleanValue = value.replace(/[^0-9.]/g, '');
+                
+                // Evitar múltiples puntos decimales
+                const parts = cleanValue.split('.');
+                if (parts.length > 2) {
+                    event.target.value = parts[0] + '.' + parts.slice(1).join('');
                 } else {
-                    // Para decimales, permitir punto decimal
-                    const decimalValue = value.replace(/[^0-9.]/g, '');
-                    const parts = decimalValue.split('.');
-                    event.target.value = parts.length > 2 ? parts[0] + '.' + parts.slice(1).join('') : decimalValue;
+                    event.target.value = cleanValue;
                 }
+            });
 
-                // Validar que la cantidad no exceda el stock
-                if (cantidad > stock) {
-                    alert('La cantidad no puede exceder el stock disponible: ' + stock);
-                    event.target.value = stock;
+            // Validación final cuando pierde el foco (blur)
+            cantidadInput.addEventListener('blur', function (event) {
+                const step = event.target.step || '1';
+                const min = event.target.min || '1';
+                const stock = parseFloat(stockInput.value) || 0;
+                let value = event.target.value.trim();
+                
+                // Si está vacío, establecer valor por defecto
+                if (value === '' || value === '.') {
+                    value = step === '1' ? '1' : '1.00';
+                    event.target.value = value;
+                    return;
                 }
-
-                // Solo usar setSelectionRange si el input lo soporta (no en inputs type="number")
-                try {
-                    if (event.target.type !== 'number' && event.target.setSelectionRange) {
-                        event.target.setSelectionRange(cursorPosition, cursorPosition);
+                
+                const numValue = parseFloat(value);
+                
+                if (step === '1') {
+                    // Para unidades, convertir a entero y validar mínimo
+                    const intValue = Math.floor(numValue);
+                    if (intValue < 1) {
+                        event.target.value = '1';
+                    } else {
+                        event.target.value = intValue.toString();
                     }
-                } catch (e) {
-                    // Ignorar errores de setSelectionRange en inputs que no lo soportan
-                    console.log('setSelectionRange no soportado en este input');
+                } else {
+                    // Para decimales, validar mínimo y formato
+                    if (numValue < 0.01) {
+                        event.target.value = '0.01';
+                    } else {
+                        // Limitar a 2 decimales
+                        event.target.value = numValue.toFixed(2);
+                    }
+                }
+                
+                // Validar que la cantidad no exceda el stock después de las correcciones
+                const finalValue = parseFloat(event.target.value);
+                if (finalValue > stock && stock > 0) {
+                    alert('La cantidad no puede exceder el stock disponible: ' + stock);
+                    event.target.value = stock.toString();
                 }
             });
 
