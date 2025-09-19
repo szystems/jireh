@@ -15,7 +15,7 @@
 		<meta property="og:description" content="Sistema de gestión para Jireh Automotriz">
 		<meta property="og:type" content="Website">
 		<meta property="og:site_name" content="Jireh Automotriz">
-		<link rel="shortcut icon" href="{{ asset('img/favicon.ico') }}" />
+		<link rel="shortcut icon" href="{{ asset('favicon.ico') }}" />
 
 		<!-- Title -->
 		<title>Jireh Automotriz - Sistema de Gestión</title>

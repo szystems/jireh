@@ -16,7 +16,7 @@
 		<meta property="og:description" content="Software de manejo de centro de servicios de Car Wash y Taller">
 		<meta property="og:type" content="Web App">
 		<meta property="og:site_name" content="https://www.app.jirehautomotriz.com">
-		<link rel="shortcut icon" href="assets/imgs/logos/favicon.ico" />
+		<link rel="shortcut icon" href="favicon.ico" />
 
 		<!-- Title -->
 		<title>{{ config('app.name', 'JIREH') }}</title>
