@@ -1,3 +1,60 @@
+# 🏢 Sistema Jireh v1.7.2 - Gestión Empresarial Integral
+
+> **Sistema de gestión empresarial desarrollado con Laravel 8 para PyMEs**
+
+[![Laravel](https://img.shields.io/badge/Laravel-8.x-red.svg)](https://laravel.com)
+[![PHP](https://img.shields.io/badge/PHP-7.3%2B%7C8.0%2B-blue.svg)](https://php.net)
+[![MySQL](https://img.shields.io/badge/MySQL-5.7%2B-orange.svg)](https://mysql.com)
+[![Bootstrap](https://img.shields.io/badge/Bootstrap-5.x-purple.svg)](https://getbootstrap.com)
+
+## 🚀 ¿Qué es Sistema Jireh?
+
+**Jireh** es una plataforma integral de gestión empresarial diseñada específicamente para pequeñas y medianas empresas que necesitan:
+
+- ✅ **Control de Inventario** - Gestión completa de stock y productos
+- ✅ **Sistema de Ventas** - Facturación y control de clientes  
+- ✅ **Gestión de Personal** - Trabajadores, comisiones y sueldos
+- ✅ **Cotizaciones Inteligentes** - Estados automáticos y regeneración
+- ✅ **Centro de Ayuda** - Documentación completa integrada
+- ✅ **Validaciones Avanzadas v1.7.2** - UX optimizada con validaciones inteligentes
+
+## 🆕 Novedades v1.7.2 (Enero 16, 2025)
+
+### **Validaciones Inteligentes** ⭐ **NUEVO**
+- **Validación por tipo de unidad**: Los campos respetan si la unidad es entera o decimal
+- **Separador decimal nativo**: Utiliza punto (.) como separador estándar
+- **Validación no intrusiva**: Solo valida al abandonar el campo
+- **Compatibilidad total**: Preserva funcionalidad Select2 y auto-completado
+- **Módulos cubiertos**: Cotizaciones, Ingresos y Ventas
+
+### **Mejoras de UX**
+- **Diseño responsivo**: Tablas optimizadas para dispositivos móviles
+- **Navegación corregida**: Visualización correcta de roles de usuario
+- **Entrada natural**: Sin interrupciones al digitar cantidades decimales
+
+## 📚 Documentación Completa
+
+La documentación completa está disponible en la carpeta `docs/`:
+
+- **[CHANGELOG.md](docs/CHANGELOG.md)** - Historial detallado de versiones
+- **[PROJECT_STATUS.md](docs/PROJECT_STATUS.md)** - Estado actual del proyecto
+- **[core/PRD.md](docs/core/PRD.md)** - Especificación de producto
+- **[VERSION_MANAGEMENT_PROTOCOL.md](docs/VERSION_MANAGEMENT_PROTOCOL.md)** - Protocolo de versiones
+
+## 🛠️ Stack Tecnológico
+
+```
+Framework: Laravel 8.x
+PHP: ^7.3|^8.0
+Base de Datos: MySQL
+Frontend: Blade + Bootstrap 5 + jQuery
+PDF: DomPDF
+Tablas: DataTables
+Autenticación: Laravel Sanctum + UI
+```
+
+---
+
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
 
 <p align="center">

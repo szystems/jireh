@@ -1,14 +1,14 @@
-# 📊 Estado Actual del Proyecto - Sistema Jireh v1.7.1
+# 📊 Estado Actual del Proyecto - Sistema Jireh v1.7.2
 
-**Fecha de reporte**: 18 de septiembre, 2025  
-**Versión del sistema**: v1.7.1  
-**Estado**: Producción activa con permisos expandidos para vendedores
+**Fecha de reporte**: 16 de enero, 2025  
+**Versión del sistema**: v1.7.2  
+**Estado**: Producción activa con validaciones mejoradas y UX optimizada
 
 ---
 
 ## 🎯 Resumen Ejecutivo
 
-El **Sistema Jireh** se encuentra en la versión **v1.7.1** con todas las funcionalidades core implementadas y operativas. Esta versión introduce una **expansión significativa de permisos para vendedores**, otorgándoles acceso completo a módulos de **Inventario, Compras y Trabajadores** manteniendo restricciones de seguridad para eliminación de registros.
+El **Sistema Jireh** se encuentra en la versión **v1.7.2** con todas las funcionalidades core implementadas y operativas. Esta versión introduce **validaciones inteligentes no intrusivas** para campos de cantidad que respetan tipos de unidad (entero vs decimal) y utilizan el separador decimal nativo (.) para una mejor experiencia de usuario, junto con mejoras en el diseño responsivo y correcciones en la visualización de roles de usuario.
 
 ---
 
@@ -75,7 +75,21 @@ docs/                          # Documentación completa
 
 ## 🚀 Funcionalidades Destacadas
 
-### **📚 Centro de Ayuda v1.7.0** ⭐ **NUEVA**
+### **� Validaciones Inteligentes v1.7.2** ⭐ **NUEVA**
+- **Validación por tipo de unidad**: Campos de cantidad respetan unidad.tipo (entero vs decimal)
+- **Separador decimal nativo**: Utiliza punto (.) como separador decimal estándar
+- **Validación no intrusiva**: Solo valida al abandonar el campo (evento blur)
+- **Compatibilidad completa**: Preserva funcionalidad Select2 y auto-completado
+- **Módulos cubiertos**: Cotizaciones, Ingresos de Inventario y Ventas
+- **UX mejorada**: Entrada natural de decimales sin interrupciones
+
+### **📱 Mejoras de Diseño Responsivo v1.7.2** ⭐ **NUEVA**
+- **Tablas responsivas**: Scroll horizontal automático en dispositivos móviles
+- **CSS optimizado**: Barras de scroll personalizadas para mejor UX móvil
+- **Compatibilidad Bootstrap**: Integración nativa con clases responsive
+- **Navegación corregida**: Visualización correcta de roles de usuario
+
+### **�📚 Centro de Ayuda v1.7.0** ⭐ **ESTABLE**
 - **4 secciones organizadas**: Primeros Pasos, Módulos, FAQ, Soporte
 - **Contenido por roles**: Administrador vs Vendedor
 - **Documentación detallada**: Guías paso a paso para cada módulo
@@ -200,17 +214,17 @@ docs/                          # Documentación completa
 
 ## 🎯 Roadmap de Desarrollo
 
-### **Corto Plazo (Q4 2025)**
-- **v1.8.0**: Dashboard con analytics en tiempo real
+### **Corto Plazo (Q1 2025)**
+- **v1.7.3**: Optimización de performance y validaciones adicionales
 - **Notificaciones**: Sistema de alertas automáticas
 - **API REST**: Completar endpoints faltantes
 
-### **Mediano Plazo (Q1-Q2 2026)**
+### **Mediano Plazo (Q2-Q3 2025)**
+- **v1.8.0**: Dashboard con analytics en tiempo real
 - **v2.0.0**: App móvil básica para vendedores
 - **Integración**: APIs de sistemas externos
-- **BI Básico**: Reportes predictivos
 
-### **Largo Plazo (Q3-Q4 2026)**
+### **Largo Plazo (Q4 2025-Q1 2026)**
 - **v2.5.0**: Business Intelligence avanzado
 - **Machine Learning**: Predicciones de ventas
 - **Automatización**: Procesos inteligentes
@@ -220,22 +234,25 @@ docs/                          # Documentación completa
 ## 🏆 Logros Destacados
 
 ### **Funcionalidades Únicas**
+- **Validaciones inteligentes por tipo de unidad** (v1.7.2)
 - **Regeneración inteligente** de cotizaciones
 - **Estados automáticos** con cálculo de vigencia
 - **Centro de Ayuda** diferenciado por roles
 - **Gestión integral** en una sola plataforma
 
 ### **Calidad Técnica**
+- **Validaciones no intrusivas** que preservan UX
 - **Arquitectura escalable** y mantenible
 - **Código limpio** siguiendo estándares Laravel
 - **Documentación completa** para continuidad
 - **Testing structure** preparada
 
 ### **Experiencia de Usuario**
+- **Entrada decimal nativa** sin interrupciones
 - **Interface moderna** con Bootstrap 5
 - **Navegación intuitiva** entre módulos
 - **Feedback visual** en todas las operaciones
-- **Responsive design** para múltiples dispositivos
+- **Responsive design** optimizado para móviles
 
 ---
 

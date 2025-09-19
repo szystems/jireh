@@ -6,6 +6,47 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
+## [v1.7.2] - 2025-09-18
+
+### ✨ Validaciones No Intrusivas y UX Mejorada
+- **Validaciones no intrusivas** para campos de cantidad en Ingresos y Ventas
+- **Separador decimal punto (.)** nativo en lugar de coma (,) para mejor UX
+- **Tabla responsive** con scroll horizontal en listado de ventas
+- **Corrección de roles** de usuario en navegación (Administrador/Vendedor)
+
+### 🎯 Módulos Actualizados
+- **Ingresos (create/edit)**: Inputs cantidad/precio con validaciones quirúrgicas
+- **Ventas (create/edit)**: Campos cantidad con validaciones no intrusivas  
+- **Navegación**: Roles de usuario corregidos según lógica del sistema
+
+### 🔧 Mejoras Técnicas
+- **type='text' + inputmode='decimal'** para punto decimal nativo
+- **Validaciones blur** no intrusivas basadas en step/min del input
+- **Preserva funcionalidad Select2** y auto-población de campos
+- **table-responsive** con CSS personalizado para móviles
+
+### 📱 UX Mejorada
+- **Escritura libre** sin interrupciones durante entrada de datos
+- **Auto-corrección inteligente** al perder foco según tipo de unidad
+- **Tabla de ventas navegable** completamente en dispositivos móviles
+- **Scrollbar visible** y scroll suave en iOS/Android
+
+### 🛡️ Validaciones Backend
+- **IngresoController**: Validación cantidades según unidad.tipo
+- **Integridad de datos** con validaciones duales (frontend + backend)
+- **Compatibilidad total** con funcionalidad existente
+
+### 🗂️ Archivos Modificados
+- `app/Http/Controllers/Admin/IngresoController.php`
+- `resources/views/admin/ingreso/create.blade.php`
+- `resources/views/admin/ingreso/edit.blade.php`
+- `resources/views/admin/venta/create.blade.php`
+- `resources/views/admin/venta/edit.blade.php`
+- `resources/views/admin/venta/index.blade.php`
+- `resources/views/layouts/incadmin/nav.blade.php`
+
+---
+
 ## [v1.7.1] - 2025-09-18
 
 ### 🔓 Expansión de Permisos de Vendedores

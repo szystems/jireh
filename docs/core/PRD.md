@@ -3,10 +3,11 @@
 ## 1. Resumen Ejecutivo
 
 ### 1.1 Visión del Producto
-**Jireh** es un sistema integral de gestión empresarial diseñado para pequeñas y medianas empresas que requieren control sobre inventario, ventas, cotizaciones, personal y finanzas en una solución unificada. **Actualizado con Centro de Ayuda v1.7.0 (Septiembre 18, 2025)**.
+**Jireh** es un sistema integral de gestión empresarial diseñado para pequeñas y medianas empresas que requieren control sobre inventario, ventas, cotizaciones, personal y finanzas en una solución unificada. **Actualizado con Validaciones Inteligentes v1.7.2 (Enero 16, 2025)**.
 
 ### 1.2 Objetivos del Producto
 - Centralizar la gestión empresarial en una plataforma única
+- **🆕 Validaciones inteligentes por tipo de unidad con separador decimal nativo**
 - **🆕 Gestionar cotizaciones con estados inteligentes y regeneración automática**
 - **🆕 Proporcionar documentación completa con Centro de Ayuda integrado**
 - Automatizar cálculos de comisiones y pagos de personal
@@ -15,7 +16,7 @@
 - Optimizar procesos administrativos y financieros
 
 ### 1.3 Alcance
-**Incluye**: Gestión de inventario, ventas, **cotizaciones avanzadas**, personal, comisiones, pagos, reportes, **Centro de Ayuda completo**  
+**Incluye**: Gestión de inventario, ventas, **cotizaciones avanzadas**, **validaciones inteligentes**, personal, comisiones, pagos, reportes, **Centro de Ayuda completo**  
 **Excluye**: Contabilidad completa, nómina avanzada, CRM completo, e-commerce
 
 ## 2. Usuarios Objetivo
@@ -221,14 +222,20 @@
 - Roles y permisos diferenciados
 - Protección CSRF en formularios
 - Validación de entrada de datos
+- **🆕 Validaciones inteligentes por tipo de unidad (v1.7.2)**
+- **🆕 Separador decimal nativo para mejor UX (v1.7.2)**
+- **🆕 Validación no intrusiva que preserva funcionalidad existente (v1.7.2)**
 - Logs de auditoría para operaciones críticas
 - **🆕 Validación de estados de cotizaciones**
 
-### 5.3 Usabilidad ⭐ **MEJORADA CON COTIZACIONES**
+### 5.3 Usabilidad ⭐ **MEJORADA CON VALIDACIONES v1.7.2**
 - Interfaz intuitiva y responsive
+- **🆕 Validaciones inteligentes que respetan tipo de unidad (entero vs decimal)**
+- **🆕 Entrada decimal nativa sin interrupciones al usuario**
 - **🆕 5 pestañas especializadas para gestión eficiente de cotizaciones**
 - Navegación clara entre módulos
 - **🆕 Cambios de estado visuales con retroalimentación inmediata**
+- **🆕 Diseño responsivo optimizado para dispositivos móviles**
 - Mensajes de error descriptivos
 - Confirmaciones para operaciones críticas
 - **🆕 Filtrado automático mejora experiencia de usuario**

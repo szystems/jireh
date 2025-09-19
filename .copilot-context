@@ -89,13 +89,23 @@ Eres un asistente experto en proyectos Laravel 8. Tu tarea es cargar inmediatame
 - /login, /register - Autenticación
 - API REST en desarrollo (/api/*)
 
-### Estado Actual ⭐ **ACTUALIZADO SEPTIEMBRE 18, 2025**
+### Estado Actual ⭐ **ACTUALIZADO ENERO 16, 2025**
 - Sistema estable en producción
+- **Validaciones Inteligentes v1.7.2 IMPLEMENTADAS** para campos de cantidad
 - **Módulo de Cotizaciones 100% FUNCIONAL** con características avanzadas
 - **Centro de Ayuda v1.7.0 IMPLEMENTADO** con documentación completa
 - Todas las funcionalidades core implementadas
 - Estructura profesional con tools/ organizados
 - Documentación completa actualizada
+- **📝 Funcionalidades Validaciones v1.7.2**:
+  - ✅ Validación por tipo de unidad (entero vs decimal)
+  - ✅ Separador decimal nativo (.) para mejor UX
+  - ✅ Validación no intrusiva (solo en evento blur)
+  - ✅ Preserva funcionalidad Select2 y auto-completado
+  - ✅ Implementado en Cotizaciones, Ingresos y Ventas
+  - ✅ Backend validation con unit type checking
+  - ✅ Diseño responsivo mejorado para móviles
+  - ✅ Corrección de visualización de roles de usuario
 - **Funcionalidades Cotizaciones**:
   - ✅ CRUD completo con validaciones robustas
   - ✅ Estados inteligentes (Generado/Aprobado + vigencia automática)
@@ -114,8 +124,8 @@ Eres un asistente experto en proyectos Laravel 8. Tu tarea es cargar inmediatame
 Mantener este contexto vivo para cada sugerencia o generación de código, actualizar o extender la documentación sin duplicar ni romper la estructura existente, proponer mejoras respetando las convenciones del proyecto.
 
 ---
-**Última actualización**: Septiembre 18, 2025
-**Versión del sistema**: v1.7.0 (Centro de Ayuda implementado)
-**Estado**: Producción activa con Centro de Ayuda funcional
-**Módulos Recientes**: Cotizaciones (Sep 2025) + Centro de Ayuda (Sep 18, 2025)
+**Última actualización**: Enero 16, 2025
+**Versión del sistema**: v1.7.2 (Validaciones Inteligentes implementadas)
+**Estado**: Producción activa con validaciones mejoradas y UX optimizada
+**Módulos Recientes**: Cotizaciones (Sep 2025) + Centro de Ayuda (Sep 18, 2025) + **Validaciones v1.7.2 (Ene 16, 2025)**
 **Protocolo de Versiones**: Documentado en .copilot-context/VERSION_MANAGEMENT.md

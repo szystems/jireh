@@ -3,9 +3,9 @@
 ## 🎯 Objetivo
 Mantener un control riguroso de las versiones del Sistema Jireh y asegurar que todos los archivos relevantes se actualicen correctamente cuando se agreguen nuevas funcionalidades.
 
-## 🔢 Versión Actual: **1.7.0**
+## 🔢 Versión Actual: **1.7.2**
 
-### 📅 Fecha de Última Actualización: 18 de septiembre, 2025
+### 📅 Fecha de Última Actualización: 16 de enero, 2025
 
 ---
 
@@ -13,13 +13,13 @@ Mantener un control riguroso de las versiones del Sistema Jireh y asegurar que t
 
 ### 1. **Sidebar Principal**
 - **Archivo:** `resources/views/layouts/incadmin/sidebar.blade.php`
-- **Buscar:** `Szystems v1.7.0`
+- **Buscar:** `Szystems v1.7.2`
 - **Ubicación:** Sección footer del sidebar (~línea 281)
 - **Formato:** `<b>Szystems vX.Y.Z</b>`
 
 ### 2. **Centro de Ayuda - Información del Sistema**
 - **Archivo:** `resources/views/admin/ayuda/sections/soporte.blade.php`
-- **Buscar:** `Sistema Jireh v1.7.0`
+- **Buscar:** `Sistema Jireh v1.7.2`
 - **Ubicación:** Sección "Información del Sistema"
 - **Actualizar:** Versión y fecha de actualización
 
@@ -128,5 +128,33 @@ MAJOR.MINOR.PATCH
 **Documentación:** Sistema automatizado
 
 ---
-**Última revisión:** 18 de septiembre, 2025  
+**Última revisión:** 16 de enero, 2025  
 **Próxima revisión:** Con cada actualización del sistema
+
+---
+
+## 📈 Historial de Versiones Recientes
+
+### v1.7.2 (Enero 16, 2025) - **Validaciones Inteligentes**
+**Tipo:** MINOR - Nuevas funcionalidades de validación
+**Cambios principales:**
+- ✅ Validaciones inteligentes por tipo de unidad (entero vs decimal)
+- ✅ Separador decimal nativo (.) para mejor UX
+- ✅ Validación no intrusiva (solo en evento blur)
+- ✅ Implementado en Cotizaciones, Ingresos y Ventas
+- ✅ Mejoras en diseño responsivo para móviles
+- ✅ Corrección de visualización de roles de usuario
+
+### v1.7.1 (Septiembre 2025) - **Permisos Expandidos**
+**Tipo:** MINOR - Expansión de funcionalidades
+**Cambios principales:**
+- ✅ Permisos expandidos para vendedores en Inventario y Compras
+- ✅ Restricciones de eliminación mantenidas para seguridad
+
+### v1.7.0 (Septiembre 18, 2025) - **Centro de Ayuda**
+**Tipo:** MINOR - Nuevo módulo completo
+**Cambios principales:**
+- ✅ Centro de Ayuda completo con 4 secciones
+- ✅ Contenido diferenciado por roles (Admin/Vendedor)
+- ✅ Documentación detallada de todos los módulos
+- ✅ Sistema de información y contacto integrado
