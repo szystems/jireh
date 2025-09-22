@@ -531,19 +531,22 @@ function calcularMargen() {
     // Solo aplicar costos de comisiones si es un servicio
     const costosComisiones = (tipoArticulo === 'servicio') ? (costoMecanico + comisionCarwash) : 0;
 
-    // Calcular costos adicionales
-    const impuestoValor = precioVenta * (impuestoPorcentaje / 100);
+    // El precio de venta INCLUYE IVA - calcular precio base sin IVA
+    const precioBaseSinIva = precioVenta / (1 + (impuestoPorcentaje / 100));
+    
+    // Calcular el IVA sobre el precio base
+    const impuestoValor = precioBaseSinIva * (impuestoPorcentaje / 100);
 
-    // Calcular ganancia y margen incluyendo comisiones
-    const ganancia = precioVenta - precioCompra;
-    const gananciaReal = ganancia - impuestoValor - costosComisiones;
-
-    // El margen se calcula sobre el costo total (precio de compra + comisiones)
-    const costoTotal = precioCompra + costosComisiones;
+    // Calcular el costo total real (compra + IVA calculado)
+    const costoTotal = precioCompra + impuestoValor + costosComisiones;
+    
+    // Calcular ganancia real
+    const gananciaReal = precioVenta - costoTotal;
     const margenReal = costoTotal > 0 ? (gananciaReal / costoTotal) * 100 : 0;
 
     // Actualizar etiquetas en la tabla
     const tdPrecioVenta = document.getElementById('td-precio-venta');
+    const tdPrecioBase = document.getElementById('td-precio-base');
     const tdPrecioCompra = document.getElementById('td-precio-compra');
     const tdLabelImpuesto = document.getElementById('td-label-impuesto');
     const tdImpuesto = document.getElementById('td-impuesto');
@@ -552,12 +555,16 @@ function calcularMargen() {
         tdPrecioVenta.textContent = `${simboloMoneda}.${formatNumber(precioVenta)}`;
     }
 
+    if (tdPrecioBase) {
+        tdPrecioBase.textContent = `${simboloMoneda}.${formatNumber(precioBaseSinIva)}`;
+    }
+
     if (tdPrecioCompra) {
         tdPrecioCompra.textContent = `- ${simboloMoneda}.${formatNumber(precioCompra)}`;
     }
 
     if (tdLabelImpuesto) {
-        tdLabelImpuesto.textContent = `Impuesto (${formatNumber(impuestoPorcentaje)}%)`;
+        tdLabelImpuesto.textContent = `IVA (${formatNumber(impuestoPorcentaje)}%)`;
     }
 
     if (tdImpuesto) {

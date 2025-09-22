@@ -156,15 +156,19 @@
                                                             <table class="table table-sm table-bordered">
                                                                 <tbody>
                                                                     <tr>
-                                                                        <td width="40%">Precio de Venta</td>
+                                                                        <td width="40%">Precio de Venta (incluye IVA)</td>
                                                                         <td class="text-end text-success" id="td-precio-venta">{{ $config->currency_simbol ?? '$' }}.0.00</td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td>Precio Base sin IVA</td>
+                                                                        <td class="text-end" id="td-precio-base">{{ $config->currency_simbol ?? '$' }}.0.00</td>
                                                                     </tr>
                                                                     <tr>
                                                                         <td>Precio de Compra</td>
                                                                         <td class="text-end text-danger" id="td-precio-compra">- {{ $config->currency_simbol ?? '$' }}.0.00</td>
                                                                     </tr>
                                                                     <tr>
-                                                                        <td id="td-label-impuesto">Impuesto ({{ number_format($config->impuesto ?? 0, 2) }}%)</td>
+                                                                        <td id="td-label-impuesto">IVA ({{ number_format($config->impuesto ?? 0, 2) }}%)</td>
                                                                         <td class="text-end text-danger" id="td-impuesto">- $0.00</td>
                                                                     </tr>
                                                                     <tr class="table-active">

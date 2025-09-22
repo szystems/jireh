@@ -115,34 +115,40 @@
                                             </div>
                                             <div class="card-body p-0">
                                                 <div class="p-3">
+                                                    @php
+                                                        $costosComisiones = 0;
+                                                        // El precio de venta INCLUYE IVA - calcular precio base sin IVA
+                                                        $impuestoPorcentaje = $config->impuesto ?? 0;
+                                                        $precioBaseSinIva = $articulo->precio_venta / (1 + ($impuestoPorcentaje / 100));
+                                                        $impuestoValor = $precioBaseSinIva * ($impuestoPorcentaje / 100);
+                                                    @endphp
+                                                    
                                                     <table class="table table-sm">
                                                         <tbody>
                                                             <tr>
-                                                                <td class="text-start">Precio de venta</td>
+                                                                <td class="text-start">Precio de venta (incluye IVA)</td>
                                                                 <td class="text-end">{{ $config->currency_simbol }}.{{ number_format($articulo->precio_venta, 2) }}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td class="text-start">Precio base sin IVA</td>
+                                                                <td class="text-end">{{ $config->currency_simbol }}.{{ number_format($precioBaseSinIva, 2) }}</td>
                                                             </tr>
                                                             <tr>
                                                                 <td class="text-start">Precio de compra</td>
                                                                 <td class="text-end text-danger">- {{ $config->currency_simbol }}.{{ number_format($articulo->precio_compra, 2) }}</td>
                                                             </tr>
                                                             <tr>
-                                                                <td class="text-start">Impuesto ({{ number_format($config->impuesto ?? 0, 2) }}%)</td>
-                                                                <td class="text-end text-danger">- {{ $config->currency_simbol }}.{{ number_format(($articulo->precio_venta * ($config->impuesto ?? 0) / 100), 2) }}</td>
+                                                                <td class="text-start">IVA ({{ number_format($config->impuesto ?? 0, 2) }}%)</td>
+                                                                <td class="text-end text-danger">- {{ $config->currency_simbol }}.{{ number_format($impuestoValor, 2) }}</td>
                                                             </tr>
-
-                                                            @php
-                                                                $costosComisiones = 0;
-                                                                $impuestoValor = $articulo->precio_venta * (($config->impuesto ?? 0) / 100);
-                                                            @endphp
 
                                                             @if($articulo->tipo == 'servicio')
                                                                 @php
                                                                     $costosComisiones = ($articulo->costo_mecanico ?? 0) + ($articulo->comision_carwash ?? 0);
-                                                                    $gananciaBasica = $articulo->precio_venta - $articulo->precio_compra;
-                                                                    $gananciaReal = $gananciaBasica - $impuestoValor - $costosComisiones;
+                                                                    $costoTotal = $articulo->precio_compra + $impuestoValor + $costosComisiones;
+                                                                    $gananciaReal = $articulo->precio_venta - $costoTotal;
 
                                                                     // Calcular el margen sobre el costo total
-                                                                    $costoTotal = $articulo->precio_compra + $costosComisiones;
                                                                     $margenReal = $costoTotal > 0 ? ($gananciaReal / $costoTotal) * 100 : 0;
                                                                 @endphp
 
@@ -154,9 +160,9 @@
                                                                 @endif
                                                             @else
                                                                 @php
-                                                                    $gananciaBasica = $articulo->precio_venta - $articulo->precio_compra;
-                                                                    $gananciaReal = $gananciaBasica - $impuestoValor;
-                                                                    $margenReal = $articulo->precio_compra > 0 ? ($gananciaReal / $articulo->precio_compra) * 100 : 0;
+                                                                    $costoTotal = $articulo->precio_compra + $impuestoValor;
+                                                                    $gananciaReal = $articulo->precio_venta - $costoTotal;
+                                                                    $margenReal = $costoTotal > 0 ? ($gananciaReal / $costoTotal) * 100 : 0;
                                                                 @endphp
                                                             @endif
 
