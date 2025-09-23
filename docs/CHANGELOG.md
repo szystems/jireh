@@ -6,6 +6,39 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
+## [v1.7.3] - 2025-09-22
+
+### 🧮 Corrección de Cálculos de Rentabilidad
+- **Lógica corregida**: Precio de venta incluye IVA por defecto
+- **Cálculo IVA**: Sobre precio base sin IVA (precio_venta ÷ 1.12)
+- **Costo total**: precio_compra + IVA + comisiones 
+- **Ganancia real**: precio_venta - costo_total
+- **Margen**: ganancia_real ÷ costo_total × 100
+
+### 🎯 Archivos Modificados
+- `public/js/articulo-script.js` - Función calcularMargen() corregida
+- `resources/views/admin/articulo/show.blade.php` - Análisis rentabilidad
+- `resources/views/admin/articulo/add.blade.php` - Preview rentabilidad 
+- `resources/views/admin/articulo/edit.blade.php` - Preview rentabilidad
+- `app/Http/Controllers/Admin/ArticuloController.php` - Export PDF
+
+### 📊 Mejoras Visuales
+- **Nueva fila**: "Precio base sin IVA" en todas las vistas
+- **Etiquetas actualizadas**: "Precio de venta (incluye IVA)"
+- **IVA clarificado**: Etiqueta "IVA" en lugar de "Impuesto"
+- **Cálculos precisos**: Coinciden exactamente con especificaciones del cliente
+
+### 🔍 Ejemplo de Corrección
+```
+Antes (INCORRECTO):
+Ganancia: Q 260.96, Margen: 37.28%
+
+Después (CORRECTO):  
+Ganancia: Q 275.00, Margen: 33.66%
+```
+
+---
+
 ## [v1.7.2] - 2025-09-18
 
 ### ✨ Validaciones No Intrusivas y UX Mejorada

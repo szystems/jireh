@@ -286,6 +286,20 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    <tr class="table-info">
+                                        <td><strong>1.7.3</strong></td>
+                                        <td>Sep 22, 2025</td>
+                                        <td>
+                                            <strong>Corrección cálculos de rentabilidad:</strong>
+                                            <ul class="mb-0">
+                                                <li>IVA calculado sobre precio base sin IVA</li>
+                                                <li>Precio de venta incluye IVA por defecto</li>
+                                                <li>Cálculos precisos de ganancia y margen</li>
+                                                <li>Vista mejorada con precio base sin IVA</li>
+                                                <li>Aplicado en crear, editar, ver y PDF</li>
+                                            </ul>
+                                        </td>
+                                    </tr>
                                     <tr class="table-success">
                                         <td><strong>1.7.1</strong></td>
                                         <td>Sep 18, 2025</td>
@@ -351,9 +365,9 @@
                         <div class="col-md-8">
                             <h5><i class="bi bi-info-circle text-primary"></i> Información del Sistema</h5>
                             <p class="mb-0">
-                                <strong>Sistema Jireh v1.7.1</strong> - Desarrollado por <a href="https://szystems.com" target="_blank" class="text-decoration-none">Szystems</a><br>
+                                <strong>Sistema Jireh v1.7.3</strong> - Desarrollado por <a href="https://szystems.com" target="_blank" class="text-decoration-none">Szystems</a><br>
                                 Plataforma: Laravel 8 | Base de datos: MySQL | Interfaz: Bootstrap 5<br>
-                                <small class="text-muted">Última actualización: Septiembre 18, 2025 - Expansión permisos vendedores</small>
+                                <small class="text-muted">Última actualización: Septiembre 22, 2025 - Corrección cálculos de rentabilidad</small>
                             </p>
                         </div>
                         <div class="col-md-4 text-center">

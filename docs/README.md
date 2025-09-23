@@ -2,32 +2,19 @@
 
 **Sistema de Gestión Empresarial Laravel 8**
 
-## 📊 Estado Actual (Septiembre 18, 2025) - v1.7.1
+## 📊 Estado Actual (Septiembre 22, 2025) - v1.7.3
 
 ### ✅ **Módulos Completados**
 - **📋 Cotizaciones** ⭐ **100% FUNCIONAL** - Sistema avanzado implementado
-- **❓ Centro de Ayuda** ⭐ **100% FUNCIONAL (v1.7.1)** - Sistema completo de documentación con permisos actualizados
+- **❓ Centro de Ayuda** ⭐ **100% FUNCIONAL (v1.7.0)** - Sistema completo de documentación
 - **👥 Trabajadores** - Gestión completa con acceso para vendedores
 - **🚗 Vehículos** - Funcional
 - **⚙️ Configuración** - Sistema centralizado
 - **💰 Ventas** - Sistema de facturación
-- **📦 Inventario** - Gestión de artículos y stock con acceso para vendedores
+- **📦 Inventario** ⭐ **CORREGIDO v1.7.3** - Cálculos de rentabilidad con IVA incluido
 - **🛒 Compras** - Control de ingresos y proveedores con acceso para vendedores
 - **💼 Personal** - Administración de empleados
-- **💳 Finanzas** - Control de pagos y comisionesón del Proyecto Jireh (BuroSoft)
-
-**Sistema de Gestión Empresarial Laravel 8**
-
-## 📊 Estado Actual (Septiembre 18, 2025) - v1.7.0
-
-### ✅ **Módulos Completados**
-- **📋 Cotizaciones** ⭐ **100% FUNCIONAL** - Sistema avanzado implementado
-- **� Centro de Ayuda** ⭐ **100% FUNCIONAL (v1.7.0)** - Sistema completo de documentación
-- **�👥 Trabajadores** - Gestión completa 
-- **🚗 Vehículos** - Funcional
-- **⚙️ Configuración** - Sistema centralizado
-- **💰 Ventas** - Sistema de facturación
-- **📦 Inventario** - Gestión de artículos y stock
+- **💳 Finanzas** - Control de pagos y comisiones
 - **💼 Personal** - Administración de empleados
 - **💳 Finanzas** - Control de pagos y comisiones
 

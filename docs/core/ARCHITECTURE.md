@@ -2,18 +2,18 @@
 
 ## Visión General
 
-Jireh es un sistema de gestión empresarial construido en Laravel 8 que implementa una arquitectura MVC modular con separación clara de responsabilidades. **Actualizado con Centro de Ayuda v1.7.0 (Septiembre 18, 2025)**.
+Jireh es un sistema de gestión empresarial construido en Laravel 8 que implementa una arquitectura MVC modular con separación clara de responsabilidades. **Actualizado con corrección de cálculos de rentabilidad v1.7.3 (Septiembre 22, 2025)**.
 
-## 🎯 Estado Actual de Módulos - v1.7.0
+## 🎯 Estado Actual de Módulos - v1.7.3
 
 ### ✅ **Módulos Completados al 100%**
-- **� Centro de Ayuda** ⭐ **v1.7.0 (Sep 18, 2025)** - Sistema completo de documentación con 4 secciones
-- **�📋 Cotizaciones** ⭐ **COMPLETO (Sep 2025)** - Sistema avanzado con estados inteligentes
+- **❓ Centro de Ayuda** ⭐ **v1.7.0 (Sep 18, 2025)** - Sistema completo de documentación con 4 secciones
+- **📋 Cotizaciones** ⭐ **COMPLETO (Sep 2025)** - Sistema avanzado con estados inteligentes
 - **💰 Ventas** - Sistema de facturación completo
-- **📦 Inventario** - Gestión de artículos, categorías, stock
+- **📦 Inventario** ⭐ **CORREGIDO v1.7.3** - Cálculos de rentabilidad con IVA incluido
 - **👥 Personal** - Trabajadores, tipos, comisiones, sueldos
-- **� Finanzas** - Pagos, lotes de pago, control financiero
-- **�👥 Trabajadores** - Gestión completa implementada
+- **💳 Finanzas** - Pagos, lotes de pago, control financiero
+- **👥 Trabajadores** - Gestión completa implementada
 - **🚗 Vehículos** - Funcional
 - **⚙️ Configuración** - Sistema centralizado
 
@@ -312,19 +312,52 @@ database/factories/     # Generación datos prueba
 - Testing de flujos completos
 - Testing de autenticación
 
----
+## 📊 Lógica de Cálculos de Rentabilidad ⭐ **v1.7.3 (Sep 22, 2025)**
 
-**Convenciones del Proyecto:**
-- PSR-4 autoloading
-- CamelCase para clases
-- snake_case para BD
-- Blade templates organizados por módulo
+### Implementación Corregida
+El sistema maneja cálculos de rentabilidad considerando que **el precio de venta incluye IVA**.
+
+#### **Fórmulas Aplicadas:**
+```php
+// 1. Calcular precio base sin IVA
+$precioBaseSinIva = $precioVenta / (1 + ($impuestoPorcentaje / 100));
+
+// 2. Calcular IVA sobre precio base
+$valorIVA = $precioBaseSinIva * ($impuestoPorcentaje / 100);
+
+// 3. Calcular costo total
+$costoTotal = $precioCompra + $valorIVA + $comisiones;
+
+// 4. Calcular ganancia real
+$gananciaReal = $precioVenta - $costoTotal;
+
+// 5. Calcular margen
+$margen = ($gananciaReal / $costoTotal) * 100;
+```
+
+#### **Ejemplo Práctico:**
+```
+Precio de venta (incluye IVA): Q 1,092.00
+Precio base sin IVA:          Q   975.00  (1,092 ÷ 1.12)
+Precio de compra:             Q   700.00
+IVA (12%):                    Q   117.00  (975 × 12%)
+Costo total:                  Q   817.00  (700 + 117)
+Ganancia real:                Q   275.00  (1,092 - 817)
+Margen:                       33.66%      (275/817)
+```
+
+#### **Archivos Implementados:**
+- `public/js/articulo-script.js` - Cálculo en tiempo real
+- `resources/views/admin/articulo/show.blade.php` - Vista detalle
+- `resources/views/admin/articulo/add.blade.php` - Vista creación  
+- `resources/views/admin/articulo/edit.blade.php` - Vista edición
+- `app/Http/Controllers/Admin/ArticuloController.php` - Export PDF
 
 ---
 
 **Información del Documento:**
-- **Última actualización**: Septiembre 18, 2025
-- **Versión del sistema**: v1.7.0
-- **Estado**: Producción activa con Centro de Ayuda
-- **Módulos recientes**: Cotizaciones (Sep 2025) + Centro de Ayuda (Sep 18, 2025)
+- **Última actualización**: Septiembre 22, 2025
+- **Versión del sistema**: v1.7.3
+- **Estado**: Producción activa con cálculos de rentabilidad corregidos
+- **Módulos recientes**: Cotizaciones (Sep 2025) + Centro de Ayuda (Sep 18, 2025) + **Rentabilidad v1.7.3 (Sep 22, 2025)**
 - **Próximas actualizaciones**: API REST, reportes avanzados

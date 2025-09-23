@@ -3,9 +3,9 @@
 ## 🎯 Objetivo
 Mantener un control riguroso de las versiones del Sistema Jireh y asegurar que todos los archivos relevantes se actualicen correctamente cuando se agreguen nuevas funcionalidades.
 
-## 🔢 Versión Actual: **1.7.2**
+## 🔢 Versión Actual: **1.7.3**
 
-### 📅 Fecha de Última Actualización: 16 de enero, 2025
+### 📅 Fecha de Última Actualización: 22 de septiembre, 2025
 
 ---
 
@@ -13,13 +13,13 @@ Mantener un control riguroso de las versiones del Sistema Jireh y asegurar que t
 
 ### 1. **Sidebar Principal**
 - **Archivo:** `resources/views/layouts/incadmin/sidebar.blade.php`
-- **Buscar:** `Szystems v1.7.2`
+- **Buscar:** `Szystems v1.7.3`
 - **Ubicación:** Sección footer del sidebar (~línea 281)
 - **Formato:** `<b>Szystems vX.Y.Z</b>`
 
 ### 2. **Centro de Ayuda - Información del Sistema**
 - **Archivo:** `resources/views/admin/ayuda/sections/soporte.blade.php`
-- **Buscar:** `Sistema Jireh v1.7.2`
+- **Buscar:** `Sistema Jireh v1.7.3`
 - **Ubicación:** Sección "Información del Sistema"
 - **Actualizar:** Versión y fecha de actualización
 
