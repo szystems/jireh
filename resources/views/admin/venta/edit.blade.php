@@ -142,6 +142,42 @@
                                             <option value="pagado" {{ (old('estado_pago', $venta->estado_pago) == 'pagado') ? 'selected' : '' }}>Pagado</option>
                                         </select>
                                     </div>
+                                    
+                                    <!-- ⭐ NUEVO: Toggle para aplicar impuestos en edición -->
+                                    @php
+                                        // Detectar estado actual de impuestos
+                                        $totalDetalles = $venta->detalleVentas->count();
+                                        $detallesConImpuestos = $venta->detalleVentas->where('porcentaje_impuestos', '>', 0)->count();
+                                        $detallesSinImpuestos = $venta->detalleVentas->where('porcentaje_impuestos', 0)->count();
+                                        $tieneImpuestosPredominante = $detallesConImpuestos > ($totalDetalles / 2);
+                                        $esMixto = $detallesConImpuestos > 0 && $detallesSinImpuestos > 0;
+                                    @endphp
+                                    <div class="col-md-12 mb-3">
+                                        <div class="card border-primary">
+                                            <div class="card-header bg-light">
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" id="aplicar_impuestos" name="aplicar_impuestos" value="1" 
+                                                           {{ old('aplicar_impuestos', $tieneImpuestosPredominante) ? 'checked' : '' }}
+                                                           onchange="toggleImpuestosEdit(this.checked)">
+                                                    <label class="form-check-label" for="aplicar_impuestos">
+                                                        <i class="bi bi-receipt-cutoff {{ $tieneImpuestosPredominante ? 'text-success' : 'text-secondary' }}"></i> 
+                                                        <strong>Aplicar impuestos ({{ number_format($config->impuesto, 2) }}%)</strong>
+                                                    </label>
+                                                </div>
+                                                <small class="form-text text-muted mt-1">
+                                                    @if($esMixto)
+                                                        <i class="bi bi-exclamation-triangle text-warning"></i> 
+                                                        <strong>Estado mixto:</strong> {{ $detallesConImpuestos }} artículos con impuestos, {{ $detallesSinImpuestos }} sin impuestos. El toggle unificará el criterio.
+                                                    @elseif($detallesConImpuestos > 0)
+                                                        <i class="bi bi-check-circle text-success"></i> Todos los artículos tienen impuestos aplicados
+                                                    @else
+                                                        <i class="bi bi-x-circle text-secondary"></i> Ningún artículo tiene impuestos aplicados
+                                                    @endif
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
                                     <input type="hidden" name="estado" value="{{ $venta->estado }}">
                                     <input type="hidden" name="usuario_id" value="{{ $venta->usuario_id }}">
 
@@ -1520,6 +1556,77 @@
             
             // Disparar evento de cambio para recalcular totales
             $(event.target).trigger('input');
+        }
+
+        // ⭐ NUEVA FUNCIÓN: Toggle de impuestos para editar venta
+        function toggleImpuestosEdit(aplicar) {
+            const porcentajeConfig = {{ $config->impuesto }};
+            const nuevoPorcentaje = aplicar ? porcentajeConfig : 0;
+            const estadoTexto = aplicar ? 'CON IMPUESTOS' : 'SIN IMPUESTOS';
+            
+            console.log(`🔄 EDITANDO VENTA ${estadoTexto} - Nuevo porcentaje: ${nuevoPorcentaje}%`);
+            
+            // Actualizar el icono del toggle
+            const icono = document.querySelector('label[for="aplicar_impuestos"] i');
+            if (icono) {
+                icono.className = `bi bi-receipt-cutoff ${aplicar ? 'text-success' : 'text-secondary'}`;
+            }
+            
+            // Actualizar todos los inputs de porcentaje de impuestos en detalles existentes
+            document.querySelectorAll('input[name*="detalles_a_mantener"][name*="[porcentaje_impuestos]"]').forEach(input => {
+                input.value = nuevoPorcentaje;
+                console.log(`📋 Detalle existente actualizado: ${input.name} = ${nuevoPorcentaje}%`);
+            });
+            
+            // Actualizar detalles nuevos si existen
+            document.querySelectorAll('input[name*="nuevos_detalles"][name*="[porcentaje_impuestos]"]').forEach(input => {
+                input.value = nuevoPorcentaje;
+                console.log(`🆕 Nuevo detalle actualizado: ${input.name} = ${nuevoPorcentaje}%`);
+            });
+            
+            // Recalcular todos los totales si la función existe
+            if (typeof actualizarTotalVenta === 'function') {
+                actualizarTotalVenta();
+                console.log('💰 Totales recalculados');
+            }
+            
+            // Mostrar mensaje de confirmación
+            mostrarMensajeTemporalEdit(aplicar ? 
+                '✅ Impuestos activados en todos los artículos. Los cambios se aplicarán al guardar.' : 
+                '❌ Impuestos removidos de todos los artículos. Los cambios se aplicarán al guardar.',
+                aplicar ? 'success' : 'warning'
+            );
+        }
+
+        // Función para mostrar mensaje temporal en edición
+        function mostrarMensajeTemporalEdit(mensaje, tipo = 'info') {
+            // Remover mensaje anterior si existe
+            const mensajeAnterior = document.getElementById('mensaje-temporal-impuestos-edit');
+            if (mensajeAnterior) {
+                mensajeAnterior.remove();
+            }
+            
+            // Crear nuevo mensaje
+            const alertDiv = document.createElement('div');
+            alertDiv.id = 'mensaje-temporal-impuestos-edit';
+            alertDiv.className = `alert alert-${tipo} alert-dismissible fade show mt-2`;
+            alertDiv.innerHTML = `
+                <i class="bi bi-info-circle"></i> ${mensaje}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            // Insertar después del card de impuestos
+            const cardImpuestos = document.querySelector('.card.border-primary');
+            if (cardImpuestos) {
+                cardImpuestos.parentNode.insertBefore(alertDiv, cardImpuestos.nextSibling);
+            }
+            
+            // Auto-remover después de 4 segundos
+            setTimeout(() => {
+                if (document.getElementById('mensaje-temporal-impuestos-edit')) {
+                    alertDiv.remove();
+                }
+            }, 4000);
         }
     </script>
     

@@ -83,6 +83,30 @@
                                             {{ ucfirst($venta->estado_pago) }}
                                         </span>
                                     </div>
+                                    <!-- ⭐ NUEVO: Indicador de estado de impuestos -->
+                                    @php
+                                        $totalDetalles = $venta->detalleVentas->count();
+                                        $detallesConImpuestos = $venta->detalleVentas->where('porcentaje_impuestos', '>', 0)->count();
+                                        $detallesSinImpuestos = $venta->detalleVentas->where('porcentaje_impuestos', 0)->count();
+                                        $esMixto = $detallesConImpuestos > 0 && $detallesSinImpuestos > 0;
+                                    @endphp
+                                    <div class="mb-3">
+                                        <h6 class="fw-bold">Impuestos:</h6>
+                                        @if($esMixto)
+                                            <span class="badge bg-warning">
+                                                <i class="bi bi-exclamation-triangle"></i> Mixto
+                                            </span>
+                                            <br><small class="text-muted">{{ $detallesConImpuestos }} con impuestos, {{ $detallesSinImpuestos }} sin impuestos</small>
+                                        @elseif($detallesConImpuestos > 0)
+                                            <span class="badge bg-success">
+                                                <i class="bi bi-receipt-cutoff"></i> Con impuestos ({{ $config->impuesto }}%)
+                                            </span>
+                                        @else
+                                            <span class="badge bg-secondary">
+                                                <i class="bi bi-x-circle"></i> Sin impuestos
+                                            </span>
+                                        @endif
+                                    </div>
                                     <div class="mb-3">
                                         <h6 class="fw-bold">Estado:</h6>
                                         @if($venta->estado)
@@ -203,8 +227,14 @@
                                                 // Calcular subtotal con descuento
                                                 $subtotalConDescuento = $subtotalSinDescuento - $montoDescuento;
 
-                                                // Calcular impuesto
-                                                $impuestoDetalle = $subtotalConDescuento * ($detalle->porcentaje_impuestos ?? 0) / 100;
+                                                // CORREGIDO: El precio incluye IVA, extraer el IVA del subtotal
+                                                $porcentajeImpuestos = $detalle->porcentaje_impuestos ?? 0;
+                                                if ($porcentajeImpuestos > 0) {
+                                                    $precioBaseSinIva = $subtotalConDescuento / (1 + ($porcentajeImpuestos / 100));
+                                                    $impuestoDetalle = $precioBaseSinIva * ($porcentajeImpuestos / 100);
+                                                } else {
+                                                    $impuestoDetalle = 0;
+                                                }
                                                 $totalImpuestos += $impuestoDetalle;
 
                                                 // Calcular costo de compra total (incluir precio_costo + comisiones)

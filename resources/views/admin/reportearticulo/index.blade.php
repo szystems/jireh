@@ -186,8 +186,14 @@
                                             // Calcular subtotal con descuento
                                             $subtotalConDescuento = $subtotalSinDescuento - $montoDescuento;
 
-                                            // Calcular impuestos
-                                            $impuestoDetalle = $subtotalConDescuento * ($detalle->porcentaje_impuestos ?? 0) / 100;
+                                            // CORREGIDO: El precio incluye IVA, extraer el IVA del subtotal
+                                            $porcentajeImpuestos = $detalle->porcentaje_impuestos ?? 0;
+                                            if ($porcentajeImpuestos > 0) {
+                                                $precioBaseSinIva = $subtotalConDescuento / (1 + ($porcentajeImpuestos / 100));
+                                                $impuestoDetalle = $precioBaseSinIva * ($porcentajeImpuestos / 100);
+                                            } else {
+                                                $impuestoDetalle = 0;
+                                            }
 
                                             // Calcular costo total
                                             $costoTotal = $detalle->precio_costo * $detalle->cantidad;

@@ -84,11 +84,9 @@ class DetalleCotizacion extends Model
             $subtotal -= $descuentoMonto;
         }
         
-        // Aplicar impuestos si existen
-        if ($this->porcentaje_impuestos > 0) {
-            $impuestos = ($subtotal * $this->porcentaje_impuestos) / 100;
-            $subtotal += $impuestos;
-        }
+        // ✅ CORREGIDO: Los precios YA INCLUYEN IVA - no debemos agregarlo
+        // Si hay impuestos configurados, el subtotal ya los contiene
+        // No necesitamos sumar nada adicional porque el precio_venta ya incluye el IVA
         
         $this->sub_total = round($subtotal, 2);
     }
@@ -108,6 +106,7 @@ class DetalleCotizacion extends Model
 
     /**
      * Accessor para obtener el monto de impuestos aplicado
+     * ✅ CORREGIDO: Calcula correctamente el IVA incluido en el precio
      */
     public function getMontoImpuestosAttribute()
     {
@@ -115,8 +114,11 @@ class DetalleCotizacion extends Model
             return 0;
         }
         
-        $subtotalSinImpuestos = ($this->cantidad * $this->precio_venta) - $this->monto_descuento;
-        return round(($subtotalSinImpuestos * $this->porcentaje_impuestos) / 100, 2);
+        // El subtotal YA INCLUYE el IVA, calculamos cuánto corresponde al impuesto
+        $subtotalConDescuento = ($this->cantidad * $this->precio_venta) - $this->monto_descuento;
+        $precioBaseSinIva = $subtotalConDescuento / (1 + ($this->porcentaje_impuestos / 100));
+        
+        return round($precioBaseSinIva * ($this->porcentaje_impuestos / 100), 2);
     }
 
     /**

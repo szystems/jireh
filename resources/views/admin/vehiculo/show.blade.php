@@ -132,9 +132,15 @@
                                             <div class="vehicle-detail-card">
                                                 <h6 class="text-muted mb-1">VIN/Número de Chasis</h6>
                                                 <p class="mb-0">
-                                                    <span class="badge bg-secondary">
-                                                        <i class="bi bi-upc-scan me-1"></i>{{ $vehiculo->vin }}
-                                                    </span>
+                                                    @if($vehiculo->vin && !empty(trim($vehiculo->vin)))
+                                                        <span class="badge bg-secondary">
+                                                            <i class="bi bi-upc-scan me-1"></i>{{ $vehiculo->vin }}
+                                                        </span>
+                                                    @else
+                                                        <span class="badge bg-light text-muted">
+                                                            <i class="bi bi-dash me-1"></i>No registrado
+                                                        </span>
+                                                    @endif
                                                 </p>
                                             </div>
                                         </div>

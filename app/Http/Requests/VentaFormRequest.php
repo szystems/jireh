@@ -42,6 +42,8 @@ class VentaFormRequest extends FormRequest
             'trabajadores_carwash' => 'nullable|array',
             'trabajadores_carwash.*' => 'nullable|array',
             'trabajadores_carwash.*.*' => 'nullable|exists:trabajadors,id',
+            // ⭐ NUEVO: Validación para el toggle de impuestos
+            'aplicar_impuestos' => 'nullable|boolean',
         ];
     }
 }

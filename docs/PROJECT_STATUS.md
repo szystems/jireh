@@ -1,14 +1,14 @@
-# 📊 Estado Actual del Proyecto - Sistema Jireh v1.7.2
+# 📊 Estado Actual del Proyecto - Sistema Jireh v1.7.3
 
-**Fecha de reporte**: 16 de enero, 2025  
-**Versión del sistema**: v1.7.2  
-**Estado**: Producción activa con validaciones mejoradas y UX optimizada
+**Fecha de reporte**: 24 de septiembre, 2025  
+**Versión del sistema**: v1.7.3  
+**Estado**: Producción activa con reportes PDF mejorados, cálculos de impuestos corregidos y VIN opcional
 
 ---
 
 ## 🎯 Resumen Ejecutivo
 
-El **Sistema Jireh** se encuentra en la versión **v1.7.2** con todas las funcionalidades core implementadas y operativas. Esta versión introduce **validaciones inteligentes no intrusivas** para campos de cantidad que respetan tipos de unidad (entero vs decimal) y utilizan el separador decimal nativo (.) para una mejor experiencia de usuario, junto con mejoras en el diseño responsivo y correcciones en la visualización de roles de usuario.
+El **Sistema Jireh** se encuentra en la versión **v1.7.3** con todas las funcionalidades core implementadas y operativas. Esta versión introduce **reportes PDF mejorados con resúmenes financieros detallados**, **correcciones críticas en cálculos de impuestos** (DetalleCotizacion) y **campo VIN opcional en el módulo de vehículos**, además de las validaciones inteligentes no intrusivas para campos de cantidad implementadas en v1.7.2.
 
 ---
 
@@ -204,6 +204,7 @@ docs/                          # Documentación completa
 - ✅ **VERSION_MANAGEMENT_PROTOCOL.md** - Protocolo de versionado
 - ✅ **AGENT_INITIALIZATION_GUIDE.md** - Guía para agentes de IA
 - ✅ **CENTRO_AYUDA_v1.7.0.md** - Documentación del Centro de Ayuda
+- ✅ **REPORTE_CAMBIOS_2025-09-24.md** - Reporte formal de mejoras v1.7.3
 
 ### **Contexto del Proyecto**
 - ✅ **.copilot-context** - Estado completo y actualizado
@@ -215,7 +216,7 @@ docs/                          # Documentación completa
 ## 🎯 Roadmap de Desarrollo
 
 ### **Corto Plazo (Q1 2025)**
-- **v1.7.3**: Optimización de performance y validaciones adicionales
+- ✅ **v1.7.3**: **COMPLETADO** - Reportes PDF mejorados, cálculos de impuestos corregidos, VIN opcional (Sep 24, 2025)
 - **Notificaciones**: Sistema de alertas automáticas
 - **API REST**: Completar endpoints faltantes
 
@@ -234,6 +235,9 @@ docs/                          # Documentación completa
 ## 🏆 Logros Destacados
 
 ### **Funcionalidades Únicas**
+- **Reportes PDF con resúmenes financieros completos** (v1.7.3)
+- **Cálculos de impuestos unificados** en todo el sistema (v1.7.3)
+- **Campo VIN opcional** para flexibilidad en vehículos (v1.7.3)
 - **Validaciones inteligentes por tipo de unidad** (v1.7.2)
 - **Regeneración inteligente** de cotizaciones
 - **Estados automáticos** con cálculo de vigencia
@@ -241,7 +245,9 @@ docs/                          # Documentación completa
 - **Gestión integral** en una sola plataforma
 
 ### **Calidad Técnica**
-- **Validaciones no intrusivas** que preservan UX
+- **Reportes PDF con cálculos financieros precisos** (v1.7.3)
+- **Consistencia en cálculos de impuestos** en todo el sistema (v1.7.3)
+- **Validaciones no intrusivas** que preservan UX (v1.7.2)
 - **Arquitectura escalable** y mantenible
 - **Código limpio** siguiendo estándares Laravel
 - **Documentación completa** para continuidad
@@ -272,4 +278,5 @@ docs/                          # Documentación completa
 
 **Estado del documento**: Activo y actualizado  
 **Próxima revisión**: 1 de octubre, 2025  
-**Responsable**: Equipo de Desarrollo Jireh
+**Responsable**: Equipo de Desarrollo Jireh  
+**Última actualización**: 24 de septiembre, 2025 - v1.7.3

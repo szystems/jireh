@@ -137,8 +137,13 @@ class ReporteArticuloController extends Controller
 
             $subtotalConDescuento = $subtotalSinDescuento - $montoDescuento;
 
-            // Calcular impuesto usando el porcentaje específico de este detalle
-            return $subtotalConDescuento * ($detalle->porcentaje_impuestos ?? 0) / 100;
+            // CORREGIDO: El precio incluye IVA, extraer el IVA del subtotal
+            $porcentajeImpuestos = $detalle->porcentaje_impuestos ?? 0;
+            if ($porcentajeImpuestos > 0) {
+                $precioBaseSinIva = $subtotalConDescuento / (1 + ($porcentajeImpuestos / 100));
+                return $precioBaseSinIva * ($porcentajeImpuestos / 100);
+            }
+            return 0;
         });
 
         $totalCostos = $detallesVenta->sum(function ($detalle) {
@@ -339,8 +344,13 @@ class ReporteArticuloController extends Controller
 
             $subtotalConDescuento = $subtotalSinDescuento - $montoDescuento;
 
-            // Calcular impuesto usando el porcentaje específico de este detalle
-            return $subtotalConDescuento * ($detalle->porcentaje_impuestos ?? 0) / 100;
+            // CORREGIDO: El precio incluye IVA, extraer el IVA del subtotal  
+            $porcentajeImpuestos = $detalle->porcentaje_impuestos ?? 0;
+            if ($porcentajeImpuestos > 0) {
+                $precioBaseSinIva = $subtotalConDescuento / (1 + ($porcentajeImpuestos / 100));
+                return $precioBaseSinIva * ($porcentajeImpuestos / 100);
+            }
+            return 0;
         });
 
         // Actualizar el array de totales para incluir los impuestos calculados

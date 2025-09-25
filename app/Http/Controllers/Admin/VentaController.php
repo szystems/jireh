@@ -73,7 +73,7 @@ class VentaController extends Controller
             $query->where('estado_pago', $request->estado_pago);
         }
 
-        $ventas = $query->with(['detalleVentas.articulo'])->orderBy('fecha', 'desc')->get();
+        $ventas = $query->with(['detalleVentas.articulo', 'pagos'])->orderBy('fecha', 'desc')->get();
 
         $clientes = Cliente::all();
         $vehiculos = Vehiculo::all();
@@ -182,7 +182,8 @@ class VentaController extends Controller
             ));
 
             foreach ($validated['detalles'] as $index => $detalle) {
-                $detalle['porcentaje_impuestos'] = $config->impuesto;
+                // ⭐ NUEVO: Aplicar impuestos según el toggle del usuario
+                $detalle['porcentaje_impuestos'] = $request->has('aplicar_impuestos') ? $config->impuesto : 0;
                 $articulo = Articulo::find($detalle['articulo_id']);
                 if ($articulo) {
                     $detalle['precio_costo'] = $articulo->precio_compra;
@@ -423,6 +424,9 @@ class VentaController extends Controller
                                 Log::info("No hay cambios en artículo ni cantidad - stock sin modificar");
                             }
 
+                            // ⭐ NUEVO: Aplicar impuestos según el toggle del usuario a detalles existentes
+                            $detalleData['porcentaje_impuestos'] = $request->has('aplicar_impuestos') ? $config->impuesto : 0;
+
                             // Actualizar el detalle
                             $detalle->update($detalleData);
                             Log::info("Detalle ID: {$detalleId} actualizado correctamente", []);                            // Actualizar trabajadores de carwash
@@ -517,7 +521,8 @@ class VentaController extends Controller
                     Log::info("Procesando nuevo detalle con índice: {$index}", $nuevoDetalle);
                     
                     // Agregar el porcentaje de impuestos desde la configuración
-                    $nuevoDetalle['porcentaje_impuestos'] = $config->impuesto;
+                    // ⭐ NUEVO: Aplicar impuestos según el toggle del usuario
+                    $nuevoDetalle['porcentaje_impuestos'] = $request->has('aplicar_impuestos') ? $config->impuesto : 0;
                     
                     // Agregar el usuario_id (requerido en la tabla detalle_ventas)
                     $nuevoDetalle['usuario_id'] = Auth::user()->id;
@@ -719,6 +724,47 @@ class VentaController extends Controller
         $clientes = Cliente::all();
         $usuarios = User::all();
 
+        // Calcular resúmenes de tipos de pago para el PDF
+        $totalTiposPago = [];
+        $totalVentas = 0;
+        $totalPagos = 0;
+        $totalGananciaNeta = 0;
+        $totalGananciaNetaConIva = 0;
+        
+        foreach ($ventas as $venta) {
+            // Solo procesar ventas activas para totales y ganancias
+            if ($venta->estado) {
+                $totalVentas += $venta->total;
+                
+                // Calcular ganancia neta sin IVA
+                $costoTotal = $venta->detalleVentas->sum(function($detalle) {
+                    return $detalle->cantidad * $detalle->costo;
+                });
+                $totalGananciaNeta += ($venta->total - $costoTotal);
+                
+                // Calcular ganancia neta con IVA si aplica
+                if ($venta->estado_predominante_impuestos === 'Con IVA') {
+                    $precioBaseSinIva = $venta->total / 1.16;
+                    $costoTotalConIva = $costoTotal;
+                    $totalGananciaNetaConIva += ($precioBaseSinIva - $costoTotalConIva);
+                } else {
+                    $totalGananciaNetaConIva += ($venta->total - $costoTotal);
+                }
+            }
+            
+            // Los pagos se procesan independientemente del estado de la venta
+            foreach ($venta->pagos as $pago) {
+                $metodo = $pago->metodo_pago ?? 'sin_especificar'; // Usar metodo_pago en lugar de metodo
+                $metodoLegible = \App\Models\Pago::$metodosPago[$metodo] ?? ucfirst(str_replace('_', ' ', $metodo));
+                
+                if (!isset($totalTiposPago[$metodoLegible])) {
+                    $totalTiposPago[$metodoLegible] = 0;
+                }
+                $totalTiposPago[$metodoLegible] += $pago->monto;
+                $totalPagos += $pago->monto;
+            }
+        }
+
         // Preparar datos de filtros para mostrarlos en el reporte
         $filters = [
             'fecha_desde' => $request->input('fecha_desde') ?? \Carbon\Carbon::now()->subDays(30)->format('Y-m-d'),
@@ -729,8 +775,22 @@ class VentaController extends Controller
             'usuario' => $request->filled('usuario') ? $usuarios->find($request->usuario)->name : null,
             'estado' => $request->filled('estado') ? ($request->estado == '1' ? 'Activa' : 'Cancelada') : null,
             'estado_pago' => $request->filled('estado_pago') ? ucfirst($request->estado_pago) : null,
-        ];        // Generar PDF
-        $pdf = Pdf::loadView('admin.venta.pdf', compact('ventas', 'config', 'filters'));
+            'iva' => $request->input('iva'), // Para incluir filtro IVA
+        ];
+        
+        // Preparar datos de resumen para el PDF
+        $resumen = [
+            'total_tipos_pago' => $totalTiposPago,
+            'total_ventas' => $totalVentas,
+            'total_pagos' => $totalPagos,
+            'diferencia' => $totalVentas - $totalPagos,
+            'total_ganancia_neta' => $totalGananciaNeta,
+            'total_ganancia_neta_con_iva' => $totalGananciaNetaConIva,
+            'cantidad_ventas' => count($ventas)
+        ];
+
+        // Generar PDF
+        $pdf = Pdf::loadView('admin.venta.pdf', compact('ventas', 'config', 'filters', 'resumen'));
         $pdf->setPaper('a4', 'landscape'); // Usar formato apaisado para incluir más datos
 
         return $pdf->stream('reporte_ventas_'.date('Y-m-d').'.pdf');
@@ -845,8 +905,13 @@ class VentaController extends Controller
             $subtotalConDescuento = $subtotalSinDescuento - $montoDescuento;
             $totalVenta += $subtotalConDescuento;
 
-            // Impuestos
-            $impuestoDetalle = $subtotalConDescuento * ($detalle->porcentaje_impuestos ?? 0) / 100;
+            // Impuestos - CORREGIDO: El precio incluye IVA, extraer el IVA del subtotal
+            if ($detalle->porcentaje_impuestos > 0) {
+                $precioBaseSinIva = $subtotalConDescuento / (1 + ($detalle->porcentaje_impuestos / 100));
+                $impuestoDetalle = $precioBaseSinIva * ($detalle->porcentaje_impuestos / 100);
+            } else {
+                $impuestoDetalle = 0;
+            }
             $totalImpuestos += $impuestoDetalle;
 
             // Costo de compra (incluir precio_costo + comisiones)

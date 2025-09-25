@@ -89,8 +89,11 @@ Eres un asistente experto en proyectos Laravel 8. Tu tarea es cargar inmediatame
 - /login, /register - Autenticación
 - API REST en desarrollo (/api/*)
 
-### Estado Actual ⭐ **ACTUALIZADO SEPTIEMBRE 22, 2025**
+### Estado Actual ⭐ **ACTUALIZADO SEPTIEMBRE 24, 2025**
 - Sistema estable en producción
+- **Reportes PDF v1.7.3 MEJORADOS** - Resúmenes financieros detallados
+- **Cálculos de Impuestos CORREGIDOS** - DetalleCotizacion con IVA incluido
+- **Módulo Vehículos ACTUALIZADO** - Campo VIN opcional
 - **Cálculos de Rentabilidad v1.7.3 CORREGIDOS** - IVA incluido en precio de venta
 - **Validaciones Inteligentes v1.7.2 IMPLEMENTADAS** para campos de cantidad
 - **Módulo de Cotizaciones 100% FUNCIONAL** con características avanzadas
@@ -98,6 +101,24 @@ Eres un asistente experto en proyectos Laravel 8. Tu tarea es cargar inmediatame
 - Todas las funcionalidades core implementadas
 - Estructura profesional con tools/ organizados
 - Documentación completa actualizada
+- **📊 Mejoras Reportes PDF v1.7.3 (Sep 24, 2025)**:
+  - ✅ Resumen de totales por tipo de pago en PDFs
+  - ✅ Sección de resumen financiero completa
+  - ✅ Cálculo de ganancia neta con consideración de IVA
+  - ✅ Filtro IVA incluido en reportes
+  - ✅ Símbolo de moneda de configuración aplicado
+  - ✅ Optimización con datos pre-calculados del controlador
+- **📐 Corrección Cálculos Impuestos v1.7.3 (Sep 24, 2025)**:
+  - ✅ DetalleCotizacion.php corregido (IVA incluido, no adicional)
+  - ✅ Método calculateSubTotal() sin suma de impuestos
+  - ✅ Método getMontoImpuestosAttribute() con fórmula correcta
+  - ✅ Consistencia con resto del sistema
+- **🚗 Módulo Vehículos Actualizado v1.7.3 (Sep 24, 2025)**:
+  - ✅ Campo VIN modificado a opcional en toda la aplicación
+  - ✅ Migración actualizada con nullable()
+  - ✅ Formularios sin asterisco obligatorio para VIN
+  - ✅ Validaciones JavaScript actualizadas
+  - ✅ Vista de detalle con manejo de VIN vacío
 - **📊 Corrección Cálculos Rentabilidad v1.7.3 (Sep 22, 2025)**:
   - ✅ IVA calculado sobre precio base sin IVA (precio_venta ÷ 1.12)
   - ✅ Precio de venta incluye IVA por defecto
@@ -132,8 +153,66 @@ Eres un asistente experto en proyectos Laravel 8. Tu tarea es cargar inmediatame
 Mantener este contexto vivo para cada sugerencia o generación de código, actualizar o extender la documentación sin duplicar ni romper la estructura existente, proponer mejoras respetando las convenciones del proyecto.
 
 ---
-**Última actualización**: Septiembre 22, 2025
-**Versión del sistema**: v1.7.3 (Cálculos de Rentabilidad corregidos)
-**Estado**: Producción activa con cálculos de IVA corregidos
-**Módulos Recientes**: Cotizaciones (Sep 2025) + Centro de Ayuda (Sep 18, 2025) + **Cálculos Rentabilidad v1.7.3 (Sep 22, 2025)**
+**Última actualización**: Septiembre 24, 2025
+**Versión del sistema**: v1.7.3 (Reportes PDF mejorados, cálculos impuestos corregidos, VIN opcional)
+**Estado**: Producción activa con mejoras PDF y correcciones fiscales
+**Módulos Recientes**: 
+- Cotizaciones (Sep 2025) 
+- Centro de Ayuda (Sep 18, 2025) 
+- Cálculos Rentabilidad v1.7.3 (Sep 22, 2025)
+- **Reportes PDF v1.7.3 (Sep 24, 2025)**
+- **Corrección Impuestos v1.7.3 (Sep 24, 2025)**
+- **Módulo Vehículos Actualizado v1.7.3 (Sep 24, 2025)**
 **Protocolo de Versiones**: Documentado en docs/VERSION_MANAGEMENT_PROTOCOL.md
+
+## 📋 Archivos Críticos Modificados (Sep 24, 2025)
+
+### Reportes PDF v1.7.3 (Nuevos)
+```
+app/Http/Controllers/Admin/VentaController.php - Método exportPdf() con resúmenes financieros
+```
+
+### Corrección Cálculos Impuestos v1.7.3 (Crítico)
+```
+app/Models/DetalleCotizacion.php - Métodos calculateSubTotal() y getMontoImpuestosAttribute()
+```
+
+### Módulo Vehículos v1.7.3 (Actualizado)
+```
+database/migrations/2024_12_03_112938_create_vehiculos_table.php - Campo VIN nullable
+app/Http/Requests/VehiculoFormRequest.php - Validaciones actualizadas
+resources/views/admin/vehiculos/add.blade.php - Formulario sin VIN obligatorio
+resources/views/admin/vehiculos/edit.blade.php - Formulario sin VIN obligatorio
+resources/views/admin/vehiculos/show.blade.php - Vista con manejo VIN vacío
+```
+
+### Cálculos Rentabilidad v1.7.3 (Sep 22, 2025)
+```
+resources/views/admin/articulos/show.blade.php - Cálculo IVA precio incluido
+resources/views/admin/articulos/add.blade.php - Cálculo IVA precio incluido
+resources/views/admin/articulos/edit.blade.php - Cálculo IVA precio incluido
+public/js/admin/articulo-script.js - JavaScript con IVA incluido
+app/Http/Controllers/Admin/ArticuloController.php - Cálculo automático
+```
+
+## 📄 Documentación Completa (docs/)
+
+### Documentos Core
+- `AGENT_INITIALIZATION_GUIDE.md` - Guía de inicialización para agentes IA
+- `CALCULOS_RENTABILIDAD_v1.7.3.md` - Documentación de cálculos de rentabilidad
+- `CENTRO_AYUDA_v1.7.0.md` - Documentación del centro de ayuda
+- `CHANGELOG.md` - Historial completo de cambios
+- `PROJECT_STATUS.md` - Estado actual del proyecto
+- `VERSION_MANAGEMENT_PROTOCOL.md` - Protocolo de gestión de versiones
+- `vscode-snippets.json` - Snippets de VS Code para el proyecto
+
+### Reportes de Cambios
+- `REPORTE_CAMBIOS_2025-09-24.md` - **NUEVO** - Reporte formal de cambios Sep 24, 2025
+
+### Documentación Técnica (docs/core/)
+- `ARCHITECTURE.md` - Arquitectura del sistema
+- `PRD.md` - Documento de requisitos del producto  
+- `API.md` - Documentación de la API
+
+### Documentación Visual (docs/visual/)
+- Diagramas y recursos visuales del proyecto

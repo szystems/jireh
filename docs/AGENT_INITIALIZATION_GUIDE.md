@@ -10,18 +10,18 @@ Esta guía te ayuda a inicializar correctamente cualquier agente de IA para trab
 ### **Copia y pega este prompt al iniciar un nuevo agente:**
 
 ```
-SISTEMA JIREH v1.7.0 - INICIALIZACIÓN COMPLETA
+SISTEMA JIREH v1.7.3 - INICIALIZACIÓN COMPLETA
 
 Soy desarrollador del Sistema Jireh (Laravel 8 + MySQL + Bootstrap 5).
 
 CARGAR CONTEXTO OBLIGATORIO:
 1. ✅ Lee .copilot-context - Estado completo del proyecto  
 2. ✅ Revisa estructura: app/Http/Controllers/Admin/, resources/views/admin/
-3. ✅ Identifica versión actual: v1.7.0 (Centro de Ayuda implementado)
+3. ✅ Identifica versión actual: v1.7.3 (PDF mejorados, impuestos corregidos, VIN opcional)
 4. ✅ Entiende convenciones: PSR-4, snake_case BD, CamelCase clases
 5. ✅ Revisa 7 módulos: Admin, Inventario, Ventas, Personal, Finanzas, Cotizaciones, Centro de Ayuda
 
-PROTOCOLO DE VERSIONES: .copilot-context/VERSION_MANAGEMENT.md
+PROTOCOLO DE VERSIONES: docs/VERSION_MANAGEMENT_PROTOCOL.md
 
 TAREA: [DESCRIBE AQUÍ LO QUE NECESITAS HACER]
 
@@ -34,11 +34,11 @@ Confirma que has cargado el contexto correctamente y procede con la tarea manten
 
 **Después del prompt inicial, el agente debe poder responder:**
 
-1. **¿Cuál es la versión actual?** → v1.7.0
+1. **¿Cuál es la versión actual?** → v1.7.3
 2. **¿Cuántos módulos principales hay?** → 7 módulos
 3. **¿Cuál es el stack tecnológico?** → Laravel 8 + MySQL + Bootstrap 5  
-4. **¿Cuál fue la última funcionalidad agregada?** → Centro de Ayuda (Sep 18, 2025)
-5. **¿Dónde está el protocolo de versiones?** → .copilot-context/VERSION_MANAGEMENT.md
+4. **¿Cuáles fueron las últimas mejoras?** → Reportes PDF mejorados, cálculos de impuestos corregidos, VIN opcional (Sep 24, 2025)
+5. **¿Dónde está el protocolo de versiones?** → docs/VERSION_MANAGEMENT_PROTOCOL.md
 
 **Si el agente puede responder correctamente, el contexto está cargado ✅**
 
@@ -48,7 +48,7 @@ Confirma que has cargado el contexto correctamente y procede con la tarea manten
 
 ### **Para Desarrollo Frontend:**
 ```
-Contexto Jireh v1.7.0 cargado ✓
+Contexto Jireh v1.7.3 cargado ✓
 
 Trabajaré en frontend. Revisar:
 - Layout: resources/views/layouts/admin.blade.php
@@ -60,7 +60,7 @@ Mantener consistencia con diseño existente.
 
 ### **Para Desarrollo Backend:**
 ```
-Contexto Jireh v1.7.0 cargado ✓
+Contexto Jireh v1.7.3 cargado ✓
 
 Trabajaré en backend. Revisar:
 - Controllers: app/Http/Controllers/Admin/
@@ -72,7 +72,7 @@ Seguir patrones de controllers existentes.
 
 ### **Para Actualizar Documentación:**
 ```
-Contexto Jireh v1.7.0 cargado ✓
+Contexto Jireh v1.7.3 cargado ✓
 
 Actualizar documentación para [MÓDULO].
 Revisar Centro de Ayuda existente como referencia.
@@ -85,13 +85,13 @@ Seguir formato y estructura establecida.
 
 ### **1. Agregar Nueva Funcionalidad:**
 ```
-Jireh v1.7.0 ✓ - Implementar [FUNCIONALIDAD]
+Jireh v1.7.3 ✓ - Implementar [FUNCIONALIDAD]
 Seguir arquitectura existente y convenciones del proyecto.
 ```
 
 ### **2. Corregir Bug:**
 ```
-Sistema Jireh v1.7.0 ✓ - Problema: [DESCRIPCIÓN]
+Sistema Jireh v1.7.3 ✓ - Problema: [DESCRIPCIÓN]
 Analizar con contexto completo del proyecto.
 ```
 
@@ -103,7 +103,7 @@ Aplicar protocolo VERSION_MANAGEMENT.md para nueva versión.
 
 ### **4. Mejorar Módulo Existente:**
 ```
-Contexto Jireh v1.7.0 ✓ - Mejorar módulo [NOMBRE]
+Contexto Jireh v1.7.3 ✓ - Mejorar módulo [NOMBRE]
 Revisar implementación actual antes de modificar.
 ```
 
@@ -156,7 +156,7 @@ Revisar implementación actual antes de modificar.
 ## 💡 Tips Adicionales
 
 ### **Para Continuidad:**
-- "Continúa con contexto Jireh v1.7.0 previamente cargado"
+- "Continúa con contexto Jireh v1.7.3 previamente cargado"
 
 ### **Para Cambio de Enfoque:**
 - "Mantén contexto Jireh - Ahora trabajar en [NUEVO ÁREA]"
@@ -169,6 +169,6 @@ Revisar implementación actual antes de modificar.
 **🎯 Resultado:** Con estos prompts, cualquier agente cargará el contexto completo del Sistema Jireh en menos de 2 minutos y trabajará eficientemente manteniendo todas las convenciones y patrones establecidos.
 
 ---
-**Última actualización:** 18 de septiembre, 2025  
-**Versión del sistema:** v1.7.0  
+**Última actualización:** 24 de septiembre, 2025  
+**Versión del sistema:** v1.7.3  
 **Creado para:** Desarrolladores y agentes del Sistema Jireh

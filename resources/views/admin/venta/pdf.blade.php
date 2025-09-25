@@ -126,6 +126,9 @@
             @if(isset($filters['estado_pago']) && $filters['estado_pago'])
                 <li>Estado de pago: {{ $filters['estado_pago'] }}</li>
             @endif
+            @if(isset($filters['iva']) && $filters['iva'] && $filters['iva'] != '')
+                <li>IVA: {{ $filters['iva'] == 'con_iva' ? 'Con IVA' : ($filters['iva'] == 'sin_iva' ? 'Sin IVA' : 'Todas') }}</li>
+            @endif
         </ul>
     </div>
 
@@ -138,6 +141,62 @@
                 <td width="25%"><strong>Ventas Pagadas:</strong> {{ $ventas->where('estado_pago', 'pagado')->count() }}</td>
                 <td width="25%"><strong>Ventas Pendientes:</strong> {{ $ventas->where('estado_pago', 'pendiente')->count() }}</td>
             </tr>
+        </table>
+    </div>
+
+    <!-- Resumen de Tipos de Pago -->
+    <div class="summary" style="margin-top: 15px;">
+        <h3>Resumen Financiero</h3>
+        
+        @if(!empty($resumen['total_tipos_pago']))
+        <div style="margin-bottom: 10px;">
+            <h4 style="margin-bottom: 8px; font-size: 14px;">Totales por Tipo de Pago:</h4>
+            <table style="width: 100%; font-size: 12px; border: none;">
+                @php $contador = 0; @endphp
+                @foreach($resumen['total_tipos_pago'] as $metodo => $total)
+                    @if($contador % 2 == 0)
+                        <tr>
+                    @endif
+                    <td width="20%" style="padding: 3px; border: none;"><strong>{{ $metodo }}:</strong></td>
+                    <td width="30%" style="padding: 3px; border: none;">{{ $config->currency_simbol }}{{ number_format($total, 2) }}</td>
+                    @php $contador++; @endphp
+                    @if($contador % 2 == 0 || $loop->last)
+                        @if($loop->last && $contador % 2 != 0)
+                            <td width="20%" style="border: none;"></td>
+                            <td width="30%" style="border: none;"></td>
+                        @endif
+                        </tr>
+                    @endif
+                @endforeach
+            </table>
+        </div>
+        @else
+        <div style="margin-bottom: 10px;">
+            <p style="font-size: 12px; color: #666;">No hay tipos de pago registrados para mostrar.</p>
+        </div>
+        @endif
+        
+        <table style="font-size: 12px;">
+            <tr>
+                <td width="25%"><strong>Total Ventas:</strong> {{ $config->currency_simbol }}{{ number_format($resumen['total_ventas'], 2) }}</td>
+                <td width="25%"><strong>Total Pagos:</strong> {{ $config->currency_simbol }}{{ number_format($resumen['total_pagos'], 2) }}</td>
+                <td width="25%"><strong>Diferencia:</strong> 
+                    <span style="color: {{ $resumen['diferencia'] >= 0 ? 'green' : 'red' }};">
+                        {{ $config->currency_simbol }}{{ number_format($resumen['diferencia'], 2) }}
+                    </span>
+                </td>
+                <td width="25%">
+                    @if(Auth::user()->role_as != 1)
+                        <strong>Ganancia Neta:</strong> {{ $config->currency_simbol }}{{ number_format($resumen['total_ganancia_neta'], 2) }}
+                    @endif
+                </td>
+            </tr>
+            @if(isset($filters['iva']) && $filters['iva'] != '' && Auth::user()->role_as != 1)
+            <tr>
+                <td width="25%"><strong>Ganancia (IVA considerado):</strong></td>
+                <td colspan="3">{{ $config->currency_simbol }}{{ number_format($resumen['total_ganancia_neta_con_iva'], 2) }}</td>
+            </tr>
+            @endif
         </table>
     </div>
 
@@ -156,25 +215,9 @@
             </tr>
         </thead>
         <tbody>
-            @php
-                $totalVentas = 0;
-                $totalGanancias = 0;
-            @endphp
-
             @foreach($ventas as $venta)
                 @php
-                    $ventaTotal = $venta->detalleVentas->sum('sub_total');
-                    $totalVentas += $venta->estado ? $ventaTotal : 0;
-
-                    // Calcular ganancia si el usuario tiene permiso
-                    $ventaGanancia = 0;
-                    if (Auth::user()->role_as != 1 && $venta->estado) {
-                        $costosVenta = $venta->detalleVentas->sum(function($detalle) {
-                            return $detalle->precio_costo * $detalle->cantidad;
-                        });
-                        $ventaGanancia = $ventaTotal - $costosVenta;
-                        $totalGanancias += $ventaGanancia;
-                    }
+                    $ventaTotal = $venta->total; // Usar el total directo de la venta
                 @endphp
                 <tr>
                     <td>{{ $venta->id }}</td>
@@ -203,7 +246,7 @@
                         @endif
                     </td>
                     <td class="text-right">
-                        {{ $config->currency_simbol }}.{{ number_format($ventaTotal, 2) }}
+                        {{ $config->currency_simbol }}{{ number_format($ventaTotal, 2) }}
                     </td>
                 </tr>
             @endforeach
@@ -211,13 +254,19 @@
         <tfoot>
             <tr class="total-row">
                 <td colspan="8" class="text-right"><strong>TOTAL VENTAS:</strong></td>
-                <td class="text-right">{{ $config->currency_simbol }}.{{ number_format($totalVentas, 2) }}</td>
+                <td class="text-right">{{ $config->currency_simbol }}{{ number_format($resumen['total_ventas'], 2) }}</td>
             </tr>
             @if(Auth::user()->role_as != 1)
                 <tr class="total-row">
                     <td colspan="8" class="text-right"><strong>TOTAL GANANCIAS:</strong></td>
-                    <td class="text-right">{{ $config->currency_simbol }}.{{ number_format($totalGanancias, 2) }}</td>
+                    <td class="text-right">{{ $config->currency_simbol }}{{ number_format($resumen['total_ganancia_neta'], 2) }}</td>
                 </tr>
+                @if(isset($filters['iva']) && $filters['iva'] != '')
+                <tr class="total-row">
+                    <td colspan="8" class="text-right"><strong>GANANCIAS (IVA Considerado):</strong></td>
+                    <td class="text-right">{{ $config->currency_simbol }}{{ number_format($resumen['total_ganancia_neta_con_iva'], 2) }}</td>
+                </tr>
+                @endif
             @endif
         </tfoot>
     </table>

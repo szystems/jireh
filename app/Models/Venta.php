@@ -67,6 +67,33 @@ class Venta extends Model
     }
 
     /**
+     * Verifica si la venta tiene impuestos aplicados
+     */
+    public function getTieneImpuestosAttribute()
+    {
+        return $this->detalleVentas->where('porcentaje_impuestos', '>', 0)->count() > 0;
+    }
+
+    /**
+     * Verifica si todos los detalles de la venta están sin impuestos
+     */
+    public function getSinImpuestosAttribute()
+    {
+        $totalDetalles = $this->detalleVentas->count();
+        return $totalDetalles > 0 && $this->detalleVentas->where('porcentaje_impuestos', 0)->count() === $totalDetalles;
+    }
+
+    /**
+     * Determina el estado predominante de impuestos (para edición)
+     */
+    public function getEstadoPredominanteImpuestosAttribute()
+    {
+        $totalDetalles = $this->detalleVentas->count();
+        $detallesConImpuestos = $this->detalleVentas->where('porcentaje_impuestos', '>', 0)->count();
+        return $detallesConImpuestos > ($totalDetalles / 2);
+    }
+
+    /**
      * Alias de usuario() para compatibilidad.
      * Esta relación usa el mismo campo que usuario().
      */

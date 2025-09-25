@@ -54,7 +54,7 @@
                                                 @endforeach
                                             </select>
                                         </div>
-                                        <div class="col-md-2">
+                                        <div class="col-md-1">
                                             <label for="tipo_venta" class="form-label">Tipo de Venta</label>
                                             <br>
                                             <select name="tipo_venta" class="form-control select2">
@@ -89,6 +89,14 @@
                                                 <option value=""{{ request('estado_pago') === null ? ' selected' : '' }}>Todos</option>
                                                 <option value="pagado"{{ request('estado_pago') === 'pagado' ? ' selected' : '' }}>Pagado</option>
                                                 <option value="pendiente"{{ request('estado_pago') === 'pendiente' ? ' selected' : '' }}>Pendiente</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-1">
+                                            <label for="filtro_iva" class="form-label">Cálculo</label>
+                                            <br>
+                                            <select name="filtro_iva" class="form-control select2">
+                                                <option value=""{{ request('filtro_iva') === null ? ' selected' : '' }}>Normal</option>
+                                                <option value="sin_iva"{{ request('filtro_iva') === 'sin_iva' ? ' selected' : '' }}>Sin IVA</option>
                                             </select>
                                         </div>
                                     </div>

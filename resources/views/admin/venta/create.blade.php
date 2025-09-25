@@ -62,6 +62,20 @@
                                             <option value="CDS" {{ old('tipo_venta') == 'CDS' ? 'selected' : '' }}>CDS</option>
                                         </select>
                                     </div>
+                                    <!-- ⭐ NUEVO: Toggle para aplicar impuestos -->
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">&nbsp;</label>
+                                        <div class="form-check form-switch" style="margin-top: 8px;">
+                                            <input class="form-check-input" type="checkbox" id="aplicar_impuestos" name="aplicar_impuestos" value="1" checked onchange="toggleImpuestosCreate(this.checked)">
+                                            <label class="form-check-label" for="aplicar_impuestos">
+                                                <i class="bi bi-receipt-cutoff text-success"></i> 
+                                                <strong>Aplicar impuestos ({{ number_format($config->impuesto, 2) }}%)</strong>
+                                            </label>
+                                        </div>
+                                        <small class="form-text text-muted">
+                                            <i class="bi bi-info-circle"></i> Activo por defecto. Desactivar para ventas sin impuestos.
+                                        </small>
+                                    </div>
                                     <div class="col-md-6 mb-3">
                                         <input type="hidden" id="estado_pago" name="estado_pago" value="pendiente">
                                     </div>
@@ -674,5 +688,60 @@
                 }, 500);
             @endif
         });
+
+        // ⭐ NUEVA FUNCIÓN: Toggle de impuestos para crear venta
+        function toggleImpuestosCreate(aplicar) {
+            const estadoTexto = aplicar ? 'CON IMPUESTOS' : 'SIN IMPUESTOS';
+            const colorIcono = aplicar ? 'text-success' : 'text-secondary';
+            
+            // Actualizar el icono del toggle
+            const icono = document.querySelector('label[for="aplicar_impuestos"] i');
+            if (icono) {
+                icono.className = `bi bi-receipt-cutoff ${colorIcono}`;
+            }
+            
+            // Mostrar mensaje temporal
+            console.log(`🔄 VENTA CREADA ${estadoTexto}`);
+            
+            // Si hay detalles en la tabla, mostrar advertencia de que se aplicará al guardar
+            const detallesTabla = document.getElementById('detalles-body');
+            if (detallesTabla && detalles_venta.length > 0) {
+                const mensaje = aplicar ? 
+                    '✅ Los impuestos se aplicarán al guardar la venta' : 
+                    '⚠️ Los impuestos se removerán al guardar la venta';
+                
+                // Crear o actualizar mensaje temporal
+                mostrarMensajeTemporal(mensaje, aplicar ? 'success' : 'warning');
+            }
+        }
+
+        // Función para mostrar mensaje temporal
+        function mostrarMensajeTemporal(mensaje, tipo = 'info') {
+            // Remover mensaje anterior si existe
+            const mensajeAnterior = document.getElementById('mensaje-temporal-impuestos');
+            if (mensajeAnterior) {
+                mensajeAnterior.remove();
+            }
+            
+            // Crear nuevo mensaje
+            const alertDiv = document.createElement('div');
+            alertDiv.id = 'mensaje-temporal-impuestos';
+            alertDiv.className = `alert alert-${tipo} alert-dismissible fade show mt-2`;
+            alertDiv.innerHTML = `
+                ${mensaje}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            // Insertar después del toggle
+            const toggleDiv = document.querySelector('input[name="aplicar_impuestos"]').closest('.col-md-6');
+            toggleDiv.parentNode.insertBefore(alertDiv, toggleDiv.nextSibling);
+            
+            // Auto-remover después de 3 segundos
+            setTimeout(() => {
+                if (document.getElementById('mensaje-temporal-impuestos')) {
+                    alertDiv.remove();
+                }
+            }, 3000);
+        }
     </script>
 @endsection

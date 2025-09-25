@@ -51,7 +51,9 @@ class VentaEditFormRequest extends FormRequest
             'nuevos_detalles.*.cantidad' => 'sometimes|numeric|min:0.01',
             'nuevos_detalles.*.descuento_id' => 'nullable|exists:descuentos,id',
             'nuevos_detalles.*.usuario_id' => 'sometimes|exists:users,id',
-            'nuevos_detalles.*.sub_total' => 'sometimes|numeric|min:0'
+            'nuevos_detalles.*.sub_total' => 'sometimes|numeric|min:0',
+            // ⭐ NUEVO: Validación para el toggle de impuestos
+            'aplicar_impuestos' => 'nullable|boolean',
         ];
     }
 

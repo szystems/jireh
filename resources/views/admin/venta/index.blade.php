@@ -256,6 +256,7 @@
                                                     <tr>
                                                         <th>Acciones</th>
                                                         <th>Fecha</th>
+                                                        <th style="width: 90px;">Estado</th>
                                                         <th>Número de Factura</th>
                                                         <th>Cliente / Vehículo</th>
                                                         <th class="text-center">Tipo de Venta</th>
@@ -279,15 +280,72 @@
                                                                 <a href="{{ url('show-venta/'.$venta->id)  }}" class="text-primary">
                                                                     {{ \Carbon\Carbon::parse($venta->fecha)->format('d/m/Y') }}
                                                                 </a>
-                                                                @unless($venta->estado)
-                                                                    <span class="badge bg-danger">Cancelada</span>
-                                                                @endunless
-                                                                <!-- Agregar badge para estado de pago -->
-                                                                @if($venta->estado)
-                                                                    <span class="badge {{ $venta->estado_pago == 'pagado' ? 'bg-success' : 'bg-warning' }}">
-                                                                        {{ ucfirst($venta->estado_pago) }}
-                                                                    </span>
-                                                                @endif
+                                                            </td>
+                                                            <td style="width: 90px;">
+                                                                <div class="d-flex flex-column align-items-start">
+                                                                    @unless($venta->estado)
+                                                                        <span class="badge bg-danger mb-1">Cancelada</span>
+                                                                    @endunless
+                                                                    <!-- Badge para estado de pago -->
+                                                                    @if($venta->estado)
+                                                                        <span class="badge {{ $venta->estado_pago == 'pagado' ? 'bg-success' : 'bg-warning' }} mb-1">
+                                                                            {{ ucfirst($venta->estado_pago) }}
+                                                                        </span>
+                                                                    @endif
+                                                                    
+                                                                    <!-- Badge para tipo de pago -->
+                                                                    @php
+                                                                        $pagosVenta = $venta->pagos;
+                                                                        $cantidadPagos = $pagosVenta->count();
+                                                                        
+                                                                        if ($cantidadPagos == 0) {
+                                                                            $tipoPagoBadge = 'Sin pagos';
+                                                                            $badgeClass = 'bg-secondary';
+                                                                            $badgeIcon = 'bi-x-circle';
+                                                                        } elseif ($cantidadPagos == 1) {
+                                                                            $metodoPago = $pagosVenta->first()->metodo_pago;
+                                                                            $tipoPagoBadge = \App\Models\Pago::$metodosPago[$metodoPago] ?? ucfirst(str_replace('_', ' ', $metodoPago));
+                                                                            $badgeClass = 'bg-info';
+                                                                            $badgeIcon = 'bi-credit-card';
+                                                                        } else {
+                                                                            // Verificar si todos los pagos son del mismo tipo
+                                                                            $metodosPagos = $pagosVenta->pluck('metodo_pago')->unique();
+                                                                            if ($metodosPagos->count() == 1) {
+                                                                                $metodoPago = $metodosPagos->first();
+                                                                                $tipoPagoBadge = \App\Models\Pago::$metodosPago[$metodoPago] ?? ucfirst(str_replace('_', ' ', $metodoPago));
+                                                                                $badgeClass = 'bg-info';
+                                                                                $badgeIcon = 'bi-credit-card';
+                                                                            } else {
+                                                                                $tipoPagoBadge = 'Pago mixto';
+                                                                                $badgeClass = 'bg-warning';
+                                                                                $badgeIcon = 'bi-shuffle';
+                                                                            }
+                                                                        }
+                                                                    @endphp
+                                                                    
+                                                                    @if($venta->estado && $cantidadPagos > 0)
+                                                                        <span class="badge {{ $badgeClass }}" title="Método(s) de pago utilizado(s)">
+                                                                            <i class="{{ $badgeIcon }}"></i> {{ $tipoPagoBadge }}
+                                                                        </span>
+                                                                    @elseif($venta->estado && $cantidadPagos == 0)
+                                                                        <span class="badge {{ $badgeClass }}" title="No hay pagos registrados">
+                                                                            <i class="{{ $badgeIcon }}"></i> {{ $tipoPagoBadge }}
+                                                                        </span>
+                                                                    @endif
+                                                                    
+                                                                    <!-- Badge para estado de impuestos -->
+                                                                    @if($venta->estado)
+                                                                        @if($venta->tiene_impuestos)
+                                                                            <span class="badge bg-primary" title="Esta venta incluye impuestos (IVA)">
+                                                                                <i class="bi bi-percent"></i> Con IVA
+                                                                            </span>
+                                                                        @elseif($venta->sin_impuestos)
+                                                                            <span class="badge bg-light text-dark" title="Esta venta no incluye impuestos">
+                                                                                <i class="bi bi-dash-circle"></i> Sin IVA
+                                                                            </span>
+                                                                        @endif
+                                                                    @endif
+                                                                </div>
                                                             </td>
                                                             <td><a href="{{ url('show-venta/'.$venta->id)  }}">{{ $venta->numero_factura }}</a></td>
                                                             <td>
@@ -355,8 +413,14 @@
                                                                                         // Calcular subtotal con descuento
                                                                                         $subtotalConDescuento = $subtotalSinDescuento - $montoDescuento;
 
-                                                                                        // Calcular impuesto
-                                                                                        $impuestoDetalle = $subtotalConDescuento * ($detalle->porcentaje_impuestos ?? 0) / 100;
+                                                                                        // CORREGIDO: El precio incluye IVA, extraer el IVA del subtotal
+                                                                                        $porcentajeImpuestos = $detalle->porcentaje_impuestos ?? 0;
+                                                                                        if ($porcentajeImpuestos > 0) {
+                                                                                            $precioBaseSinIva = $subtotalConDescuento / (1 + ($porcentajeImpuestos / 100));
+                                                                                            $impuestoDetalle = $precioBaseSinIva * ($porcentajeImpuestos / 100);
+                                                                                        } else {
+                                                                                            $impuestoDetalle = 0;
+                                                                                        }
                                                                                         $totalImpuestosVenta += $impuestoDetalle;
                                                                                     @endphp
                                                                                 </td>
@@ -419,10 +483,10 @@
                                                 <tfoot>
                                                     <!-- SECCIÓN DE VENTAS -->
                                                     <tr class="table-primary">
-                                                        <td colspan="7" class="text-center"><strong>RESUMEN DE VENTAS</strong></td>
+                                                        <td colspan="8" class="text-center"><strong>RESUMEN DE VENTAS</strong></td>
                                                     </tr>
                                                     <tr>
-                                                        <td colspan="6" class="text-end"><strong>Subtotal sin descuento:</strong></td>
+                                                        <td colspan="7" class="text-end"><strong>Subtotal sin descuento:</strong></td>
                                                         <td class="text-end">
                                                             <strong>
                                                                 {{ $config->currency_simbol }}.{{
@@ -441,7 +505,7 @@
                                                         </td>
                                                     </tr>
                                                     <tr>
-                                                        <td colspan="6" class="text-end"><strong>Total descuentos:</strong></td>
+                                                        <td colspan="7" class="text-end"><strong>Total descuentos:</strong></td>
                                                         <td class="text-end text-danger">
                                                             <strong>
                                                                 {{ $config->currency_simbol }}.{{
@@ -471,7 +535,7 @@
                                                         </td>
                                                     </tr>
                                                     <tr>
-                                                        <td colspan="6" class="text-end"><strong>Total de ventas (después de descuentos):</strong></td>
+                                                        <td colspan="7" class="text-end"><strong>Total de ventas (después de descuentos):</strong></td>
                                                         <td class="text-end text-primary">
                                                             <strong>
                                                                 {{ $config->currency_simbol }}.{{
@@ -501,13 +565,106 @@
                                                         </td>
                                                     </tr>
 
+                                                    <!-- SECCIÓN DE TIPOS DE PAGO -->
+                                                    <tr class="table-info">
+                                                        <td colspan="8" class="text-center"><strong>RESUMEN DE TIPOS DE PAGO</strong></td>
+                                                    </tr>
+                                                    @php
+                                                        // Calcular totales por método de pago
+                                                        $tiposPago = [];
+                                                        $totalPagosGeneral = 0;
+                                                        
+                                                        foreach($ventas->where('estado', true) as $venta) {
+                                                            if ($venta->pagos->count() > 0) {
+                                                                foreach($venta->pagos as $pago) {
+                                                                    $metodo = $pago->metodo_pago;
+                                                                    $nombreMetodo = \App\Models\Pago::$metodosPago[$metodo] ?? ucfirst(str_replace('_', ' ', $metodo));
+                                                                    
+                                                                    if (!isset($tiposPago[$nombreMetodo])) {
+                                                                        $tiposPago[$nombreMetodo] = 0;
+                                                                    }
+                                                                    $tiposPago[$nombreMetodo] += $pago->monto;
+                                                                    $totalPagosGeneral += $pago->monto;
+                                                                }
+                                                            }
+                                                        }
+                                                        
+                                                        // Ordenar por monto descendente
+                                                        arsort($tiposPago);
+                                                    @endphp
+                                                    
+                                                    @if(count($tiposPago) > 0)
+                                                        @foreach($tiposPago as $metodo => $total)
+                                                        <tr>
+                                                            <td colspan="7" class="text-end"><strong>{{ $metodo }}:</strong></td>
+                                                            <td class="text-end">
+                                                                <strong class="text-info">
+                                                                    {{ $config->currency_simbol }}.{{ number_format($total, 2, '.', ',') }}
+                                                                </strong>
+                                                            </td>
+                                                        </tr>
+                                                        @endforeach
+                                                    @else
+                                                        <tr>
+                                                            <td colspan="8" class="text-center text-muted">
+                                                                <em>No hay pagos registrados en las ventas del período</em>
+                                                            </td>
+                                                        </tr>
+                                                    @endif
+                                                    
+                                                    <tr class="table-info">
+                                                        <td colspan="7" class="text-end"><strong>TOTAL PAGOS REGISTRADOS:</strong></td>
+                                                        <td class="text-end">
+                                                            <strong class="text-primary">
+                                                                {{ $config->currency_simbol }}.{{ number_format($totalPagosGeneral, 2, '.', ',') }}
+                                                            </strong>
+                                                        </td>
+                                                    </tr>
+                                                    
+                                                    @php
+                                                        // Calcular total de ventas después de descuentos para comparar
+                                                        $totalVentasComparacion = $ventas->where('estado', true)->sum(function($venta) {
+                                                            $totalVenta = 0;
+                                                            foreach($venta->detalleVentas as $detalle) {
+                                                                $precioUnitario = $detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad);
+                                                                $subtotalSinDescuento = $precioUnitario * $detalle->cantidad;
+                                                                
+                                                                $montoDescuento = 0;
+                                                                if($detalle->descuento_id) {
+                                                                    $descuento = \App\Models\Descuento::find($detalle->descuento_id);
+                                                                    if($descuento) {
+                                                                        $porcentajeDescuento = $descuento->porcentaje_descuento;
+                                                                        $montoDescuento = $subtotalSinDescuento * ($porcentajeDescuento / 100);
+                                                                    }
+                                                                }
+                                                                $totalVenta += ($subtotalSinDescuento - $montoDescuento);
+                                                            }
+                                                            return $totalVenta;
+                                                        });
+                                                        
+                                                        $diferenciaPagos = $totalVentasComparacion - $totalPagosGeneral;
+                                                    @endphp
+                                                    
+                                                    @if(abs($diferenciaPagos) > 0.01)
+                                                    <tr class="table-warning">
+                                                        <td colspan="7" class="text-end">
+                                                            <strong>{{ $diferenciaPagos > 0 ? 'PENDIENTE POR COBRAR:' : 'SOBREPAGO:' }}</strong>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <strong class="{{ $diferenciaPagos > 0 ? 'text-warning' : 'text-danger' }}">
+                                                                {{ $config->currency_simbol }}.{{ number_format(abs($diferenciaPagos), 2, '.', ',') }}
+                                                            </strong>
+                                                        </td>
+                                                    </tr>
+                                                    @endif
+
                                                     <!-- SECCIÓN DE COSTOS Y GASTOS -->
                                                     @if (Auth::user()->role_as != 1)
                                                     <tr class="table-danger">
-                                                        <td colspan="7" class="text-center"><strong>COSTOS Y GASTOS</strong></td>
+                                                        <td colspan="8" class="text-center"><strong>COSTOS Y GASTOS</strong></td>
                                                     </tr>
                                                     <tr>
-                                                        <td colspan="6" class="text-end"><strong>Total costo de compra:</strong></td>
+                                                        <td colspan="7" class="text-end"><strong>Total costo de compra:</strong></td>
                                                         <td class="text-end text-danger">
                                                             <strong>
                                                                 {{ $config->currency_simbol }}.{{
@@ -525,7 +682,7 @@
                                                         </td>
                                                     </tr>
                                                     <tr>
-                                                        <td colspan="6" class="text-end"><strong>Total de impuestos:</strong></td>
+                                                        <td colspan="7" class="text-end"><strong>Total de impuestos:</strong></td>
                                                         <td class="text-end text-info">
                                                             <strong>
                                                                 {{ $config->currency_simbol }}.{{
@@ -550,8 +707,14 @@
                                                                                 // Calcular subtotal con descuento
                                                                                 $subtotalConDescuento = $subtotalSinDescuento - $montoDescuento;
 
-                                                                                // Calcular impuesto
-                                                                                $impuestoDetalle = $subtotalConDescuento * ($detalle->porcentaje_impuestos ?? 0) / 100;
+                                                                                // CORREGIDO: El precio incluye IVA, extraer el IVA del subtotal
+                                                                                $porcentajeImpuestos = $detalle->porcentaje_impuestos ?? 0;
+                                                                                if ($porcentajeImpuestos > 0) {
+                                                                                    $precioBaseSinIva = $subtotalConDescuento / (1 + ($porcentajeImpuestos / 100));
+                                                                                    $impuestoDetalle = $precioBaseSinIva * ($porcentajeImpuestos / 100);
+                                                                                } else {
+                                                                                    $impuestoDetalle = 0;
+                                                                                }
                                                                                 $impuestoTotal += $impuestoDetalle;
                                                                             }
                                                                             return $impuestoTotal;
@@ -561,15 +724,27 @@
                                                             </strong>
                                                         </td>
                                                     </tr>
+                                                    @if(request('filtro_iva'))
+                                                    <tr>
+                                                        <td colspan="8" class="text-center">
+                                                            <small class="text-info">
+                                                                <i class="bi bi-info-circle"></i>
+                                                                @if(request('filtro_iva') === 'sin_iva')
+                                                                    Cálculo "Sin IVA": Se muestran todas las ventas pero la ganancia NO descuenta impuestos (Ganancia Bruta)
+                                                                @endif
+                                                            </small>
+                                                        </td>
+                                                    </tr>
+                                                    @endif
                                                     @endif
 
                                                     <!-- SECCIÓN DE RESULTADOS -->
                                                     @if (Auth::user()->role_as != 1)
                                                     <tr class="table-success">
-                                                        <td colspan="7" class="text-center"><strong>RESULTADOS</strong></td>
+                                                        <td colspan="8" class="text-center"><strong>RESULTADOS</strong></td>
                                                     </tr>
                                                     <tr class="table-success">
-                                                        <td colspan="6" class="text-end"><strong>GANANCIA NETA:</strong></td>
+                                                        <td colspan="7" class="text-end"><strong>GANANCIA NETA:</strong></td>
                                                         <td class="text-end">
                                                     @endif
                                                             @php
@@ -607,7 +782,15 @@
                                                                             }
                                                                         }
                                                                         $subtotalConDescuento = $subtotalSinDescuento - $montoDescuento;
-                                                                        $impuestoDetalle = $subtotalConDescuento * ($detalle->porcentaje_impuestos ?? 0) / 100;
+                                                                        
+                                                                        // CORREGIDO: El precio incluye IVA, extraer el IVA del subtotal
+                                                                        $porcentajeImpuestos = $detalle->porcentaje_impuestos ?? 0;
+                                                                        if ($porcentajeImpuestos > 0) {
+                                                                            $precioBaseSinIva = $subtotalConDescuento / (1 + ($porcentajeImpuestos / 100));
+                                                                            $impuestoDetalle = $precioBaseSinIva * ($porcentajeImpuestos / 100);
+                                                                        } else {
+                                                                            $impuestoDetalle = 0;
+                                                                        }
                                                                         $impuestoTotal += $impuestoDetalle;
                                                                     }
                                                                     return $impuestoTotal;
@@ -622,13 +805,28 @@
                                                                     return $costosTotal;
                                                                 });
 
-                                                                // Calcular ganancia neta
-                                                                $gananciaNeta = $totalVentas - $totalImpuestos - $totalCostos;
+                                                                // Calcular ganancia neta según filtro de cálculo
+                                                                $filtroIva = request('filtro_iva');
+                                                                
+                                                                if ($filtroIva === 'sin_iva') {
+                                                                    // "Sin IVA": No descontar impuestos de la ganancia (Ganancia Bruta)
+                                                                    $gananciaNeta = $totalVentas - $totalCostos;
+                                                                    $mensajeGanancia = '(Ganancia Bruta - Sin descontar IVA)';
+                                                                } else {
+                                                                    // "Normal": Descontar impuestos (Ganancia Neta)
+                                                                    $gananciaNeta = $totalVentas - $totalImpuestos - $totalCostos;
+                                                                    $mensajeGanancia = '';
+                                                                }
                                                             @endphp
                                                     @if (Auth::user()->role_as != 1)
-                                                            <strong class="text-success">
-                                                                {{ $config->currency_simbol }}.{{ number_format($gananciaNeta, 2, '.', ',') }}
-                                                            </strong>
+                                                            <div class="d-flex flex-column align-items-end">
+                                                                <strong class="text-success">
+                                                                    {{ $config->currency_simbol }}.{{ number_format($gananciaNeta, 2, '.', ',') }}
+                                                                </strong>
+                                                                @if($mensajeGanancia)
+                                                                    <small class="text-muted">{{ $mensajeGanancia }}</small>
+                                                                @endif
+                                                            </div>
                                                         </td>
                                                     </tr>
                                                     @endif

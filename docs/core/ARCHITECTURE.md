@@ -2,19 +2,19 @@
 
 ## Visión General
 
-Jireh es un sistema de gestión empresarial construido en Laravel 8 que implementa una arquitectura MVC modular con separación clara de responsabilidades. **Actualizado con corrección de cálculos de rentabilidad v1.7.3 (Septiembre 22, 2025)**.
+Jireh es un sistema de gestión empresarial construido en Laravel 8 que implementa una arquitectura MVC modular con separación clara de responsabilidades. **Actualizado con mejoras PDF, correcciones de impuestos y VIN opcional v1.7.3 (Septiembre 24, 2025)**.
 
 ## 🎯 Estado Actual de Módulos - v1.7.3
 
 ### ✅ **Módulos Completados al 100%**
 - **❓ Centro de Ayuda** ⭐ **v1.7.0 (Sep 18, 2025)** - Sistema completo de documentación con 4 secciones
 - **📋 Cotizaciones** ⭐ **COMPLETO (Sep 2025)** - Sistema avanzado con estados inteligentes
-- **💰 Ventas** - Sistema de facturación completo
+- **💰 Ventas** ⭐ **MEJORADO v1.7.3** - Reportes PDF con resúmenes financieros detallados
 - **📦 Inventario** ⭐ **CORREGIDO v1.7.3** - Cálculos de rentabilidad con IVA incluido
 - **👥 Personal** - Trabajadores, tipos, comisiones, sueldos
 - **💳 Finanzas** - Pagos, lotes de pago, control financiero
 - **👥 Trabajadores** - Gestión completa implementada
-- **🚗 Vehículos** - Funcional
+- **🚗 Vehículos** ⭐ **ACTUALIZADO v1.7.3** - Campo VIN opcional para mayor flexibilidad
 - **⚙️ Configuración** - Sistema centralizado
 
 ### 🚧 **En Desarrollo**

@@ -3,10 +3,13 @@
 ## 1. Resumen Ejecutivo
 
 ### 1.1 Visión del Producto
-**Jireh** es un sistema integral de gestión empresarial diseñado para pequeñas y medianas empresas que requieren control sobre inventario, ventas, cotizaciones, personal y finanzas en una solución unificada. **Actualizado con Validaciones Inteligentes v1.7.2 (Enero 16, 2025)**.
+**Jireh** es un sistema integral de gestión empresarial diseñado para pequeñas y medianas empresas que requieren control sobre inventario, ventas, cotizaciones, personal y finanzas en una solución unificada. **Actualizado con reportes PDF mejorados, correcciones de impuestos y VIN opcional v1.7.3 (Septiembre 24, 2025)**.
 
 ### 1.2 Objetivos del Producto
 - Centralizar la gestión empresarial en una plataforma única
+- **🆕 Reportes PDF con resúmenes financieros detallados v1.7.3**
+- **🆕 Cálculos de impuestos consistentes en todo el sistema v1.7.3**
+- **🆕 Campo VIN opcional para mayor flexibilidad v1.7.3**
 - **🆕 Validaciones inteligentes por tipo de unidad con separador decimal nativo**
 - **🆕 Gestionar cotizaciones con estados inteligentes y regeneración automática**
 - **🆕 Proporcionar documentación completa con Centro de Ayuda integrado**
@@ -284,9 +287,12 @@
 
 ## 8. Roadmap y Futuras Mejoras
 
-### 8.1 Versión Actual (v1.7.0) ⭐ **ACTUALIZADA**
+### 8.1 Versión Actual (v1.7.3) ⭐ **ACTUALIZADA**
 - ✅ Todas las funcionalidades core implementadas
 - ✅ Sistema estable en producción
+- ✅ **Reportes PDF con resúmenes financieros detallados (Sep 24, 2025)**
+- ✅ **Cálculos de impuestos corregidos en DetalleCotizacion (Sep 24, 2025)**
+- ✅ **Campo VIN opcional en módulo vehículos (Sep 24, 2025)**
 - ✅ **Módulo de Cotizaciones completo con estados inteligentes**
 - ✅ **Centro de Ayuda v1.7.0 con documentación completa**
 - ✅ Reportes básicos funcionando
@@ -323,8 +329,8 @@
 
 ---
 
-**Documento Versión**: 1.7.0 ⭐ **ACTUALIZADO**  
-**Última Actualización**: Septiembre 18, 2025  
+**Documento Versión**: 1.7.3 ⭐ **ACTUALIZADO**  
+**Última Actualización**: Septiembre 24, 2025  
 **Responsable**: Equipo de Desarrollo Jireh  
-**Estado**: Activo en Producción con Centro de Ayuda  
-**Módulos Recientes**: Cotizaciones (Sep 2025) + Centro de Ayuda (Sep 18, 2025)
+**Estado**: Activo en Producción con mejoras PDF, correcciones fiscales y VIN opcional  
+**Módulos Recientes**: Cotizaciones (Sep 2025) + Centro de Ayuda (Sep 18, 2025) + **Mejoras v1.7.3 (Sep 24, 2025)**

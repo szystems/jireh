@@ -61,7 +61,6 @@ class VehiculoFormRequest extends FormRequest
             'color.required' => 'El color es obligatorio.',
             'placa.required' => 'La placa es obligatoria.',
             'placa.unique' => 'La placa ya está en uso.',
-            'vin.required' => 'El VIN es obligatorio.',
             'vin.unique' => 'El VIN ya está en uso.',
         ];
     }

@@ -21,7 +21,7 @@ class CreateVehiculosTable extends Migration
             $table->year('ano'); // Año del vehículo
             $table->string('color'); // Color del vehículo
             $table->string('placa')->unique(); // Placa del vehículo
-            $table->string('vin')->unique(); // Número de identificación del vehículo (VIN)
+            $table->string('vin')->unique()->nullable(); // Número de identificación del vehículo (VIN) - OPCIONAL
             $table->string('fotografia')->nullable();
             $table->boolean('estado')->default(true);
             $table->timestamps();

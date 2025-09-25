@@ -136,15 +136,15 @@
                                                     </div>
 
                                                     <div class="col-md-6">
-                                                        <label for="vin" class="form-label">VIN/Chasis <span class="text-danger">*</span></label>
+                                                        <label for="vin" class="form-label">VIN/Chasis <small class="text-muted">(Opcional)</small></label>
                                                         <div class="input-group">
                                                             <span class="input-group-text"><i class="bi bi-upc-scan"></i></span>
-                                                            <input name="vin" id="vin" type="text" class="form-control" placeholder="Número VIN o chasis..." value="{{ old('vin') }}" required data-bs-toggle="tooltip" data-bs-placement="top" title="Número de Identificación del Vehículo - Normalmente 17 caracteres" />
+                                                            <input name="vin" id="vin" type="text" class="form-control" placeholder="Número VIN o chasis (opcional)..." value="{{ old('vin') }}" data-bs-toggle="tooltip" data-bs-placement="top" title="Número de Identificación del Vehículo - Normalmente 17 caracteres (Opcional)" />
                                                         </div>
                                                         @if ($errors->has('vin'))
                                                             <div class="text-danger mt-1">{{ $errors->first('vin') }}</div>
                                                         @endif
-                                                        <div class="form-text">El VIN es un código único de 17 caracteres</div>
+                                                        <div class="form-text">El VIN es un código único de 17 caracteres (opcional)</div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -340,7 +340,7 @@
             // Validación del formulario
             $('#vehiculoForm').submit(function(e) {
                 let valid = true;
-                const required = ['marca', 'modelo', 'ano', 'color', 'placa', 'vin', 'fcliente'];
+                const required = ['marca', 'modelo', 'ano', 'color', 'placa', 'fcliente']; // Removido 'vin'
 
                 required.forEach(function(field) {
                     if (!$('#' + field).val()) {
