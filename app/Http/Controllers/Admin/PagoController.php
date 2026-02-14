@@ -177,7 +177,8 @@ class PagoController extends Controller
         // Calcular el total de la venta
         $totalVenta = 0;
         foreach ($venta->detalleVentas as $detalle) {
-            $precioUnitario = $detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad);
+            // Usar precio histórico guardado en detalle, con fallback
+            $precioUnitario = $detalle->precio_venta > 0 ? $detalle->precio_venta : ($detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad));
             $subtotalSinDescuento = $precioUnitario * $detalle->cantidad;
 
             $montoDescuento = 0;

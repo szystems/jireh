@@ -287,6 +287,20 @@
                                 </thead>
                                 <tbody>
                                     <tr class="table-info">
+                                        <td><strong>1.7.4</strong></td>
+                                        <td>Ene 5, 2026</td>
+                                        <td>
+                                            <strong>Corrección crítica precios históricos:</strong>
+                                            <ul class="mb-0">
+                                                <li>Ventas muestran precio al momento de la venta</li>
+                                                <li>29 correcciones en 12 archivos</li>
+                                                <li>PDFs y reportes con precios correctos</li>
+                                                <li>Fallback automático para datos legacy</li>
+                                                <li>Auditoría completa del código</li>
+                                            </ul>
+                                        </td>
+                                    </tr>
+                                    <tr>
                                         <td><strong>1.7.3</strong></td>
                                         <td>Sep 22, 2025</td>
                                         <td>
@@ -365,9 +379,9 @@
                         <div class="col-md-8">
                             <h5><i class="bi bi-info-circle text-primary"></i> Información del Sistema</h5>
                             <p class="mb-0">
-                                <strong>Sistema Jireh v1.7.3</strong> - Desarrollado por <a href="https://szystems.com" target="_blank" class="text-decoration-none">Szystems</a><br>
+                                <strong>Sistema Jireh v1.7.4</strong> - Desarrollado por <a href="https://szystems.com" target="_blank" class="text-decoration-none">Szystems</a><br>
                                 Plataforma: Laravel 8 | Base de datos: MySQL | Interfaz: Bootstrap 5<br>
-                                <small class="text-muted">Última actualización: Septiembre 22, 2025 - Corrección cálculos de rentabilidad</small>
+                                <small class="text-muted">Última actualización: Enero 5, 2026 - Corrección precios históricos en ventas</small>
                             </p>
                         </div>
                         <div class="col-md-4 text-center">

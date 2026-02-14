@@ -25,6 +25,16 @@
                                     </ul>
                                 </div>
                             @endif
+                            @if (session('error'))
+                                <div class="alert alert-danger text-white" role="alert">
+                                    <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ session('error') }}
+                                </div>
+                            @endif
+                            @if (session('status'))
+                                <div class="alert alert-success text-white" role="alert">
+                                    <i class="bi bi-check-circle-fill me-2"></i>{{ session('status') }}
+                                </div>
+                            @endif
                             <form action="{{ url('insert-venta') }}" method="POST">
                                 @csrf
                                 <div class="row gx-3">

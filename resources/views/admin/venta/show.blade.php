@@ -188,8 +188,8 @@
                                         @endphp
                                         @foreach($venta->detalleVentas as $detalle)
                                             @php
-                                                // Calcular precio unitario (usar el precio del artículo si existe, o calcularlo desde el subtotal)
-                                                $precioUnitario = $detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad);
+                                                // Calcular precio unitario (usar el precio guardado en el detalle, o fallback al artículo/subtotal)
+                                                $precioUnitario = $detalle->precio_venta > 0 ? $detalle->precio_venta : ($detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad));
                                                 $precioCosto = $detalle->precio_costo;
                                                 
                                                 // Calcular costo real incluyendo comisiones para servicios

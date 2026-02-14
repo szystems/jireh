@@ -212,13 +212,6 @@ class ArticuloController extends Controller
             'tipo' => 'required|in:articulo,servicio',
             'estado' => 'boolean',
             'cantidades.*' => 'required|numeric|min:0',
-            'articulos_servicio' => [
-                function ($attribute, $value, $fail) use ($request) {
-                    if ($request->tipo == 'servicio' && empty($value)) {
-                        $fail('Debe agregar al menos un artículo al servicio.');
-                    }
-                },
-            ],
         ]);
 
         // Validación adicional para mecánico si es un servicio
@@ -654,7 +647,7 @@ class ArticuloController extends Controller
         // Cálculos de rentabilidad considerando comisiones si es servicio
         $costosComisiones = $articulo->tipo == 'servicio' ?
                             ($articulo->costo_mecanico ?? 0) + ($articulo->comision_carwash ?? 0) : 0;
-        
+
         // Calcular costo total real
         $costoTotal = $articulo->precio_compra + $valorImpuesto + $costosComisiones;
         $gananciaReal = $articulo->precio_venta - $costoTotal;

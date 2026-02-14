@@ -1,14 +1,14 @@
-# 📊 Estado Actual del Proyecto - Sistema Jireh v1.7.3
+# 📊 Estado Actual del Proyecto - Sistema Jireh v1.7.4
 
-**Fecha de reporte**: 24 de septiembre, 2025  
-**Versión del sistema**: v1.7.3  
-**Estado**: Producción activa con reportes PDF mejorados, cálculos de impuestos corregidos y VIN opcional
+**Fecha de reporte**: 5 de enero, 2026  
+**Versión del sistema**: v1.7.4  
+**Estado**: Producción activa con corrección crítica de precios históricos en ventas
 
 ---
 
 ## 🎯 Resumen Ejecutivo
 
-El **Sistema Jireh** se encuentra en la versión **v1.7.3** con todas las funcionalidades core implementadas y operativas. Esta versión introduce **reportes PDF mejorados con resúmenes financieros detallados**, **correcciones críticas en cálculos de impuestos** (DetalleCotizacion) y **campo VIN opcional en el módulo de vehículos**, además de las validaciones inteligentes no intrusivas para campos de cantidad implementadas en v1.7.2.
+El **Sistema Jireh** se encuentra en la versión **v1.7.4** con todas las funcionalidades core implementadas y operativas. Esta versión corrige un **error crítico donde las ventas mostraban el precio actual del artículo en lugar del precio al momento de la venta**. Se realizaron 29 correcciones quirúrgicas en 12 archivos para garantizar que los reportes de ventas, PDFs y cálculos financieros reflejen correctamente los precios históricos.
 
 ---
 

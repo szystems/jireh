@@ -224,7 +224,8 @@
                     $totales['totalImpuestos'] = 0;
                     // Calcular los impuestos totales correctamente sumando los impuestos individuales
                     foreach($detallesVenta as $detalle) {
-                        $precioUnitario = $detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad);
+                        // Usar precio histórico guardado en detalle
+                        $precioUnitario = $detalle->precio_venta > 0 ? $detalle->precio_venta : ($detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad));
                         $subtotalSinDescuento = $precioUnitario * $detalle->cantidad;
 
                         // Aplicar descuento si existe
@@ -267,8 +268,8 @@
                 <tbody>
                     @foreach($detallesVenta as $detalle)
                         @php
-                            // Calcular precio unitario y subtotales
-                            $precioUnitario = $detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad);
+                            // Calcular precio unitario usando precio histórico guardado
+                            $precioUnitario = $detalle->precio_venta > 0 ? $detalle->precio_venta : ($detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad));
                             $subtotalSinDescuento = $precioUnitario * $detalle->cantidad;
 
                             // Calcular monto de descuento

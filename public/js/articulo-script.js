@@ -415,41 +415,12 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // 4. VALIDACIÓN DEL FORMULARIO
+    // Nota: Los componentes del servicio son opcionales (servicios puros sin artículos están permitidos)
     const formulario = document.querySelector('#form-articulo');
     if (formulario) {
         formulario.addEventListener('submit', function(e) {
-            if (tipoSelect && tipoSelect.value === 'servicio') {
-                // Verificar si existen los elementos antes de consultar
-                if (!servicioArticulosExistentesBody && !servicioArticulosNuevosBody) {
-                    console.error('No se encontraron los elementos para verificar artículos');
-                    return;
-                }
-
-                const tieneArticulos =
-                    (servicioArticulosExistentesBody ? servicioArticulosExistentesBody.querySelectorAll('tr').length > 0 : false) ||
-                    (servicioArticulosNuevosBody ? servicioArticulosNuevosBody.querySelectorAll('tr').length > 0 : false);
-
-                if (!tieneArticulos) {
-                    e.preventDefault();
-                    alert('Debe agregar al menos un artículo al servicio');
-
-                    // Mostrar sección de componentes
-                    if (seccionComponentes) {
-                        seccionComponentes.style.display = 'block';
-                        seccionComponentes.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
-
-                    // Mostrar pestaña de componentes si existe
-                    if (componentesTab && typeof bootstrap !== 'undefined') {
-                        try {
-                            const componentesTabTrigger = new bootstrap.Tab(componentesTab);
-                            componentesTabTrigger.show();
-                        } catch (error) {
-                            console.error('Error al mostrar la pestaña de componentes:', error);
-                        }
-                    }
-                }
-            }
+            // Validaciones generales del formulario pueden ir aquí
+            // Los componentes de servicio son opcionales - no se bloquea el submit
         });
     }
 
@@ -533,13 +504,13 @@ function calcularMargen() {
 
     // El precio de venta INCLUYE IVA - calcular precio base sin IVA
     const precioBaseSinIva = precioVenta / (1 + (impuestoPorcentaje / 100));
-    
+
     // Calcular el IVA sobre el precio base
     const impuestoValor = precioBaseSinIva * (impuestoPorcentaje / 100);
 
     // Calcular el costo total real (compra + IVA calculado)
     const costoTotal = precioCompra + impuestoValor + costosComisiones;
-    
+
     // Calcular ganancia real
     const gananciaReal = precioVenta - costoTotal;
     const margenReal = costoTotal > 0 ? (gananciaReal / costoTotal) * 100 : 0;

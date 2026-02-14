@@ -6,7 +6,13 @@
 
         <!-- Main header starts -->
         <div class="main-header d-flex align-items-center justify-content-between position-relative">
-            <div class="d-flex align-items-center justify-content-center">
+            <div class="d-flex align-items-cen                                                        <tr>
+                                                            <th>Componente</th>
+                                                            <th>Cantidad</th>
+                                                            <th>Stock Disponible</th>
+                                                            <th>Precio Unitario</th>
+                                                            <th>Costo Total</th>
+                                                        </tr>stify-content-center">
                 <div class="page-icon">
                     <i class="bi bi-boxes"></i>
                 </div>
@@ -311,13 +317,14 @@
                                     <div class="card-body">
                                         @if($articulo->articulos->count() > 0)
                                             <div class="table-responsive">
-                                                <table class="table table-sm table-hover">
-                                                    <thead>
+                                                <table class="table table-sm table-hover" style="min-width: 800px;">
+                                                    <thead class="table-light">
                                                         <tr>
-                                                            <th>Artículo</th>
-                                                            <th>Cantidad</th>
-                                                            <th>Precio</th>
-                                                            <th>Costo Total</th>
+                                                            <th style="min-width: 200px;">Artículo</th>
+                                                            <th style="min-width: 100px;">Cantidad</th>
+                                                            <th style="min-width: 120px;">Stock Disponible</th>
+                                                            <th style="min-width: 100px;">Precio</th>
+                                                            <th style="min-width: 100px;">Costo Total</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -341,6 +348,24 @@
                                                                     <span>{{ number_format($cantidad, $componente->unidad->tipo == 'unidad' ? 0 : 2) }} {{ $componente->unidad->abreviatura }}</span>
                                                                 </td>
                                                                 <td>
+                                                                    @php 
+                                                                        $stockClass = '';
+                                                                        if ($componente->stock < $cantidad) {
+                                                                            $stockClass = 'text-danger fw-bold';
+                                                                        } elseif ($componente->stock <= ($cantidad * 1.5)) {
+                                                                            $stockClass = 'text-warning fw-bold';
+                                                                        } else {
+                                                                            $stockClass = 'text-success';
+                                                                        }
+                                                                    @endphp
+                                                                    <span class="{{ $stockClass }}">
+                                                                        {{ number_format($componente->stock, $componente->unidad->tipo == 'unidad' ? 0 : 2) }} {{ $componente->unidad->abreviatura }}
+                                                                    </span>
+                                                                    @if ($componente->stock < $cantidad)
+                                                                        <i class="bi bi-exclamation-triangle text-danger ms-1" title="Stock insuficiente"></i>
+                                                                    @endif
+                                                                </td>
+                                                                <td>
                                                                     {{ $config->currency_simbol }} {{ number_format($componente->precio_compra, 2) }}
                                                                 </td>
                                                                 <td>
@@ -351,7 +376,7 @@
                                                     </tbody>
                                                     <tfoot>
                                                         <tr class="table-light">
-                                                            <td class="fw-bold text-end" colspan="3">Costo Total de Componentes:</td>
+                                                            <td class="fw-bold text-end" colspan="4">Costo Total de Componentes:</td>
                                                             <td class="fw-bold">{{ $config->currency_simbol }} {{ number_format($costoTotal, 2) }}</td>
                                                         </tr>
                                                     </tfoot>

@@ -36,7 +36,8 @@
                         $descuento = 0;
                         foreach ($cotizacion->detalleCotizaciones as $detalle) {
                             if ($detalle->descuento_id && $detalle->descuento) {
-                                $precioUnitario = $detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad);
+                                // Usar precio histórico guardado en detalle
+                                $precioUnitario = $detalle->precio_venta > 0 ? $detalle->precio_venta : ($detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad));
                                 $subtotal = $precioUnitario * $detalle->cantidad;
                                 $descuento += $subtotal * ($detalle->descuento->porcentaje_descuento / 100);
                             }

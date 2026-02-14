@@ -316,7 +316,7 @@
                                                 <div class="accordion-body">
                                                     <!-- Contenido de componentes del servicio -->
                                                     <div class="alert alert-info">
-                                                        <i class="bi bi-info-circle"></i> Agregue los artículos que componen este servicio.
+                                                        <i class="bi bi-info-circle"></i> <strong>Opcional:</strong> Agregue los artículos que componen este servicio. Si el servicio no requiere artículos (ej. mano de obra), puede dejarlo vacío.
                                                     </div>
 
                                                     <!-- Artículos Existentes -->
@@ -474,5 +474,5 @@
     </div>
     <!-- Content wrapper scroll end -->
 
-<script src="{{ asset('js/articulo-script.js') }}"></script>
+<script src="{{ asset('js/articulo-script.js') }}?v={{ time() }}"></script>
 @endsection

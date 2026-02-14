@@ -282,7 +282,7 @@
     <div class="sidebar-footer">
         <div class="d-flex align-items-center justify-content-between">
             <div>
-                <span class="small text-muted"><a class="text-white" href="https://szystems.com" target="_blank" rel="noopener noreferrer"><b>Szystems v1.7.3</b></a></span>
+                <span class="small text-muted"><a class="text-white" href="https://szystems.com" target="_blank" rel="noopener noreferrer"><b>Szystems v1.7.4</b></a></span>
             </div>
             <div>
                 <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"

@@ -6,6 +6,60 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
+## [v1.7.4] - 2026-01-05
+
+### 🐛 Corrección Crítica: Precios Históricos en Ventas
+- **Bug corregido**: Las ventas ahora muestran el precio al momento de la venta, no el precio actual del artículo
+- **Patrón implementado**: `$detalle->precio_venta > 0 ? $detalle->precio_venta : (fallback)`
+- **Compatibilidad legacy**: Fallback automático para registros antiguos sin precio guardado
+
+### 🎯 Archivos Corregidos (29 correcciones en 12 archivos)
+
+#### Vistas de Ventas
+- `resources/views/admin/venta/index.blade.php` - 10 correcciones
+- `resources/views/admin/venta/show.blade.php` - 1 corrección
+- `resources/views/admin/venta/single_pdf.blade.php` - 1 corrección
+- `resources/views/admin/venta/edit.blade.php` - 1 corrección
+
+#### Vistas de Reportes
+- `resources/views/admin/reportearticulo/index.blade.php` - 1 corrección
+- `resources/views/admin/reportearticulo/pdf.blade.php` - 2 correcciones
+
+#### Vistas de Cotizaciones
+- `resources/views/admin/cotizacion/index.blade.php` - 1 corrección
+
+#### Controladores
+- `app/Http/Controllers/Admin/VentaController.php` - 1 corrección (calcularTotalesVenta)
+- `app/Http/Controllers/Admin/ReporteArticuloController.php` - 8 correcciones
+- `app/Http/Controllers/Admin/PagoController.php` - 1 corrección
+
+#### Validaciones
+- `app/Http/Requests/PagoFormRequest.php` - 1 corrección
+
+#### Scripts de Testing
+- `tools/TESTING_DESARROLLO/validar_calculos_costos.php` - 1 corrección
+
+### 🔍 Problema Resuelto
+```
+ANTES (incorrecto):
+$precioUnitario = $detalle->articulo->precio_venta;
+// Mostraba precio ACTUAL del artículo
+
+DESPUÉS (correcto):
+$precioUnitario = $detalle->precio_venta > 0 
+    ? $detalle->precio_venta 
+    : ($detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad));
+// Muestra precio HISTÓRICO guardado al momento de la venta
+```
+
+### ✅ Verificaciones Realizadas
+- Auditoría completa del código fuente
+- Verificación de exports (VentasExport.php ya era correcto)
+- Verificación de modelos (Venta.php usa sum('sub_total') correctamente)
+- Verificación de vistas de cotización (ya usaban precio histórico)
+
+---
+
 ## [v1.7.3] - 2025-09-22
 
 ### 🧮 Corrección de Cálculos de Rentabilidad

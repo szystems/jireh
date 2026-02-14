@@ -887,7 +887,8 @@ class VentaController extends Controller
 
         // Calcular totales de los detalles
         foreach ($venta->detalleVentas as $detalle) {
-            $precioUnitario = $detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad);
+            // Usar precio histórico guardado en detalle, con fallback al artículo/subtotal
+            $precioUnitario = $detalle->precio_venta > 0 ? $detalle->precio_venta : ($detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad));
             $subtotalSinDescuento = $precioUnitario * $detalle->cantidad;
             $subtotalSinDescuentoTotal += $subtotalSinDescuento;
 

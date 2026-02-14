@@ -295,7 +295,7 @@
                                 <!-- Componentes de Servicio (solo para servicios) -->
                                 <div class="section mb-4" id="seccion-componentes" style="display: none;">
                                     <h5 class="text-primary mb-3"><i class="bi bi-boxes"></i> Componentes del Servicio</h5>
-                                    
+
                                     <div class="accordion" id="accordionComponentes">
                                         <div class="accordion-item">
                                             <h2 class="accordion-header" id="headingComponentes">
@@ -308,7 +308,7 @@
                                                 <div class="accordion-body">
                                                     <!-- Contenido de componentes del servicio -->
                                                     <div class="alert alert-info">
-                                                        <i class="bi bi-info-circle"></i> Agregue los artículos que componen este servicio. Esto afectará el costo y precio sugerido del servicio.
+                                                        <i class="bi bi-info-circle"></i> <strong>Opcional:</strong> Agregue los artículos que componen este servicio. Si el servicio no requiere artículos (ej. mano de obra), puede dejarlo vacío.
                                                     </div>
 
                                                     <!-- Lista de artículos del servicio -->
@@ -358,8 +358,8 @@
                                                                     <select class="form-select" id="articulo_id">
                                                                         <option value="">Seleccione un artículo</option>
                                                                         @foreach($articulos as $articulo)
-                                                                            <option value="{{ $articulo->id }}" 
-                                                                                    data-precio="{{ $articulo->precio_compra }}" 
+                                                                            <option value="{{ $articulo->id }}"
+                                                                                    data-precio="{{ $articulo->precio_compra }}"
                                                                                     data-unidad="{{ $articulo->unidad->abreviatura }}"
                                                                                     data-unidad-tipo="{{ $articulo->unidad->tipo }}">
                                                                                 {{ $articulo->codigo ? $articulo->codigo . ' - ' : '' }}{{ $articulo->nombre }}
@@ -406,5 +406,5 @@
     </div>
     <!-- Content wrapper scroll end -->
 
-<script src="{{ asset('js/articulo-script.js') }}"></script>
+<script src="{{ asset('js/articulo-script.js') }}?v={{ time() }}"></script>
 @endsection

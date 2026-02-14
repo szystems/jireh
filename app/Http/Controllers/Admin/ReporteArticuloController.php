@@ -101,7 +101,8 @@ class ReporteArticuloController extends Controller
         // Calcular estadísticas
         $totalArticulosVendidos = $detallesVenta->sum('cantidad');
         $totalVentas = $detallesVenta->sum(function ($detalle) {
-            $precioUnitario = $detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad);
+            // Usar precio histórico guardado en detalle
+            $precioUnitario = $detalle->precio_venta > 0 ? $detalle->precio_venta : ($detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad));
             $subtotalSinDescuento = $precioUnitario * $detalle->cantidad;
 
             $montoDescuento = 0;
@@ -113,7 +114,8 @@ class ReporteArticuloController extends Controller
         });
 
         $totalDescuentos = $detallesVenta->sum(function ($detalle) {
-            $precioUnitario = $detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad);
+            // Usar precio histórico guardado en detalle
+            $precioUnitario = $detalle->precio_venta > 0 ? $detalle->precio_venta : ($detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad));
             $subtotalSinDescuento = $precioUnitario * $detalle->cantidad;
 
             $montoDescuento = 0;
@@ -126,7 +128,8 @@ class ReporteArticuloController extends Controller
 
         // Calcular impuestos
         $totalImpuestos = $detallesVenta->sum(function ($detalle) {
-            $precioUnitario = $detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad);
+            // Usar precio histórico guardado en detalle
+            $precioUnitario = $detalle->precio_venta > 0 ? $detalle->precio_venta : ($detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad));
             $subtotalSinDescuento = $precioUnitario * $detalle->cantidad;
 
             // Aplicar descuento si existe
@@ -158,7 +161,8 @@ class ReporteArticuloController extends Controller
                     'articulo' => $items->first()->articulo,
                     'cantidad' => $items->sum('cantidad'),
                     'total' => $items->sum(function ($item) {
-                        $precioUnitario = $item->articulo ? $item->articulo->precio_venta : ($item->sub_total / $item->cantidad);
+                        // Usar precio histórico guardado en detalle
+                        $precioUnitario = $item->precio_venta > 0 ? $item->precio_venta : ($item->articulo ? $item->articulo->precio_venta : ($item->sub_total / $item->cantidad));
                         $subtotal = $precioUnitario * $item->cantidad;
                         $descuento = 0;
                         if ($item->descuento_id && $item->descuento) {
@@ -182,7 +186,8 @@ class ReporteArticuloController extends Controller
                     'categoria' => $categoria,
                     'cantidad' => $items->sum('cantidad'),
                     'total' => $items->sum(function ($item) {
-                        $precioUnitario = $item->articulo ? $item->articulo->precio_venta : ($item->sub_total / $item->cantidad);
+                        // Usar precio histórico guardado en detalle
+                        $precioUnitario = $item->precio_venta > 0 ? $item->precio_venta : ($item->articulo ? $item->articulo->precio_venta : ($item->sub_total / $item->cantidad));
                         $subtotal = $precioUnitario * $item->cantidad;
                         $descuento = 0;
                         if ($item->descuento_id && $item->descuento) {
@@ -304,7 +309,8 @@ class ReporteArticuloController extends Controller
         // Calcular totales para el reporte
         $totalArticulosVendidos = $detallesVenta->sum('cantidad');
         $totalVentas = $detallesVenta->sum(function ($detalle) {
-            $precioUnitario = $detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad);
+            // Usar precio histórico guardado en detalle
+            $precioUnitario = $detalle->precio_venta > 0 ? $detalle->precio_venta : ($detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad));
             $subtotalSinDescuento = $precioUnitario * $detalle->cantidad;
 
             $montoDescuento = 0;
@@ -316,7 +322,8 @@ class ReporteArticuloController extends Controller
         });
 
         $totalDescuentos = $detallesVenta->sum(function ($detalle) {
-            $precioUnitario = $detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad);
+            // Usar precio histórico guardado en detalle
+            $precioUnitario = $detalle->precio_venta > 0 ? $detalle->precio_venta : ($detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad));
             $subtotalSinDescuento = $precioUnitario * $detalle->cantidad;
 
             $montoDescuento = 0;
@@ -333,7 +340,8 @@ class ReporteArticuloController extends Controller
 
         // Agregar un nuevo cálculo específico para los impuestos
         $totalImpuestos = $detallesVenta->sum(function ($detalle) {
-            $precioUnitario = $detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad);
+            // Usar precio histórico guardado en detalle
+            $precioUnitario = $detalle->precio_venta > 0 ? $detalle->precio_venta : ($detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad));
             $subtotalSinDescuento = $precioUnitario * $detalle->cantidad;
 
             // Aplicar descuento si existe

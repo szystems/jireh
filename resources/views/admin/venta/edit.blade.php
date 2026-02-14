@@ -203,8 +203,8 @@
                                                     <tbody>
                                                         @foreach($venta->detalleVentas as $detalle)
                                                             @php
-                                                                // Calcular precio unitario correctamente
-                                                                $precioUnitario = $detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad);
+                                                                // Calcular precio unitario usando precio histórico guardado
+                                                                $precioUnitario = $detalle->precio_venta > 0 ? $detalle->precio_venta : ($detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad));
 
                                                                 // Calcular subtotal sin descuento
                                                                 $subtotalSinDescuento = $precioUnitario * $detalle->cantidad;

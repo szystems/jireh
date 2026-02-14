@@ -68,8 +68,8 @@ try {
             echo "      Cantidad: {$detalle->cantidad}\n";
             echo "      Precio costo: Q" . number_format($detalle->precio_costo, 2) . "\n";
             
-            // Calcular precio unitario
-            $precioUnitario = $detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad);
+            // Calcular precio unitario usando precio histórico
+            $precioUnitario = $detalle->precio_venta > 0 ? $detalle->precio_venta : ($detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad));
             echo "      Precio unitario: Q" . number_format($precioUnitario, 2) . "\n";
 
             // Calcular subtotal sin descuento

@@ -63,7 +63,7 @@
                         $descuento = 0;
                         foreach ($venta->detalleVentas as $detalle) {
                             if ($detalle->descuento_id && $detalle->descuento) {
-                                $precioUnitario = $detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad);
+                                $precioUnitario = $detalle->precio_venta > 0 ? $detalle->precio_venta : ($detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad));
                                 $subtotal = $precioUnitario * $detalle->cantidad;
                                 $descuento += $subtotal * ($detalle->descuento->porcentaje_descuento / 100);
                             }
@@ -386,8 +386,8 @@
                                                                                 </td>
                                                                                 <td>
                                                                                     @php
-                                                                                        // Calcular precio unitario
-                                                                                        $precioUnitario = $detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad);
+                                                                                        // Calcular precio unitario usando precio histórico
+                                                                                        $precioUnitario = $detalle->precio_venta > 0 ? $detalle->precio_venta : ($detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad));
 
                                                                                         // Calcular subtotal sin descuento (precio unitario × cantidad)
                                                                                         $subtotalSinDescuento = $precioUnitario * $detalle->cantidad;
@@ -440,8 +440,8 @@
                                                                             $totalVenta = 0;
 
                                                                             foreach($venta->detalleVentas as $detalle) {
-                                                                                // Calcular precio unitario
-                                                                                $precioUnitario = $detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad);
+                                                                                // Calcular precio unitario usando precio histórico
+                                                                                $precioUnitario = $detalle->precio_venta > 0 ? $detalle->precio_venta : ($detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad));
 
                                                                                 // Calcular subtotal sin descuento
                                                                                 $subtotalSinDescuento = $precioUnitario * $detalle->cantidad;
@@ -494,7 +494,7 @@
                                                                         $ventas->where('estado', true)->sum(function($venta) {
                                                                             $subtotal = 0;
                                                                             foreach($venta->detalleVentas as $detalle) {
-                                                                                $precioUnitario = $detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad);
+                                                                                $precioUnitario = $detalle->precio_venta > 0 ? $detalle->precio_venta : ($detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad));
                                                                                 $subtotal += $precioUnitario * $detalle->cantidad;
                                                                             }
                                                                             return $subtotal;
@@ -513,7 +513,7 @@
                                                                         $ventas->where('estado', true)->sum(function($venta) {
                                                                             $descuentoTotal = 0;
                                                                             foreach($venta->detalleVentas as $detalle) {
-                                                                                $precioUnitario = $detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad);
+                                                                                $precioUnitario = $detalle->precio_venta > 0 ? $detalle->precio_venta : ($detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad));
                                                                                 $subtotalSinDescuento = $precioUnitario * $detalle->cantidad;
 
                                                                                 $montoDescuento = 0;
@@ -543,7 +543,7 @@
                                                                         $ventas->where('estado', true)->sum(function($venta) {
                                                                             $totalVenta = 0;
                                                                             foreach($venta->detalleVentas as $detalle) {
-                                                                                $precioUnitario = $detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad);
+                                                                                $precioUnitario = $detalle->precio_venta > 0 ? $detalle->precio_venta : ($detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad));
                                                                                 $subtotalSinDescuento = $precioUnitario * $detalle->cantidad;
 
                                                                                 $montoDescuento = 0;
@@ -626,7 +626,7 @@
                                                         $totalVentasComparacion = $ventas->where('estado', true)->sum(function($venta) {
                                                             $totalVenta = 0;
                                                             foreach($venta->detalleVentas as $detalle) {
-                                                                $precioUnitario = $detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad);
+                                                                $precioUnitario = $detalle->precio_venta > 0 ? $detalle->precio_venta : ($detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad));
                                                                 $subtotalSinDescuento = $precioUnitario * $detalle->cantidad;
                                                                 
                                                                 $montoDescuento = 0;
@@ -690,8 +690,8 @@
                                                                         $ventas->where('estado', true)->sum(function($venta) {
                                                                             $impuestoTotal = 0;
                                                                             foreach($venta->detalleVentas as $detalle) {
-                                                                                // Calcular precio unitario y subtotal
-                                                                                $precioUnitario = $detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad);
+                                                                                // Calcular precio unitario usando precio histórico
+                                                                                $precioUnitario = $detalle->precio_venta > 0 ? $detalle->precio_venta : ($detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad));
                                                                                 $subtotalSinDescuento = $precioUnitario * $detalle->cantidad;
 
                                                                                 // Calcular descuento
@@ -752,7 +752,7 @@
                                                                 $totalVentas = $ventas->where('estado', true)->sum(function($venta) {
                                                                     $totalVenta = 0;
                                                                     foreach($venta->detalleVentas as $detalle) {
-                                                                        $precioUnitario = $detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad);
+                                                                        $precioUnitario = $detalle->precio_venta > 0 ? $detalle->precio_venta : ($detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad));
                                                                         $subtotalSinDescuento = $precioUnitario * $detalle->cantidad;
                                                                         $montoDescuento = 0;
                                                                         if($detalle->descuento_id) {
@@ -771,7 +771,7 @@
                                                                 $totalImpuestos = $ventas->where('estado', true)->sum(function($venta) {
                                                                     $impuestoTotal = 0;
                                                                     foreach($venta->detalleVentas as $detalle) {
-                                                                        $precioUnitario = $detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad);
+                                                                        $precioUnitario = $detalle->precio_venta > 0 ? $detalle->precio_venta : ($detalle->articulo ? $detalle->articulo->precio_venta : ($detalle->sub_total / $detalle->cantidad));
                                                                         $subtotalSinDescuento = $precioUnitario * $detalle->cantidad;
                                                                         $montoDescuento = 0;
                                                                         if($detalle->descuento_id) {
