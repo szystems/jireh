@@ -1,18 +1,85 @@
-/node_modules
+# =============================================================================
+# Laravel .gitignore - Comprehensive Security & Cleanliness Rules
+# =============================================================================
+
+# --- Laravel Framework ---
+/vendor/
+/node_modules/
 /public/hot
 /public/storage
+/public/build
+/public/mix-manifest.json
 /storage/*.key
-/vendor
+/bootstrap/cache/*.php
+
+# --- Environment Files (CRITICAL - prevents credential leaks) ---
 .env
-.env.backup
+.env.*
+!.env.example
+.env_*
+
+# --- Database Dumps & Backups ---
+*.sql
+*.sql.gz
+*.dump
+*.backup
+*.bak
+*.orig
+composer.json.backup
+composer.lock.backup
+
+# --- Storage (runtime data) ---
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/logs/*
+/storage/pail
+!/storage/framework/.gitignore
+!/storage/framework/cache/.gitignore
+!/storage/framework/sessions/.gitignore
+!/storage/framework/views/.gitignore
+!/storage/logs/.gitignore
+
+# --- IDE & Editor Files ---
+/.idea
+/.vscode
+/.fleet
+/.nova
+/.zed
+*.swp
+*.swo
+*~
+.#*
+\#*#
+
+# --- OS Files ---
+.DS_Store
+Thumbs.db
+desktop.ini
+nul
+NUL
+
+# --- PHP Tools ---
 .phpunit.result.cache
+.phpunit.cache/
+.php-cs-fixer.cache
+.phpactor.json
+/psalm-output/
+/auth.json
+
+# --- Docker (local overrides) ---
 docker-compose.override.yml
+
+# --- Build & Dependencies ---
 Homestead.json
 Homestead.yaml
 npm-debug.log
 yarn-error.log
-/.idea
-/.vscode
 
-# Carpeta temporal para correcciones MySQL - no versionar
+# --- Temporary & Debug Files ---
+*.tmp
+*.temp
+*.log
+
+# --- Jireh Specific ---
 /correcciones-mysql
