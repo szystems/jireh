@@ -40,18 +40,18 @@ class ComisionController extends Controller
     public function gestion(Request $request)
     {
         $config = Config::first();
-        
+
         // Obtener datos necesarios para dropdowns y filtros
         $trabajadores = Trabajador::with('tipoTrabajador')
             ->whereHas('comisiones')
             ->orderBy('nombre')
             ->get();
-            
+
         $vendedores = User::where('role_as', 1)
             ->whereHas('comisiones')
             ->orderBy('name')
             ->get();
-            
+
         return view('admin.comisiones.gestion', compact('trabajadores', 'vendedores', 'config'));
     }
 
@@ -62,7 +62,7 @@ class ComisionController extends Controller
     {
         // Debug temporal - eliminar en producción
         \Illuminate\Support\Facades\Log::info('Filtros recibidos en apiTodasComisiones:', $request->all());
-        
+
         $config = Config::first();
         $query = Comision::with(['commissionable', 'venta', 'detalleVenta', 'articulo', 'pagos.lotePago']);
 
@@ -86,7 +86,7 @@ class ComisionController extends Controller
                     'referencia' => $pagoCompleto->lotePago->referencia
                 ];
             }
-            
+
             return [
                 'id' => $comision->id,
                 'beneficiario_nombre' => $this->obtenerNombreBeneficiario($comision),
@@ -132,7 +132,7 @@ class ComisionController extends Controller
             $this->aplicarFiltrosAvanzados($q, $request);
         }])->whereHas('comisiones', function($q) use ($request) {
             $this->aplicarFiltrosAvanzados($q, $request);
-            
+
             // Filtro específico por tipo de trabajador
             if ($request->filled('tipo_trabajador')) {
                 $q->where('tipo_comision', $request->tipo_trabajador);
@@ -150,7 +150,7 @@ class ComisionController extends Controller
             $comisionesTotales = $trabajador->comisiones->sum('monto');
             $comisionesPagadas = $trabajador->comisiones->where('estado', 'pagado')->sum('monto');
             $comisionesPendientes = $trabajador->comisiones->where('estado', 'pendiente')->sum('monto');
-            
+
             return [
                 'id' => $trabajador->id,
                 'nombre' => $trabajador->nombre . ' ' . $trabajador->apellido,
@@ -202,7 +202,7 @@ class ComisionController extends Controller
             $comisionesTotales = $vendedor->comisiones->sum('monto');
             $comisionesPagadas = $vendedor->comisiones->where('estado', 'pagado')->sum('monto');
             $comisionesPendientes = $vendedor->comisiones->where('estado', 'pendiente')->sum('monto');
-            
+
             return [
                 'id' => $vendedor->id,
                 'nombre' => $vendedor->name,
@@ -307,12 +307,12 @@ class ComisionController extends Controller
         // Filtro por período de meta (solo aplica para comisiones de venta_meta)
         if ($request->filled('periodo_meta')) {
             $query->where('tipo_comision', 'venta_meta');
-            
+
             // Calcular fechas según el período de meta seleccionado
             $fechasBase = $this->calcularPeriodo('mes_actual'); // fechas base
             $fechasMeta = $this->ajustarFechasPorPeriodoMeta($fechasBase, $request->periodo_meta);
             $query->whereBetween('fecha_calculo', [$fechasMeta['inicio'], $fechasMeta['fin']]);
-            
+
             // Verificar que existan metas activas para este período
             $query->whereExists(function($q) use ($request) {
                 $q->select(DB::raw(1))
@@ -337,7 +337,7 @@ class ComisionController extends Controller
     private function calcularFechasPorTipo($tipoPeriodo)
     {
         $ahora = Carbon::now();
-        
+
         switch ($tipoPeriodo) {
             case 'hoy':
                 return [
@@ -400,13 +400,13 @@ class ComisionController extends Controller
         $query = Comision::query();
         $this->aplicarFiltrosAvanzados($query, $request);
 
-        $total = $query->sum('monto');
-        $totalPagadas = $query->where('estado', 'pagado')->sum('monto');
-        $totalPendientes = $query->where('estado', 'pendiente')->sum('monto');
-        
-        $cantidadTotal = $query->count();
-        $cantidadPagadas = $query->where('estado', 'pagado')->count();
-        $cantidadPendientes = $query->where('estado', 'pendiente')->count();
+        $total = (clone $query)->sum('monto');
+        $totalPagadas = (clone $query)->where('estado', 'pagado')->sum('monto');
+        $totalPendientes = (clone $query)->where('estado', 'pendiente')->sum('monto');
+
+        $cantidadTotal = (clone $query)->count();
+        $cantidadPagadas = (clone $query)->where('estado', 'pagado')->count();
+        $cantidadPendientes = (clone $query)->where('estado', 'pendiente')->count();
 
         return [
             'total' => $total,
@@ -481,12 +481,12 @@ class ComisionController extends Controller
         $meta = MetaVenta::where('porcentaje_comision', $comision->porcentaje)
                         ->where('estado', true)
                         ->first();
-        
+
         if ($meta) {
             // Generar color basado en el nombre de la meta para consistencia
             $colores = ['primary', 'success', 'info', 'warning', 'secondary', 'dark'];
             $colorIndex = abs(crc32($meta->nombre)) % count($colores);
-            
+
             return [
                 'nombre' => $meta->nombre,
                 'color' => $colores[$colorIndex],
@@ -510,20 +510,20 @@ class ComisionController extends Controller
     public function dashboard(Request $request)
     {
         $config = Config::first();
-        
+
         // FILTRO DE SEGURIDAD: Los vendedores solo ven sus propios datos
         $baseQuery = Comision::query();
         if (auth()->user()->role_as == 1) {
             $baseQuery->where('commissionable_type', 'App\\Models\\User')
                       ->where('commissionable_id', auth()->user()->id);
         }
-        
+
         // === ESTADÍSTICAS PRINCIPALES ===
-        
+
         // Comisiones pendientes (filtradas por usuario si es vendedor)
         $comisionesPendientes = (clone $baseQuery)->where('estado', 'pendiente')->sum('monto');
         $cantidadPendientes = (clone $baseQuery)->where('estado', 'pendiente')->count();
-        
+
         // Comisiones pagadas este mes (filtradas por usuario si es vendedor)
         $comisionesPagadasMes = (clone $baseQuery)->where('estado', 'pagado')
             ->whereMonth('created_at', now()->month)
@@ -533,7 +533,7 @@ class ComisionController extends Controller
             ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
             ->count();
-        
+
         // Lotes de pago recientes - Solo administradores
         if (auth()->user()->role_as != 1) {
             $lotesPendientes = LotePago::where('created_at', '>=', now()->subDays(30))->count();
@@ -544,13 +544,13 @@ class ComisionController extends Controller
             $montoLotesPendientes = 0;
             $metasProximasVencer = 0;
         }
-            
+
         // === DISTRIBUCIÓN POR TIPOS (filtrada) ===
         $comisionesPorTipo = (clone $baseQuery)->select('tipo_comision', DB::raw('SUM(monto) as total_monto'), DB::raw('COUNT(*) as cantidad'))
             ->where('estado', 'pendiente')
             ->groupBy('tipo_comision')
             ->get();
-            
+
         // === TENDENCIAS MENSUALES (filtrada) ===
         $tendenciaMensual = (clone $baseQuery)->select(
                 DB::raw('YEAR(created_at) as año'),
@@ -563,20 +563,20 @@ class ComisionController extends Controller
             ->orderBy('año', 'desc')
             ->orderBy('mes', 'desc')
             ->get();
-            
+
         // === TOP BENEFICIARIOS ===
         // Top vendedores por comisiones (filtrado)
         $topVendedoresQuery = Comision::where('commissionable_type', 'App\Models\User');
         if (auth()->user()->role_as == 1) {
             $topVendedoresQuery->where('commissionable_id', auth()->user()->id);
         }
-        
+
         $topVendedoresData = $topVendedoresQuery->select('commissionable_id', DB::raw('SUM(monto) as total_comisiones'), DB::raw('COUNT(*) as cantidad'))
             ->groupBy('commissionable_id')
             ->orderBy('total_comisiones', 'desc')
             ->limit(5)
             ->get();
-            
+
         // Cargar los usuarios correspondientes
         $topVendedores = $topVendedoresData->map(function($item) {
             $usuario = User::find($item->commissionable_id);
@@ -587,7 +587,7 @@ class ComisionController extends Controller
                 'commissionable' => $usuario
             ];
         });
-            
+
         // Top trabajadores por comisiones - Solo administradores
         if (auth()->user()->role_as != 1) {
             $topTrabajadoresData = Comision::where('commissionable_type', 'App\Models\Trabajador')
@@ -596,7 +596,7 @@ class ComisionController extends Controller
                 ->orderBy('total_comisiones', 'desc')
                 ->limit(5)
                 ->get();
-                
+
             // Cargar los trabajadores correspondientes
             $topTrabajadores = $topTrabajadoresData->map(function($item) {
                 $trabajador = Trabajador::find($item->commissionable_id);
@@ -610,22 +610,22 @@ class ComisionController extends Controller
         } else {
             $topTrabajadores = collect();
         }
-            
+
         // === ACTIVIDAD RECIENTE ===
         // Últimas comisiones generadas
         $ultimasComisiones = Comision::with(['commissionable', 'venta'])
             ->orderBy('fecha_calculo', 'desc')
             ->limit(10)
             ->get();
-            
+
         // Últimos lotes de pago
         $ultimosLotes = LotePago::orderBy('created_at', 'desc')
             ->limit(5)
             ->get();
-            
+
         // === ALERTAS Y NOTIFICACIONES ===
         $alertas = [];
-        
+
         // Comisiones pendientes por más de 30 días
         $comisionesVencidas = Comision::where('estado', 'pendiente')
             ->where('fecha_calculo', '<', now()->subDays(30))
@@ -637,7 +637,7 @@ class ComisionController extends Controller
                 'accion' => route('comisiones.gestion', ['estado' => 'pendiente'])
             ];
         }
-        
+
         // Lotes de pago realmente pendientes (no completados)
         $lotesPendientesReales = LotePago::where('estado', '!=', 'completado')->count();
         if ($lotesPendientesReales > 0) {
@@ -647,7 +647,7 @@ class ComisionController extends Controller
                 'accion' => route('lotes-pago.index')
             ];
         }
-        
+
         // Compilar datos para la vista
         $datos = [
             'estadisticas' => [
@@ -667,10 +667,10 @@ class ComisionController extends Controller
             'ultimos_lotes' => $ultimosLotes,
             'alertas' => $alertas
         ];
-        
+
         return view('admin.comisiones.dashboard-moderno', compact('datos', 'config'));
     }
-    
+
     /**
      * Calcular comisiones de vendedores por metas
      */
@@ -678,7 +678,7 @@ class ComisionController extends Controller
     {
         // Ajustar fechas según el período de la meta
         $fechasAjustadas = $this->ajustarFechasPorPeriodoMeta($fechas, $periodoMeta);
-        
+
         // Obtener todos los vendedores con sus ventas en el período
         $vendedores = DB::table('ventas as v')
             ->join('users as u', 'v.usuario_id', '=', 'u.id')
@@ -696,15 +696,15 @@ class ComisionController extends Controller
 
         // Calcular comisión basada en metas para cada vendedor
         $resultado = collect();
-        
+
         foreach ($vendedores as $vendedor) {
             $meta = MetaVenta::determinarMetaPorMonto($vendedor->total_vendido, $periodoMeta);
-            
+
             $comisionCalculada = 0;
             $metaNombre = 'Sin meta aplicable';
             $porcentajeAplicado = 0;
             $metaDetalles = null;
-            
+
             if ($meta) {
                 $comisionCalculada = $vendedor->total_vendido * ($meta->porcentaje_comision / 100);
                 $metaNombre = $meta->nombre;
@@ -719,16 +719,16 @@ class ComisionController extends Controller
                     'periodo' => $meta->periodo
                 ];
             }
-            
+
             // Verificar si ya existe comisión registrada en BD
             $comisionExistente = Comision::where('commissionable_type', 'App\Models\User')
                 ->where('commissionable_id', $vendedor->id)
                 ->where('tipo_comision', 'venta_meta')
                 ->whereBetween('fecha_calculo', [$fechasAjustadas['inicio'], $fechasAjustadas['fin']])
                 ->first();
-                
+
             $estado = $comisionExistente ? $comisionExistente->estado : 'calculado';
-            
+
             $resultado->push((object)[
                 'id' => $vendedor->id,
                 'nombre' => $vendedor->nombre,
@@ -743,17 +743,17 @@ class ComisionController extends Controller
                 'comision_id' => $comisionExistente->id ?? null
             ]);
         }
-        
+
         return $resultado;
     }
-    
+
     /**
      * Ajustar fechas según el período de la meta
      */
     private function ajustarFechasPorPeriodoMeta($fechas, $periodoMeta)
     {
         $hoy = Carbon::now();
-        
+
         switch($periodoMeta) {
             case 'mensual':
                 return [
@@ -787,7 +787,7 @@ class ComisionController extends Controller
                 return $fechas;
         }
     }
-    
+
     /**
      * Calcular comisiones de mecánicos
      */
@@ -812,7 +812,7 @@ class ComisionController extends Controller
             ->groupBy('t.id', 't.nombre', 't.apellido')
             ->get();
     }
-    
+
     /**
      * Calcular comisiones de carwash
      */
@@ -837,7 +837,7 @@ class ComisionController extends Controller
             ->groupBy('t.id', 't.nombre', 't.apellido')
             ->get();
     }
-    
+
     /**
      * Calcular período de fechas
      */
@@ -1171,7 +1171,7 @@ class ComisionController extends Controller
             ->orderBy('v.fecha', 'desc')
             ->get();
     }
-    
+
     /**
      * Detalles de comisión de mecánico
      */
@@ -1195,7 +1195,7 @@ class ComisionController extends Controller
             ->orderBy('v.fecha', 'desc')
             ->get();
     }
-    
+
     /**
      * Detalles de comisión de carwash
      */
@@ -1226,16 +1226,16 @@ class ComisionController extends Controller
     {
         $periodoMeta = $request->get('periodo_meta', 'mensual');
         $fechas = $this->ajustarFechasPorPeriodoMeta(
-            $this->calcularPeriodo('mes_actual'), 
+            $this->calcularPeriodo('mes_actual'),
             $periodoMeta
         );
-        
+
         $comisionesCalculadas = $this->calcularComisionesVendedores($fechas, $periodoMeta);
         $procesadas = 0;
         $actualizadas = 0;
-        
+
         DB::beginTransaction();
-        
+
         try {
             foreach ($comisionesCalculadas as $comisionData) {
                 if ($comisionData->comision_calculada > 0) {
@@ -1244,7 +1244,7 @@ class ComisionController extends Controller
                         ->where('tipo_comision', 'venta_meta')
                         ->whereBetween('fecha_calculo', [$fechas['inicio'], $fechas['fin']])
                         ->first();
-                    
+
                     if ($existente) {
                         // Actualizar comisión existente
                         $existente->update([
@@ -1268,16 +1268,16 @@ class ComisionController extends Controller
                     }
                 }
             }
-            
+
             DB::commit();
-            
-            return redirect()->back()->with('success', 
+
+            return redirect()->back()->with('success',
                 "Comisiones procesadas exitosamente: {$procesadas} nuevas, {$actualizadas} actualizadas."
             );
-            
+
         } catch (\Exception $e) {
             DB::rollback();
-            return redirect()->back()->with('error', 
+            return redirect()->back()->with('error',
                 'Error al procesar comisiones: ' . $e->getMessage()
             );
         }
@@ -1292,7 +1292,7 @@ class ComisionController extends Controller
             DB::beginTransaction();
 
             $comision = Comision::findOrFail($request->comision_id);
-            
+
             if ($comision->estado === 'pagado') {
                 return response()->json([
                     'success' => false,
@@ -1328,8 +1328,7 @@ class ComisionController extends Controller
 
             // Actualizar estado de la comisión
             $comision->update([
-                'estado' => 'pagado',
-                'fecha_pago' => now()
+                'estado' => 'pagado'
             ]);
 
             DB::commit();
@@ -1424,8 +1423,7 @@ class ComisionController extends Controller
 
                 // Actualizar estado de la comisión
                 $comision->update([
-                    'estado' => 'pagado',
-                    'fecha_pago' => now()
+                    'estado' => 'pagado'
                 ]);
 
                 $cantidadProcesadas++;
@@ -1509,8 +1507,7 @@ class ComisionController extends Controller
 
                 // Actualizar estado de la comisión
                 $comision->update([
-                    'estado' => 'pagado',
-                    'fecha_pago' => now()
+                    'estado' => 'pagado'
                 ]);
 
                 $cantidadProcesadas++;
@@ -1595,8 +1592,7 @@ class ComisionController extends Controller
 
                 // Actualizar estado de la comisión
                 $comision->update([
-                    'estado' => 'pagado',
-                    'fecha_pago' => now()
+                    'estado' => 'pagado'
                 ]);
 
                 $cantidadProcesadas++;
@@ -1629,7 +1625,7 @@ class ComisionController extends Controller
     {
         try {
             $comision = Comision::with(['commissionable'])->findOrFail($id);
-            
+
             if ($comision->tipo_comision !== 'meta_venta') {
                 return response()->json([
                     'success' => false,
@@ -1641,7 +1637,7 @@ class ComisionController extends Controller
             $resumenMeta = $comision->info_meta_resumen;
             $ventas = $comision->ventas_de_meta;
             $config = Config::first();
-            
+
             $html = view('admin.comisiones.detalles-meta', compact('comision', 'resumenMeta', 'ventas', 'config'))->render();
 
             return response()->json([
@@ -1663,22 +1659,22 @@ class ComisionController extends Controller
     public function generarPDFListado(Request $request)
     {
         $config = Config::first();
-        
+
         // Obtener comisiones con filtros aplicados
         $query = Comision::with(['commissionable', 'venta', 'detalleVenta', 'articulo', 'pagos.lotePago']);
         $this->aplicarFiltrosAvanzados($query, $request);
         $comisiones = $query->orderBy('fecha_calculo', 'desc')->get();
-        
+
         // Calcular estadísticas
         $totalComisiones = $comisiones->sum('monto');
         $cantidadComisiones = $comisiones->count();
         $pendientes = $comisiones->where('estado', 'pendiente')->count();
         $pagadas = $comisiones->where('estado', 'pagado')->count();
         $canceladas = $comisiones->where('estado', 'cancelado')->count();
-        
+
         // Obtener información de filtros aplicados
         $filtrosAplicados = $this->obtenerTextoFiltrosAplicados($request);
-        
+
         // Transformar comisiones para la vista
         $comisionesTransformadas = $comisiones->map(function ($comision) use ($config) {
             return [
@@ -1695,7 +1691,7 @@ class ComisionController extends Controller
                 'fecha_venta' => $comision->venta ? $comision->venta->fecha : null,
             ];
         });
-        
+
         $data = [
             'config' => $config,
             'comisiones' => $comisionesTransformadas,
@@ -1707,13 +1703,13 @@ class ComisionController extends Controller
             'filtrosAplicados' => $filtrosAplicados,
             'fechaGeneracion' => now()->format('d/m/Y H:i:s')
         ];
-        
+
         $pdf = Pdf::loadView('comisiones.pdf.listado-general', $data);
         $pdf->setPaper('A4', 'portrait');
-        
+
         return $pdf->stream('reporte-comisiones-' . now()->format('Y-m-d') . '.pdf');
     }
-    
+
     /**
      * Generar PDF individual de una comisión específica
      */
@@ -1722,13 +1718,13 @@ class ComisionController extends Controller
         $config = Config::first();
         $comision = Comision::with(['commissionable', 'venta', 'detalleVenta', 'articulo', 'pagos.lotePago'])
             ->findOrFail($id);
-        
+
         // Obtener información adicional
         $metaInfo = $this->obtenerInfoMeta($comision, $config);
         $beneficiario = $this->obtenerNombreBeneficiario($comision);
         $tipoReceptor = $this->obtenerTipoReceptor($comision);
         $tipoComisionTexto = $this->obtenerTextoTipoComision($comision->tipo_comision);
-        
+
         // Información del lote de pago si existe
         $loteInfo = null;
         $pagoCompleto = $comision->pagos()->where('estado', 'completado')->first();
@@ -1741,7 +1737,7 @@ class ComisionController extends Controller
                 'referencia' => $pagoCompleto->lotePago->referencia
             ];
         }
-        
+
         $data = [
             'config' => $config,
             'comision' => $comision,
@@ -1752,20 +1748,20 @@ class ComisionController extends Controller
             'loteInfo' => $loteInfo,
             'fechaGeneracion' => now()->format('d/m/Y H:i:s')
         ];
-        
+
         $pdf = Pdf::loadView('comisiones.pdf.individual', $data);
         $pdf->setPaper('A4', 'portrait');
-        
+
         return $pdf->stream('comision-' . $comision->id . '-' . now()->format('Y-m-d') . '.pdf');
     }
-    
+
     /**
      * Obtener texto descriptivo de los filtros aplicados
      */
     private function obtenerTextoFiltrosAplicados(Request $request)
     {
         $filtros = [];
-        
+
         if ($request->filled('fecha_inicio') && $request->filled('fecha_fin')) {
             $filtros[] = 'Fechas: ' . Carbon::parse($request->fecha_inicio)->format('d/m/Y') . ' - ' . Carbon::parse($request->fecha_fin)->format('d/m/Y');
         } elseif ($request->filled('tipo_periodo')) {
@@ -1782,11 +1778,11 @@ class ComisionController extends Controller
                 $filtros[] = 'Período: ' . $periodos[$request->tipo_periodo];
             }
         }
-        
+
         if ($request->filled('estado')) {
             $filtros[] = 'Estado: ' . ucfirst($request->estado);
         }
-        
+
         if ($request->filled('tipo_comision')) {
             $tipos = [
                 'mecanico' => 'Mecánico',
@@ -1796,29 +1792,29 @@ class ComisionController extends Controller
             ];
             $filtros[] = 'Tipo: ' . ($tipos[$request->tipo_comision] ?? ucfirst($request->tipo_comision));
         }
-        
+
         if ($request->filled('trabajador_id')) {
             $trabajador = Trabajador::find($request->trabajador_id);
             if ($trabajador) {
                 $filtros[] = 'Trabajador: ' . $trabajador->nombre;
             }
         }
-        
+
         if ($request->filled('vendedor_id')) {
             $vendedor = User::find($request->vendedor_id);
             if ($vendedor) {
                 $filtros[] = 'Vendedor: ' . $vendedor->name;
             }
         }
-        
+
         if ($request->filled('monto_minimo')) {
             $filtros[] = 'Monto mínimo: $' . number_format($request->monto_minimo, 2);
         }
-        
+
         if ($request->filled('monto_maximo')) {
             $filtros[] = 'Monto máximo: $' . number_format($request->monto_maximo, 2);
         }
-        
+
         return empty($filtros) ? 'Sin filtros aplicados' : implode(' | ', $filtros);
     }
 
@@ -1829,29 +1825,29 @@ class ComisionController extends Controller
     {
         $usuarioId = auth()->user()->id;
         $config = Config::first();
-        
+
         // Solo comisiones del vendedor actual
         $comisiones = Comision::with(['venta.cliente', 'trabajador', 'metaVenta'])
             ->where('commissionable_type', 'App\\Models\\User')
             ->where('commissionable_id', $usuarioId)
             ->orderBy('fecha_calculo', 'desc')
             ->paginate(15);
-        
+
         // Métricas del vendedor
         $totalComisiones = Comision::where('commissionable_type', 'App\\Models\\User')
             ->where('commissionable_id', $usuarioId)
             ->sum('monto');
-            
+
         $comisionesPendientes = Comision::where('commissionable_type', 'App\\Models\\User')
             ->where('commissionable_id', $usuarioId)
             ->where('estado', 'pendiente')
             ->sum('monto');
-            
+
         $comisionesPagadas = Comision::where('commissionable_type', 'App\\Models\\User')
             ->where('commissionable_id', $usuarioId)
             ->where('estado', 'pagada')
             ->sum('monto');
-            
+
         // Comisiones por mes (últimos 6 meses)
         $comisionesPorMes = [];
         for ($i = 5; $i >= 0; $i--) {
@@ -1861,13 +1857,13 @@ class ComisionController extends Controller
                 ->whereYear('fecha_calculo', $fecha->year)
                 ->whereMonth('fecha_calculo', $fecha->month)
                 ->sum('monto');
-                
+
             $comisionesPorMes[] = [
                 'mes' => $fecha->format('M Y'),
                 'monto' => $monto
             ];
         }
-        
+
         return view('admin.comisiones.dashboard-vendedor', compact(
             'config', 'comisiones', 'totalComisiones', 'comisionesPendientes',
             'comisionesPagadas', 'comisionesPorMes'

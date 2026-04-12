@@ -64,7 +64,7 @@ class IngresoController extends Controller
     public function create(Request $request)
     {
         $config = Config::first();
-        $todosArticulos = Articulo::with('unidad')->get();
+        $todosArticulos = Articulo::with('unidad')->where('estado', 1)->get();
         $proveedores = Proveedor::all();
 
         // Verificamos si se proporcionó un ID de artículo
@@ -87,7 +87,7 @@ class IngresoController extends Controller
             if ($articulo && $articulo->unidad) {
                 $cantidad = (float) $detalle['cantidad'];
                 $tipoUnidad = $articulo->unidad->tipo;
-                
+
                 if ($tipoUnidad === 'unidad') {
                     // Para unidades de tipo "unidad", debe ser número entero >= 1
                     if ($cantidad != floor($cantidad) || $cantidad < 1) {
@@ -138,7 +138,7 @@ class IngresoController extends Controller
     public function edit($id)
     {
         $ingreso = Ingreso::with('detalles.articulo')->findOrFail($id);
-        $todosArticulos = Articulo::with('unidad')->get();
+        $todosArticulos = Articulo::with('unidad')->where('estado', 1)->get();
         $proveedores = Proveedor::all();
         $config = Config::first();
         return view('admin.ingreso.edit', compact('ingreso', 'todosArticulos', 'proveedores', 'config'));
@@ -158,7 +158,7 @@ class IngresoController extends Controller
                     if ($articulo && $articulo->unidad) {
                         $cantidad = (float) $detalleData['cantidad'];
                         $tipoUnidad = $articulo->unidad->tipo;
-                        
+
                         if ($tipoUnidad === 'unidad') {
                             // Para unidades de tipo "unidad", debe ser número entero >= 1
                             if ($cantidad != floor($cantidad) || $cantidad < 1) {

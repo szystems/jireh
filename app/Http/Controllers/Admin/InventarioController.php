@@ -315,7 +315,8 @@ class InventarioController extends Controller
                 return response()->json([]);
             }
 
-            $articulos = Articulo::where(function($query) use ($busqueda) {
+            $articulos = Articulo::where('estado', 1)
+                ->where(function($query) use ($busqueda) {
                     $query->where('nombre', 'like', '%' . $busqueda . '%')
                           ->orWhere('codigo', 'like', '%' . $busqueda . '%');
                 })

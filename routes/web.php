@@ -67,7 +67,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', function() {
         return redirect('/dashboard-pro');
     });
-    
+
 
     // Notificaciones
     Route::get('/notificaciones', [NotificacionController::class, 'index'])->name('notificaciones.index');
@@ -88,7 +88,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/faq', [AyudaController::class, 'faq'])->name('faq');
         Route::get('/soporte', [AyudaController::class, 'soporte'])->name('soporte');
     });
-    
+
     // Dashboard Mejorado
     Route::get('/dashboard-pro',[DashboardController::class, 'index'])->name('dashboard.pro');
     Route::get('/api/dashboard/estado-sistema',[DashboardController::class, 'getEstadoSistema'])->name('dashboard.estado');
@@ -171,10 +171,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('articulos', [ArticuloController::class, 'index']);
     Route::get('add-articulo', [ArticuloController::class, 'add']);
     Route::post('insert-articulo', [ArticuloController::class, 'insert']);
-    Route::get('show-articulo/{id}', [ArticuloController::class, 'show']);
-    Route::get('edit-articulo/{id}', [ArticuloController::class, 'edit']);
-    Route::put('update-articulo/{id}', [ArticuloController::class, 'update']);
-    Route::get('delete-articulo/{id}', [ArticuloController::class, 'destroy'])->middleware('superAdmin');
+    Route::get('show-articulo/{id}', [ArticuloController::class, 'show'])->where('id', '[0-9]+');
+    Route::get('edit-articulo/{id}', [ArticuloController::class, 'edit'])->where('id', '[0-9]+');
+    Route::put('update-articulo/{id}', [ArticuloController::class, 'update'])->where('id', '[0-9]+');
+    Route::get('delete-articulo/{id}', [ArticuloController::class, 'destroy'])->where('id', '[0-9]+')->middleware('superAdmin');
     Route::get('export-articulos-pdf', [ArticuloController::class, 'exportPdf']);
     Route::get('export-articulo-pdf/{id}', [ArticuloController::class, 'exportPdfSingle']); // Nueva ruta para exportar artículo individual
 
@@ -299,10 +299,10 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('comisiones')->name('comisiones.')->group(function() {
         Route::get('/', [ComisionController::class, 'index'])->name('index');
         Route::get('/dashboard', [ComisionController::class, 'dashboard'])->name('dashboard');
-        
+
         // Rutas PDF - DEBEN IR ANTES de las rutas con parámetros
         Route::get('/pdf', [ComisionController::class, 'generarPDFListado'])->name('pdf_listado');
-        
+
         Route::get('/show/{id}', [ComisionController::class, 'show'])->name('show');
         Route::get('/{id}/pdf', [ComisionController::class, 'generarPDFIndividual'])->name('pdf_individual');
         Route::get('/{id}/detalles-meta', [ComisionController::class, 'detallesMeta'])->name('detalles_meta');
@@ -312,28 +312,28 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/resumen', [ComisionController::class, 'resumen'])->name('resumen');
         // Nueva ruta para procesar comisiones de vendedores por metas
         Route::post('/procesar-vendedores', [ComisionController::class, 'procesarComisionesVendedores'])->name('procesar_vendedores');
-        
+
         // NUEVAS RUTAS CONSOLIDADAS
         Route::get('/gestion', [ComisionController::class, 'gestion'])->name('gestion');
         Route::get('/gestion/todas', [ComisionController::class, 'apiTodasComisiones'])->name('api_todas');
         Route::get('/gestion/trabajadores', [ComisionController::class, 'apiComisionesTrabajadores'])->name('api_trabajadores');
         Route::get('/gestion/vendedores', [ComisionController::class, 'apiComisionesVendedores'])->name('api_vendedores');
-        
+
         // RUTAS DE PAGO
         Route::post('/pagar-individual', [ComisionController::class, 'pagarIndividual'])->name('pagar_individual');
         Route::post('/pagar-multiples', [ComisionController::class, 'pagarMultiples'])->name('pagar_multiples');
         Route::post('/pagar-trabajador', [ComisionController::class, 'pagarTrabajador'])->name('pagar_trabajador');
         Route::post('/pagar-vendedor', [ComisionController::class, 'pagarVendedor'])->name('pagar_vendedor');
     });
-    
+
     // Rutas para lotes de pago (nuevo sistema híbrido)
     Route::prefix('lotes-pago')->name('lotes-pago.')->group(function() {
         Route::get('/', [LotePagoController::class, 'index'])->name('index');
         Route::get('/create', [LotePagoController::class, 'create'])->name('create');
-        
+
         // Rutas para PDFs (deben ir ANTES de las rutas con parámetros)
         Route::get('/pdf', [LotePagoController::class, 'generarPDFListado'])->name('pdf');
-        
+
         Route::post('/', [LotePagoController::class, 'store'])->name('store');
         Route::get('/{lotePago}', [LotePagoController::class, 'show'])->name('show');
         Route::get('/{lotePago}/edit', [LotePagoController::class, 'edit'])->name('edit');
@@ -341,22 +341,22 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/{lotePago}', [LotePagoController::class, 'update'])->name('update');
         Route::delete('/{lotePago}', [LotePagoController::class, 'destroy'])->name('destroy');
     });
-    
+
     // Rutas para reportes de metas de ventas
     Route::prefix('reportes/metas')->name('reportes.metas.')->group(function() {
         Route::get('/', [ReporteMetasController::class, 'index'])->name('index');
         Route::get('/trabajador/{trabajador}', [ReporteMetasController::class, 'trabajadorDetalle'])->name('trabajador');
-        
+
         // Rutas para PDFs
         Route::get('/pdf', [ReporteMetasController::class, 'generarPDFGeneral'])->name('pdf');
         Route::get('/pdf/trabajador/{trabajador}', [ReporteMetasController::class, 'generarPDFTrabajador'])->name('pdf.trabajador');
     });
-    
+
     // APIs simples para datos de filtros
     Route::get('/api/trabajadores', function() {
         return response()->json(\App\Models\Trabajador::select('id', 'nombre', 'apellido')->get());
     });
-    
+
     Route::get('/api/vendedores', function() {
         return response()->json(\App\Models\User::where('role_as', 1)->select('id', 'name')->get());
     });
@@ -370,7 +370,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/marcar-pendientes', [PagoComisionController::class, 'marcarPendientesPago'])->name('marcar_pendientes');
         Route::post('/anular/{id}', [PagoComisionController::class, 'anularPago'])->name('anular');
         Route::get('/reporte', [PagoComisionController::class, 'generarReporte'])->name('reporte');
-        
+
         // NUEVAS RUTAS PARA PAGOS MASIVOS
         Route::post('/masivo', [PagoComisionController::class, 'procesarPagoMasivo'])->name('pago_masivo');
     });
@@ -383,7 +383,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/alertas-stock', [AuditoriaController::class, 'alertasStock'])->name('alertas_stock');
         Route::get('/inconsistencias-ventas', [AuditoriaController::class, 'inconsistenciasVentas'])->name('inconsistencias_ventas');
         Route::get('/reporte/{fecha}', [AuditoriaController::class, 'verReporte'])->name('ver_reporte');
-        
+
         // Nuevas rutas para funcionalidades avanzadas
         Route::post('/corregir-stock/{articuloId}', [AuditoriaController::class, 'corregirStock'])->name('corregir_stock');
         Route::post('/ajuste-manual', [AuditoriaController::class, 'ajusteManual'])->name('ajuste_manual');
@@ -394,7 +394,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/enviar-notificaciones', [AuditoriaController::class, 'enviarNotificaciones'])->name('enviar_notificaciones');
         Route::get('/exportar-stock/{formato}', [AuditoriaController::class, 'exportarStock'])->name('exportar_stock');
         Route::get('/exportar-reporte/{fecha}', [AuditoriaController::class, 'exportarReporte'])->name('exportar_reporte');
-        
+
         // Rutas para corrección de inconsistencias
         Route::post('/corregir-detalle', [AuditoriaController::class, 'corregirDetalle'])->name('corregir_detalle');
         Route::delete('/eliminar-detalle/{detalleId}', [AuditoriaController::class, 'eliminarDetalle'])->name('eliminar_detalle');
@@ -452,13 +452,13 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('vendedor')->name('vendedor.')->group(function() {
         // Dashboard de comisiones personal
         Route::get('/mis-comisiones', [ComisionController::class, 'dashboardVendedor'])->name('mis_comisiones');
-        
+
         // Mis ventas filtradas automáticamente
         Route::get('/mis-ventas', [VentaController::class, 'misVentas'])->name('mis_ventas');
-        
+
         // Mi rendimiento personal
         Route::get('/mi-rendimiento', [DashboardController::class, 'miRendimiento'])->name('mi_rendimiento');
-        
+
         // Vista de metas (solo lectura para vendedores)
         Route::get('/metas-disponibles', [ReporteMetasController::class, 'metasVendedor'])->name('metas_disponibles');
     });

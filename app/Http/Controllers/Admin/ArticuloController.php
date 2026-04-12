@@ -318,7 +318,7 @@ class ArticuloController extends Controller
         $articulo = Articulo::with('articulos')->find($id);
         $categorias = Categoria::where('estado', 1)->get();
         $unidades = Unidad::where('estado', 1)->get();
-        $todosArticulos = Articulo::where('tipo', 'articulo')->get(); // Obtener todos los artículos que no son servicios
+        $todosArticulos = Articulo::where('tipo', 'articulo')->where('estado', 1)->get(); // Obtener todos los artículos activos que no son servicios
         $config = Config::first();
 
         // Obtener mecánicos disponibles

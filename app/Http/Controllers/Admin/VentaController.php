@@ -75,7 +75,7 @@ class VentaController extends Controller
 
         $ventas = $query->with(['detalleVentas.articulo', 'pagos'])->orderBy('fecha', 'desc')->get();
 
-        $clientes = Cliente::all();
+        $clientes = Cliente::where('estado', 1)->orderBy('nombre')->get();
         $vehiculos = Vehiculo::all();
         $usuarios = User::all();
         $config = Config::first();
@@ -86,8 +86,8 @@ class VentaController extends Controller
     public function create(Request $request)
     {
         $config = Config::first();
-        $todosArticulos = Articulo::with('unidad')->get();
-        $clientes = Cliente::all();
+        $todosArticulos = Articulo::with('unidad')->where('estado', 1)->get();
+        $clientes = Cliente::where('estado', 1)->orderBy('nombre')->get();
         $descuentos = Descuento::where('estado', 1)->get();
 
         // Obtener trabajadores de tipo Car Wash
@@ -128,13 +128,13 @@ class VentaController extends Controller
         try {
             $operacion = $restar ? 'restar' : 'sumar';
             $descripcion = $restar ? 'Venta realizada' : 'Venta cancelada/restaurada';
-            
+
             $resultado = $this->actualizarStockSeguro($articuloId, $cantidad, $operacion, $ventaId, $descripcion);
-            
+
             if (!$resultado['exitoso']) {
                 throw new \Exception("Error al actualizar stock para artículo ID {$articuloId}");
             }
-            
+
         } catch (\Exception $e) {
             Log::error("Error en actualizarStockArticulo", [
                 'articulo_id' => $articuloId,
@@ -290,7 +290,7 @@ class VentaController extends Controller
             'method' => $request->method(),
             'url' => $request->fullUrl()
         ]);
-        
+
         try {
             DB::beginTransaction();            // Log COMPLETO para depuración            Log::info('=== INICIO DEBUG EDICIÓN VENTA ===', []);
             Log::info('Iniciando actualización de venta', ['venta_id' => $id]);
@@ -383,7 +383,7 @@ class VentaController extends Controller
                                     'articulo_anterior' => $articuloIdAnterior,
                                     'articulo_nuevo' => $articuloIdNuevo
                                 ]);
-                                
+
                                 // Restaurar stock del artículo anterior completamente
                                 $this->actualizarStockArticulo($articuloIdAnterior, $cantidadAnterior, false, $venta->id);
                                 Log::info("Stock restaurado para artículo anterior ID: {$articuloIdAnterior}");
@@ -403,7 +403,7 @@ class VentaController extends Controller
                                 ]);
 
                                 $diferenciaCantidad = $cantidadNueva - $cantidadAnterior;
-                                
+
                                 if ($diferenciaCantidad > 0) {
                                     // Aumentó la cantidad: validar y descontar solo el incremento
                                     $validacionStock = $this->validarStockDisponible($articuloIdAnterior, $diferenciaCantidad, $venta->id);
@@ -412,7 +412,7 @@ class VentaController extends Controller
                                     }
                                     $this->actualizarStockArticulo($articuloIdAnterior, $diferenciaCantidad, true, $venta->id);
                                     Log::info("Stock descontado por incremento", ['incremento' => $diferenciaCantidad]);
-                                    
+
                                 } elseif ($diferenciaCantidad < 0) {
                                     // Disminuyó la cantidad: devolver al stock la diferencia
                                     $cantidadADevolver = abs($diferenciaCantidad);
@@ -434,13 +434,13 @@ class VentaController extends Controller
                             if ($articulo && $articulo->tipo === 'servicio') {
                                 // Intentar múltiples formatos para obtener trabajadores
                                 $trabajadoresCarwash = [];
-                                
+
                                 // Formato 1: trabajadores_carwash[ID][]
                                 $formato1 = $request->input("trabajadores_carwash.{$detalleId}", []);
                                 if (!empty($formato1)) {
                                     $trabajadoresCarwash = $formato1;
                                 }
-                                
+
                                 // Formato 2: trabajadores_carwash[ID] (sin array)
                                 if (empty($trabajadoresCarwash)) {
                                     $formato2 = $request->input("trabajadores_carwash.{$detalleId}");
@@ -448,7 +448,7 @@ class VentaController extends Controller
                                         $trabajadoresCarwash = is_array($formato2) ? $formato2 : [$formato2];
                                     }
                                 }
-                                
+
                                 // Formato 3: buscar en todos los trabajadores_carwash
                                 if (empty($trabajadoresCarwash)) {
                                     $todosTrabajadores = $request->input('trabajadores_carwash', []);
@@ -456,7 +456,7 @@ class VentaController extends Controller
                                         $trabajadoresCarwash = $todosTrabajadores[$detalleId];
                                     }
                                 }
-                                
+
                                 // Si no es array, convertirlo
                                 if (!is_array($trabajadoresCarwash)) {
                                     $trabajadoresCarwash = $trabajadoresCarwash ? [$trabajadoresCarwash] : [];
@@ -478,7 +478,7 @@ class VentaController extends Controller
 
                                 // Asignar trabajadores (esto ya limpia los anteriores)
                                 $detalle->asignarTrabajadores($trabajadoresCarwash, $articulo->comision_carwash);
-                                
+
                                 // Regenerar comisiones para este detalle
                                 $detalle->refresh();
                                 $detalle->generarComisionesCarwash(true);
@@ -497,18 +497,18 @@ class VentaController extends Controller
             Log::info('=== INICIANDO PROCESAMIENTO DE NUEVOS DETALLES ===', []);
             if ($request->has('nuevos_detalles')) {                Log::info('DATOS RECIBIDOS de nuevos_detalles:', $request->input('nuevos_detalles'));
                 Log::info('CONTEO de nuevos_detalles:', ['count' => count($request->input('nuevos_detalles'))]);
-                
+
                 foreach ($request->nuevos_detalles as $index => $nuevoDetalle) {
                     Log::info("=== PROCESANDO NUEVO DETALLE ÍNDICE: {$index} ===", []);
                     Log::info("Datos del nuevo detalle:", $nuevoDetalle);
-                    
+
                     // Verificar si ya existe un detalle con estos datos para evitar duplicación
                     $detallesExistentes = $venta->detalleVentas()
                         ->where('articulo_id', $nuevoDetalle['articulo_id'])
                         ->where('cantidad', $nuevoDetalle['cantidad'])
                         ->where('created_at', '>', now()->subMinute()) // Solo verificar creados en el último minuto
                         ->get();
-                    
+
                     if ($detallesExistentes->count() > 0) {
                         Log::warning("DUPLICACIÓN DETECTADA: Ya existen {$detallesExistentes->count()} detalles similares para artículo {$nuevoDetalle['articulo_id']}, SALTANDO");
                         foreach ($detallesExistentes as $existe) {
@@ -516,14 +516,14 @@ class VentaController extends Controller
                         }
                         continue; // Saltar este detalle para evitar duplicación
                     }
-                
+
                     // Registrar lo que estamos procesando para depuración
                     Log::info("Procesando nuevo detalle con índice: {$index}", $nuevoDetalle);
-                    
+
                     // Agregar el porcentaje de impuestos desde la configuración
                     // ⭐ NUEVO: Aplicar impuestos según el toggle del usuario
                     $nuevoDetalle['porcentaje_impuestos'] = $request->has('aplicar_impuestos') ? $config->impuesto : 0;
-                    
+
                     // Agregar el usuario_id (requerido en la tabla detalle_ventas)
                     $nuevoDetalle['usuario_id'] = Auth::user()->id;
 
@@ -558,13 +558,13 @@ class VentaController extends Controller
                     if (isset($nuevoDetalle['articulo_id']) && $articulo && $articulo->tipo === 'servicio') {
                         // Intentar múltiples formatos para obtener trabajadores
                         $trabajadoresCarwash = [];
-                        
+
                         // Formato 1: nuevos_trabajadores_carwash[index][]
                         $formato1 = $request->input("nuevos_trabajadores_carwash.{$index}", []);
                         if (!empty($formato1)) {
                             $trabajadoresCarwash = $formato1;
                         }
-                        
+
                         // Formato 2: nuevos_detalles[index][trabajadores_carwash][]
                         if (empty($trabajadoresCarwash)) {
                             $formato2 = $request->input("nuevos_detalles.{$index}.trabajadores_carwash", []);
@@ -572,7 +572,7 @@ class VentaController extends Controller
                                 $trabajadoresCarwash = $formato2;
                             }
                         }
-                        
+
                         // Formato 3: buscar en todos los nuevos_trabajadores_carwash
                         if (empty($trabajadoresCarwash)) {
                             $todosTrabajadores = $request->input('nuevos_trabajadores_carwash', []);
@@ -580,7 +580,7 @@ class VentaController extends Controller
                                 $trabajadoresCarwash = $todosTrabajadores[$index];
                             }
                         }
-                        
+
                         // Si no es array, convertirlo
                         if (!is_array($trabajadoresCarwash)) {
                             $trabajadoresCarwash = $trabajadoresCarwash ? [$trabajadoresCarwash] : [];
@@ -590,11 +590,11 @@ class VentaController extends Controller
                         $trabajadoresCarwash = array_filter($trabajadoresCarwash, function($value) {
                             return $value !== null && $value !== '' && $value > 0;
                         });
-                        
+
                         // Convertir a enteros
                         $trabajadoresCarwash = array_map('intval', $trabajadoresCarwash);
                         $trabajadoresCarwash = array_unique($trabajadoresCarwash);
-                        
+
                         Log::info("Procesando trabajadores para nuevo detalle índice: {$index}", [
                             'trabajadores' => $trabajadoresCarwash,
                             'count' => count($trabajadoresCarwash)
@@ -608,7 +608,7 @@ class VentaController extends Controller
                             Log::info("No se encontraron trabajadores para asignar al nuevo detalle ID: {$detalle->id}", []);
                         }
                     }
-                    
+
                     Log::info("=== NUEVO DETALLE COMPLETADO: {$detalle->id} ===", []);
                 }
             } else {
@@ -617,7 +617,7 @@ class VentaController extends Controller
 
             // Regenerar comisiones: eliminar todas las comisiones de esta venta y regenerarlas
             Comision::where('venta_id', $venta->id)->delete();
-            
+
             // Regenerar comisiones para cada detalle individualmente
             foreach ($venta->fresh()->detalleVentas as $detalle) {
                 // Regenerar comisiones de carwash si aplica
@@ -627,7 +627,7 @@ class VentaController extends Controller
                 if ($detalle->articulo && $detalle->articulo->tipo === 'servicio') {
                     $detalle->generarComisionesCarwash(true);
                 }
-                
+
                 // Regenerar comisiones de mecánico si aplica
                 $detalle->generarComisionMecanico();
             }
@@ -636,7 +636,7 @@ class VentaController extends Controller
             Log::info('Venta actualizada exitosamente', ['venta_id' => $venta->id]);
             Log::info('Comisiones regeneradas para venta', ['venta_id' => $venta->id]);
             DB::commit();
-            
+
             // Verificar si es una solicitud AJAX
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
@@ -645,7 +645,7 @@ class VentaController extends Controller
                     'redirect_url' => url('show-venta/'.$venta->id.'?success=true')
                 ]);
             }
-            
+
             return redirect('show-venta/'.$venta->id.'?success=true')->with('status', __('Venta actualizada exitosamente.'));
         } catch (\Exception $e) {
             DB::rollBack();
@@ -659,7 +659,7 @@ class VentaController extends Controller
 
             // Mensaje de error más específico para el usuario
             $errorMessage = $e->getMessage();
-            
+
             // Personalizar el mensaje para errores de stock
             if (strpos($errorMessage, 'stock negativo') !== false) {
                 $errorMessage = 'Error de stock: ' . $errorMessage . '. Por favor, revise las cantidades y el inventario disponible.';
@@ -721,7 +721,7 @@ class VentaController extends Controller
         ]);
 
         $config = Config::first();
-        $clientes = Cliente::all();
+        $clientes = Cliente::where('estado', 1)->orderBy('nombre')->get();
         $usuarios = User::all();
 
         // Calcular resúmenes de tipos de pago para el PDF
@@ -730,18 +730,18 @@ class VentaController extends Controller
         $totalPagos = 0;
         $totalGananciaNeta = 0;
         $totalGananciaNetaConIva = 0;
-        
+
         foreach ($ventas as $venta) {
             // Solo procesar ventas activas para totales y ganancias
             if ($venta->estado) {
                 $totalVentas += $venta->total;
-                
+
                 // Calcular ganancia neta sin IVA
                 $costoTotal = $venta->detalleVentas->sum(function($detalle) {
                     return $detalle->cantidad * $detalle->costo;
                 });
                 $totalGananciaNeta += ($venta->total - $costoTotal);
-                
+
                 // Calcular ganancia neta con IVA si aplica
                 if ($venta->estado_predominante_impuestos === 'Con IVA') {
                     $precioBaseSinIva = $venta->total / 1.16;
@@ -751,12 +751,12 @@ class VentaController extends Controller
                     $totalGananciaNetaConIva += ($venta->total - $costoTotal);
                 }
             }
-            
+
             // Los pagos se procesan independientemente del estado de la venta
             foreach ($venta->pagos as $pago) {
                 $metodo = $pago->metodo_pago ?? 'sin_especificar'; // Usar metodo_pago en lugar de metodo
                 $metodoLegible = \App\Models\Pago::$metodosPago[$metodo] ?? ucfirst(str_replace('_', ' ', $metodo));
-                
+
                 if (!isset($totalTiposPago[$metodoLegible])) {
                     $totalTiposPago[$metodoLegible] = 0;
                 }
@@ -777,7 +777,7 @@ class VentaController extends Controller
             'estado_pago' => $request->filled('estado_pago') ? ucfirst($request->estado_pago) : null,
             'iva' => $request->input('iva'), // Para incluir filtro IVA
         ];
-        
+
         // Preparar datos de resumen para el PDF
         $resumen = [
             'total_tipos_pago' => $totalTiposPago,
@@ -917,7 +917,7 @@ class VentaController extends Controller
 
             // Costo de compra (incluir precio_costo + comisiones)
             $costoCompra = $detalle->precio_costo * $detalle->cantidad;
-            
+
             // Agregar comisiones de trabajadores carwash/mecánico si es un servicio
             if($detalle->articulo && $detalle->articulo->tipo === 'servicio') {
                 // Sumar comisiones de trabajadores carwash asignados
@@ -926,13 +926,13 @@ class VentaController extends Controller
                         $costoCompra += $trabajador->pivot->monto_comision;
                     }
                 }
-                
+
                 // Sumar comisión de mecánico si aplica
                 if($detalle->articulo->mecanico_id && $detalle->articulo->costo_mecanico > 0) {
                     $costoCompra += $detalle->articulo->costo_mecanico * $detalle->cantidad;
                 }
             }
-            
+
             $totalCostoCompra += $costoCompra;
         }
 
@@ -1080,7 +1080,7 @@ class VentaController extends Controller
         }
 
         $ventas = $query->orderBy('fecha', 'desc')->paginate(15);
-        
+
         // Calcular totales del vendedor
         $totalVentas = Venta::where('usuario_id', $usuarioId)
             ->with('detalleVentas')
@@ -1088,7 +1088,7 @@ class VentaController extends Controller
             ->sum(function($venta) {
                 return $venta->detalleVentas->sum('sub_total');
             });
-            
+
         $ventasEstesMes = Venta::where('usuario_id', $usuarioId)
             ->whereMonth('fecha', now()->month)
             ->whereYear('fecha', now()->year)
@@ -1097,9 +1097,9 @@ class VentaController extends Controller
             ->sum(function($venta) {
                 return $venta->detalleVentas->sum('sub_total');
             });
-        
+
         $config = Config::first();
-        
+
         return view('admin.ventas.mis-ventas', compact(
             'ventas', 'config', 'totalVentas', 'ventasEstesMes'
         ));

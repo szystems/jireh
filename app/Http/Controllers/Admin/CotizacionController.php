@@ -79,7 +79,7 @@ class CotizacionController extends Controller
             $cotizacion->actualizarEstado();
         }
 
-        $clientes = Cliente::all();
+        $clientes = Cliente::where('estado', 1)->orderBy('nombre')->get();
         $vehiculos = Vehiculo::all();
         $usuarios = User::all();
         $config = Config::first();
@@ -93,8 +93,8 @@ class CotizacionController extends Controller
     public function create(Request $request)
     {
         $config = Config::first();
-        $todosArticulos = Articulo::with('unidad')->get();
-        $clientes = Cliente::all();
+        $todosArticulos = Articulo::with('unidad')->where('estado', 1)->get();
+        $clientes = Cliente::where('estado', 1)->orderBy('nombre')->get();
         $descuentos = Descuento::where('estado', 1)->get();
 
         // Obtener cliente_id de la URL si existe
@@ -107,7 +107,7 @@ class CotizacionController extends Controller
         // Generar siguiente número de cotización
         $ultimaCotizacion = Cotizacion::orderBy('id', 'desc')->first();
         $siguienteNumero = 'COT-001';
-        
+
         if ($ultimaCotizacion && $ultimaCotizacion->numero_cotizacion) {
             // Extraer el número de la última cotización
             $ultimoNumero = (int) substr($ultimaCotizacion->numero_cotizacion, 4);
@@ -115,11 +115,11 @@ class CotizacionController extends Controller
         }
 
         return view('admin.cotizacion.create', compact(
-            'config', 
-            'todosArticulos', 
-            'clientes', 
-            'descuentos', 
-            'cliente_selected', 
+            'config',
+            'todosArticulos',
+            'clientes',
+            'descuentos',
+            'cliente_selected',
             'vehiculos',
             'siguienteNumero'
         ));
@@ -147,10 +147,10 @@ class CotizacionController extends Controller
         // Validación personalizada de cantidades según tipo de unidad
         foreach ($request->detalles as $index => $detalle) {
             $articulo = Articulo::with('unidad')->find($detalle['articulo_id']);
-            
+
             if ($articulo && $articulo->unidad) {
                 $cantidad = floatval($detalle['cantidad']);
-                
+
                 if ($articulo->unidad->tipo === 'unidad') {
                     // Para unidades, debe ser un número entero >= 1
                     if ($cantidad != intval($cantidad) || $cantidad < 1) {
@@ -179,7 +179,7 @@ class CotizacionController extends Controller
             // Generar número de cotización
             $ultimaCotizacion = Cotizacion::orderBy('id', 'desc')->first();
             $siguienteNumero = 'COT-001';
-            
+
             if ($ultimaCotizacion && $ultimaCotizacion->numero_cotizacion) {
                 // Extraer el número de la última cotización
                 $ultimoNumero = (int) substr($ultimaCotizacion->numero_cotizacion, 4);
@@ -202,7 +202,7 @@ class CotizacionController extends Controller
             // Crear los detalles de la cotización
             foreach ($request->detalles as $detalle) {
                 $articulo = Articulo::find($detalle['articulo_id']);
-                
+
                 DetalleCotizacion::create([
                     'cotizacion_id' => $cotizacion->id,
                     'articulo_id' => $detalle['articulo_id'],
@@ -223,7 +223,7 @@ class CotizacionController extends Controller
         } catch (\Exception $e) {
             DB::rollback();
             Log::error('Error al crear cotización: ' . $e->getMessage());
-            
+
             return redirect()->back()
                            ->withInput()
                            ->with('error', 'Error al crear la cotización: ' . $e->getMessage());
@@ -236,9 +236,9 @@ class CotizacionController extends Controller
     public function show($id)
     {
         $cotizacion = Cotizacion::with([
-            'cliente', 
-            'vehiculo', 
-            'usuario', 
+            'cliente',
+            'vehiculo',
+            'usuario',
             'detalleCotizaciones.articulo.unidad',
             'detalleCotizaciones.descuento'
         ])->findOrFail($id);
@@ -268,16 +268,16 @@ class CotizacionController extends Controller
         }
 
         $config = Config::first();
-        $todosArticulos = Articulo::with('unidad')->get();
-        $clientes = Cliente::all();
+        $todosArticulos = Articulo::with('unidad')->where('estado', 1)->get();
+        $clientes = Cliente::where('estado', 1)->orderBy('nombre')->get();
         $vehiculos = Vehiculo::where('cliente_id', $cotizacion->cliente_id)->get();
         $descuentos = Descuento::where('estado', 1)->get();
 
         return view('admin.cotizacion.edit', compact(
             'cotizacion',
-            'config', 
-            'todosArticulos', 
-            'clientes', 
+            'config',
+            'todosArticulos',
+            'clientes',
             'vehiculos',
             'descuentos'
         ));
@@ -317,10 +317,10 @@ class CotizacionController extends Controller
             // Validación personalizada de cantidades según tipo de unidad para nuevos detalles
             foreach ($request->nuevos_detalles as $index => $detalle) {
                 $articulo = Articulo::with('unidad')->find($detalle['articulo_id']);
-                
+
                 if ($articulo && $articulo->unidad) {
                     $cantidad = floatval($detalle['cantidad']);
-                    
+
                     if ($articulo->unidad->tipo === 'unidad') {
                         // Para unidades, debe ser un número entero >= 1
                         if ($cantidad != intval($cantidad) || $cantidad < 1) {
@@ -368,10 +368,10 @@ class CotizacionController extends Controller
             if ($request->has('nuevos_detalles')) {
                 foreach ($request->nuevos_detalles as $nuevoDetalle) {
                     $articulo = Articulo::find($nuevoDetalle['articulo_id']);
-                    
+
                     // Calcular sub_total
                     $subtotal = $nuevoDetalle['cantidad'] * $nuevoDetalle['precio_venta'];
-                    
+
                     // Aplicar descuento si existe
                     if (!empty($nuevoDetalle['descuento_id'])) {
                         $descuento = Descuento::find($nuevoDetalle['descuento_id']);
@@ -380,7 +380,7 @@ class CotizacionController extends Controller
                             $subtotal -= $montoDescuento;
                         }
                     }
-                    
+
                     DetalleCotizacion::create([
                         'cotizacion_id' => $cotizacion->id,
                         'articulo_id' => $nuevoDetalle['articulo_id'],
@@ -403,7 +403,7 @@ class CotizacionController extends Controller
         } catch (\Exception $e) {
             DB::rollback();
             Log::error('Error al actualizar cotización: ' . $e->getMessage());
-            
+
             return redirect()->back()
                            ->withInput()
                            ->with('error', 'Error al actualizar la cotización: ' . $e->getMessage());
@@ -417,7 +417,7 @@ class CotizacionController extends Controller
     {
         try {
             $cotizacion = Cotizacion::findOrFail($id);
-            
+
             // Verificar que la cotización se pueda eliminar
             if ($cotizacion->estado === 'convertida') {
                 return redirect()->route('admin.cotizaciones.index')
@@ -431,7 +431,7 @@ class CotizacionController extends Controller
 
         } catch (\Exception $e) {
             Log::error('Error al eliminar cotización: ' . $e->getMessage());
-            
+
             return redirect()->route('admin.cotizaciones.index')
                            ->with('error', 'Error al eliminar la cotización.');
         }
@@ -443,8 +443,8 @@ class CotizacionController extends Controller
     public function exportSinglePdf($id)
     {
         $cotizacion = Cotizacion::with([
-            'cliente', 
-            'vehiculo', 
+            'cliente',
+            'vehiculo',
             'usuario',
             'detalleCotizaciones.articulo.unidad',
             'detalleCotizaciones.descuento'
@@ -453,7 +453,7 @@ class CotizacionController extends Controller
         $config = Config::first();
 
         $pdf = PDF::loadView('admin.cotizacion.single_pdf', compact('cotizacion', 'config'));
-        
+
         return $pdf->stream('cotizacion_' . $cotizacion->numero_cotizacion . '.pdf');
     }
 
@@ -469,14 +469,14 @@ class CotizacionController extends Controller
         try {
             $cotizacion = Cotizacion::findOrFail($id);
             $estadoAnterior = $cotizacion->estado;
-            
+
             // Si estamos regenerando (Aprobado → Generado), dar 15 días frescos
             if ($estadoAnterior === 'Aprobado' && $request->estado === 'Generado') {
                 $cotizacion->update([
                     'estado' => $request->estado,
                     'fecha_vencimiento' => now()->addDays(15)
                 ]);
-                
+
                 $mensaje = 'Cotización regenerada exitosamente con 15 días de vigencia.';
             } else {
                 // Para otros cambios de estado, solo actualizar el estado
@@ -498,7 +498,7 @@ class CotizacionController extends Controller
 
         } catch (\Exception $e) {
             Log::error('Error al cambiar estado de cotización: ' . $e->getMessage());
-            
+
             // Si es una petición AJAX, retornar JSON de error
             if ($request->ajax()) {
                 return response()->json([
@@ -506,7 +506,7 @@ class CotizacionController extends Controller
                     'message' => 'Error al cambiar el estado de la cotización: ' . $e->getMessage()
                 ], 500);
             }
-            
+
             return redirect()->back()
                            ->with('error', 'Error al cambiar el estado de la cotización.');
         }
