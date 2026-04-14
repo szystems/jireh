@@ -8,7 +8,7 @@
             gap: 20px !important; /* Aumentar espaciado entre botones */
             margin: 1.5em auto 0 !important;
         }
-        
+
         /* Mejorar contraste y diseño del botón cancelar */
         .swal2-styled.btn-secondary,
         .swal2-cancel {
@@ -18,7 +18,7 @@
             font-weight: 500 !important;
             box-shadow: 0 2px 4px rgba(108, 117, 125, 0.3) !important;
         }
-        
+
         .swal2-styled.btn-secondary:hover,
         .swal2-cancel:hover {
             background-color: #545b62 !important;
@@ -27,7 +27,7 @@
             transform: translateY(-1px);
             box-shadow: 0 4px 8px rgba(108, 117, 125, 0.4) !important;
         }
-        
+
         /* Mejorar el botón de confirmar */
         .swal2-styled.btn-danger,
         .swal2-confirm {
@@ -37,7 +37,7 @@
             font-weight: 500 !important;
             box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3) !important;
         }
-        
+
         .swal2-styled.btn-danger:hover,
         .swal2-confirm:hover {
             background-color: #c82333 !important;
@@ -46,12 +46,12 @@
             transform: translateY(-1px);
             box-shadow: 0 4px 8px rgba(220, 53, 69, 0.4) !important;
         }
-        
+
         /* Transiciones suaves para los botones */
         .swal2-styled {
             transition: all 0.2s ease !important;
         }
-        
+
         /* Mejorar el contenedor de botones */
         .swal2-actions button {
             margin: 0 10px !important;
@@ -142,7 +142,7 @@
                                             <option value="pagado" {{ (old('estado_pago', $venta->estado_pago) == 'pagado') ? 'selected' : '' }}>Pagado</option>
                                         </select>
                                     </div>
-                                    
+
                                     <!-- ⭐ NUEVO: Toggle para aplicar impuestos en edición -->
                                     @php
                                         // Detectar estado actual de impuestos
@@ -156,17 +156,17 @@
                                         <div class="card border-primary">
                                             <div class="card-header bg-light">
                                                 <div class="form-check form-switch">
-                                                    <input class="form-check-input" type="checkbox" id="aplicar_impuestos" name="aplicar_impuestos" value="1" 
+                                                    <input class="form-check-input" type="checkbox" id="aplicar_impuestos" name="aplicar_impuestos" value="1"
                                                            {{ old('aplicar_impuestos', $tieneImpuestosPredominante) ? 'checked' : '' }}
                                                            onchange="toggleImpuestosEdit(this.checked)">
                                                     <label class="form-check-label" for="aplicar_impuestos">
-                                                        <i class="bi bi-receipt-cutoff {{ $tieneImpuestosPredominante ? 'text-success' : 'text-secondary' }}"></i> 
+                                                        <i class="bi bi-receipt-cutoff {{ $tieneImpuestosPredominante ? 'text-success' : 'text-secondary' }}"></i>
                                                         <strong>Aplicar impuestos ({{ number_format($config->impuesto, 2) }}%)</strong>
                                                     </label>
                                                 </div>
                                                 <small class="form-text text-muted mt-1">
                                                     @if($esMixto)
-                                                        <i class="bi bi-exclamation-triangle text-warning"></i> 
+                                                        <i class="bi bi-exclamation-triangle text-warning"></i>
                                                         <strong>Estado mixto:</strong> {{ $detallesConImpuestos }} artículos con impuestos, {{ $detallesSinImpuestos }} sin impuestos. El toggle unificará el criterio.
                                                     @elseif($detallesConImpuestos > 0)
                                                         <i class="bi bi-check-circle text-success"></i> Todos los artículos tienen impuestos aplicados
@@ -177,7 +177,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    
+
                                     <input type="hidden" name="estado" value="{{ $venta->estado }}">
                                     <input type="hidden" name="usuario_id" value="{{ $venta->usuario_id }}">
 
@@ -557,10 +557,24 @@
     <script>
         $(document).ready(function() {
             console.log('Edit venta: Inicializando eventos...');
-            
+
+            // Inicializar Select2 en el select de artículos (#articulo) para habilitar búsqueda
+            if ($('#articulo').length && !$('#articulo').data('select2')) {
+                $('#articulo').select2({
+                    language: {
+                        noResults: () => "No se encontraron resultados",
+                        searching: () => "Buscando..."
+                    },
+                    width: '100%',
+                    allowClear: true,
+                    placeholder: 'Seleccione un artículo',
+                    selectOnClose: false
+                });
+            }
+
             // Variables para el modal de trabajadores
             let detalleActualEditando = null;
-            
+
             // Rehabilitar botón de guardar si hay errores de validación (página cargada con errores)
             @if (count($errors) > 0)
                 console.log('Se detectaron errores de validación, rehabilitando botón');
@@ -568,7 +582,7 @@
                                         .html('<i class="bi bi-check-circle"></i> Guardar Cambios');
                 $('#mensaje-guardando').addClass('d-none');
             @endif
-            
+
             // Fix para inputs de cantidad (ahora son type="text")
             $(document).on('input focus blur', '.cantidad-input, #cantidad-nuevo', function(e) {
                 try {
@@ -586,19 +600,19 @@
                     console.warn('Evento select2:select sin datos válidos');
                     return;
                 }
-                
+
                 var clienteId = e.params.data.id;
                 console.log('Cliente seleccionado:', clienteId);
-                
+
                 if (clienteId) {
                     // Limpiar vehículos actuales
                     $('#vehiculo_id').empty().append('<option value="">Cargando vehículos...</option>');
-                    
+
                     // Cargar vehículos del cliente
                     $.get('/api/clientes/' + clienteId + '/vehiculos')
                         .done(function(data) {
                             $('#vehiculo_id').empty().append('<option value="">Seleccione un vehículo</option>');
-                            
+
                             if (data && data.length > 0) {
                                 $.each(data, function(index, vehiculo) {
                                     var option = new Option(
@@ -609,7 +623,7 @@
                                     );
                                     $('#vehiculo_id').append(option);
                                 });
-                                
+
                                 // Reseleccionar el vehículo si hay uno preservado
                                 var vehiculoIdPreservado = '{{ old("vehiculo_id", $venta->vehiculo_id ?? "") }}';
                                 if (vehiculoIdPreservado) {
@@ -627,19 +641,19 @@
                     $('#vehiculo_id').empty().append('<option value="">Seleccione un vehículo</option>');
                 }
             });
-            
+
             // Preservar vehiculo_id si hay errores de validación - MÉTODO CORREGIDO
             var clienteIdPreservado = '{{ old("cliente_id", $venta->cliente_id ?? "") }}';
             var vehiculoIdPreservado = '{{ old("vehiculo_id", $venta->vehiculo_id ?? "") }}';
-            
+
             if (clienteIdPreservado && vehiculoIdPreservado) {
                 console.log('Preservando selección - Cliente:', clienteIdPreservado, 'Vehículo:', vehiculoIdPreservado);
-                
+
                 // Cargar vehículos directamente sin disparar el evento select2:select
                 $.get('/api/clientes/' + clienteIdPreservado + '/vehiculos')
                     .done(function(data) {
                         $('#vehiculo_id').empty().append('<option value="">Seleccione un vehículo</option>');
-                        
+
                         if (data && data.length > 0) {
                             $.each(data, function(index, vehiculo) {
                                 var option = new Option(
@@ -663,26 +677,26 @@
             /*
             $('#forma-editar-venta').on('submit', function(e) {
                 console.log('🚀 FORMULARIO ENVIÁNDOSE - Iniciando proceso');
-                
+
                 // Obtener la URL de acción del formulario
                 const formAction = $(this).attr('action');
                 const formMethod = $(this).attr('method');
                 console.log('URL de destino:', formAction);
                 console.log('Método:', formMethod);
-                
+
                 // Validaciones básicas esenciales
                 const clienteId = $('#cliente_id').val();
                 const vehiculoId = $('#vehiculo_id').val();
                 const fecha = $('#fecha').val();
-                
-                console.log('Datos básicos:', { 
-                    clienteId: clienteId, 
-                    vehiculoId: vehiculoId, 
+
+                console.log('Datos básicos:', {
+                    clienteId: clienteId,
+                    vehiculoId: vehiculoId,
                     fecha: fecha,
                     clienteIdType: typeof clienteId,
                     vehiculoIdType: typeof vehiculoId
                 });
-                
+
                 // Validaciones mínimas con logging
                 if (!clienteId || clienteId === '' || clienteId === '0') {
                     console.error('❌ Validación fallida: Cliente no válido');
@@ -690,38 +704,38 @@
                     e.preventDefault();
                     return false;
                 }
-                
+
                 if (!vehiculoId || vehiculoId === '' || vehiculoId === '0') {
                     console.error('❌ Validación fallida: Vehículo no válido');
                     alert('Debe seleccionar un vehículo');
                     e.preventDefault();
                     return false;
                 }
-                
+
                 if (!fecha || fecha === '') {
                     console.error('❌ Validación fallida: Fecha no válida');
                     alert('Debe ingresar una fecha');
                     e.preventDefault();
                     return false;
                 }
-                
+
                 console.log('✅ Validaciones básicas pasadas');
-                
+
                 // Verificar tokens CSRF
                 const csrfToken = $('input[name="_token"]').val();
                 const methodField = $('input[name="_method"]').val();
                 console.log('CSRF Token:', csrfToken ? 'Presente' : 'FALTANTE');
                 console.log('Method Field:', methodField ? methodField : 'FALTANTE');
-                
+
                 // Deshabilitar botón para prevenir doble envío
                 const $btnGuardar = $('#btn-guardar-cambios');
                 $btnGuardar.prop('disabled', true).text('Guardando...');
-                
+
                 // Agregar evento para detectar cambios en la página
                 $(window).on('beforeunload.debug', function() {
                     console.log('🔄 PÁGINA DESCARGÁNDOSE - Navegando a nueva página o recargando');
                 });
-                
+
                 // Timeout para detectar si la página no cambia
                 setTimeout(function() {
                     console.log('⏰ TIMEOUT 3s: Verificando si el formulario se procesó');
@@ -730,9 +744,9 @@
                         $btnGuardar.prop('disabled', false).text('Guardar Cambios');
                     }
                 }, 3000);
-                
+
                 console.log('🚀 PERMITIENDO ENVÍO - Todo OK, enviando formulario');
-                
+
                 // Permitir el envío normal del formulario
                 return true;
             });
@@ -742,13 +756,13 @@
             $(document).on('click', '.eliminar-detalle', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                
+
                 const detalleId = $(this).data('detalle-id');
                 const $filaDetalle = $(`#detalle-row-${detalleId}`);
                 const articuloNombre = $filaDetalle.find('td:first').text().trim();
-                
+
                 console.log('Eliminando detalle existente:', detalleId);
-                
+
                 // Usar SweetAlert para una mejor experiencia
                 Swal.fire({
                     title: '¿Eliminar detalle?',
@@ -767,7 +781,7 @@
                 }).then((result) => {
                     if (result.isConfirmed) {
                         eliminarDetalleExistente(detalleId);
-                        
+
                         // Mostrar mensaje de confirmación
                         Swal.fire({
                             title: '¡Eliminado!',
@@ -781,15 +795,15 @@
                     }
                 });
             });
-            
+
             // Función para eliminar detalle existente
             function eliminarDetalleExistente(detalleId) {
                 console.log('Procesando eliminación del detalle:', detalleId);
-                
+
                 // Verificar que existen los elementos necesarios
                 const $eliminarInput = $(`#eliminar-${detalleId}`);
                 const $filaDetalle = $(`#detalle-row-${detalleId}`);
-                
+
                 if ($eliminarInput.length === 0) {
                     console.error('No se encontró el input de eliminación para detalle:', detalleId);
                     Swal.fire({
@@ -800,7 +814,7 @@
                     });
                     return;
                 }
-                
+
                 if ($filaDetalle.length === 0) {
                     console.error('No se encontró la fila del detalle:', detalleId);
                     Swal.fire({
@@ -811,11 +825,11 @@
                     });
                     return;
                 }
-                
+
                 // Marcar como eliminado
                 $eliminarInput.val('1');
                 console.log('Input eliminación marcado:', $eliminarInput.attr('name'), '=', $eliminarInput.val());
-                
+
                 // Agregar clases para identificación y ocultar con animación suave
                 $filaDetalle.addClass('detalle-oculto-por-eliminacion bg-danger bg-opacity-25')
                            .fadeOut(300, function() {
@@ -824,12 +838,12 @@
                                    window.actualizarTotalVenta();
                                }
                            });
-                
+
                 // Marcar que hay cambios
                 if (typeof window.marcarCambio === 'function') {
                     window.marcarCambio();
                 }
-                
+
                 console.log('Detalle marcado para eliminación exitosamente:', detalleId);
             }
 
@@ -837,19 +851,19 @@
             $(document).on('click', '.editar-trabajadores', function() {
                 const detalleId = $(this).data('detalle-id');
                 const articuloNombre = $(this).data('articulo-nombre');
-                
+
                 console.log('🔧 Abriendo modal para detalle:', detalleId);
                 console.log('📋 Artículo:', articuloNombre);
-                
+
                 detalleActualEditando = detalleId;
-                
+
                 // Configurar el modal
                 $('#servicio-nombre').text(articuloNombre || 'Servicio');
-                
+
                 // Limpiar select de trabajadores primero
                 $('#trabajadores-carwash-edit').val(null).trigger('change');
                 console.log('🧹 Select de trabajadores limpiado');
-                
+
                 // Obtener trabajadores asignados actualmente
                 const trabajadoresAsignados = [];
                 $(`#trabajadores-${detalleId} input[name="trabajadores_carwash[${detalleId}][]"]`).each(function() {
@@ -858,9 +872,9 @@
                         trabajadoresAsignados.push(trabajadorId);
                     }
                 });
-                
+
                 console.log('👥 Trabajadores asignados encontrados:', trabajadoresAsignados);
-                
+
                 // Verificar que las opciones existen en el select
                 console.log('🔍 Verificando opciones disponibles...');
                 const opcionesDisponibles = [];
@@ -868,12 +882,12 @@
                     opcionesDisponibles.push($(this).val());
                 });
                 console.log('📋 Opciones en select:', opcionesDisponibles);
-                
+
                 // Preseleccionar trabajadores en el modal
                 if (trabajadoresAsignados.length > 0) {
                     console.log('🎯 Preseleccionando trabajadores:', trabajadoresAsignados);
                     $('#trabajadores-carwash-edit').val(trabajadoresAsignados).trigger('change');
-                    
+
                     // Verificar que se seleccionaron correctamente
                     setTimeout(() => {
                         const seleccionados = $('#trabajadores-carwash-edit').val() || [];
@@ -882,7 +896,7 @@
                 } else {
                     console.log('ℹ️ No hay trabajadores previamente asignados');
                 }
-                
+
                 // Mostrar el modal
                 $('#editar-trabajadores-modal').modal('show');
             });
@@ -890,7 +904,7 @@
             // EVENTO: Modal mostrado - Re-inicializar Select2 si es necesario
             $('#editar-trabajadores-modal').on('shown.bs.modal', function() {
                 console.log('🔧 Modal mostrado - Verificando Select2...');
-                
+
                 // Verificar si Select2 está funcionando
                 if (!$('#trabajadores-carwash-edit').hasClass('select2-hidden-accessible')) {
                     console.log('⚠️ Select2 no inicializado en modal - Re-inicializando...');
@@ -905,7 +919,7 @@
                         placeholder: "Seleccione trabajadores"
                     });
                 }
-                
+
                 // Forzar focus en el select para asegurar que funcione
                 setTimeout(() => {
                     $('#trabajadores-carwash-edit').focus();
@@ -916,10 +930,10 @@
             $('#guardar-trabajadores').on('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                
+
                 console.log('🔧 INICIANDO GUARDADO DE TRABAJADORES');
                 console.log('Detalle actual editando:', detalleActualEditando);
-                
+
                 if (!detalleActualEditando) {
                     console.error('❌ No hay detalle seleccionado para editar');
                     if (typeof Swal !== 'undefined') {
@@ -936,13 +950,13 @@
 
                 // Determinar si es detalle nuevo o existente
                 const esDetalleNuevo = detalleActualEditando.toString().startsWith('nuevo-');
-                const containerId = esDetalleNuevo ? 
-                    `trabajadores-${detalleActualEditando}` : 
+                const containerId = esDetalleNuevo ?
+                    `trabajadores-${detalleActualEditando}` :
                     `trabajadores-${detalleActualEditando}`;
                 const textoContainerId = esDetalleNuevo ?
                     `trabajadores-text-${detalleActualEditando}` :
                     `trabajadores-text-${detalleActualEditando}`;
-                
+
                 console.log('🔍 Tipo de detalle:', esDetalleNuevo ? 'NUEVO' : 'EXISTENTE');
                 console.log('🔍 Container ID:', containerId);
                 console.log('🔍 Texto container ID:', textoContainerId);
@@ -951,20 +965,20 @@
                 let $containerTrabajadores = $(`#${containerId}`);
                 console.log('🔍 Buscando container:', `#${containerId}`);
                 console.log('📦 Container encontrado:', $containerTrabajadores.length > 0);
-                
+
                 if ($containerTrabajadores.length === 0) {
                     console.error('❌ No se encontró el container de trabajadores para detalle:', detalleActualEditando);
-                    
+
                     // Buscar containers alternativos
                     console.log('🔍 Buscando containers alternativos...');
-                    const selectorAlternativo = esDetalleNuevo ? 
+                    const selectorAlternativo = esDetalleNuevo ?
                         `tr[id="nuevo-detalle-${detalleActualEditando.replace('nuevo-', '')}"] div[id^="trabajadores-"]` :
                         `tr[id="detalle-row-${detalleActualEditando}"] div[id^="trabajadores-"]`;
-                    
+
                     const $containerAlternativo = $(selectorAlternativo);
                     console.log('🔍 Selector alternativo:', selectorAlternativo);
                     console.log('📦 Container alternativo encontrado:', $containerAlternativo.length);
-                    
+
                     if ($containerAlternativo.length === 0) {
                         console.error('❌ No se encontró ningún container para trabajadores');
                         if (typeof Swal !== 'undefined') {
@@ -991,7 +1005,7 @@
                 const $formulario = $('#forma-editar-venta');
                 const containerEnFormulario = $formulario.find($containerTrabajadores).length > 0;
                 console.log('📝 Container está dentro del formulario:', containerEnFormulario);
-                
+
                 if (!containerEnFormulario) {
                     console.error('❌ El container no está dentro del formulario principal');
                     if (typeof Swal !== 'undefined') {
@@ -1007,11 +1021,11 @@
                 // Agregar los nuevos trabajadores con verificación mejorada
                 let inputsCreados = 0;
                 let inputsHtml = '';
-                
+
                 console.log('➕ Creando nuevos inputs para trabajadores...');
                 trabajadoresSeleccionados.forEach(function(trabajadorId, index) {
                     console.log(`  - Procesando trabajador ${index + 1}:`, trabajadorId);
-                    
+
                     if (trabajadorId && trabajadorId.toString().trim() !== '') {
                         // Generar el nombre del input según el tipo de detalle
                         let inputName;
@@ -1021,17 +1035,17 @@
                         } else {
                             inputName = `trabajadores_carwash[${detalleActualEditando}][]`;
                         }
-                        
+
                         const inputHtml = `<input type="hidden" name="${inputName}" value="${trabajadorId}">`;
-                        
+
                         // Crear el elemento y agregarlo
                         const $nuevoInput = $(inputHtml);
                         $containerTrabajadores.append($nuevoInput);
-                        
+
                         // Verificar que se agregó correctamente
                         const inputAgregado = $containerTrabajadores.find(`input[value="${trabajadorId}"]`).length > 0;
                         console.log(`    ✅ Input creado y verificado:`, inputHtml, 'Agregado:', inputAgregado);
-                        
+
                         if (inputAgregado) {
                             inputsCreados++;
                             inputsHtml += inputHtml + '\n';
@@ -1059,7 +1073,7 @@
 
                 if (numTrabajadores > 0) {
                     textoTrabajadores = `<span class="badge bg-info">${numTrabajadores} trabajador(es)</span>`;
-                    
+
                     // Mostrar nombres si hay pocos trabajadores
                     if (numTrabajadores <= 3) {
                         const nombres = [];
@@ -1085,15 +1099,15 @@
                 console.log('🎨 Actualizando interfaz visual...');
                 console.log('📍 Buscando container de texto:', `#${textoContainerId}`);
                 console.log('📦 Container de texto encontrado:', $textoContainer.length > 0);
-                
+
                 if ($textoContainer.length > 0) {
                     // Para nuevos detalles, mantener el container de inputs y botón
                     if (esDetalleNuevo) {
                         const $containerInputs = $textoContainer.find(`#${containerId}`);
                         const $botonEditar = $textoContainer.find('.editar-trabajadores');
-                        
+
                         $textoContainer.html(textoTrabajadores);
-                        
+
                         // Re-agregar el container y botón si existen
                         if ($containerInputs.length > 0) {
                             $textoContainer.prepend($containerInputs);
@@ -1105,9 +1119,9 @@
                         // Para detalles existentes, solo actualizar el texto después del container
                         const $containerInputs = $textoContainer.find(`#${containerId}`);
                         const $botonEditar = $textoContainer.find('.editar-trabajadores');
-                        
+
                         $textoContainer.empty();
-                        
+
                         if ($containerInputs.length > 0) {
                             $textoContainer.append($containerInputs);
                         }
@@ -1116,16 +1130,16 @@
                             $textoContainer.append($botonEditar);
                         }
                     }
-                    
+
                     console.log('✅ Texto actualizado en interfaz:', textoTrabajadores);
                 } else {
                     console.warn('⚠️ No se encontró el container de texto para trabajadores:', detalleActualEditando);
-                    
+
                     // Buscar contenedor alternativo según el tipo
                     const selectorTextoAlternativo = esDetalleNuevo ?
                         `tr[id="nuevo-detalle-${detalleActualEditando.replace('nuevo-', '')}"] td[id^="trabajadores-text-"]` :
                         `tr[id="detalle-row-${detalleActualEditando}"] td[id^="trabajadores-text-"]`;
-                    
+
                     const $textoAlternativo = $(selectorTextoAlternativo);
                     if ($textoAlternativo.length > 0) {
                         $textoAlternativo.html(textoTrabajadores);
@@ -1154,41 +1168,41 @@
 
                 // Cerrar modal
                 $('#editar-trabajadores-modal').modal('hide');
-                
+
                 console.log('🎉 Trabajadores actualizados exitosamente para detalle:', detalleActualEditando);
                 console.log('📊 ESTADO FINAL:');
                 console.log('  - Inputs creados:', inputsCreados);
                 console.log('  - Trabajadores asignados:', trabajadoresSeleccionados);
                 console.log('  - Container actualizado:', $containerTrabajadores.length > 0);
-                
+
                 // Verificación final después de un pequeño delay para asegurar que el DOM se actualizó
                 setTimeout(function() {
                     console.log('🔍 VERIFICACIÓN FINAL POST-GUARDADO:');
                     const $inputsFinales = $containerTrabajadores.find('input[name*="trabajadores_carwash"]');
                     console.log('  - Inputs finales en container:', $inputsFinales.length);
-                    
+
                     $inputsFinales.each(function(index) {
                         console.log(`    ${index + 1}. ${this.name} = "${this.value}"`);
                     });
-                    
+
                     // Verificar también en todo el formulario
                     const busquedaInputs = esDetalleNuevo ?
                         `#forma-editar-venta input[name*="nuevos_detalles[${detalleActualEditando.replace('nuevo-', '')}][trabajadores_carwash]"]` :
                         `#forma-editar-venta input[name*="trabajadores_carwash[${detalleActualEditando}]"]`;
-                    
+
                     const $todosLosInputs = $(busquedaInputs);
                     console.log('  - Búsqueda inputs:', busquedaInputs);
                     console.log('  - Total inputs en formulario para este detalle:', $todosLosInputs.length);
-                    
+
                     if ($todosLosInputs.length !== inputsCreados) {
                         console.error('❌ DISCREPANCIA: Se esperaban', inputsCreados, 'inputs pero se encontraron', $todosLosInputs.length);
                     } else {
                         console.log('✅ ÉXITO: Cantidad de inputs coincide con lo esperado');
                     }
                 }, 100);
-                
+
                 console.log('🔧 FIN DEL PROCESO DE GUARDADO');
-                
+
                 // Reset variable
                 detalleActualEditando = null;
             });
@@ -1198,20 +1212,20 @@
             $('#agregar-detalle').on('click', function() {
                 console.log('🆕 INICIANDO AGREGAR NUEVO DETALLE');
                 console.log('🔍 Estado del botón:', $(this).length, '- Deshabilitado:', $(this).prop('disabled'));
-                
+
                 // Verificar que los elementos existen
                 console.log('🔍 Verificando elementos:');
                 console.log('  - Select artículo:', $('#articulo').length);
                 console.log('  - Input cantidad:', $('#cantidad-nuevo').length);
                 console.log('  - Select descuento:', $('#descuento-nuevo').length);
                 console.log('  - Container nuevos detalles:', $('#nuevos-detalles').length);
-                
+
                 // Obtener datos del formulario
                 const articuloId = $('#articulo').val();
                 const cantidad = parseFloat($('#cantidad-nuevo').val());
                 const descuentoId = $('#descuento-nuevo').val();
                 const trabajadoresCarwash = $('#trabajadores-carwash-nuevo').val() || [];
-                
+
                 console.log('📋 Datos del nuevo detalle:', {
                     articuloId: articuloId,
                     cantidad: cantidad,
@@ -1285,17 +1299,17 @@
                 let textoTrabajadores = '<span class="text-muted">No aplica</span>';
                 let containerTrabajadores = '';
                 let botonEditarTrabajadores = '';
-                
+
                 if (tipoArticulo === 'servicio') {
                     // Crear container para trabajadores (similar a detalles existentes)
                     containerTrabajadores = `<div id="trabajadores-nuevo-${nuevoDetalleIndex}">`;
-                    
+
                     if (trabajadoresCarwash.length > 0) {
                         trabajadoresCarwash.forEach(function(trabajadorId) {
                             containerTrabajadores += `<input type="hidden" name="nuevos_detalles[${nuevoDetalleIndex}][trabajadores_carwash][]" value="${trabajadorId}">`;
                         });
                         textoTrabajadores = `<span class="badge bg-info">${trabajadoresCarwash.length} trabajador(es)</span>`;
-                        
+
                         // Mostrar nombres si hay pocos trabajadores
                         if (trabajadoresCarwash.length <= 3) {
                             const nombres = [];
@@ -1314,13 +1328,13 @@
                     } else {
                         textoTrabajadores = '<span class="badge bg-warning">Sin asignar</span>';
                     }
-                    
+
                     containerTrabajadores += '</div>';
-                    
+
                     // Crear botón para editar trabajadores
                     botonEditarTrabajadores = `
-                        <button type="button" class="btn btn-primary btn-sm mt-1 editar-trabajadores" 
-                                data-detalle-id="nuevo-${nuevoDetalleIndex}" 
+                        <button type="button" class="btn btn-primary btn-sm mt-1 editar-trabajadores"
+                                data-detalle-id="nuevo-${nuevoDetalleIndex}"
                                 data-articulo-nombre="${articuloNombre}">
                             <i class="bi bi-people-fill"></i> Editar trabajadores
                         </button>
@@ -1395,17 +1409,17 @@
             $(document).on('click', '.eliminar-nuevo-detalle', function() {
                 const index = $(this).data('index');
                 const $fila = $(`#nuevo-detalle-${index}`);
-                
+
                 console.log('🗑️ Eliminando nuevo detalle:', index);
-                
+
                 $fila.fadeOut(300, function() {
                     $(this).remove();
-                    
+
                     // Ocultar container si no hay más detalles nuevos
                     if ($('#nuevos-detalles tr').length === 0) {
                         $('#nuevos-detalles-container').hide();
                     }
-                    
+
                     // Actualizar total
                     if (typeof window.actualizarTotalVenta === 'function') {
                         window.actualizarTotalVenta();
@@ -1455,23 +1469,23 @@
             // Función específica para debugging de un detalle
             window.debugDetalleTrabajadores = function(detalleId) {
                 console.log(`🔍 === DEBUG DETALLE ${detalleId} ===`);
-                
+
                 const container = $(`#trabajadores-${detalleId}`);
                 console.log('Container encontrado:', container.length > 0);
-                
+
                 if (container.length > 0) {
                     const inputs = container.find('input[name*="trabajadores_carwash"]');
                     console.log('Inputs en container:', inputs.length);
-                    
+
                     inputs.each(function(index) {
                         console.log(`  ${index + 1}. ${this.name} = "${this.value}"`);
                     });
-                    
+
                     // Verificar si está dentro del formulario
                     const enFormulario = $('#forma-editar-venta').find(container).length > 0;
                     console.log('Container dentro del formulario:', enFormulario);
                 }
-                
+
                 // Buscar inputs sueltos para este detalle
                 const inputsSueltos = $(`input[name*="trabajadores_carwash[${detalleId}]"]`).not(container.find('input'));
                 if (inputsSueltos.length > 0) {
@@ -1480,38 +1494,38 @@
                         console.log(`  Suelto ${index + 1}. ${this.name} = "${this.value}"`);
                     });
                 }
-                
+
                 return container;
             };
 
             console.log('✅ Todos los eventos JavaScript inicializados correctamente');
-            
+
             // Aplicar validaciones no intrusivas a campos de cantidad
             aplicarValidacionesVentas();
         });
-        
+
         // Función para aplicar validaciones no intrusivas a campos de cantidad
         function aplicarValidacionesVentas() {
             const cantidadInputs = document.querySelectorAll('.cantidad-input, #cantidad-nuevo');
-            
+
             cantidadInputs.forEach(function(input) {
                 // Remover listeners existentes para evitar duplicados
                 input.removeEventListener('input', validarInputCantidadVenta);
                 input.removeEventListener('blur', validarBlurCantidadVenta);
-                
+
                 // Agregar nuevos listeners
                 input.addEventListener('input', validarInputCantidadVenta);
                 input.addEventListener('blur', validarBlurCantidadVenta);
             });
         }
-        
+
         // Función de validación de input para cantidad en ventas
         function validarInputCantidadVenta(event) {
             const value = event.target.value;
-            
+
             // Solo limpiar caracteres obviamente inválidos, pero permitir estados temporales
             const cleanValue = value.replace(/[^0-9.]/g, '');
-            
+
             // Evitar múltiples puntos decimales
             const parts = cleanValue.split('.');
             if (parts.length > 2) {
@@ -1520,22 +1534,22 @@
                 event.target.value = cleanValue;
             }
         }
-        
+
         // Función de validación de blur para cantidad en ventas
         function validarBlurCantidadVenta(event) {
             const step = event.target.step || '1';
             const min = event.target.min || '1';
             let value = event.target.value.trim();
-            
+
             // Si está vacío, establecer valor por defecto
             if (value === '' || value === '.') {
                 value = step === '1' ? '1' : '1.00';
                 event.target.value = value;
                 return;
             }
-            
+
             const numValue = parseFloat(value);
-            
+
             if (step === '1') {
                 // Para unidades, convertir a entero y validar mínimo
                 const intValue = Math.floor(numValue);
@@ -1553,7 +1567,7 @@
                     event.target.value = numValue.toFixed(2);
                 }
             }
-            
+
             // Disparar evento de cambio para recalcular totales
             $(event.target).trigger('input');
         }
@@ -1563,36 +1577,36 @@
             const porcentajeConfig = {{ $config->impuesto }};
             const nuevoPorcentaje = aplicar ? porcentajeConfig : 0;
             const estadoTexto = aplicar ? 'CON IMPUESTOS' : 'SIN IMPUESTOS';
-            
+
             console.log(`🔄 EDITANDO VENTA ${estadoTexto} - Nuevo porcentaje: ${nuevoPorcentaje}%`);
-            
+
             // Actualizar el icono del toggle
             const icono = document.querySelector('label[for="aplicar_impuestos"] i');
             if (icono) {
                 icono.className = `bi bi-receipt-cutoff ${aplicar ? 'text-success' : 'text-secondary'}`;
             }
-            
+
             // Actualizar todos los inputs de porcentaje de impuestos en detalles existentes
             document.querySelectorAll('input[name*="detalles_a_mantener"][name*="[porcentaje_impuestos]"]').forEach(input => {
                 input.value = nuevoPorcentaje;
                 console.log(`📋 Detalle existente actualizado: ${input.name} = ${nuevoPorcentaje}%`);
             });
-            
+
             // Actualizar detalles nuevos si existen
             document.querySelectorAll('input[name*="nuevos_detalles"][name*="[porcentaje_impuestos]"]').forEach(input => {
                 input.value = nuevoPorcentaje;
                 console.log(`🆕 Nuevo detalle actualizado: ${input.name} = ${nuevoPorcentaje}%`);
             });
-            
+
             // Recalcular todos los totales si la función existe
             if (typeof actualizarTotalVenta === 'function') {
                 actualizarTotalVenta();
                 console.log('💰 Totales recalculados');
             }
-            
+
             // Mostrar mensaje de confirmación
-            mostrarMensajeTemporalEdit(aplicar ? 
-                '✅ Impuestos activados en todos los artículos. Los cambios se aplicarán al guardar.' : 
+            mostrarMensajeTemporalEdit(aplicar ?
+                '✅ Impuestos activados en todos los artículos. Los cambios se aplicarán al guardar.' :
                 '❌ Impuestos removidos de todos los artículos. Los cambios se aplicarán al guardar.',
                 aplicar ? 'success' : 'warning'
             );
@@ -1605,7 +1619,7 @@
             if (mensajeAnterior) {
                 mensajeAnterior.remove();
             }
-            
+
             // Crear nuevo mensaje
             const alertDiv = document.createElement('div');
             alertDiv.id = 'mensaje-temporal-impuestos-edit';
@@ -1614,13 +1628,13 @@
                 <i class="bi bi-info-circle"></i> ${mensaje}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             `;
-            
+
             // Insertar después del card de impuestos
             const cardImpuestos = document.querySelector('.card.border-primary');
             if (cardImpuestos) {
                 cardImpuestos.parentNode.insertBefore(alertDiv, cardImpuestos.nextSibling);
             }
-            
+
             // Auto-remover después de 4 segundos
             setTimeout(() => {
                 if (document.getElementById('mensaje-temporal-impuestos-edit')) {
@@ -1629,7 +1643,7 @@
             }, 4000);
         }
     </script>
-    
+
     <!-- Script de debugging integrado -->
     <script src="{{ asset('js/debugging/form-debug-integrated.js') }}"></script>
 @endsection
