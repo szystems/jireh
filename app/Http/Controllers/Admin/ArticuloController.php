@@ -230,6 +230,12 @@ class ArticuloController extends Controller
         // Crear el artículo con los campos adicionales
         $articulo = new Articulo($request->all());
 
+        // Solo el administrador puede establecer precios
+        if (Auth::user()->role_as != 0) {
+            $articulo->precio_compra = 0;
+            $articulo->precio_venta = 0;
+        }
+
         // Si no es un servicio, asegurarse que los campos de mecánico estén vacíos
         if ($request->tipo != 'servicio') {
             $articulo->mecanico_id = null;
@@ -377,6 +383,12 @@ class ArticuloController extends Controller
         $tipoOriginal = $articulo->tipo;
         $stockAnterior = $articulo->stock;
         $articulo->fill($request->all());
+
+        // Solo el administrador puede modificar precios
+        if (Auth::user()->role_as != 0) {
+            $articulo->precio_compra = $articulo->getOriginal('precio_compra');
+            $articulo->precio_venta = $articulo->getOriginal('precio_venta');
+        }
 
         // Si no es un servicio, asegurarse que los campos de mecánico estén vacíos
         if ($request->tipo != 'servicio') {

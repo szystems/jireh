@@ -124,7 +124,7 @@
                                                         <label for="precio_compra" class="form-label">Precio de Compra</label>
                                                         <div class="input-group">
                                                             <span class="input-group-text"><i class="bi bi-cash"></i></span>
-                                                            <input type="number" step="0.01" class="form-control" id="precio_compra" name="precio_compra" value="{{ old('precio_compra', 0) }}" required min="0" onchange="calcularMargen()">
+                                                            <input type="number" step="0.01" class="form-control @if(Auth::user()->role_as != 0) bg-light @endif" id="precio_compra" name="precio_compra" value="{{ old('precio_compra', 0) }}" required min="0" @if(Auth::user()->role_as != 0) readonly @endif onchange="calcularMargen()">
                                                         </div>
                                                         @if ($errors->has('precio_compra'))
                                                             <div class="invalid-feedback d-block">
@@ -136,7 +136,7 @@
                                                         <label for="precio_venta" class="form-label">Precio de Venta</label>
                                                         <div class="input-group">
                                                             <span class="input-group-text"><i class="bi bi-tag"></i></span>
-                                                            <input type="number" step="0.01" class="form-control" id="precio_venta" name="precio_venta" value="{{ old('precio_venta', 0) }}" required min="0" onchange="calcularMargen()">
+                                                            <input type="number" step="0.01" class="form-control @if(Auth::user()->role_as != 0) bg-light @endif" id="precio_venta" name="precio_venta" value="{{ old('precio_venta', 0) }}" required min="0" @if(Auth::user()->role_as != 0) readonly @endif onchange="calcularMargen()">
                                                         </div>
                                                         @if ($errors->has('precio_venta'))
                                                             <div class="invalid-feedback d-block">
