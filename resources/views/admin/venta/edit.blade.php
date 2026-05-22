@@ -88,7 +88,6 @@
                             @endif
                             <form action="{{ url('update-venta/'.$venta->id) }}" method="POST" id="forma-editar-venta">
                                 @csrf
-                                @method('PUT')
                                 <div class="row gx-3">
                                     <!-- Información básica de la venta -->
                                     <div class="col-md-6 mb-3">

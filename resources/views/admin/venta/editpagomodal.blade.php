@@ -7,7 +7,6 @@
             </div>
             <form action="{{ url('pagos/'.$pago->id) }}" method="POST" enctype="multipart/form-data">
                 @csrf
-                @method('PUT')
                 <div class="modal-body">
                     <input type="hidden" name="venta_id" value="{{ $venta->id }}">
                     <input type="hidden" name="usuario_id" value="{{ $pago->usuario_id }}">

@@ -82,7 +82,6 @@
                                                     @endif
                                                     <form action="{{ url('update-descuento/'.$descuento->id) }}" method="POST" id="descuentoEditForm" class="needs-validation" novalidate>
                                                         @csrf
-                                                        @method('PUT')
 
                                                         <div class="card mb-3">
                                                             <div class="card-header bg-light">

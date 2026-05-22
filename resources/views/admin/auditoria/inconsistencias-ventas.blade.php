@@ -95,7 +95,7 @@
             </div>
         </div>
         @else
-        
+
         <!-- Detalles Sospechosos -->
         @if(collect($inconsistencias)->where('tipo', 'DETALLE_SOSPECHOSO')->count() > 0)
         <div class="card border-warning mb-4">
@@ -146,16 +146,16 @@
                                     </td>
                                     <td>
                                         <div class="btn-group btn-group-sm">
-                                            <a href="{{ url('admin/venta/' . $inconsistencia['detalle']->venta->id) }}" 
+                                            <a href="{{ url('admin/venta/' . $inconsistencia['detalle']->venta->id) }}"
                                                class="btn btn-outline-primary" target="_blank" title="Ver venta">
                                                 <i class="bi bi-eye"></i>
                                             </a>
-                                            <button class="btn btn-outline-warning" 
+                                            <button class="btn btn-outline-warning"
                                                     onclick="corregirDetalle({{ $inconsistencia['detalle']->id }})"
                                                     title="Corregir detalle">
                                                 <i class="bi bi-wrench"></i>
                                             </button>
-                                            <button class="btn btn-outline-danger" 
+                                            <button class="btn btn-outline-danger"
                                                     onclick="eliminarDetalle({{ $inconsistencia['detalle']->id }})"
                                                     title="Eliminar detalle">
                                                 <i class="bi bi-trash"></i>
@@ -211,17 +211,17 @@
                                     </td>
                                     <td>
                                         <div class="btn-group btn-group-sm">
-                                            <button class="btn btn-outline-info" 
+                                            <button class="btn btn-outline-info"
                                                     onclick="compararVentas({{ $inconsistencia['venta1']->id }}, {{ $inconsistencia['venta2']->id }})"
                                                     title="Comparar ventas">
                                                 <i class="bi bi-eye"></i>
                                             </button>
-                                            <button class="btn btn-outline-warning" 
+                                            <button class="btn btn-outline-warning"
                                                     onclick="fusionarVentas({{ $inconsistencia['venta1']->id }}, {{ $inconsistencia['venta2']->id }})"
                                                     title="Fusionar ventas">
                                                 <i class="bi bi-arrow-down-up"></i>
                                             </button>
-                                            <button class="btn btn-outline-danger" 
+                                            <button class="btn btn-outline-danger"
                                                     onclick="eliminarVentaDuplicada({{ $inconsistencia['venta2']->id }})"
                                                     title="Eliminar duplicada">
                                                 <i class="bi bi-trash"></i>
@@ -316,7 +316,7 @@ function corregirDetalle(detalleId) {
 function aplicarCorreccion() {
     const form = document.getElementById('correccionForm');
     const formData = new FormData(form);
-    
+
     fetch('{{ url("admin/auditoria/corregir-detalle") }}', {
         method: 'POST',
         body: formData,
@@ -342,7 +342,7 @@ function aplicarCorreccion() {
 function eliminarDetalle(detalleId) {
     if (confirm('¿Está seguro de eliminar este detalle de venta? Esta acción no se puede deshacer.')) {
         fetch(`{{ url('admin/auditoria/eliminar-detalle') }}/${detalleId}`, {
-            method: 'DELETE',
+            method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
                 'Content-Type': 'application/json'
@@ -390,7 +390,7 @@ function fusionarVentas(venta1Id, venta2Id) {
 function eliminarVentaDuplicada(ventaId) {
     if (confirm('¿Está seguro de eliminar esta venta duplicada? Esta acción no se puede deshacer.')) {
         fetch(`{{ url('admin/auditoria/eliminar-venta') }}/${ventaId}`, {
-            method: 'DELETE',
+            method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
                 'Content-Type': 'application/json'

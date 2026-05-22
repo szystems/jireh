@@ -54,7 +54,6 @@
 
                             <form action="{{ url('update-categoria/'.$categoria->id) }}" method="POST" id="categoriaForm">
                                 @csrf
-                                @method('PUT')
                                 <div class="row g-3">
                                     <div class="col-md-12 mb-3">
                                         <label for="nombre" class="form-label">Nombre de la Categoría <span class="text-danger">*</span></label>

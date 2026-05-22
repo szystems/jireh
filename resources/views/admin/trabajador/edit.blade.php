@@ -74,7 +74,6 @@
                                                     @endif
                                                     <form action="{{ url('update-trabajador/'.$trabajador->id) }}" method="POST" id="trabajadorForm" class="needs-validation" novalidate>
                                                         @csrf
-                                                        @method('PUT')
 
                                                         <div class="card mb-3">
                                                             <div class="card-header bg-light">

@@ -24,7 +24,7 @@
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
                     @endif
-                    
+
                     <div class="card mb-3">
                         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center pb-3">
                             <h5 class="card-title mb-0 text-white">
@@ -39,7 +39,7 @@
                                     @default
                                         <span class="badge bg-secondary ms-2">{{ strtoupper($cotizacion->estado) }}</span>
                                 @endswitch
-                                
+
                                 <!-- Estado de vigencia automático -->
                                 @if($cotizacion->estado === 'Generado')
                                     @if($cotizacion->esta_vigente)
@@ -65,7 +65,7 @@
                                 @endif
                             </div>
                         </div>
-                        
+
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-md-6">
@@ -181,7 +181,7 @@
                                                 // Usar el sub_total que ya está calculado correctamente
                                                 $subtotalConDescuento = $detalle->sub_total;
                                                 $totalGeneral += $subtotalConDescuento;
-                                                
+
                                                 // Calcular descuento solo para mostrar
                                                 $montoDescuento = 0;
                                                 if ($detalle->descuento_id && $detalle->descuento) {
@@ -256,11 +256,11 @@
             } else if (nuevoEstado === 'Generado') {
                 mensaje = '¿Está seguro de regenerar esta cotización?';
             }
-            
+
             if (confirm(mensaje)) {
                 $.ajax({
                     url: '{{ route("admin.cotizaciones.cambiar.estado", ":id") }}'.replace(':id', cotizacionId),
-                    method: 'PUT',
+                    method: 'POST',
                     data: {
                         _token: '{{ csrf_token() }}',
                         estado: nuevoEstado
@@ -276,7 +276,7 @@
                     error: function(xhr, status, error) {
                         console.error('Error completo:', xhr);
                         let errorMessage = 'Error desconocido';
-                        
+
                         if (xhr.responseJSON && xhr.responseJSON.message) {
                             errorMessage = xhr.responseJSON.message;
                         } else if (xhr.responseText) {
@@ -284,7 +284,7 @@
                         } else {
                             errorMessage = error;
                         }
-                        
+
                         alert('Error al cambiar el estado: ' + errorMessage);
                     }
                 });

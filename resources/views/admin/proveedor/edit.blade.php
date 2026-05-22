@@ -47,7 +47,6 @@
 
                             <form action="{{ url('update-proveedor/'.$proveedor->id) }}" method="POST">
                                 @csrf
-                                @method('PUT')
 
                                 <!-- Datos Generales -->
                                 <div class="row mb-4">

@@ -54,7 +54,6 @@
 
                             <form action="{{ url('update-vehiculo/'.$vehiculo->id) }}" method="POST" enctype="multipart/form-data" id="vehiculoForm">
                                 @csrf
-                                @method('PUT')
                                 <div class="row">
                                     <div class="col-md-8">
                                         <!-- Información del Vehículo -->

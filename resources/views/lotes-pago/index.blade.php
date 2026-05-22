@@ -27,12 +27,12 @@
                         <div class="row">
                             <div class="col-md-3">
                                 <label for="fecha_inicio" class="form-label">Fecha Inicio</label>
-                                <input type="date" name="fecha_inicio" id="fecha_inicio" class="form-control" 
+                                <input type="date" name="fecha_inicio" id="fecha_inicio" class="form-control"
                                        value="{{ request('fecha_inicio') }}">
                             </div>
                             <div class="col-md-3">
                                 <label for="fecha_fin" class="form-label">Fecha Fin</label>
-                                <input type="date" name="fecha_fin" id="fecha_fin" class="form-control" 
+                                <input type="date" name="fecha_fin" id="fecha_fin" class="form-control"
                                        value="{{ request('fecha_fin') }}">
                             </div>
                             <div class="col-md-2">
@@ -129,22 +129,21 @@
                                         </td>
                                         <td>
                                             <div class="btn-group" role="group">
-                                                <a href="{{ route('lotes-pago.show', $lote) }}" 
+                                                <a href="{{ route('lotes-pago.show', $lote) }}"
                                                    class="btn btn-sm btn-info" title="Ver detalles">
                                                     <i class="bi bi-eye"></i>
                                                 </a>
-                                                
+
                                                 @if($lote->estado != 'anulado')
-                                                    <a href="{{ route('lotes-pago.edit', $lote) }}" 
+                                                    <a href="{{ route('lotes-pago.edit', $lote) }}"
                                                        class="btn btn-sm btn-warning" title="Editar">
                                                         <i class="bi bi-pencil"></i>
                                                     </a>
-                                                    
-                                                    <form method="POST" action="{{ route('lotes-pago.destroy', $lote) }}" 
+
+                                                    <form method="POST" action="{{ route('lotes-pago.destroy', $lote) }}"
                                                           style="display: inline;"
                                                           onsubmit="return confirm('¿Está seguro de anular este lote de pago? Esta acción anulará todos los pagos asociados.')">
                                                         @csrf
-                                                        @method('DELETE')
                                                         <button type="submit" class="btn btn-sm btn-danger" title="Anular">
                                                             <i class="bi bi-x-circle"></i>
                                                         </button>

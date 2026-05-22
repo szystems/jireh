@@ -42,13 +42,12 @@
 
             <form action="{{ route('lotes-pago.update', $lotePago) }}" method="POST" enctype="multipart/form-data" id="form-editar-lote">
                 @csrf
-                @method('PUT')
 
                 <!-- Información del Lote -->
                 <div class="card mb-4">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">
-                            <i class="bi bi-pencil"></i> 
+                            <i class="bi bi-pencil"></i>
                             Editar Lote de Pago: {{ $lotePago->numero_lote }}
                         </h5>
                         <span class="badge bg-info">{{ ucfirst($lotePago->estado) }}</span>
@@ -60,10 +59,10 @@
                                     <label for="numero_lote" class="form-label">
                                         <i class="bi bi-upc"></i> Número de Lote
                                     </label>
-                                    <input type="text" 
-                                           name="numero_lote" 
-                                           id="numero_lote" 
-                                           class="form-control" 
+                                    <input type="text"
+                                           name="numero_lote"
+                                           id="numero_lote"
+                                           class="form-control"
                                            value="{{ $lotePago->numero_lote }}"
                                            readonly>
                                     <small class="form-text text-muted">
@@ -76,10 +75,10 @@
                                     <label for="fecha_pago" class="form-label">
                                         <i class="bi bi-calendar"></i> Fecha de Pago *
                                     </label>
-                                    <input type="date" 
-                                           name="fecha_pago" 
-                                           id="fecha_pago" 
-                                           class="form-control @error('fecha_pago') is-invalid @enderror" 
+                                    <input type="date"
+                                           name="fecha_pago"
+                                           id="fecha_pago"
+                                           class="form-control @error('fecha_pago') is-invalid @enderror"
                                            value="{{ old('fecha_pago', $lotePago->fecha_pago->format('Y-m-d')) }}"
                                            required>
                                     @error('fecha_pago')
@@ -95,8 +94,8 @@
                                     <label for="metodo_pago" class="form-label">
                                         <i class="bi bi-credit-card"></i> Método de Pago *
                                     </label>
-                                    <select name="metodo_pago" 
-                                            id="metodo_pago" 
+                                    <select name="metodo_pago"
+                                            id="metodo_pago"
                                             class="form-control @error('metodo_pago') is-invalid @enderror"
                                             required>
                                         <option value="">Seleccionar método...</option>
@@ -120,10 +119,10 @@
                                     <label for="referencia" class="form-label">
                                         <i class="bi bi-hash"></i> Referencia
                                     </label>
-                                    <input type="text" 
-                                           name="referencia" 
-                                           id="referencia" 
-                                           class="form-control @error('referencia') is-invalid @enderror" 
+                                    <input type="text"
+                                           name="referencia"
+                                           id="referencia"
+                                           class="form-control @error('referencia') is-invalid @enderror"
                                            value="{{ old('referencia', $lotePago->referencia) }}"
                                            placeholder="Número de transferencia, cheque, etc.">
                                     @error('referencia')
@@ -139,9 +138,9 @@
                                     <label for="comprobante_imagen" class="form-label">
                                         <i class="bi bi-file-earmark-image"></i> Comprobante de Pago
                                     </label>
-                                    <input type="file" 
-                                           name="comprobante_imagen" 
-                                           id="comprobante_imagen" 
+                                    <input type="file"
+                                           name="comprobante_imagen"
+                                           id="comprobante_imagen"
                                            class="form-control @error('comprobante_imagen') is-invalid @enderror"
                                            accept="image/*">
                                     <small class="form-text text-muted">
@@ -157,8 +156,8 @@
                                     <div class="mb-3">
                                         <label class="form-label">Comprobante Actual</label>
                                         <div>
-                                            <a href="{{ asset('uploads/comprobantes/' . $lotePago->comprobante_imagen) }}" 
-                                               target="_blank" 
+                                            <a href="{{ asset('uploads/comprobantes/' . $lotePago->comprobante_imagen) }}"
+                                               target="_blank"
                                                class="btn btn-outline-primary btn-sm">
                                                 <i class="bi bi-file-earmark-image"></i> Ver Comprobante Actual
                                             </a>
@@ -177,9 +176,9 @@
                                     <label for="observaciones" class="form-label">
                                         <i class="bi bi-chat-text"></i> Observaciones
                                     </label>
-                                    <textarea name="observaciones" 
-                                              id="observaciones" 
-                                              class="form-control @error('observaciones') is-invalid @enderror" 
+                                    <textarea name="observaciones"
+                                              id="observaciones"
+                                              class="form-control @error('observaciones') is-invalid @enderror"
                                               rows="3"
                                               placeholder="Observaciones adicionales sobre el lote de pago...">{{ old('observaciones', $lotePago->observaciones) }}</textarea>
                                     @error('observaciones')
@@ -194,8 +193,8 @@
                             <div class="col-md-3">
                                 <div class="mb-3">
                                     <label class="form-label">Cantidad de Comisiones</label>
-                                    <input type="text" 
-                                           class="form-control" 
+                                    <input type="text"
+                                           class="form-control"
                                            value="{{ $lotePago->cantidad_comisiones }}"
                                            readonly>
                                 </div>
@@ -203,8 +202,8 @@
                             <div class="col-md-3">
                                 <div class="mb-3">
                                     <label class="form-label">Monto Total</label>
-                                    <input type="text" 
-                                           class="form-control text-success" 
+                                    <input type="text"
+                                           class="form-control text-success"
                                            value="{{ $config->currency_simbol }}{{ number_format($lotePago->monto_total, 2) }}"
                                            readonly>
                                 </div>
@@ -212,8 +211,8 @@
                             <div class="col-md-3">
                                 <div class="mb-3">
                                     <label class="form-label">Usuario Creador</label>
-                                    <input type="text" 
-                                           class="form-control" 
+                                    <input type="text"
+                                           class="form-control"
                                            value="{{ $lotePago->usuario->name ?? 'N/A' }}"
                                            readonly>
                                 </div>
@@ -221,8 +220,8 @@
                             <div class="col-md-3">
                                 <div class="mb-3">
                                     <label class="form-label">Fecha Creación</label>
-                                    <input type="text" 
-                                           class="form-control" 
+                                    <input type="text"
+                                           class="form-control"
                                            value="{{ $lotePago->created_at->format('d/m/Y H:i') }}"
                                            readonly>
                                 </div>
@@ -235,7 +234,7 @@
                 <div class="card mb-4">
                     <div class="card-header">
                         <h5 class="mb-0">
-                            <i class="bi bi-list-ul"></i> 
+                            <i class="bi bi-list-ul"></i>
                             Comisiones Incluidas en este Lote
                         </h5>
                         <small class="text-muted">
@@ -267,7 +266,7 @@
                                                     {{ $pago->comision->commissionable->name ?? 'Usuario eliminado' }}
                                                     <small class="text-muted">(Vendedor)</small>
                                                 @else
-                                                    {{ $pago->comision->commissionable->nombre ?? 'N/A' }} 
+                                                    {{ $pago->comision->commissionable->nombre ?? 'N/A' }}
                                                     {{ $pago->comision->commissionable->apellido ?? '' }}
                                                     <small class="text-muted">(Trabajador)</small>
                                                 @endif
@@ -302,14 +301,14 @@
                                                 @php
                                                     $badgeColor = 'secondary';
                                                     switch($pago->comision->tipo_comision) {
-                                                        case 'meta_venta': 
-                                                            $badgeColor = 'primary'; 
+                                                        case 'meta_venta':
+                                                            $badgeColor = 'primary';
                                                             break;
-                                                        case 'mecanico': 
-                                                            $badgeColor = 'warning'; 
+                                                        case 'mecanico':
+                                                            $badgeColor = 'warning';
                                                             break;
-                                                        case 'carwash': 
-                                                            $badgeColor = 'info'; 
+                                                        case 'carwash':
+                                                            $badgeColor = 'info';
                                                             break;
                                                     }
 
@@ -327,7 +326,7 @@
                                                                 break;
                                                             case 5:
                                                                 $metaInfo = [
-                                                                    'nombre' => 'Plata', 
+                                                                    'nombre' => 'Plata',
                                                                     'color' => 'secondary',
                                                                     'rango' => '$2.5K - $5K'
                                                                 ];
@@ -335,7 +334,7 @@
                                                             case 8:
                                                                 $metaInfo = [
                                                                     'nombre' => 'Oro',
-                                                                    'color' => 'success', 
+                                                                    'color' => 'success',
                                                                     'rango' => '$5K+'
                                                                 ];
                                                                 break;
@@ -395,7 +394,7 @@
                             <a href="{{ route('lotes-pago.show', $lotePago) }}" class="btn btn-secondary">
                                 <i class="bi bi-arrow-left"></i> Cancelar
                             </a>
-                            
+
                             <button type="submit" class="btn btn-warning" id="btn-actualizar-lote">
                                 <i class="bi bi-save"></i> Actualizar Lote de Pago
                             </button>
@@ -424,7 +423,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (file) {
             const fileName = file.name;
             const fileSize = (file.size / 1024 / 1024).toFixed(2); // MB
-            
+
             // Crear o actualizar mensaje de preview
             let preview = document.getElementById('file-preview');
             if (!preview) {
@@ -433,9 +432,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 preview.className = 'form-text text-info';
                 this.parentNode.appendChild(preview);
             }
-            
+
             preview.innerHTML = `<i class="bi bi-file-earmark-image"></i> Archivo seleccionado: ${fileName} (${fileSize} MB)`;
-            
+
             // Validar tamaño
             if (file.size > 2 * 1024 * 1024) { // 2MB
                 preview.className = 'form-text text-danger';

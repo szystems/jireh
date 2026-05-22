@@ -23,15 +23,15 @@
                     $totalCotizaciones = $cotizaciones->count();
                     $cotizacionesGeneradas = $cotizaciones->filter(function($c) { return $c->estado === 'Generado'; })->count();
                     $cotizacionesAprobadas = $cotizaciones->filter(function($c) { return $c->estado === 'Aprobado'; })->count();
-                    
+
                     // Para las generadas, calcular vigentes/vencidas
-                    $cotizacionesVigentes = $cotizaciones->filter(function($c) { 
-                        return $c->estado === 'Generado' && $c->esta_vigente; 
+                    $cotizacionesVigentes = $cotizaciones->filter(function($c) {
+                        return $c->estado === 'Generado' && $c->esta_vigente;
                     })->count();
-                    $cotizacionesVencidas = $cotizaciones->filter(function($c) { 
-                        return $c->estado === 'Generado' && !$c->esta_vigente; 
+                    $cotizacionesVencidas = $cotizaciones->filter(function($c) {
+                        return $c->estado === 'Generado' && !$c->esta_vigente;
                     })->count();
-                    
+
                     $totalDescuentos = $cotizaciones->sum(function($cotizacion) {
                         $descuento = 0;
                         foreach ($cotizacion->detalleCotizaciones as $detalle) {
@@ -177,7 +177,7 @@
                                                     @else
                                                         <span class="badge bg-info">Generado</span>
                                                     @endif
-                                                    
+
                                                     <!-- Vigencia badge (solo para Generado) -->
                                                     @if($cotizacion->estado === 'Generado')
                                                         <br>
@@ -470,11 +470,11 @@
             } else if (nuevoEstado === 'Generado') {
                 mensaje = '¿Está seguro de regenerar esta cotización?';
             }
-            
+
             if (confirm(mensaje)) {
                 $.ajax({
                     url: '{{ route("admin.cotizaciones.cambiar.estado", ":id") }}'.replace(':id', cotizacionId),
-                    method: 'PUT',
+                    method: 'POST',
                     data: {
                         _token: '{{ csrf_token() }}',
                         estado: nuevoEstado
@@ -490,7 +490,7 @@
                     error: function(xhr, status, error) {
                         console.error('Error completo:', xhr);
                         let errorMessage = 'Error desconocido';
-                        
+
                         if (xhr.responseJSON && xhr.responseJSON.message) {
                             errorMessage = xhr.responseJSON.message;
                         } else if (xhr.responseText) {
@@ -498,7 +498,7 @@
                         } else {
                             errorMessage = error;
                         }
-                        
+
                         alert('Error al cambiar el estado: ' + errorMessage);
                     }
                 });

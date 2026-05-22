@@ -74,7 +74,6 @@
 
                             <form id="clienteForm" action="{{ url('update-cliente/'.$cliente->id) }}" method="POST" enctype="multipart/form-data">
                                 @csrf
-                                @method('PUT')
                                 <div class="row">
                                     <!-- Sección de información personal -->
                                     <div class="col-12">

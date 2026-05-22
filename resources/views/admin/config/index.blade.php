@@ -82,7 +82,6 @@
 
                                             <form id="configForm" action="{{ url('update-config') }}" method="POST" enctype="multipart/form-data">
                                                 @csrf
-                                                @method('PUT')
 
                                                 <!-- Sección de Moneda y Finanzas -->
                                                 <div class="card mb-4 border">

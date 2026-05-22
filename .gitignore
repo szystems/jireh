@@ -18,6 +18,9 @@
 !.env.example
 .env_*
 
+# --- Credenciales del servidor (NUNCA subir a GitHub) ---
+docs/CREDENCIALES_SERVIDOR.md
+
 # --- Database Dumps & Backups ---
 *.sql
 *.sql.gz

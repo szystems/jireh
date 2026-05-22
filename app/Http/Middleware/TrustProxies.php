@@ -9,10 +9,12 @@ class TrustProxies extends Middleware
 {
     /**
      * The trusted proxies for this application.
+     * Se confía en todos los proxies porque el servidor está detrás de Cloudflare.
+     * Esto permite leer la IP real del cliente desde X-Forwarded-For / CF-Connecting-IP.
      *
      * @var array<int, string>|string|null
      */
-    protected $proxies;
+    protected $proxies = '*';
 
     /**
      * The headers that should be used to detect proxies.

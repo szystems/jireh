@@ -34,7 +34,7 @@
                     $totalMetas = $metas->count();
                     $metasActivas = $metas->where('estado', true)->count();
                     $metasInactivas = $metas->where('estado', false)->count();
-                    
+
                     $metasPorPeriodo = $metas->groupBy('periodo')->map(function($metas, $periodo) {
                         return [
                             'periodo' => ucfirst($periodo),
@@ -42,7 +42,7 @@
                             'activas' => $metas->where('estado', true)->count()
                         ];
                     });
-                    
+
                     $comisionPromedio = $metas->where('estado', true)->avg('porcentaje_comision') ?? 0;
                 @endphp
 
@@ -119,23 +119,23 @@
                                 @endisset
                             </div>
                             <div class="btn-group" role="group" aria-label="Filtros de período">
-                                <a href="{{ route('metas-ventas.index') }}" 
+                                <a href="{{ route('metas-ventas.index') }}"
                                    class="btn {{ !isset($filtroAplicado) ? 'btn-primary' : 'btn-outline-primary' }}">
                                     <i class="bi bi-list me-1"></i> Todas
                                 </a>
-                                <a href="{{ route('metas-ventas.por-periodo', 'mensual') }}" 
+                                <a href="{{ route('metas-ventas.por-periodo', 'mensual') }}"
                                    class="btn {{ (isset($filtroAplicado) && $filtroAplicado['valor'] == 'mensual') ? 'btn-info' : 'btn-outline-info' }}">
                                     <i class="bi bi-calendar-month me-1"></i> Mensuales
                                 </a>
-                                <a href="{{ route('metas-ventas.por-periodo', 'trimestral') }}" 
+                                <a href="{{ route('metas-ventas.por-periodo', 'trimestral') }}"
                                    class="btn {{ (isset($filtroAplicado) && $filtroAplicado['valor'] == 'trimestral') ? 'btn-warning' : 'btn-outline-warning' }}">
                                     <i class="bi bi-calendar3 me-1"></i> Trimestrales
                                 </a>
-                                <a href="{{ route('metas-ventas.por-periodo', 'semestral') }}" 
+                                <a href="{{ route('metas-ventas.por-periodo', 'semestral') }}"
                                    class="btn {{ (isset($filtroAplicado) && $filtroAplicado['valor'] == 'semestral') ? 'btn-secondary' : 'btn-outline-secondary' }}">
                                     <i class="bi bi-calendar2-range me-1"></i> Semestrales
                                 </a>
-                                <a href="{{ route('metas-ventas.por-periodo', 'anual') }}" 
+                                <a href="{{ route('metas-ventas.por-periodo', 'anual') }}"
                                    class="btn {{ (isset($filtroAplicado) && $filtroAplicado['valor'] == 'anual') ? 'btn-success' : 'btn-outline-success' }}">
                                     <i class="bi bi-calendar-year me-1"></i> Anuales
                                 </a>
@@ -188,7 +188,7 @@
                                                 </td>
                                                 <td>
                                                     <span class="badge bg-info">
-                                                        Q{{ number_format($meta->monto_minimo, 2) }} 
+                                                        Q{{ number_format($meta->monto_minimo, 2) }}
                                                         @if($meta->monto_maximo)
                                                             - Q{{ number_format($meta->monto_maximo, 2) }}
                                                         @else
@@ -200,11 +200,11 @@
                                                     <span class="badge bg-success fs-6">{{ $meta->porcentaje_comision }}%</span>
                                                 </td>
                                                 <td>
-                                                    <span class="badge 
-                                                        @if($meta->periodo == 'mensual') bg-info 
-                                                        @elseif($meta->periodo == 'trimestral') bg-warning 
-                                                        @elseif($meta->periodo == 'anual') bg-success 
-                                                        @else bg-secondary 
+                                                    <span class="badge
+                                                        @if($meta->periodo == 'mensual') bg-info
+                                                        @elseif($meta->periodo == 'trimestral') bg-warning
+                                                        @elseif($meta->periodo == 'anual') bg-success
+                                                        @else bg-secondary
                                                         @endif">
                                                         {{ ucfirst($meta->periodo) }}
                                                     </span>
@@ -222,13 +222,12 @@
                                                 </td>
                                                 <td class="text-center">
                                                     <!-- Botón Toggle Estado -->
-                                                    <form action="{{ route('metas-ventas.toggle-estado', $meta) }}" 
-                                                          method="POST" 
+                                                    <form action="{{ route('metas-ventas.toggle-estado', $meta) }}"
+                                                          method="POST"
                                                           style="display: inline;">
                                                         @csrf
-                                                        @method('PATCH')
-                                                        <button type="submit" 
-                                                                class="btn btn-{{ $meta->estado ? 'success' : 'danger' }} btn-sm" 
+                                                        <button type="submit"
+                                                                class="btn btn-{{ $meta->estado ? 'success' : 'danger' }} btn-sm"
                                                                 title="{{ $meta->estado ? 'Meta activa - Clic para desactivar' : 'Meta inactiva - Clic para activar' }}"
                                                                 onclick="return confirm('¿Estás seguro de {{ $meta->estado ? 'desactivar' : 'activar' }} esta meta?')">
                                                             <i class="bi bi-{{ $meta->estado ? 'toggle-on' : 'toggle-off' }}"></i>
@@ -238,23 +237,23 @@
                                                 <td>
                                                     <div class="btn-group btn-group-sm" role="group">
                                                         <!-- Botón Ver -->
-                                                        <a href="{{ route('metas-ventas.show', $meta) }}" 
-                                                           class="btn btn-info" 
+                                                        <a href="{{ route('metas-ventas.show', $meta) }}"
+                                                           class="btn btn-info"
                                                            title="Ver detalles">
                                                             <i class="bi bi-eye"></i>
                                                         </a>
-                                                        
+
                                                         <!-- Botón Editar -->
-                                                        <a href="{{ route('metas-ventas.edit', $meta) }}" 
-                                                           class="btn btn-warning {{ !$meta->estado ? 'disabled' : '' }}" 
+                                                        <a href="{{ route('metas-ventas.edit', $meta) }}"
+                                                           class="btn btn-warning {{ !$meta->estado ? 'disabled' : '' }}"
                                                            title="Editar meta">
                                                             <i class="bi bi-pencil"></i>
                                                         </a>
-                                                        
+
                                                         <!-- Botón Eliminar -->
-                                                        <button type="button" 
-                                                                class="btn btn-danger" 
-                                                                data-bs-toggle="modal" 
+                                                        <button type="button"
+                                                                class="btn btn-danger"
+                                                                data-bs-toggle="modal"
                                                                 data-bs-target="#deleteModal-{{ $meta->id }}"
                                                                 title="Eliminar meta">
                                                             <i class="bi bi-trash"></i>
@@ -324,7 +323,6 @@
                         </button>
                         <form action="{{ route('metas-ventas.destroy', $meta) }}" method="POST" style="display: inline;">
                             @csrf
-                            @method('DELETE')
                             <button type="submit" class="btn btn-danger">
                                 <i class="bi bi-trash me-1"></i>Eliminar Meta
                             </button>

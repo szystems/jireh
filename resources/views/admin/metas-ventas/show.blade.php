@@ -76,7 +76,7 @@
                                 <h6 class="text-muted">Rango de Montos</h6>
                                 <h4 class="text-primary">{{ $metaVenta->rango_formateado }}</h4>
                             </div>
-                            
+
                             <div class="mb-3">
                                 <h6 class="text-muted">Porcentaje de Comisión</h6>
                                 <h3 class="text-success">{{ $metaVenta->porcentaje_formateado }}</h3>
@@ -91,8 +91,8 @@
                                         <label for="simulador_monto" class="form-label">Monto de ventas:</label>
                                         <div class="input-group input-group-sm">
                                             <span class="input-group-text">Q</span>
-                                            <input type="number" id="simulador_monto" class="form-control" 
-                                                   value="{{ ($metaVenta->monto_minimo + ($metaVenta->monto_maximo ?: ($metaVenta->monto_minimo + 10000))) / 2 }}" 
+                                            <input type="number" id="simulador_monto" class="form-control"
+                                                   value="{{ ($metaVenta->monto_minimo + ($metaVenta->monto_maximo ?: ($metaVenta->monto_minimo + 10000))) / 2 }}"
                                                    step="100" min="0">
                                         </div>
                                     </div>
@@ -112,17 +112,15 @@
                             <div class="d-grid gap-2">
                                 <form action="{{ route('metas-ventas.toggle-estado', $metaVenta) }}" method="POST">
                                     @csrf
-                                    @method('PATCH')
                                     <button type="submit" class="btn btn-outline-{{ $metaVenta->estado ? 'secondary' : 'success' }} w-100">
                                         <i class="bi bi-{{ $metaVenta->estado ? 'toggle-off' : 'toggle-on' }}"></i>
                                         {{ $metaVenta->estado ? 'Desactivar' : 'Activar' }} Meta
                                     </button>
                                 </form>
-                                
-                                <form action="{{ route('metas-ventas.destroy', $metaVenta) }}" method="POST" 
+
+                                <form action="{{ route('metas-ventas.destroy', $metaVenta) }}" method="POST"
                                       onsubmit="return confirm('¿Estás seguro de eliminar esta meta?')">
                                     @csrf
-                                    @method('DELETE')
                                     <button type="submit" class="btn btn-outline-danger w-100">
                                         <i class="bi bi-trash"></i> Eliminar Meta
                                     </button>
@@ -143,10 +141,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const porcentajeComision = {{ $metaVenta->porcentaje_comision }};
     const montoMinimo = {{ $metaVenta->monto_minimo }};
     const montoMaximo = {{ $metaVenta->monto_maximo ?: 'null' }};
-    
+
     function calcularComision() {
         const monto = parseFloat(simuladorMonto.value) || 0;
-        
+
         // Verificar si el monto está en el rango de esta meta
         if (monto >= montoMinimo && (montoMaximo === null || monto <= montoMaximo)) {
             const comision = monto * (porcentajeComision / 100);
@@ -157,7 +155,7 @@ document.addEventListener('DOMContentLoaded', function() {
             comisionResultado.className = 'text-warning';
         }
     }
-    
+
     simuladorMonto.addEventListener('input', calcularComision);
     calcularComision(); // Calcular inicial
 });

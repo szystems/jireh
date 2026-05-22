@@ -41,7 +41,6 @@
 
                             <form action="{{ url('update-ingreso/'.$ingreso->id) }}" method="POST" enctype="multipart/form-data">
                                 @csrf
-                                @method('PUT')
 
                                 <!-- Datos básicos del ingreso -->
                                 <div class="row gx-3">
@@ -289,7 +288,7 @@
                     cantidadInput.min = "1";
                 }
                 cantidadInput.value = "";
-                
+
                 // Agregar atributo para identificar tipo (para validaciones)
                 cantidadInput.setAttribute('data-unidad-tipo', unidadTipo);
             }
@@ -298,10 +297,10 @@
         // Validación no intrusiva para cantidad - permite escribir libremente
         cantidadInput.addEventListener('input', function (event) {
             const value = event.target.value;
-            
+
             // Solo limpiar caracteres obviamente inválidos, pero permitir estados temporales
             const cleanValue = value.replace(/[^0-9.]/g, '');
-            
+
             // Evitar múltiples puntos decimales
             const parts = cleanValue.split('.');
             if (parts.length > 2) {
@@ -316,16 +315,16 @@
             const step = event.target.step || '1';
             const min = event.target.min || '1';
             let value = event.target.value.trim();
-            
+
             // Si está vacío, establecer valor por defecto
             if (value === '' || value === '.') {
                 value = step === '1' ? '1' : '1.00';
                 event.target.value = value;
                 return;
             }
-            
+
             const numValue = parseFloat(value);
-            
+
             if (step === '1') {
                 // Para unidades, convertir a entero y validar mínimo
                 const intValue = Math.floor(numValue);
@@ -348,13 +347,13 @@
         // Validación no intrusiva para precios
         ['precio_compra', 'precio_venta'].forEach(function(fieldId) {
             const input = document.getElementById(fieldId);
-            
+
             input.addEventListener('input', function(event) {
                 const value = event.target.value;
-                
+
                 // Solo limpiar caracteres obviamente inválidos
                 const cleanValue = value.replace(/[^0-9.]/g, '');
-                
+
                 // Evitar múltiples puntos decimales
                 const parts = cleanValue.split('.');
                 if (parts.length > 2) {
@@ -366,12 +365,12 @@
 
             input.addEventListener('blur', function(event) {
                 let value = event.target.value.trim();
-                
+
                 if (value === '' || value === '.') {
                     event.target.value = '0.00';
                     return;
                 }
-                
+
                 const numValue = parseFloat(value);
                 if (isNaN(numValue) || numValue < 0) {
                     event.target.value = '0.00';
@@ -677,44 +676,44 @@
         setTimeout(function() {
             actualizarTotal();
             actualizarEstadoTabla();
-            
+
             // Aplicar validaciones no intrusivas a campos de cantidad existentes
             aplicarValidacionesCantidad();
         }, 100);
-        
+
         // Función para aplicar validaciones no intrusivas a campos de cantidad
         function aplicarValidacionesCantidad() {
             const cantidadInputs = document.querySelectorAll('.cantidad-input');
             const precioInputs = document.querySelectorAll('.precio-compra, input[name*="precio_venta"]');
-            
+
             cantidadInputs.forEach(function(input) {
                 // Remover listeners existentes para evitar duplicados
                 input.removeEventListener('input', validarInputCantidad);
                 input.removeEventListener('blur', validarBlurCantidad);
-                
+
                 // Agregar nuevos listeners
                 input.addEventListener('input', validarInputCantidad);
                 input.addEventListener('blur', validarBlurCantidad);
             });
-            
+
             precioInputs.forEach(function(input) {
                 // Remover listeners existentes para evitar duplicados
                 input.removeEventListener('input', validarInputPrecio);
                 input.removeEventListener('blur', validarBlurPrecio);
-                
+
                 // Agregar nuevos listeners
                 input.addEventListener('input', validarInputPrecio);
                 input.addEventListener('blur', validarBlurPrecio);
             });
         }
-        
+
         // Función de validación de input para cantidad
         function validarInputCantidad(event) {
             const value = event.target.value;
-            
+
             // Solo limpiar caracteres obviamente inválidos, pero permitir estados temporales
             const cleanValue = value.replace(/[^0-9.]/g, '');
-            
+
             // Evitar múltiples puntos decimales
             const parts = cleanValue.split('.');
             if (parts.length > 2) {
@@ -723,21 +722,21 @@
                 event.target.value = cleanValue;
             }
         }
-        
+
         // Función de validación de blur para cantidad
         function validarBlurCantidad(event) {
             const unidadTipo = event.target.getAttribute('data-tipo') || 'unidad';
             let value = event.target.value.trim();
-            
+
             // Si está vacío, establecer valor por defecto
             if (value === '' || value === '.') {
                 value = unidadTipo === 'unidad' ? '1' : '1.00';
                 event.target.value = value;
                 return;
             }
-            
+
             const numValue = parseFloat(value);
-            
+
             if (unidadTipo === 'unidad') {
                 // Para unidades, convertir a entero y validar mínimo
                 const intValue = Math.floor(numValue);
@@ -755,18 +754,18 @@
                     event.target.value = numValue.toFixed(2);
                 }
             }
-            
+
             // Recalcular total después de modificar el valor
             setTimeout(actualizarTotal, 10);
         }
-        
+
         // Función de validación de input para precios
         function validarInputPrecio(event) {
             const value = event.target.value;
-            
+
             // Solo limpiar caracteres obviamente inválidos, pero permitir estados temporales
             const cleanValue = value.replace(/[^0-9.]/g, '');
-            
+
             // Evitar múltiples puntos decimales
             const parts = cleanValue.split('.');
             if (parts.length > 2) {
@@ -775,16 +774,16 @@
                 event.target.value = cleanValue;
             }
         }
-        
+
         // Función de validación de blur para precios
         function validarBlurPrecio(event) {
             let value = event.target.value.trim();
-            
+
             if (value === '' || value === '.') {
                 event.target.value = '0.00';
                 return;
             }
-            
+
             const numValue = parseFloat(value);
             if (isNaN(numValue) || numValue < 0) {
                 event.target.value = '0.00';
@@ -792,7 +791,7 @@
                 // Formatear a 2 decimales
                 event.target.value = numValue.toFixed(2);
             }
-            
+
             // Recalcular total después de modificar el valor
             setTimeout(actualizarTotal, 10);
         }

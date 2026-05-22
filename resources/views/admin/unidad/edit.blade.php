@@ -47,7 +47,6 @@
 
                             <form action="{{ url('update-unidad/'.$unidad->id) }}" method="POST">
                                 @csrf
-                                @method('PUT')
                                 <div class="row gx-3">
                                     <div class="col-md-4 mb-3">
                                         <div class="mb-3">

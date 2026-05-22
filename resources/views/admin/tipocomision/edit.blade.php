@@ -51,7 +51,6 @@
 
                             <form action="{{ url('update-tipo-comision/'.$tipocomision->id) }}" method="POST">
                                 @csrf
-                                @method('PUT')
                                 <div class="row gx-3">
                                     <div class="col-md-6 mb-3">
                                         <div class="form-group">

@@ -36,7 +36,7 @@
             <div class="card mb-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h4 class="mb-0">
-                        <i class="bi bi-file-earmark-plus"></i> 
+                        <i class="bi bi-file-earmark-plus"></i>
                         Lote de Pago: {{ $lotePago->numero_lote }}
                     </h4>
                     <div class="btn-group">
@@ -122,7 +122,7 @@
                                 <tr>
                                     <td><strong>Comprobante:</strong></td>
                                     <td>
-                                        <a href="{{ asset('uploads/comprobantes/' . $lotePago->comprobante_imagen) }}" 
+                                        <a href="{{ asset('uploads/comprobantes/' . $lotePago->comprobante_imagen) }}"
                                            target="_blank" class="btn btn-sm btn-outline-primary">
                                             <i class="bi bi-file-earmark-image"></i> Ver Comprobante
                                         </a>
@@ -139,7 +139,7 @@
             <div class="card">
                 <div class="card-header">
                     <h5 class="mb-0">
-                        <i class="bi bi-list-ul"></i> 
+                        <i class="bi bi-list-ul"></i>
                         Comisiones Incluidas en este Lote
                     </h5>
                 </div>
@@ -169,7 +169,7 @@
                                                 {{ $pago->comision->commissionable->name ?? 'Usuario eliminado' }}
                                                 <small class="text-muted">(Vendedor)</small>
                                             @else
-                                                {{ $pago->comision->commissionable->nombre ?? 'N/A' }} 
+                                                {{ $pago->comision->commissionable->nombre ?? 'N/A' }}
                                                 {{ $pago->comision->commissionable->apellido ?? '' }}
                                                 <small class="text-muted">(Trabajador)</small>
                                             @endif
@@ -189,40 +189,40 @@
                                                         $resumenMeta = $pago->comision->info_meta_resumen;
                                                         $metaInfo = $resumenMeta['meta_info'] ?? null;
                                                     @endphp
-                                                    
+
                                                     <div class="meta-ventas-resumen">
                                                         <div class="d-flex align-items-center mb-1">
                                                             <i class="bi bi-trophy text-warning me-1"></i>
                                                             <strong>Meta de Ventas - {{ $metaInfo['nombre'] ?? 'N/A' }}</strong>
                                                         </div>
-                                                        
+
                                                         <div class="row text-sm">
                                                             <div class="col-12">
                                                                 <small class="text-muted">
-                                                                    <i class="bi bi-calendar-month"></i> 
+                                                                    <i class="bi bi-calendar-month"></i>
                                                                     Período: {{ $resumenMeta['periodo'] ?? 'N/A' }}
                                                                 </small>
                                                             </div>
                                                             <div class="col-12">
                                                                 <small class="text-muted">
-                                                                    <i class="bi bi-cart-check"></i> 
-                                                                    {{ $resumenMeta['cantidad_ventas'] ?? 0 }} ventas - 
+                                                                    <i class="bi bi-cart-check"></i>
+                                                                    {{ $resumenMeta['cantidad_ventas'] ?? 0 }} ventas -
                                                                     {{ $config->currency_simbol }}{{ number_format($resumenMeta['total_vendido'] ?? 0, 2) }}
                                                                 </small>
                                                             </div>
                                                             @if(isset($resumenMeta['fecha_inicio']) && $resumenMeta['cantidad_ventas'] > 0)
                                                             <div class="col-12">
                                                                 <small class="text-muted">
-                                                                    <i class="bi bi-calendar-range"></i> 
+                                                                    <i class="bi bi-calendar-range"></i>
                                                                     {{ $resumenMeta['fecha_inicio'] }} - {{ $resumenMeta['fecha_fin'] }}
                                                                 </small>
                                                             </div>
                                                             @endif
                                                         </div>
-                                                        
+
                                                         @if($resumenMeta['cantidad_ventas'] > 0)
                                                         <div class="mt-2">
-                                                            <button class="btn btn-sm btn-outline-primary" 
+                                                            <button class="btn btn-sm btn-outline-primary"
                                                                     onclick="verDetallesMeta({{ $pago->comision->id }})"
                                                                     title="Ver todas las ventas que conforman esta meta">
                                                                 <i class="bi bi-list-ul"></i> Ver {{ $resumenMeta['cantidad_ventas'] }} ventas
@@ -241,14 +241,14 @@
                                             @php
                                                 $badgeColor = 'secondary';
                                                 switch($pago->comision->tipo_comision) {
-                                                    case 'meta_venta': 
-                                                        $badgeColor = 'primary'; 
+                                                    case 'meta_venta':
+                                                        $badgeColor = 'primary';
                                                         break;
-                                                    case 'mecanico': 
-                                                        $badgeColor = 'warning'; 
+                                                    case 'mecanico':
+                                                        $badgeColor = 'warning';
                                                         break;
-                                                    case 'carwash': 
-                                                        $badgeColor = 'info'; 
+                                                    case 'carwash':
+                                                        $badgeColor = 'info';
                                                         break;
                                                 }
 
@@ -266,7 +266,7 @@
                                                             break;
                                                         case 5:
                                                             $metaInfo = [
-                                                                'nombre' => 'Plata', 
+                                                                'nombre' => 'Plata',
                                                                 'color' => 'secondary',
                                                                 'rango' => '$2.5K - $5K'
                                                             ];
@@ -274,7 +274,7 @@
                                                         case 8:
                                                             $metaInfo = [
                                                                 'nombre' => 'Oro',
-                                                                'color' => 'success', 
+                                                                'color' => 'success',
                                                                 'rango' => '$5K+'
                                                             ];
                                                             break;
@@ -345,7 +345,7 @@
                 <div class="card mt-4">
                     <div class="card-header bg-warning text-dark">
                         <h6 class="mb-0">
-                            <i class="bi bi-exclamation-triangle"></i> 
+                            <i class="bi bi-exclamation-triangle"></i>
                             Acciones de Administración
                         </h6>
                     </div>
@@ -358,11 +358,10 @@
                             <a href="{{ route('lotes-pago.edit', $lotePago) }}" class="btn btn-warning">
                                 <i class="bi bi-pencil"></i> Editar Lote
                             </a>
-                            <form method="POST" action="{{ route('lotes-pago.destroy', $lotePago) }}" 
+                            <form method="POST" action="{{ route('lotes-pago.destroy', $lotePago) }}"
                                   style="display: inline;"
                                   onsubmit="return confirm('¿Está seguro de anular este lote de pago? Esta acción anulará todos los pagos asociados y no se puede deshacer.')">
                                 @csrf
-                                @method('DELETE')
                                 <button type="submit" class="btn btn-danger">
                                     <i class="bi bi-x-circle"></i> Anular Lote
                                 </button>
@@ -407,11 +406,11 @@
 <script>
 function verDetallesMeta(comisionId) {
     console.log('Cargando detalles de meta para comisión:', comisionId);
-    
+
     // Mostrar el modal
     const modal = new bootstrap.Modal(document.getElementById('modalDetallesMeta'));
     modal.show();
-    
+
     // Cargar el contenido via AJAX
     fetch(`/comisiones/${comisionId}/detalles-meta`)
         .then(response => response.json())
@@ -421,7 +420,7 @@ function verDetallesMeta(comisionId) {
             } else {
                 document.getElementById('contenidoDetallesMeta').innerHTML = `
                     <div class="alert alert-danger">
-                        <i class="bi bi-exclamation-triangle"></i> 
+                        <i class="bi bi-exclamation-triangle"></i>
                         Error al cargar los detalles: ${data.message || 'Error desconocido'}
                     </div>
                 `;
@@ -431,7 +430,7 @@ function verDetallesMeta(comisionId) {
             console.error('Error:', error);
             document.getElementById('contenidoDetallesMeta').innerHTML = `
                 <div class="alert alert-danger">
-                    <i class="bi bi-exclamation-triangle"></i> 
+                    <i class="bi bi-exclamation-triangle"></i>
                     Error de conexión al cargar los detalles de la meta.
                 </div>
             `;

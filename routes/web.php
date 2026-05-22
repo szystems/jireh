@@ -100,7 +100,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('add-user', [UsersController::class, 'adduser']);
     Route::post('insert-user', [UsersController::class, 'insertuser']);
     Route::get('edit-user/{id}',[UsersController::class,'edituser']);
-    Route::put('update-user/{id}', [UsersController::class, 'updateuser']);
+    Route::post('update-user/{id}', [UsersController::class, 'updateuser']);
     Route::get('delete-user/{id}', [UsersController::class, 'destroyuser']);
     Route::get('pdf-users', [UsersController::class, 'pdf']);
     Route::get('pdf-user/{id}', [UsersController::class, 'pdfuser']);
@@ -111,7 +111,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('add-cliente', [ClienteController::class, 'add']);
     Route::post('insert-cliente', [ClienteController::class, 'insert']);
     Route::get('edit-cliente/{id}',[ClienteController::class,'edit']);
-    Route::put('update-cliente/{id}', [ClienteController::class, 'update']);
+    Route::post('update-cliente/{id}', [ClienteController::class, 'update']);
     Route::get('delete-cliente/{id}', [ClienteController::class, 'destroy']);
     Route::get('pdf-clientes', [ClienteController::class, 'pdf']);
     Route::get('pdf-cliente/{id}', [ClienteController::class, 'pdfcliente']);
@@ -122,7 +122,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('add-vehiculo', [VehiculosController::class, 'add']);
     Route::post('insert-vehiculo',[VehiculosController::class,'insert']);
     Route::get('edit-vehiculo/{id}',[VehiculosController::class,'edit']);
-    Route::put('update-vehiculo/{id}', [VehiculosController::class, 'update']);
+    Route::post('update-vehiculo/{id}', [VehiculosController::class, 'update']);
     Route::get('delete-vehiculo/{id}', [VehiculosController::class, 'destroy']);
     Route::get('print-vehiculos', [VehiculosController::class, 'printvehiculos']);
     Route::get('print-vehiculo', [VehiculosController::class, 'printvehiculo']);
@@ -133,7 +133,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('add-categoria', [CategoriaController::class, 'add']);
     Route::post('insert-categoria',[CategoriaController::class,'insert']);
     Route::get('edit-categoria/{id}',[CategoriaController::class,'edit']);
-    Route::put('update-categoria/{id}', [CategoriaController::class, 'update']);
+    Route::post('update-categoria/{id}', [CategoriaController::class, 'update']);
     Route::get('delete-categoria/{id}', [CategoriaController::class, 'destroy'])->middleware('superAdmin');
 
     //Proveedores
@@ -142,7 +142,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('add-proveedor', [ProveedorController::class, 'add']);
     Route::post('insert-proveedor',[ProveedorController::class,'insert']);
     Route::get('edit-proveedor/{id}',[ProveedorController::class,'edit']);
-    Route::put('update-proveedor/{id}', [ProveedorController::class, 'update']);
+    Route::post('update-proveedor/{id}', [ProveedorController::class, 'update']);
     Route::get('delete-proveedor/{id}', [ProveedorController::class, 'destroy'])->middleware('superAdmin');
     Route::get('pdf-proveedores', [ProveedorController::class, 'pdf']);
     Route::get('pdf-proveedor/{id}', [ProveedorController::class, 'pdfproveedor']);
@@ -153,7 +153,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('add-unidad', [UnidadController::class, 'add']);
     Route::post('insert-unidad',[UnidadController::class,'insert']);
     Route::get('edit-unidad/{id}',[UnidadController::class,'edit']);
-    Route::put('update-unidad/{id}', [UnidadController::class, 'update']);
+    Route::post('update-unidad/{id}', [UnidadController::class, 'update']);
     Route::get('delete-unidad/{id}', [UnidadController::class, 'destroy'])->middleware('superAdmin');
     Route::get('/api/articulos/{articulo}/unidad', [UnidadController::class, 'getUnidadTipo']);
 
@@ -163,7 +163,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('add-tipo-comision', [TipoComisionController::class, 'add']);
     Route::post('insert-tipo-comision',[TipoComisionController::class,'insert']);
     Route::get('edit-tipo-comision/{id}',[TipoComisionController::class,'edit']);
-    Route::put('update-tipo-comision/{id}', [TipoComisionController::class, 'update']);
+    Route::post('update-tipo-comision/{id}', [TipoComisionController::class, 'update']);
     Route::get('delete-tipo-comision/{id}', [TipoComisionController::class, 'destroy']);
 
 
@@ -173,7 +173,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('insert-articulo', [ArticuloController::class, 'insert']);
     Route::get('show-articulo/{id}', [ArticuloController::class, 'show'])->where('id', '[0-9]+');
     Route::get('edit-articulo/{id}', [ArticuloController::class, 'edit'])->where('id', '[0-9]+');
-    Route::put('update-articulo/{id}', [ArticuloController::class, 'update'])->where('id', '[0-9]+');
+    Route::post('update-articulo/{id}', [ArticuloController::class, 'update'])->where('id', '[0-9]+');
     Route::get('delete-articulo/{id}', [ArticuloController::class, 'destroy'])->where('id', '[0-9]+')->middleware('superAdmin');
     Route::get('export-articulos-pdf', [ArticuloController::class, 'exportPdf']);
     Route::get('export-articulo-pdf/{id}', [ArticuloController::class, 'exportPdfSingle']); // Nueva ruta para exportar artículo individual
@@ -187,7 +187,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('insert-ingreso', [IngresoController::class, 'store']);
     Route::get('show-ingreso/{id}', [IngresoController::class, 'show']);
     Route::get('edit-ingreso/{id}', [IngresoController::class, 'edit']);
-    Route::put('update-ingreso/{id}', [IngresoController::class, 'update']);
+    Route::post('update-ingreso/{id}', [IngresoController::class, 'update']);
     Route::get('delete-ingreso/{id}', [IngresoController::class, 'destroy'])->middleware('superAdmin');
     Route::get('ingresos/export/pdf', [IngresoController::class, 'exportPdf'])->name('ingresos.export.pdf');
     Route::get('ingresos/export/excel', [IngresoController::class, 'exportExcel'])->name('ingresos.export.excel');
@@ -200,7 +200,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('add-trabajador', [TrabajadorController::class, 'add']);
     Route::post('insert-trabajador',[TrabajadorController::class,'insert']);
     Route::get('edit-trabajador/{id}',[TrabajadorController::class,'edit']);
-    Route::put('update-trabajador/{id}', [TrabajadorController::class, 'update']);
+    Route::post('update-trabajador/{id}', [TrabajadorController::class, 'update']);
     Route::get('delete-trabajador/{id}', [TrabajadorController::class, 'destroy'])->middleware('superAdmin');
 
     //Tipos de Trabajador (rutas estilo convencional)
@@ -209,7 +209,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('add-tipo-trabajador', [TipoTrabajadorController::class, 'create']);
     Route::post('insert-tipo-trabajador', [TipoTrabajadorController::class, 'store']);
     Route::get('edit-tipo-trabajador/{id}', [TipoTrabajadorController::class, 'edit']);
-    Route::put('update-tipo-trabajador/{id}', [TipoTrabajadorController::class, 'update']);
+    Route::post('update-tipo-trabajador/{id}', [TipoTrabajadorController::class, 'update']);
     Route::get('delete-tipo-trabajador/{id}', [TipoTrabajadorController::class, 'destroy']); // Cambiado de DELETE a GET
 
     //Pagos de Sueldos (solo administradores)
@@ -218,11 +218,11 @@ Route::middleware(['auth'])->group(function () {
     Route::post('pagos-sueldos', [PagoSueldoController::class, 'store'])->name('admin.pago-sueldo.store');
     Route::get('pagos-sueldos/{id}', [PagoSueldoController::class, 'show'])->name('admin.pago-sueldo.show');
     Route::get('pagos-sueldos/{id}/edit', [PagoSueldoController::class, 'edit'])->name('admin.pago-sueldo.edit');
-    Route::put('pagos-sueldos/{id}', [PagoSueldoController::class, 'update'])->name('admin.pago-sueldo.update');
+    Route::post('pagos-sueldos/{id}', [PagoSueldoController::class, 'update'])->name('admin.pago-sueldo.update');
     Route::post('pagos-sueldos/{id}/update-post', [PagoSueldoController::class, 'update'])->name('admin.pago-sueldo.update-post');
-    Route::delete('pagos-sueldos/{id}', [PagoSueldoController::class, 'destroy'])->name('admin.pago-sueldo.destroy');
-    Route::patch('pagos-sueldos/{id}/cambiar-estado', [PagoSueldoController::class, 'cambiarEstado'])->name('admin.pago-sueldo.cambiar-estado');
-    Route::patch('pagos-sueldos/detalle/{id}/estado', [PagoSueldoController::class, 'cambiarEstadoDetalle'])->name('admin.pago-sueldo.cambiar-estado-detalle');
+    Route::post('pagos-sueldos/{id}/delete', [PagoSueldoController::class, 'destroy'])->name('admin.pago-sueldo.destroy');
+    Route::post('pagos-sueldos/{id}/cambiar-estado', [PagoSueldoController::class, 'cambiarEstado'])->name('admin.pago-sueldo.cambiar-estado');
+    Route::post('pagos-sueldos/detalle/{id}/estado', [PagoSueldoController::class, 'cambiarEstadoDetalle'])->name('admin.pago-sueldo.cambiar-estado-detalle');
     Route::get('pagos-sueldos/{id}/pdf', [PagoSueldoController::class, 'generarPDF'])->name('admin.pago-sueldo.pdf');
 
     //inventario
@@ -237,7 +237,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('add-descuento', [DescuentoController::class, 'add']);
     Route::post('insert-descuento',[DescuentoController::class,'insert']);
     Route::get('edit-descuento/{id}',[DescuentoController::class,'edit']);
-    Route::put('update-descuento/{id}', [DescuentoController::class, 'update']);
+    Route::post('update-descuento/{id}', [DescuentoController::class, 'update']);
     Route::get('delete-descuento/{id}', [DescuentoController::class, 'destroy']);
 
     //Ventas
@@ -246,7 +246,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('insert-venta', [VentaController::class, 'store']);
     Route::get('show-venta/{id}', [VentaController::class, 'show'])->name('ventas.show');
     Route::get('edit-venta/{id}', [VentaController::class, 'edit']);
-    Route::put('update-venta/{id}', [VentaController::class, 'update'])->name('admin.ventas.update'); // Named this route
+    Route::post('update-venta/{id}', [VentaController::class, 'update'])->name('admin.ventas.update'); // Named this route
     Route::get('delete-venta/{id}', [VentaController::class, 'destroy']);
     Route::get('venta/export/pdf', [VentaController::class, 'exportPdf'])->name('ventas.export.pdf');
     Route::get('venta/export/excel', [VentaController::class, 'exportExcel'])->name('ventas.export.excel');
@@ -254,17 +254,17 @@ Route::middleware(['auth'])->group(function () {
     Route::post('update-trabajadores-detalle', [VentaController::class, 'updateTrabajadoresDetalle'])->name('ventas.update.trabajadores');
 
     // Rutas para detalles de venta (AJAX)
-    Route::put('ventas/{venta}/detalles/{detalle}', [VentaController::class, 'updateDetalle'])->name('admin.ventas.detalle.update');
-    Route::delete('ventas/{venta}/detalles/{detalle}', [VentaController::class, 'destroyDetalle'])->name('admin.ventas.detalle.destroy');
+    Route::post('ventas/{venta}/detalles/{detalle}', [VentaController::class, 'updateDetalle'])->name('admin.ventas.detalle.update');
+    Route::post('ventas/{venta}/detalles/{detalle}/delete', [VentaController::class, 'destroyDetalle'])->name('admin.ventas.detalle.destroy');
     Route::post('ventas/{venta}/detalles/{detalle}/restore', [VentaController::class, 'restoreDetalle'])->name('admin.ventas.detalle.restore');
 
 
     // Reactivado: Ruta para registrar pagos de ventas
     Route::post('pagos', [PagoController::class, 'store'])->name('pagos.store');
     // Reactivado: Ruta para actualizar pagos de ventas
-    Route::put('pagos/{id}', [PagoController::class, 'update'])->name('pagos.update');
+    Route::post('pagos/{id}', [PagoController::class, 'update'])->name('pagos.update');
     // Reactivado: Ruta para eliminar pagos de ventas
-    Route::delete('pagos/{id}', [PagoController::class, 'destroy'])->name('pagos.destroy');
+    Route::post('pagos/{id}/delete', [PagoController::class, 'destroy'])->name('pagos.destroy');
 
     //Cotizaciones
     Route::get('cotizaciones', [CotizacionController::class, 'index'])->name('admin.cotizaciones.index');
@@ -272,10 +272,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('insert-cotizacion', [CotizacionController::class, 'store'])->name('admin.cotizaciones.store');
     Route::get('show-cotizacion/{id}', [CotizacionController::class, 'show'])->name('admin.cotizaciones.show');
     Route::get('edit-cotizacion/{id}', [CotizacionController::class, 'edit'])->name('admin.cotizaciones.edit');
-    Route::put('update-cotizacion/{id}', [CotizacionController::class, 'update'])->name('admin.cotizaciones.update');
+    Route::post('update-cotizacion/{id}', [CotizacionController::class, 'update'])->name('admin.cotizaciones.update');
     Route::get('delete-cotizacion/{id}', [CotizacionController::class, 'destroy'])->name('admin.cotizaciones.destroy');
     Route::get('cotizacion/export/single/pdf/{id}', [CotizacionController::class, 'exportSinglePdf'])->name('admin.cotizaciones.export.single.pdf');
-    Route::put('cotizacion/{id}/cambiar-estado', [CotizacionController::class, 'cambiarEstado'])->name('admin.cotizaciones.cambiar.estado');
+    Route::post('cotizacion/{id}/cambiar-estado', [CotizacionController::class, 'cambiarEstado'])->name('admin.cotizaciones.cambiar.estado');
 
     //Reportes Articulos
     Route::get('reportearticulos', [ReporteArticuloController::class, 'index']);
@@ -283,7 +283,7 @@ Route::middleware(['auth'])->group(function () {
 
     //config
     Route::get('config', [ConfigController::class, 'index']);
-    Route::put('update-config', [ConfigController::class, 'update']);
+    Route::post('update-config', [ConfigController::class, 'update']);
 
 });
 
@@ -338,8 +338,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{lotePago}', [LotePagoController::class, 'show'])->name('show');
         Route::get('/{lotePago}/edit', [LotePagoController::class, 'edit'])->name('edit');
         Route::get('/{lotePago}/pdf', [LotePagoController::class, 'generarPDFIndividual'])->name('pdf.individual');
-        Route::put('/{lotePago}', [LotePagoController::class, 'update'])->name('update');
-        Route::delete('/{lotePago}', [LotePagoController::class, 'destroy'])->name('destroy');
+        Route::post('/{lotePago}', [LotePagoController::class, 'update'])->name('update');
+        Route::post('/{lotePago}/delete', [LotePagoController::class, 'destroy'])->name('destroy');
     });
 
     // Rutas para reportes de metas de ventas
@@ -397,9 +397,9 @@ Route::middleware(['auth'])->group(function () {
 
         // Rutas para corrección de inconsistencias
         Route::post('/corregir-detalle', [AuditoriaController::class, 'corregirDetalle'])->name('corregir_detalle');
-        Route::delete('/eliminar-detalle/{detalleId}', [AuditoriaController::class, 'eliminarDetalle'])->name('eliminar_detalle');
+        Route::post('/eliminar-detalle/{detalleId}', [AuditoriaController::class, 'eliminarDetalle'])->name('eliminar_detalle');
         Route::post('/fusionar-ventas/{venta1Id}/{venta2Id}', [AuditoriaController::class, 'fusionarVentas'])->name('fusionar_ventas');
-        Route::delete('/eliminar-venta/{ventaId}', [AuditoriaController::class, 'eliminarVenta'])->name('eliminar_venta');
+        Route::post('/eliminar-venta/{ventaId}', [AuditoriaController::class, 'eliminarVenta'])->name('eliminar_venta');
     });
 
     // Rutas para metas de ventas
@@ -409,9 +409,9 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/', [App\Http\Controllers\Admin\MetaVentaController::class, 'store'])->name('store');
         Route::get('/{metaVenta}', [App\Http\Controllers\Admin\MetaVentaController::class, 'show'])->name('show');
         Route::get('/{metaVenta}/edit', [App\Http\Controllers\Admin\MetaVentaController::class, 'edit'])->name('edit');
-        Route::put('/{metaVenta}', [App\Http\Controllers\Admin\MetaVentaController::class, 'update'])->name('update');
-        Route::delete('/{metaVenta}', [App\Http\Controllers\Admin\MetaVentaController::class, 'destroy'])->name('destroy');
-        Route::patch('/{metaVenta}/toggle-estado', [App\Http\Controllers\Admin\MetaVentaController::class, 'toggleEstado'])->name('toggle-estado');
+        Route::post('/{metaVenta}', [App\Http\Controllers\Admin\MetaVentaController::class, 'update'])->name('update');
+        Route::post('/{metaVenta}/delete', [App\Http\Controllers\Admin\MetaVentaController::class, 'destroy'])->name('destroy');
+        Route::post('/{metaVenta}/toggle-estado', [App\Http\Controllers\Admin\MetaVentaController::class, 'toggleEstado'])->name('toggle-estado');
         Route::get('/periodo/{periodo}', [App\Http\Controllers\Admin\MetaVentaController::class, 'porPeriodo'])->name('por-periodo');
         Route::get('/api/meta-por-monto', [App\Http\Controllers\Admin\MetaVentaController::class, 'obtenerMetaPorMonto'])->name('meta-por-monto');
     });

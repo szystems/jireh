@@ -42,7 +42,6 @@
                         <div class="card-body">
                             <form action="{{ url('update-articulo/'.$articulo->id) }}" method="POST" id="form-articulo">
                                 @csrf
-                                @method('PUT')
 
                                 <!-- Información básica siempre visible -->
                                 <div class="section mb-4">

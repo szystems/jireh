@@ -242,20 +242,20 @@
                                                         <a href="{{ route('admin.pago-sueldo.show', $pagoSueldo->id) }}" class="btn btn-sm btn-outline-primary" title="Ver detalle">
                                                             <i class="bi bi-eye"></i>
                                                         </a>
-                                                        
+
                                                         @if (Auth::user()->role_as == 0)
                                                             @if($pagoSueldo->estado == 'pendiente')
                                                                 <a href="{{ route('admin.pago-sueldo.edit', $pagoSueldo->id) }}" class="btn btn-sm btn-outline-warning" title="Editar">
                                                                     <i class="bi bi-pencil"></i>
                                                                 </a>
                                                             @endif
-                                                            
+
                                                             <a href="{{ route('admin.pago-sueldo.pdf', $pagoSueldo->id) }}" class="btn btn-sm btn-outline-info" title="PDF" target="_blank">
                                                                 <i class="bi bi-file-earmark-pdf"></i>
                                                             </a>
-                                                            
+
                                                             @if($pagoSueldo->estado == 'pendiente')
-                                                                <button type="button" class="btn btn-sm btn-outline-danger" title="Cancelar lote" 
+                                                                <button type="button" class="btn btn-sm btn-outline-danger" title="Cancelar lote"
                                                                         onclick="confirmDelete({{ $pagoSueldo->id }}, '{{ $pagoSueldo->numero_lote }}')">
                                                                     <i class="bi bi-x-circle"></i>
                                                                 </button>
@@ -318,7 +318,6 @@
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No, mantener</button>
                     <form id="deleteForm" method="POST" style="display: inline;">
                         @csrf
-                        @method('DELETE')
                         <button type="submit" class="btn btn-warning">
                             <i class="bi bi-x-circle"></i> Sí, cancelar lote
                         </button>

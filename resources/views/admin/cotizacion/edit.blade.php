@@ -28,8 +28,7 @@
                             @endif
                             <form action="{{ route('admin.cotizaciones.update', $cotizacion->id) }}" method="POST" id="form-editar-cotizacion">
                                 @csrf
-                                @method('PUT')
-                                
+
                                 <!-- Campo hidden para detalles a eliminar -->
                                 <input type="hidden" id="detalles-a-eliminar" name="detalles_a_eliminar" value="">
                                 <div class="row gx-3">
@@ -143,7 +142,7 @@
                                                 </div>
                                             </div>
                                         @endif
-                                        
+
                                         <table class="table table-bordered" id="tabla-detalles">
                                             <thead>
                                                 <tr>
@@ -221,7 +220,7 @@
             $('#cliente_id').change(function() {
                 const clienteId = $(this).val();
                 const vehiculoSelect = $('#vehiculo_id');
-                
+
                 vehiculoSelect.empty().append('<option value="">Seleccione un vehículo</option>');
 
                 if (clienteId) {
@@ -238,12 +237,12 @@
                 const option = $(this).find(':selected');
                 const unidadTipo = option.data('unidad-tipo');
                 const cantidadInput = $('#cantidad')[0];
-                
+
                 $('#stock').val(option.data('stock') || '');
                 $('#stock-unidad-abreviatura').text(option.data('unidad-abreviatura') || '');
                 $('#cantidad-unidad-abreviatura').text(option.data('unidad-abreviatura') || '');
                 $('#precio_unitario').val(option.data('precio-venta') || '');
-                
+
                 // Configurar placeholder y valor inicial según tipo de unidad
                 if (unidadTipo === 'decimal') {
                     cantidadInput.placeholder = "Ej: 1.50";
@@ -252,7 +251,7 @@
                     cantidadInput.placeholder = "Ej: 3";
                     cantidadInput.value = "1";
                 }
-                
+
                 // Agregar clase CSS para identificar tipo
                 cantidadInput.setAttribute('data-unidad-tipo', unidadTipo);
             });
@@ -260,10 +259,10 @@
             // Validación no intrusiva para cantidad - permite escribir libremente
             $('#cantidad').on('input', function(event) {
                 const value = event.target.value;
-                
+
                 // Solo limpiar caracteres obviamente inválidos, pero permitir estados temporales
                 const cleanValue = value.replace(/[^0-9.]/g, '');
-                
+
                 // Evitar múltiples puntos decimales
                 const parts = cleanValue.split('.');
                 if (parts.length > 2) {
@@ -277,16 +276,16 @@
             $('#cantidad').on('blur', function(event) {
                 const unidadTipo = event.target.getAttribute('data-unidad-tipo') || 'unidad';
                 let value = event.target.value.trim();
-                
+
                 // Si está vacío, establecer valor por defecto
                 if (value === '' || value === '.') {
                     value = unidadTipo === 'unidad' ? '1' : '1.00';
                     event.target.value = value;
                     return;
                 }
-                
+
                 const numValue = parseFloat(value);
-                
+
                 if (unidadTipo === 'unidad') {
                     // Para unidades, convertir a entero y validar mínimo
                     const intValue = Math.floor(numValue);
@@ -309,10 +308,10 @@
             // Validación no intrusiva para precio unitario
             $('#precio_unitario').on('input', function(event) {
                 const value = event.target.value;
-                
+
                 // Solo limpiar caracteres obviamente inválidos
                 const cleanValue = value.replace(/[^0-9.]/g, '');
-                
+
                 // Evitar múltiples puntos decimales
                 const parts = cleanValue.split('.');
                 if (parts.length > 2) {
@@ -325,12 +324,12 @@
             // Validación final para precio cuando pierde el foco
             $('#precio_unitario').on('blur', function(event) {
                 let value = event.target.value.trim();
-                
+
                 if (value === '' || value === '.') {
                     event.target.value = '0.00';
                     return;
                 }
-                
+
                 const numValue = parseFloat(value);
                 if (isNaN(numValue) || numValue < 0) {
                     event.target.value = '0.00';
@@ -360,7 +359,7 @@
             // Validación adicional según tipo de unidad
             const cantidadInput = $('#cantidad')[0];
             const unidadTipo = cantidadInput.getAttribute('data-unidad-tipo') || 'unidad';
-            
+
             if (unidadTipo === 'unidad') {
                 // Para unidades, verificar que sea un número entero
                 if (cantidad % 1 !== 0) {
@@ -443,13 +442,13 @@
 
         function actualizarTotal() {
             let total = 0;
-            
+
             // Sumar detalles existentes visibles
             $('#detalles-tbody tr[data-detalle-id]:visible').each(function() {
                 const subtotalTexto = $(this).find('td:nth-child(5)').text().replace('$', '').replace(',', '');
                 total += parseFloat(subtotalTexto) || 0;
             });
-            
+
             // Sumar nuevos detalles
             detalles.forEach(function(detalle) {
                 total += detalle.subtotal;

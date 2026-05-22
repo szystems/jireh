@@ -20,9 +20,8 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <form action="{{ url('pagos/'.$pago->id) }}" method="POST">
+                <form action="{{ route('pagos.destroy', $pago->id) }}" method="POST">
                     @csrf
-                    @method('DELETE')
                     <button type="submit" class="btn btn-danger">Eliminar Pago</button>
                 </form>
             </div>
