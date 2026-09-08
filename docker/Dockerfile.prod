@@ -1,0 +1,53 @@
+# Jireh POS — Laravel 8 + PHP 8.0-fpm
+# iPage live es 7.4.33; Laravel 8 admite 8.0. Fallback: php:7.4-fpm-alpine.
+# Nunca php:8.1+ sin prueba.
+
+FROM php:8.0-fpm-alpine AS php-builder
+
+WORKDIR /app
+
+RUN apk add --no-cache \
+        bash git curl unzip \
+        libpng-dev libjpeg-turbo-dev freetype-dev \
+        libzip-dev libxml2-dev oniguruma-dev icu-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) \
+        pdo pdo_mysql gd zip bcmath mbstring opcache intl
+
+COPY --from=composer:2.2 /usr/bin/composer /usr/bin/composer
+
+COPY composer.json composer.lock ./
+COPY database ./database
+RUN composer install --no-dev --no-scripts --no-interaction --prefer-dist
+
+COPY . .
+RUN composer dump-autoload --optimize --no-dev --no-interaction
+
+FROM php:8.0-fpm-alpine
+
+WORKDIR /app
+
+RUN apk add --no-cache \
+        bash curl rsync netcat-openbsd \
+        libpng libjpeg-turbo freetype libzip libxml2 oniguruma icu-libs \
+        libpng-dev libjpeg-turbo-dev freetype-dev \
+        libzip-dev libxml2-dev oniguruma-dev icu-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) \
+        pdo pdo_mysql gd zip bcmath mbstring opcache intl \
+    && apk del --purge \
+        libpng-dev libjpeg-turbo-dev freetype-dev \
+        libzip-dev libxml2-dev oniguruma-dev icu-dev
+
+COPY --from=php-builder /app /app
+RUN cp -a /app/public /opt/public-dist \
+    && chown -R www-data:www-data /app \
+    && chmod -R 775 /app/storage /app/bootstrap/cache
+
+COPY docker/php/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+EXPOSE 9000
+
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["php-fpm"]

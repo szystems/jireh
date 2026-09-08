@@ -86,3 +86,6 @@ yarn-error.log
 
 # --- Jireh Specific ---
 /correcciones-mysql
+
+# --- Migración WSL (contexto local, no GitHub) ---
+/_migracion/

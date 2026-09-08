@@ -1,0 +1,155 @@
+# Jireh POS — Coolify / Hetzner
+# Nombres prefijados (jirehpos-*) para no cruzar tráfico con jirehweb-* u otras apps.
+# Runbook: migracion/runbooks/11-jirehpos-migration.md
+# FQDN Coolify en jirehpos-nginx: https://software.jirehautomotriz.com:80 + sslip.io:80
+
+services:
+  jirehpos-app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.prod
+    container_name: jirehpos-app
+    restart: always
+    environment:
+      APP_NAME: "Jireh Automotriz"
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_KEY: ${APP_KEY}
+      APP_URL: https://software.jirehautomotriz.com
+      LOG_CHANNEL: errorlog
+      LOG_LEVEL: error
+      DB_CONNECTION: mysql
+      DB_HOST: jirehpos-mysql
+      DB_PORT: "3306"
+      DB_DATABASE: ${DB_DATABASE:-dbjirehappnuevo}
+      DB_USERNAME: ${DB_USERNAME:-sz}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_STRICT: "false"
+      CACHE_DRIVER: file
+      SESSION_DRIVER: database
+      SESSION_CONNECTION: mysql
+      SESSION_LIFETIME: "480"
+      SESSION_ENCRYPT: "false"
+      SESSION_COOKIE: jireh_session
+      SESSION_SECURE_COOKIE: "true"
+      QUEUE_CONNECTION: sync
+      MAIL_MAILER: smtp
+      MAIL_HOST: ${MAIL_HOST:-smtp.ipage.com}
+      MAIL_PORT: ${MAIL_PORT:-465}
+      MAIL_USERNAME: ${MAIL_USERNAME:-ventas@jirehautomotriz.com}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      MAIL_ENCRYPTION: ${MAIL_ENCRYPTION:-ssl}
+      MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS:-ventas@jirehautomotriz.com}
+      MAIL_FROM_NAME: "Jireh Automotriz"
+      JIREH_RUN_MIGRATIONS: "false"
+    working_dir: /app
+    volumes:
+      - public_root:/app/public
+      - app_storage:/app/storage
+      - app_bootstrap:/app/bootstrap/cache
+    depends_on:
+      jirehpos-mysql:
+        condition: service_healthy
+    networks:
+      - jirehpos_network
+      - coolify
+
+  jirehpos-nginx:
+    build:
+      context: ./docker/nginx
+      dockerfile: Dockerfile
+    container_name: jirehpos-nginx
+    restart: always
+    expose:
+      - "80"
+    volumes:
+      - public_root:/app/public:ro
+    depends_on:
+      - jirehpos-app
+    networks:
+      - jirehpos_network
+      - coolify
+
+  jirehpos-mysql:
+    image: mysql:8.4
+    container_name: jirehpos-mysql
+    restart: always
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --sql-mode=""
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-dbjirehappnuevo}
+      MYSQL_USER: ${DB_USERNAME:-sz}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - jirehpos_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  jirehpos-scheduler:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.prod
+    container_name: jirehpos-scheduler
+    restart: always
+    command: php artisan schedule:work
+    environment:
+      APP_NAME: "Jireh Automotriz"
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_KEY: ${APP_KEY}
+      APP_URL: https://software.jirehautomotriz.com
+      LOG_CHANNEL: errorlog
+      LOG_LEVEL: error
+      DB_CONNECTION: mysql
+      DB_HOST: jirehpos-mysql
+      DB_PORT: "3306"
+      DB_DATABASE: ${DB_DATABASE:-dbjirehappnuevo}
+      DB_USERNAME: ${DB_USERNAME:-sz}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_STRICT: "false"
+      CACHE_DRIVER: file
+      SESSION_DRIVER: database
+      SESSION_CONNECTION: mysql
+      SESSION_LIFETIME: "480"
+      SESSION_ENCRYPT: "false"
+      SESSION_COOKIE: jireh_session
+      SESSION_SECURE_COOKIE: "true"
+      QUEUE_CONNECTION: sync
+      MAIL_MAILER: smtp
+      MAIL_HOST: ${MAIL_HOST:-smtp.ipage.com}
+      MAIL_PORT: ${MAIL_PORT:-465}
+      MAIL_USERNAME: ${MAIL_USERNAME:-ventas@jirehautomotriz.com}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      MAIL_ENCRYPTION: ${MAIL_ENCRYPTION:-ssl}
+      MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS:-ventas@jirehautomotriz.com}
+      MAIL_FROM_NAME: "Jireh Automotriz"
+      JIREH_RUN_MIGRATIONS: "false"
+    working_dir: /app
+    volumes:
+      - public_root:/app/public
+      - app_storage:/app/storage
+      - app_bootstrap:/app/bootstrap/cache
+    depends_on:
+      jirehpos-mysql:
+        condition: service_healthy
+      jirehpos-app:
+        condition: service_started
+    networks:
+      - jirehpos_network
+
+volumes:
+  public_root:
+  app_storage:
+  app_bootstrap:
+  mysql_data:
+
+networks:
+  jirehpos_network:
+    driver: bridge
+  coolify:
+    external: true

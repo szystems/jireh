@@ -1,7 +1,5 @@
 <?php
 
-use Illuminate\Support\Str;
-
 return [
 
     /*
@@ -18,7 +16,7 @@ return [
     |
     */
 
-    'driver' => env('SESSION_DRIVER', 'file'),
+    'driver' => env('SESSION_DRIVER') ?: 'database',
 
     /*
     |--------------------------------------------------------------------------
@@ -72,7 +70,7 @@ return [
     |
     */
 
-    'connection' => env('SESSION_CONNECTION', null),
+    'connection' => env('SESSION_CONNECTION') ?: 'mysql',
 
     /*
     |--------------------------------------------------------------------------
@@ -126,10 +124,7 @@ return [
     |
     */
 
-    'cookie' => env(
-        'SESSION_COOKIE',
-        Str::slug(env('APP_NAME', 'laravel'), '_').'_session'
-    ),
+    'cookie' => env('SESSION_COOKIE') ?: 'jireh_session',
 
     /*
     |--------------------------------------------------------------------------
@@ -168,7 +163,7 @@ return [
     |
     */
 
-    'secure' => env('SESSION_SECURE_COOKIE'),
+    'secure' => filter_var(env('SESSION_SECURE_COOKIE') ?: false, FILTER_VALIDATE_BOOLEAN),
 
     /*
     |--------------------------------------------------------------------------
