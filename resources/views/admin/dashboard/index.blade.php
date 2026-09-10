@@ -1135,9 +1135,16 @@ document.addEventListener('DOMContentLoaded', function() {
         return parseFloat(value).toFixed(1);
     }
 
-    // Actualizar métricas en tiempo real cada 30 segundos
+    // Actualizar métricas cada 2 minutos y solo si la pestaña está visible.
+    // El intervalo anterior (30s) re-ejecutaba las consultas pesadas y saturaba PHP-FPM.
+    const metricasUrl = @json(url('/api/dashboard/metricas-vivo'));
+    const alertasUrl = @json(url('/api/dashboard/alertas'));
+
     setInterval(function() {
-        fetch('/api/dashboard/metricas-vivo')
+        if (document.hidden) {
+            return;
+        }
+        fetch(metricasUrl, { credentials: 'same-origin' })
             .then(response => response.json())
             .then(data => {
                 // Actualizar ventas del mes
@@ -1170,7 +1177,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             })
             .catch(error => console.log('Error al actualizar métricas:', error));
-    }, 30000);
+    }, 120000);
 
     // Animaciones de entrada para las tarjetas
     const observerOptions = {
@@ -1197,7 +1204,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Actualizar alertas dinámicamente
     function checkAlerts() {
-        fetch('/api/dashboard/alertas')
+        if (document.hidden) {
+            return;
+        }
+        fetch(alertasUrl, { credentials: 'same-origin' })
             .then(response => response.json())
             .then(data => {
                 const alertsContainer = document.querySelector('.alerts-container');

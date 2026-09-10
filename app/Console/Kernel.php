@@ -20,6 +20,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('auditoria:automatica --dias=1 --enviar-alertas')
                  ->dailyAt('06:00')
                  ->name('auditoria-diaria')
+                 ->withoutOverlapping(180)
                  ->description('Auditoría automática diaria del sistema')
                  ->onFailure(function () {
                      Log::error('Falló la auditoría automática diaria');
@@ -29,6 +30,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('auditoria:automatica --dias=7 --enviar-alertas')
                  ->weeklyOn(0, '02:00')
                  ->name('auditoria-semanal')
+                 ->withoutOverlapping(180)
                  ->description('Auditoría automática semanal completa')
                  ->onFailure(function () {
                      Log::error('Falló la auditoría automática semanal');
@@ -38,6 +40,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('auditoria:automatica --dias=1')
                  ->cron('0 */4 * * *')
                  ->name('verificacion-stock')
+                 ->withoutOverlapping(90)
                  ->description('Verificación de stock crítico cada 4 horas')
                  ->onFailure(function () {
                      Log::warning('Falló la verificación de stock automática');

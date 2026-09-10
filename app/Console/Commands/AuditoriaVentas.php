@@ -46,8 +46,13 @@ class AuditoriaVentas extends Command
         $this->info("Auditando desde: {$fechaInicio->format('Y-m-d')} hasta ahora");
         
         try {
-            DB::beginTransaction();
-              // 1. Auditar stock vs movimientos de ventas
+            // Solo abrir transacción cuando se van a persistir correcciones.
+            // En modo consulta una transacción larga bloquea InnoDB y tumba el sitio.
+            if ($aplicarCorrecciones) {
+                DB::beginTransaction();
+            }
+
+            // 1. Auditar stock vs movimientos de ventas
             $this->auditarStockVsVentas($fechaInicio, $articuloEspecifico, $aplicarCorrecciones);
             
             // 2. Detectar ventas duplicadas
@@ -80,7 +85,6 @@ class AuditoriaVentas extends Command
                 DB::commit();
                 $this->info('✅ Correcciones aplicadas y confirmadas');
             } else {
-                DB::rollBack();
                 $this->info('🔍 Auditoría completada (solo consulta)');
             }
             
@@ -91,7 +95,9 @@ class AuditoriaVentas extends Command
             $this->generarReporte();
             
         } catch (\Exception $e) {
-            DB::rollBack();
+            if ($aplicarCorrecciones && DB::transactionLevel() > 0) {
+                DB::rollBack();
+            }
             $this->error('❌ Error durante la auditoría: ' . $e->getMessage());
             Log::error('Error en auditoría de ventas: ' . $e->getMessage(), [
                 'file' => $e->getFile(),

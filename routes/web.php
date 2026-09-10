@@ -93,6 +93,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard-pro',[DashboardController::class, 'index'])->name('dashboard.pro');
     Route::get('/api/dashboard/estado-sistema',[DashboardController::class, 'getEstadoSistema'])->name('dashboard.estado');
     Route::get('/api/dashboard/metricas-vivo',[DashboardController::class, 'getMetricasEnVivo'])->name('dashboard.metricas');
+    Route::get('/api/dashboard/alertas',[DashboardController::class, 'getAlertasApi'])->name('dashboard.alertas');
 
     //Admin Users
     Route::get('users', [UsersController::class, 'users']);
@@ -418,31 +419,23 @@ Route::middleware(['auth'])->group(function () {
 
 });
 
-//Rutas de prueba - Sin autenticación
-Route::get('test', [TestController::class, 'index']);
-Route::get('test/venta-con-servicio', [TestController::class, 'testVentaConServicio']);
-
-// Ruta de prueba para dashboard sin autenticación
-Route::get('test-dashboard-pro', [DashboardController::class, 'index']);
-
-// Ruta de prueba para notificaciones sin autenticación
-Route::get('test-notificaciones', [NotificacionController::class, 'index']);
-
-// Ruta de prueba para dashboard de prevención sin autenticación
-Route::get('test/venta-completa', [TestController::class, 'testVentaCompleta']);
-Route::get('test/ver-comisiones/{ventaId}', [App\Http\Controllers\Admin\ComisionController::class, 'verComisiones']);
-Route::get('test/eliminar-venta/{ventaId}', [TestController::class, 'testEliminarVenta']);
-Route::get('test/crear-datos-prueba', [DatosInicialesController::class, 'crearDatosPrueba']);
-
-// Ruta de prueba para prevención
-Route::get('/test-prevencion', function() {
-    return response()->json(['mensaje' => 'Rutas de prevención funcionando', 'timestamp' => now()]);
-});
-
-// Ruta de prueba simplificada para prevención (sin autenticación)
-Route::get('/prevencion-simple', function() {
-    return view('admin.prevencion.dashboard-simple');
-});
+// Rutas de prueba solo en local/testing: en producción saturan PHP-FPM y MySQL.
+if (app()->environment('local', 'testing')) {
+    Route::get('test', [TestController::class, 'index']);
+    Route::get('test/venta-con-servicio', [TestController::class, 'testVentaConServicio']);
+    Route::get('test-dashboard-pro', [DashboardController::class, 'index']);
+    Route::get('test-notificaciones', [NotificacionController::class, 'index']);
+    Route::get('test/venta-completa', [TestController::class, 'testVentaCompleta']);
+    Route::get('test/ver-comisiones/{ventaId}', [App\Http\Controllers\Admin\ComisionController::class, 'verComisiones']);
+    Route::get('test/eliminar-venta/{ventaId}', [TestController::class, 'testEliminarVenta']);
+    Route::get('test/crear-datos-prueba', [DatosInicialesController::class, 'crearDatosPrueba']);
+    Route::get('/test-prevencion', function() {
+        return response()->json(['mensaje' => 'Rutas de prevención funcionando', 'timestamp' => now()]);
+    });
+    Route::get('/prevencion-simple', function() {
+        return view('admin.prevencion.dashboard-simple');
+    });
+}
 
 // ============================================================================
 // RUTAS ESPECÍFICAS PARA VENDEDORES (Control de Acceso por Rol)

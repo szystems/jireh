@@ -18,17 +18,35 @@ use App\Models\Comision;
 use App\Models\LotePago;
 use App\Models\MetaVenta;
 use App\Models\Ingreso;
+use App\Services\DashboardMetricsService;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class DashboardController extends Controller
 {
+    const DASHBOARD_CACHE_SECONDS = 60;
+    const METRICAS_CACHE_SECONDS = 30;
+
+    /** @var DashboardMetricsService */
+    protected $metrics;
+
+    public function __construct(DashboardMetricsService $metrics)
+    {
+        $this->metrics = $metrics;
+    }
+
     public function index()
     {
         $config = Config::first();
-        $data = $this->getDashboardData();
-        
+        $user = auth()->user();
+        $cacheKey = 'dashboard.data.v2.' . ($user ? $user->id : 'guest') . '.' . ($user->role_as ?? 0);
+
+        $data = Cache::remember($cacheKey, self::DASHBOARD_CACHE_SECONDS, function () {
+            return $this->getDashboardData();
+        });
+
         return view('admin.dashboard.index', compact('config', 'data'));
     }
 
@@ -116,15 +134,9 @@ class DashboardController extends Controller
         $ventasMes = $this->calcularVentasPorPeriodo($startOfMonth->format('Y-m-d'), $endOfMonth->format('Y-m-d'), $usuarioId);
         $ventasAño = $this->calcularVentasPorPeriodo(Carbon::now()->startOfYear()->format('Y-m-d'), Carbon::now()->format('Y-m-d'), $usuarioId);
 
-        // Ventas por mes para el gráfico de tendencia - últimos 12 meses
-        $ventasPorMes = [];
-        $meses = [];
-        for ($i = 11; $i >= 0; $i--) {
-            $fechaInicio = Carbon::now()->subMonths($i)->startOfMonth();
-            $fechaFin = $fechaInicio->copy()->endOfMonth();
-            $ventasPorMes[] = $this->calcularVentasPorPeriodo($fechaInicio->format('Y-m-d'), $fechaFin->format('Y-m-d'), $usuarioId);
-            $meses[] = $fechaInicio->locale('es')->format('M Y');
-        }
+        $serieAnual = $this->metrics->ventasAgrupadasPorMes(12, $usuarioId);
+        $ventasPorMes = $serieAnual['totales'];
+        $meses = $serieAnual['labels'];
 
         // Ventas recientes - filtradas por usuario si es vendedor
         $query = Venta::with(['cliente', 'detalleVentas', 'usuario'])
@@ -172,18 +184,7 @@ class DashboardController extends Controller
 
     private function calcularVentasPorPeriodo($fechaInicio, $fechaFin, $usuarioId = null)
     {
-        $query = Venta::with('detalleVentas')
-            ->whereBetween('fecha', [$fechaInicio, $fechaFin])
-            ->where('estado', true);
-            
-        if ($usuarioId) {
-            $query->where('usuario_id', $usuarioId);
-        }
-        
-        return $query->get()
-            ->sum(function($venta) {
-                return $venta->detalleVentas->sum('sub_total');
-            });
+        return $this->metrics->sumVentasPorPeriodo($fechaInicio, $fechaFin, $usuarioId);
     }
 
     /**
@@ -191,14 +192,7 @@ class DashboardController extends Controller
      */
     private function calcularIngresosPorPeriodo($fechaInicio, $fechaFin)
     {
-        return Ingreso::with('detalles')
-            ->whereBetween('fecha', [$fechaInicio, $fechaFin])
-            ->get()
-            ->sum(function($ingreso) {
-                return $ingreso->detalles->sum(function($detalle) {
-                    return $detalle->precio_compra * $detalle->cantidad;
-                });
-            });
+        return $this->metrics->sumIngresosPorPeriodo($fechaInicio, $fechaFin);
     }
 
     private function getInventarioData()
@@ -237,11 +231,7 @@ class DashboardController extends Controller
 
     private function calcularValorInventario()
     {
-        return Articulo::where('stock', '>', 0)
-            ->get()
-            ->sum(function($articulo) {
-                return $articulo->stock * $articulo->precio_venta;
-            });
+        return $this->metrics->valorInventario();
     }
 
     /**
@@ -341,15 +331,7 @@ class DashboardController extends Controller
 
     private function getTendencias()
     {
-        $ultimosSieteDias = [];
-        for ($i = 6; $i >= 0; $i--) {
-            $fecha = Carbon::now()->subDays($i);
-            $ultimosSieteDias[] = [
-                'fecha' => $fecha->format('Y-m-d'),
-                'dia' => $fecha->locale('es')->format('D'),
-                'ventas' => $this->calcularVentasPorPeriodo($fecha->format('Y-m-d'), $fecha->format('Y-m-d')),
-            ];
-        }
+        $ultimosSieteDias = $this->metrics->ventasAgrupadasPorDia(7);
 
         return [
             'ultimos_7_dias' => $ultimosSieteDias,
@@ -590,16 +572,11 @@ class DashboardController extends Controller
         if ($isVendedor) {
             $usuarioId = auth()->user()->id;
             
-            // Verificar mis metas del mes actual
-            $ventasDelMes = Venta::with('detalleVentas')
-                ->where('usuario_id', $usuarioId)
-                ->whereYear('created_at', now()->year)
-                ->whereMonth('created_at', now()->month)
-                ->get();
-                
-            $totalVentasVendedor = $ventasDelMes->sum(function ($venta) {
-                return $venta->detalleVentas->sum('sub_total');
-            });
+            $totalVentasVendedor = $this->metrics->sumVentasPorPeriodo(
+                now()->startOfMonth()->toDateString(),
+                now()->endOfMonth()->toDateString(),
+                $usuarioId
+            );
             
             // Verificar si está cumpliendo con alguna meta
             $metaActual = MetaVenta::where('estado', true)
@@ -656,18 +633,7 @@ class DashboardController extends Controller
             $metasCumplidas = 0;
             
             if ($metasActivas > 0) {
-                // Calcular cuántas metas se están cumpliendo basado en ventas del mes
-                $ventasPorVendedor = Venta::with('detalleVentas')
-                    ->whereYear('created_at', now()->year)
-                    ->whereMonth('created_at', now()->month)
-                    ->get()
-                    ->groupBy('usuario_id')
-                    ->map(function ($ventas) {
-                        return $ventas->sum(function ($venta) {
-                            return $venta->detalleVentas->sum('sub_total');
-                        });
-                    });
-                    
+                $ventasPorVendedor = $this->metrics->ventasPorVendedorEnMes(now()->year, now()->month);
                 $totalVendedores = count($ventasPorVendedor);
                 
                 if ($totalVendedores > 0) {
@@ -790,18 +756,26 @@ class DashboardController extends Controller
     public function getMetricasEnVivo()
     {
         try {
-            $kpis = $this->getKPIsUnificados();
-            $stockCritico = Articulo::where('stock', '<=', DB::raw('stock_minimo'))->count();
-            $metasAlcanzadas = $this->calculateMetasAlcanzadas();
+            $user = auth()->user();
+            $cacheKey = 'dashboard.metricas.v2.' . ($user ? $user->id : 'guest');
 
-            return response()->json([
-                'ventas_mes' => $kpis['ventas_mes'],
-                'comisiones_pendientes' => $kpis['comisiones_pendientes'],
-                'efectividad_cobranza' => $kpis['efectividad_cobranza'],
-                'stock_critico' => $stockCritico,
-                'metas_alcanzadas' => $metasAlcanzadas,
-                'timestamp' => now()->toISOString()
-            ]);
+            $payload = Cache::remember($cacheKey, self::METRICAS_CACHE_SECONDS, function () {
+                $kpis = $this->getKPIsUnificados();
+                $stockCritico = Articulo::where('stock_minimo', '>', 0)
+                    ->whereColumn('stock', '<=', 'stock_minimo')
+                    ->count();
+
+                return [
+                    'ventas_mes' => $kpis['ventas_mes'],
+                    'comisiones_pendientes' => $kpis['comisiones_pendientes'],
+                    'efectividad_cobranza' => $kpis['efectividad_cobranza'],
+                    'stock_critico' => $stockCritico,
+                    'metas_alcanzadas' => $this->calculateMetasAlcanzadas(),
+                    'timestamp' => now()->toISOString()
+                ];
+            });
+
+            return response()->json($payload);
         } catch (\Exception $e) {
             Log::error('Error al obtener métricas en vivo: ' . $e->getMessage());
             return response()->json(['error' => 'Error al cargar métricas'], 500);
@@ -814,7 +788,12 @@ class DashboardController extends Controller
     public function getAlertasApi()
     {
         try {
-            $alertas = $this->getAlertasUnificadas();
+            $user = auth()->user();
+            $cacheKey = 'dashboard.alertas.v2.' . ($user ? $user->id : 'guest');
+            $alertas = Cache::remember($cacheKey, self::DASHBOARD_CACHE_SECONDS, function () {
+                return $this->getAlertasUnificadas();
+            });
+
             return response()->json(['alertas' => $alertas]);
         } catch (\Exception $e) {
             Log::error('Error al obtener alertas: ' . $e->getMessage());
@@ -829,16 +808,12 @@ class DashboardController extends Controller
     {
         try {
             if ($isVendedor) {
-                // Para vendedores: solo verificar si alcanzó alguna meta
                 $usuarioId = auth()->user()->id;
-                $totalVentasVendedor = Venta::with('detalleVentas')
-                    ->where('usuario_id', $usuarioId)
-                    ->whereYear('created_at', now()->year)
-                    ->whereMonth('created_at', now()->month)
-                    ->get()
-                    ->sum(function ($venta) {
-                        return $venta->detalleVentas->sum('sub_total');
-                    });
+                $totalVentasVendedor = $this->metrics->sumVentasPorPeriodo(
+                    now()->startOfMonth()->toDateString(),
+                    now()->endOfMonth()->toDateString(),
+                    $usuarioId
+                );
                     
                 $metaAlcanzada = MetaVenta::where('estado', true)
                     ->where('monto_minimo', '<=', $totalVentasVendedor)
@@ -859,17 +834,7 @@ class DashboardController extends Controller
                 return 0;
             }
 
-            // Obtener ventas del mes agrupadas por vendedor
-            $ventasPorVendedor = Venta::with('detalleVentas')
-                ->whereYear('created_at', now()->year)
-                ->whereMonth('created_at', now()->month)
-                ->get()
-                ->groupBy('usuario_id')
-                ->map(function ($ventas) {
-                    return $ventas->sum(function ($venta) {
-                        return $venta->detalleVentas->sum('sub_total');
-                    });
-                });
+            $ventasPorVendedor = $this->metrics->ventasPorVendedorEnMes(now()->year, now()->month);
 
             $metasAlcanzadas = 0;
             $totalVendedores = count($ventasPorVendedor);
@@ -907,17 +872,15 @@ class DashboardController extends Controller
     private function getMiRendimiento($usuarioId, $startOfMonth, $endOfMonth)
     {
         try {
-            // Mis ventas del mes
-            $misVentas = Venta::with('detalleVentas')
-                ->where('usuario_id', $usuarioId)
+            $totalVendido = $this->metrics->sumVentasPorPeriodo(
+                $startOfMonth->format('Y-m-d'),
+                $endOfMonth->format('Y-m-d'),
+                $usuarioId
+            );
+            $cantidadVentas = Venta::where('usuario_id', $usuarioId)
                 ->whereBetween('fecha', [$startOfMonth->format('Y-m-d'), $endOfMonth->format('Y-m-d')])
-                ->get();
-                
-            $totalVendido = $misVentas->sum(function($venta) {
-                return $venta->detalleVentas->sum('sub_total');
-            });
-            
-            $cantidadVentas = $misVentas->count();
+                ->where('estado', true)
+                ->count();
             
             // Mi meta actual
             $metaActual = MetaVenta::where('estado', true)
@@ -970,31 +933,21 @@ class DashboardController extends Controller
             return redirect()->route('dashboard')->with('error', 'Acceso no autorizado');
         }
         
-        // Métricas personales del vendedor
-        $misVentasHoy = Venta::where('usuario_id', $usuarioId)
-            ->whereDate('fecha', $today)
-            ->with('detalleVentas')
-            ->get()
-            ->sum(function($venta) {
-                return $venta->detalleVentas->sum('sub_total');
-            });
-            
-        $misVentasMes = Venta::where('usuario_id', $usuarioId)
-            ->whereMonth('fecha', $today->month)
-            ->whereYear('fecha', $today->year)
-            ->with('detalleVentas')
-            ->get()
-            ->sum(function($venta) {
-                return $venta->detalleVentas->sum('sub_total');
-            });
-            
-        $misVentasAño = Venta::where('usuario_id', $usuarioId)
-            ->whereYear('fecha', $today->year)
-            ->with('detalleVentas')
-            ->get()
-            ->sum(function($venta) {
-                return $venta->detalleVentas->sum('sub_total');
-            });
+        $misVentasHoy = $this->metrics->sumVentasPorPeriodo(
+            $today->toDateString(),
+            $today->toDateString(),
+            $usuarioId
+        );
+        $misVentasMes = $this->metrics->sumVentasPorPeriodo(
+            $today->copy()->startOfMonth()->toDateString(),
+            $today->copy()->endOfMonth()->toDateString(),
+            $usuarioId
+        );
+        $misVentasAño = $this->metrics->sumVentasPorPeriodo(
+            $today->copy()->startOfYear()->toDateString(),
+            $today->toDateString(),
+            $usuarioId
+        );
         
         // Mis comisiones
         $misComisionesTotales = Comision::where('commissionable_type', 'App\\Models\\User')
@@ -1029,23 +982,9 @@ class DashboardController extends Controller
             $progresoMeta = 100; // Meta alcanzada
         }
         
-        // Ventas por mes (últimos 12 meses)
-        $ventasPorMes = [];
-        $mesesLabels = [];
-        for ($i = 11; $i >= 0; $i--) {
-            $fecha = $today->copy()->subMonths($i);
-            $ventasMes = Venta::where('usuario_id', $usuarioId)
-                ->whereMonth('fecha', $fecha->month)
-                ->whereYear('fecha', $fecha->year)
-                ->with('detalleVentas')
-                ->get()
-                ->sum(function($venta) {
-                    return $venta->detalleVentas->sum('sub_total');
-                });
-            
-            $ventasPorMes[] = $ventasMes;
-            $mesesLabels[] = $fecha->format('M Y');
-        }
+        $serieAnual = $this->metrics->ventasAgrupadasPorMes(12, $usuarioId);
+        $ventasPorMes = $serieAnual['totales'];
+        $mesesLabels = $serieAnual['labels'];
         
         // Mis clientes más frecuentes
         $misClientesFrecuentes = Cliente::whereHas('vehiculos.ventas', function($q) use ($usuarioId) {
