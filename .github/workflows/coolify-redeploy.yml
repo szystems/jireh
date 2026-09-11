@@ -1,0 +1,39 @@
+# Manual fallback only. Push/merge to main already auto-deploys via the
+# Coolify GitHub App (szystems). Do not add an on.push deploy job here:
+# that would race the webhook and can fail the clone.
+name: Redeploy Coolify
+
+on:
+  workflow_dispatch:
+    inputs:
+      force:
+        description: Force rebuild (use if Dockerfile, nginx or PHP image changed)
+        type: boolean
+        default: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Trigger Coolify deploy
+        env:
+          COOLIFY_URL: ${{ secrets.COOLIFY_URL }}
+          COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
+          APP_UUID: ${{ secrets.COOLIFY_UUID }}
+          FORCE: ${{ inputs.force }}
+        run: |
+          set -euo pipefail
+          : "${COOLIFY_URL:?missing secret COOLIFY_URL}"
+          : "${COOLIFY_TOKEN:?missing secret COOLIFY_TOKEN}"
+          : "${APP_UUID:?missing secret COOLIFY_UUID}"
+          force=false
+          if [ "${FORCE}" = "true" ]; then
+            force=true
+          fi
+          curl -sfS -X POST \
+            "${COOLIFY_URL}/api/v1/deploy?uuid=${APP_UUID}&force=${force}" \
+            -H "Authorization: Bearer ${COOLIFY_TOKEN}"
+          echo
+          echo "Queued Coolify deploy uuid=${APP_UUID} force=${force}"
+          echo "Follow: http://5.78.235.235:8000  → Jireh POS → Deployments"

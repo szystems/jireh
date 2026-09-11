@@ -88,6 +88,16 @@ php artisan view:cache
 - Secciones: Inicio, Módulos, Funciones, Soporte
 - Contenido en vistas Blade separadas por sección
 
+## Deploy (producción Coolify)
+
+Producción: https://software.jirehautomotriz.com/ · repo `szystems/jireh` · rama `main`.
+
+1. **Auto-deploy:** merge o push a `main` dispara Coolify (GitHub App). No hace falta PC local ni SSH.
+2. **Cursor Web:** trabajar en una rama, abrir PR y **mergear a `main`**. Las ramas de feature no van a producción.
+3. **Redeploy sin commit:** Actions → *Redeploy Coolify*, o Coolify UI → Redeploy.
+4. **Nunca** regenerar `APP_KEY`, tocar DNS `@`/`www`/MX, ni servicios `jirehweb-*` (eso es el catálogo).
+5. Migraciones: solo `php artisan migrate --force --path=...` puntual. Nunca `migrate --fresh`. `JIREH_RUN_MIGRATIONS=false`.
+
 ## Gestión de Versiones
 
 ### Archivos a Actualizar con Nueva Versión
