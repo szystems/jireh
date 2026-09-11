@@ -334,28 +334,38 @@ class NotificacionController extends Controller
 
     public function obtenerResumen()
     {
-        $notificaciones = $this->obtenerNotificaciones();
-        
-        $resumen = [
-            'total' => $notificaciones->count(),
-            'no_leidas' => $notificaciones->where('leida', false)->count(),
+        // El layout llama esto cada 30s. No cargar ventas/detalles a memoria.
+        $stockBajo = Articulo::whereRaw('stock <= stock_minimo')
+            ->where('stock_minimo', '>', 0)
+            ->where('stock', '>', 0)
+            ->count();
+        $stockCritico = Articulo::where('stock', '<=', 0)
+            ->where('stock_minimo', '>', 0)
+            ->count();
+        $comisionesVencidas = Comision::where('estado', 'pendiente')
+            ->where('fecha_calculo', '<', Carbon::now()->subDays(30))
+            ->count();
+
+        $noLeidas = $stockBajo + $stockCritico + ($comisionesVencidas > 0 ? 1 : 0);
+
+        return response()->json([
+            'total' => $noLeidas,
+            'no_leidas' => $noLeidas,
             'por_prioridad' => [
-                'alta' => $notificaciones->where('prioridad', 'alta')->count(),
-                'media' => $notificaciones->where('prioridad', 'media')->count(),
-                'baja' => $notificaciones->where('prioridad', 'baja')->count(),
+                'alta' => $stockCritico + ($comisionesVencidas > 0 ? 1 : 0),
+                'media' => $stockBajo,
+                'baja' => 0,
             ],
             'por_tipo' => [
-                'stock_critico' => $notificaciones->where('tipo', 'stock_critico')->count(),
-                'stock_bajo' => $notificaciones->where('tipo', 'stock_bajo')->count(),
-                'venta_importante' => $notificaciones->where('tipo', 'venta_importante')->count(),
-                'cliente_nuevo' => $notificaciones->where('tipo', 'cliente_nuevo')->count(),
-                'comisiones_vencidas' => $notificaciones->where('tipo', 'comisiones_vencidas')->count(),
-                'metas_incumplidas' => $notificaciones->where('tipo', 'metas_incumplidas')->count(),
-                'objetivo_alcanzado' => $notificaciones->where('tipo', 'objetivo_alcanzado')->count(),
+                'stock_critico' => $stockCritico,
+                'stock_bajo' => $stockBajo,
+                'venta_importante' => 0,
+                'cliente_nuevo' => 0,
+                'comisiones_vencidas' => $comisionesVencidas > 0 ? 1 : 0,
+                'metas_incumplidas' => 0,
+                'objetivo_alcanzado' => 0,
             ]
-        ];
-
-        return response()->json($resumen);
+        ]);
     }
 
     public function obtenerNotificacionesApi()

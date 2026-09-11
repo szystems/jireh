@@ -43,4 +43,11 @@ chmod -R 775 /app/storage /app/bootstrap/cache \
     /app/public/assets/imgs /app/public/uploads || true
 
 echo "Listo. Ejecutando: $*"
+
+# php-fpm master debe ser root. artisan/scheduler como www-data para
+# no dejar cache/storage con dueño root (eso cuelga PHP-FPM con flock).
+if [ "$1" != "php-fpm" ]; then
+    exec su -s /bin/sh -c "$*" www-data
+fi
+
 exec "$@"

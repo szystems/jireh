@@ -20,7 +20,6 @@ use App\Models\MetaVenta;
 use App\Models\Ingreso;
 use App\Services\DashboardMetricsService;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
@@ -40,12 +39,10 @@ class DashboardController extends Controller
     public function index()
     {
         $config = Config::first();
-        $user = auth()->user();
-        $cacheKey = 'dashboard.data.v2.' . ($user ? $user->id : 'guest') . '.' . ($user->role_as ?? 0);
-
-        $data = Cache::remember($cacheKey, self::DASHBOARD_CACHE_SECONDS, function () {
-            return $this->getDashboardData();
-        });
+        // Sin Cache::remember: el driver `file` lo escribe el scheduler (root)
+        // y PHP-FPM (www-data) no puede renovarlo; el flock cuelga el request
+        // hasta que Traefik devuelve 504. Las agregaciones SQL ya son <200ms.
+        $data = $this->getDashboardData();
 
         return view('admin.dashboard.index', compact('config', 'data'));
     }
@@ -756,26 +753,19 @@ class DashboardController extends Controller
     public function getMetricasEnVivo()
     {
         try {
-            $user = auth()->user();
-            $cacheKey = 'dashboard.metricas.v2.' . ($user ? $user->id : 'guest');
+            $kpis = $this->getKPIsUnificados();
+            $stockCritico = Articulo::where('stock_minimo', '>', 0)
+                ->whereColumn('stock', '<=', 'stock_minimo')
+                ->count();
 
-            $payload = Cache::remember($cacheKey, self::METRICAS_CACHE_SECONDS, function () {
-                $kpis = $this->getKPIsUnificados();
-                $stockCritico = Articulo::where('stock_minimo', '>', 0)
-                    ->whereColumn('stock', '<=', 'stock_minimo')
-                    ->count();
-
-                return [
-                    'ventas_mes' => $kpis['ventas_mes'],
-                    'comisiones_pendientes' => $kpis['comisiones_pendientes'],
-                    'efectividad_cobranza' => $kpis['efectividad_cobranza'],
-                    'stock_critico' => $stockCritico,
-                    'metas_alcanzadas' => $this->calculateMetasAlcanzadas(),
-                    'timestamp' => now()->toISOString()
-                ];
-            });
-
-            return response()->json($payload);
+            return response()->json([
+                'ventas_mes' => $kpis['ventas_mes'],
+                'comisiones_pendientes' => $kpis['comisiones_pendientes'],
+                'efectividad_cobranza' => $kpis['efectividad_cobranza'],
+                'stock_critico' => $stockCritico,
+                'metas_alcanzadas' => $this->calculateMetasAlcanzadas(),
+                'timestamp' => now()->toISOString()
+            ]);
         } catch (\Exception $e) {
             Log::error('Error al obtener métricas en vivo: ' . $e->getMessage());
             return response()->json(['error' => 'Error al cargar métricas'], 500);
@@ -788,13 +778,7 @@ class DashboardController extends Controller
     public function getAlertasApi()
     {
         try {
-            $user = auth()->user();
-            $cacheKey = 'dashboard.alertas.v2.' . ($user ? $user->id : 'guest');
-            $alertas = Cache::remember($cacheKey, self::DASHBOARD_CACHE_SECONDS, function () {
-                return $this->getAlertasUnificadas();
-            });
-
-            return response()->json(['alertas' => $alertas]);
+            return response()->json(['alertas' => $this->getAlertasUnificadas()]);
         } catch (\Exception $e) {
             Log::error('Error al obtener alertas: ' . $e->getMessage());
             return response()->json(['error' => 'Error al cargar alertas'], 500);
