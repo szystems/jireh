@@ -66,8 +66,11 @@ services:
       - public_root:/app/public:ro
     depends_on:
       - jirehpos-app
+    # Solo coolify (+ la red UUID que Coolify añade). Extra jirehpos_network
+    # en nginx hace que Traefik elija una IP inalcanzable → Cloudflare 504.
+    labels:
+      - traefik.docker.network=coolify
     networks:
-      - jirehpos_network
       - coolify
 
   jirehpos-mysql:
