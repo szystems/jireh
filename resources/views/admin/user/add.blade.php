@@ -129,6 +129,26 @@
                                                 @endif
 
                                                 <div class="col-md-6 mb-3">
+                                                    <label for="password" class="form-label">Contraseña</label>
+                                                    <div class="input-group">
+                                                        <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+                                                        <input name="password" type="password" class="form-control" autocomplete="new-password" minlength="8" value="{{ old('password') }}" />
+                                                    </div>
+                                                    <small class="text-muted">Mínimo 8 caracteres. Si la deja vacía se genera una temporal.</small>
+                                                    @error('password')
+                                                        <div class="text-danger mt-1">{{ $message }}</div>
+                                                    @enderror
+                                                </div>
+
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="password_confirmation" class="form-label">Confirmar contraseña</label>
+                                                    <div class="input-group">
+                                                        <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                                                        <input name="password_confirmation" type="password" class="form-control" autocomplete="new-password" minlength="8" />
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-6 mb-3">
                                                     <label for="telefono" class="form-label">Teléfono</label>
                                                     <div class="input-group">
                                                         <span class="input-group-text"><i class="bi bi-telephone-fill"></i></span>

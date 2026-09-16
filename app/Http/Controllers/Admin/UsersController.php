@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Hash;
 use App\Mail\UserMail;
 
 class UsersController extends Controller
@@ -88,7 +89,10 @@ class UsersController extends Controller
         $user->principal = 0;
         $user->name = $request->input('name');
         $user->email = $request->input('email');
-        $user->password = 'Flebo'.rand(1111,9999);
+        $plainPassword = $request->filled('password')
+            ? $request->input('password')
+            : ('Flebo'.rand(1111, 9999));
+        $user->password = Hash::make($plainPassword);
         $user->telefono = $request->input('telefono');
         $user->celular = $request->input('celular');
         $user->direccion = $request->input('direccion');
@@ -138,9 +142,46 @@ class UsersController extends Controller
         $user->celular = $request->input('celular');
         $user->direccion = $request->input('direccion');
         $user->fecha_nacimiento = $fecha_nacimiento;
+
+        if ($request->filled('password')) {
+            $changed = $this->assignPasswordFromRequest($request, $user);
+            if ($changed !== true) {
+                return $changed;
+            }
+        }
+
         $user->update();
 
         return redirect('show-user/'.$id)->with('status',__('Usuario actualizado correctamente.'));
+    }
+
+    /**
+     * Cambia la contraseña del perfil: el dueño confirma la actual;
+     * un administrador puede asignar una nueva a otro usuario.
+     *
+     * @return true|\Illuminate\Http\RedirectResponse
+     */
+    private function assignPasswordFromRequest(UserFormRequest $request, User $user)
+    {
+        $actor = Auth::user();
+        $isSelf = (int) $actor->id === (int) $user->id;
+        $isAdmin = (int) $actor->role_as === 0;
+
+        if (!$isSelf && !$isAdmin) {
+            return redirect()->back()
+                ->withErrors(['password' => 'No puede cambiar la contraseña de otro usuario.'])
+                ->withInput($request->except(['password', 'password_confirmation', 'current_password']));
+        }
+
+        if ($isSelf && !Hash::check((string) $request->input('current_password'), $user->password)) {
+            return redirect()->back()
+                ->withErrors(['current_password' => 'La contraseña actual no es correcta.'])
+                ->withInput($request->except(['password', 'password_confirmation', 'current_password']));
+        }
+
+        $user->password = Hash::make($request->input('password'));
+
+        return true;
     }
 
     public function destroyuser($id)
