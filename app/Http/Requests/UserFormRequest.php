@@ -24,7 +24,7 @@ class UserFormRequest extends FormRequest
      */
     public function rules()
     {
-        return [
+        $rules = [
             'email' => [
                 'required',
                 'string',
@@ -38,6 +38,29 @@ class UserFormRequest extends FormRequest
             'telefono'=>'string|max:20|nullable',
             'celular'=>'string|max:20|nullable',
             'direccion'=>'string|max:500|nullable',
+            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
         ];
+
+        if ($this->filled('password') && $this->isUpdatingOwnProfile()) {
+            $rules['current_password'] = ['required', 'string'];
+        }
+
+        return $rules;
+    }
+
+    public function messages()
+    {
+        return [
+            'password.min' => 'La nueva contraseña debe tener al menos 8 caracteres.',
+            'password.confirmed' => 'La confirmación de la contraseña no coincide.',
+            'current_password.required' => 'Debe ingresar su contraseña actual para cambiarla.',
+        ];
+    }
+
+    private function isUpdatingOwnProfile(): bool
+    {
+        $id = $this->route('id');
+
+        return $id && auth()->check() && (int) $id === (int) auth()->id();
     }
 }

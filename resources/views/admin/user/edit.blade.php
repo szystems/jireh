@@ -106,7 +106,7 @@
                                                 <div class="col-md-6 mb-3">
                                                     <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
                                                     <div class="input-group">
-                                                        <span class="input-group-text"><i class::bi bi-envelope-fill"></i></span>
+                                                        <span class="input-group-text"><i class="bi bi-envelope-fill"></i></span>
                                                         <input name="email" type="email" class="form-control" placeholder="correo@ejemplo.com" value="{{ $user->email }}" required />
                                                     </div>
                                                     @if ($errors->has('email'))
@@ -170,6 +170,46 @@
                                                         <div class="text-danger mt-1">{{ $errors->first('direccion') }}</div>
                                                     @endif
                                                 </div>
+
+                                                @if(Auth::id() == $user->id || (isset($isAdmin) && $isAdmin))
+                                                <div class="col-md-12 mt-2">
+                                                    <hr>
+                                                    <h6 class="mb-1"><i class="bi bi-key-fill"></i> Cambiar contraseña</h6>
+                                                    <p class="text-muted small mb-3">Deje estos campos vacíos si no desea cambiar la contraseña.</p>
+                                                </div>
+
+                                                @if(Auth::id() == $user->id)
+                                                <div class="col-md-12 mb-3">
+                                                    <label for="current_password" class="form-label">Contraseña actual</label>
+                                                    <div class="input-group">
+                                                        <span class="input-group-text"><i class="bi bi-shield-lock"></i></span>
+                                                        <input name="current_password" type="password" class="form-control @error('current_password') is-invalid @enderror" autocomplete="current-password" />
+                                                    </div>
+                                                    @error('current_password')
+                                                        <div class="text-danger mt-1">{{ $message }}</div>
+                                                    @enderror
+                                                </div>
+                                                @endif
+
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="password" class="form-label">Nueva contraseña</label>
+                                                    <div class="input-group">
+                                                        <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+                                                        <input name="password" type="password" class="form-control @error('password') is-invalid @enderror" autocomplete="new-password" minlength="8" />
+                                                    </div>
+                                                    @error('password')
+                                                        <div class="text-danger mt-1">{{ $message }}</div>
+                                                    @enderror
+                                                </div>
+
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="password_confirmation" class="form-label">Confirmar nueva contraseña</label>
+                                                    <div class="input-group">
+                                                        <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                                                        <input name="password_confirmation" type="password" class="form-control" autocomplete="new-password" minlength="8" />
+                                                    </div>
+                                                </div>
+                                                @endif
                                             </div>
                                         </div>
 
