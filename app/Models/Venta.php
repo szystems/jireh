@@ -10,6 +10,28 @@ class Venta extends Model
 {
     use HasFactory;
 
+    /**
+     * Departamentos de una factura. El valor guardado no cambia para
+     * Car Wash y CDS, así las ventas ya registradas siguen filtrando igual.
+     * No son tipos de comisión: mecánico, car wash y meta se calculan aparte.
+     */
+    public const DEPARTAMENTOS = [
+        'Car Wash' => 'Car Wash',
+        'CDS' => 'Centro de Servicios (CDS)',
+        'Autos' => 'Autos',
+        'Accesorios' => 'Accesorios',
+        'Pintura Automotriz' => 'Pintura automotriz',
+    ];
+
+    public static function etiquetaDepartamento(?string $valor): string
+    {
+        if ($valor === null || $valor === '') {
+            return 'Sin departamento';
+        }
+
+        return self::DEPARTAMENTOS[$valor] ?? $valor;
+    }
+
     protected $fillable = [
         'cliente_id',
         'vehiculo_id',

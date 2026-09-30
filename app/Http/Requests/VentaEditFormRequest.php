@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Venta;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Support\Facades\Log;
 
@@ -25,12 +27,18 @@ class VentaEditFormRequest extends FormRequest
      */
     public function rules()
     {
+        $departamentos = array_keys(Venta::DEPARTAMENTOS);
+        $ventaActual = Venta::find($this->route('id'));
+        if ($ventaActual && $ventaActual->tipo_venta && !in_array($ventaActual->tipo_venta, $departamentos, true)) {
+            $departamentos[] = $ventaActual->tipo_venta;
+        }
+
         return [
             'numero_factura' => 'nullable|string|max:255',
             'fecha' => 'required|date',
             'cliente_id' => 'required|exists:clientes,id',
             'vehiculo_id' => 'required|exists:vehiculos,id',
-            'tipo_venta' => 'required|in:Car Wash,CDS',
+            'tipo_venta' => ['required', Rule::in($departamentos)],
             'estado_pago' => 'required|in:pagado,pendiente',
 
             // Simplificamos las validaciones de detalles_a_mantener

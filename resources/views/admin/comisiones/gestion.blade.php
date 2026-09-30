@@ -192,10 +192,17 @@
                                 <label class="form-label">Tipo de Comisión</label>
                                 <select class="form-select" id="tipoComisionFiltro" name="tipo_comision">
                                     <option value="">Todas</option>
-                                    <option value="venta_meta">Por Meta de Ventas</option>
+                                    <option value="meta_venta">Por Meta de Ventas</option>
                                     <option value="mecanico">Mecánico</option>
                                     <option value="carwash">Car Wash</option>
                                 </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Departamento de la factura</label>
+                                <select class="form-select" id="departamentoFiltro" name="departamento">
+                                    @include('admin.partials.opciones-departamento', ['placeholder' => 'Todos los departamentos'])
+                                </select>
+                                <small class="text-muted">Filtra las comisiones ya generadas según el departamento de su factura. No crea comisiones nuevas.</small>
                             </div>
                             <div class="row">
                                 <div class="col-md-6">

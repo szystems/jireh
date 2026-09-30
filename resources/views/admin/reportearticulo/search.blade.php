@@ -65,11 +65,9 @@
                                             </select>
                                         </div>
                                         <div class="col-md-3">
-                                            <label for="tipo_venta" class="form-label">Tipo de Venta</label>
+                                            <label for="tipo_venta" class="form-label">Departamento</label>
                                             <select name="tipo_venta" class="form-control select2">
-                                                <option value=""{{ request('tipo_venta') == null ? 'selected' : '' }}>Todos los tipos</option>
-                                                <option value="Car Wash" {{ request('tipo_venta') == 'Car Wash' ? 'selected' : '' }}>Car Wash</option>
-                                                <option value="CDS" {{ request('tipo_venta') == 'CDS' ? 'selected' : '' }}>CDS</option>
+                                                @include('admin.partials.opciones-departamento', ['seleccionado' => request('tipo_venta'), 'placeholder' => 'Todos los departamentos'])
                                             </select>
                                         </div>
                                         <div class="col-md-3">

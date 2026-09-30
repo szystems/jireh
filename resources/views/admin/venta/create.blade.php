@@ -66,11 +66,11 @@
                                         </select>
                                     </div>
                                     <div class="col-md-6 mb-3">
-                                        <label for="tipo_venta" class="form-label">Tipo de Venta</label>
+                                        <label for="tipo_venta" class="form-label">Departamento</label>
                                         <select class="form-control" id="tipo_venta" name="tipo_venta" required>
-                                            <option value="Car Wash" {{ old('tipo_venta', 'Car Wash') == 'Car Wash' ? 'selected' : '' }}>Car Wash</option>
-                                            <option value="CDS" {{ old('tipo_venta') == 'CDS' ? 'selected' : '' }}>CDS</option>
+                                            @include('admin.partials.opciones-departamento', ['seleccionado' => old('tipo_venta', 'Car Wash')])
                                         </select>
+                                        <small class="text-muted">Car Wash, Centro de Servicios, Autos, Accesorios o Pintura. Las comisiones de mecánico y car wash se calculan igual.</small>
                                     </div>
                                     <!-- ⭐ NUEVO: Toggle para aplicar impuestos -->
                                     <div class="col-md-6 mb-3">

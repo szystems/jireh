@@ -84,7 +84,7 @@
                     $ventasPorTipo = $ventas->where('estado', true)->groupBy('tipo_venta')
                         ->map(function($ventas, $tipo) {
                             return [
-                                'tipo' => $tipo ?: 'Sin especificar',
+                                'tipo' => \App\Models\Venta::etiquetaDepartamento($tipo),
                                 'cantidad' => $ventas->count(),
                                 'monto' => $ventas->sum(function($v) {
                                     return $v->detalleVentas->sum('sub_total');
@@ -197,9 +197,14 @@
                     <!-- Botón para añadir nueva venta -->
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h6 class="mb-0">Lista de Ventas</h6>
-                        <a href="{{ url('add-venta') }}" class="btn btn-primary">
-                            <i class="bi bi-plus-circle"></i> Nueva Venta
-                        </a>
+                        <div>
+                            <a href="{{ route('ventas.por_departamento') }}" class="btn btn-outline-primary me-2">
+                                <i class="bi bi-diagram-3"></i> Por departamento
+                            </a>
+                            <a href="{{ url('add-venta') }}" class="btn btn-primary">
+                                <i class="bi bi-plus-circle"></i> Nueva Venta
+                            </a>
+                        </div>
                     </div>
 
                     <!-- Tabla de ventas -->
@@ -227,7 +232,7 @@
                                     , <span>Cliente: {{ $clientes->find(request('cliente'))->nombre }}</span>
                                 @endif
                                 @if(request('tipo_venta'))
-                                    , <span>Tipo de Venta: {{ request('tipo_venta') }}</span>
+                                    , <span>Departamento: {{ \App\Models\Venta::etiquetaDepartamento(request('tipo_venta')) }}</span>
                                 @endif
                                 @if(request('usuario') && $usuarios->find(request('usuario')))
                                     , <span>Usuario: {{ $usuarios->find(request('usuario'))->name }}</span>
@@ -259,7 +264,7 @@
                                                         <th style="width: 90px;">Estado</th>
                                                         <th>Número de Factura</th>
                                                         <th>Cliente / Vehículo</th>
-                                                        <th class="text-center">Tipo de Venta</th>
+                                                        <th class="text-center">Departamento</th>
                                                         <th>Usuario</th>
                                                         <th>Detalles</th>
                                                     </tr>
@@ -358,7 +363,7 @@
                                                                 </div>
                                                                 @endif
                                                             </td>
-                                                            <td class="text-center">{{ $venta->tipo_venta }}</td>
+                                                            <td class="text-center">{{ \App\Models\Venta::etiquetaDepartamento($venta->tipo_venta) }}</td>
                                                             <td >{{ optional($venta->usuario)->name }}</td>
                                                             <td>
                                                                 <table class="table table-sm table-bordered table-striped" style="font-size: 12px;">
@@ -867,7 +872,7 @@
                                         <li>Cliente: {{ $clientes->find(request('cliente'))->nombre }}</li>
                                     @endif
                                     @if(request('tipo_venta'))
-                                        <li>Tipo de Venta: {{ request('tipo_venta') }}</li>
+                                        <li>Departamento: {{ \App\Models\Venta::etiquetaDepartamento(request('tipo_venta')) }}</li>
                                     @endif
                                     @if(request('usuario') && $usuarios->find(request('usuario')))
                                         <li>Usuario: {{ $usuarios->find(request('usuario'))->name }}</li>
@@ -888,7 +893,7 @@
                                 <div class="col-xl-6 col-lg-6 col-md-12">
                                     <div class="card mb-3">
                                         <div class="card-header bg-primary text-white">
-                                            <h5 class="card-title mb-0 text-white">Ventas por Tipo</h5>
+                                            <h5 class="card-title mb-0 text-white">Ventas por departamento</h5>
                                         </div>
                                         <div class="card-body">
                                             <div style="height: 300px">

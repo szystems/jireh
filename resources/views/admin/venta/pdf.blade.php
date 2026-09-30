@@ -115,7 +115,7 @@
                 <li>Cliente: {{ $filters['cliente'] }}</li>
             @endif
             @if(isset($filters['tipo_venta']) && $filters['tipo_venta'])
-                <li>Tipo de venta: {{ $filters['tipo_venta'] }}</li>
+                <li>Departamento: {{ \App\Models\Venta::etiquetaDepartamento($filters['tipo_venta']) }}</li>
             @endif
             @if(isset($filters['usuario']) && $filters['usuario'])
                 <li>Usuario: {{ $filters['usuario'] }}</li>
@@ -207,7 +207,7 @@
                 <th width="8%">Fecha</th>
                 <th width="12%">Factura</th>
                 <th width="13%">Cliente</th>
-                <th width="10%">Tipo</th>
+                <th width="10%">Departamento</th>
                 <th width="10%">Vendedor</th>
                 <th width="7%">Estado</th>
                 <th width="10%">Pago</th>
@@ -229,7 +229,7 @@
                             <br><small>{{ $venta->vehiculo->marca }} {{ $venta->vehiculo->modelo }} - {{ $venta->vehiculo->placa }}</small>
                         @endif
                     </td>
-                    <td>{{ $venta->tipo_venta }}</td>
+                    <td>{{ \App\Models\Venta::etiquetaDepartamento($venta->tipo_venta) }}</td>
                     <td>{{ $venta->usuario->name }}</td>
                     <td>
                         @if($venta->estado)

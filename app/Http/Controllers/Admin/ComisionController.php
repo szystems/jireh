@@ -257,9 +257,22 @@ class ComisionController extends Controller
             $query->where('estado', $request->estado);
         }
 
-        // Filtro por tipo de comisión
+        // Filtro por tipo de comisión.
+        // Las metas se guardaron como meta_venta y, en datos viejos, como venta_meta.
         if ($request->filled('tipo_comision')) {
-            $query->where('tipo_comision', $request->tipo_comision);
+            $tipo = $request->tipo_comision;
+            if (in_array($tipo, ['meta_venta', 'venta_meta'], true)) {
+                $query->whereIn('tipo_comision', ['meta_venta', 'venta_meta']);
+            } else {
+                $query->where('tipo_comision', $tipo);
+            }
+        }
+
+        // Departamento de la factura. No cambia el cálculo de la comisión.
+        if ($request->filled('departamento') && array_key_exists($request->departamento, Venta::DEPARTAMENTOS)) {
+            $query->whereHas('venta', function ($q) use ($request) {
+                $q->where('tipo_venta', $request->departamento);
+            });
         }
 
         // Filtro por rango de monto

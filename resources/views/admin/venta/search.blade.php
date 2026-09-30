@@ -28,7 +28,7 @@
                                             <label for="numero_factura" class="form-label">Número de Factura</label>
                                             <input type="text" class="form-control" name="numero_factura" value="{{ request('numero_factura') }}">
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="col-md-3">
                                             <label for="cliente" class="form-label">Cliente</label>
                                             <br>
                                             <select name="cliente" class="form-control select2-cliente">
@@ -54,13 +54,11 @@
                                                 @endforeach
                                             </select>
                                         </div>
-                                        <div class="col-md-1">
-                                            <label for="tipo_venta" class="form-label">Tipo de Venta</label>
+                                        <div class="col-md-2">
+                                            <label for="tipo_venta" class="form-label">Departamento</label>
                                             <br>
                                             <select name="tipo_venta" class="form-control select2">
-                                                <option value=""{{ request('tipo_venta') == null ? 'selected' : '' }}>Seleccione un tipo de venta</option>
-                                                <option value="Car Wash" {{ request('tipo_venta') == 'Car Wash' ? 'selected' : '' }}>Car Wash</option>
-                                                <option value="CDS" {{ request('tipo_venta') == 'CDS' ? 'selected' : '' }}>CDS</option>
+                                                @include('admin.partials.opciones-departamento', ['seleccionado' => request('tipo_venta'), 'placeholder' => 'Todos'])
                                             </select>
                                         </div>
                                         <div class="col-md-2">

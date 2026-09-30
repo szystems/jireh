@@ -60,10 +60,9 @@
                                         </select>
                                     </div>
                                     <div class="col-md-6 mb-3">
-                                        <label for="tipo_cotizacion" class="form-label">Tipo de Cotización</label>
+                                        <label for="tipo_cotizacion" class="form-label">Departamento</label>
                                         <select class="form-control" id="tipo_cotizacion" name="tipo_cotizacion" required>
-                                            <option value="Car Wash" {{ old('tipo_cotizacion', 'Car Wash') == 'Car Wash' ? 'selected' : '' }}>Car Wash</option>
-                                            <option value="CDS" {{ old('tipo_cotizacion') == 'CDS' ? 'selected' : '' }}>CDS</option>
+                                            @include('admin.partials.opciones-departamento', ['seleccionado' => old('tipo_cotizacion', 'Car Wash')])
                                         </select>
                                     </div>
                                     <div class="col-md-12 mb-3">

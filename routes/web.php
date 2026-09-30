@@ -24,6 +24,7 @@ use App\Http\Controllers\Admin\PagoComisionController;
 use App\Http\Controllers\Admin\PagoSueldoController; // Nuevo controlador de pagos de sueldos
 use App\Http\Controllers\LotePagoController;
 use App\Http\Controllers\Admin\VentaController;
+use App\Http\Controllers\Admin\ReporteDepartamentoController;
 use App\Http\Controllers\Admin\CotizacionController; // Nuevo controlador de cotizaciones
 use App\Http\Controllers\Admin\PagoController;
 use App\Http\Controllers\Admin\ReporteArticuloController;
@@ -243,6 +244,7 @@ Route::middleware(['auth'])->group(function () {
 
     //Ventas
     Route::get('ventas', [VentaController::class, 'index'])->name('admin.ventas.index'); // <- AÑADIR ESTA LÍNEA
+    Route::get('ventas/por-departamento', [ReporteDepartamentoController::class, 'index'])->name('ventas.por_departamento');
     Route::get('add-venta', [VentaController::class, 'create']);
     Route::post('insert-venta', [VentaController::class, 'store']);
     Route::get('show-venta/{id}', [VentaController::class, 'show'])->name('ventas.show');

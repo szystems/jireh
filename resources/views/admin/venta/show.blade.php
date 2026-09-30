@@ -74,8 +74,8 @@
                                         <p>{{ \Carbon\Carbon::parse($venta->fecha)->format('d/m/Y') }}</p>
                                     </div>
                                     <div class="mb-3">
-                                        <h6 class="fw-bold">Tipo de Venta:</h6>
-                                        <p>{{ $venta->tipo_venta }}</p>
+                                        <h6 class="fw-bold">Departamento:</h6>
+                                        <p>{{ \App\Models\Venta::etiquetaDepartamento($venta->tipo_venta) }}</p>
                                     </div>
                                     <div class="mb-3">
                                         <h6 class="fw-bold">Estado de Pago:</h6>

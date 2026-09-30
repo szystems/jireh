@@ -196,7 +196,7 @@
             <span class="badge {{ $venta->estado == 1 ? 'badge-primary' : 'badge-danger' }}">
                 {{ $venta->estado == 1 ? 'VENTA ACTIVA' : 'VENTA CANCELADA' }}
             </span>
-            <span class="badge badge-info">{{ strtoupper($venta->tipo_venta) }}</span>
+            <span class="badge badge-info">{{ \App\Models\Venta::etiquetaDepartamento($venta->tipo_venta) }}</span>
         </div>
 
         <!-- Sección de información del cliente y vehículo -->
@@ -342,8 +342,7 @@
                     <tr>
                         <td>
                             @if($detalle->articulo)
-                                <span class="text-primary text-bold">{{ $detalle->articulo->codigo ?: 'SIN-COD' }}</span>
-                                <br>{{ $detalle->articulo->nombre }}
+                                {{ $detalle->articulo->nombre ?: ($detalle->articulo->codigo ?: 'Artículo') }}
                             @else
                                 Artículo no disponible
                             @endif

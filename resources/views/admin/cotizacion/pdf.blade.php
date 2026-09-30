@@ -245,8 +245,7 @@
                 @endphp
                 <tr>
                     <td>
-                        <strong>{{ $detalle->articulo->codigo }}</strong><br>
-                        {{ $detalle->articulo->nombre }}
+                        {{ $detalle->articulo->nombre ?: $detalle->articulo->codigo }}
                         @if($detalle->articulo->descripcion)
                             <br><small style="color: #666;">{{ $detalle->articulo->descripcion }}</small>
                         @endif

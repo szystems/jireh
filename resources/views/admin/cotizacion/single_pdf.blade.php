@@ -254,8 +254,7 @@
                 @endphp
                 <tr>
                     <td>
-                        <strong>{{ $detalle->articulo->codigo }}</strong><br>
-                        {{ $detalle->articulo->nombre }}
+                        {{ $detalle->articulo->nombre ?: $detalle->articulo->codigo }}
                     </td>
                     <td class="text-center">
                         {{ $detalle->cantidad }} {{ $detalle->articulo->unidad->abreviatura }}
