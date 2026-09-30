@@ -401,12 +401,22 @@
                                     <li><strong>Seleccionar cliente y vehículo</strong>
                                         <ul><li>Busca el cliente existente o crea uno nuevo</li></ul>
                                     </li>
+                                    <li><strong>Elegir el departamento</strong>
+                                        <ul>
+                                            <li>Car Wash, Centro de Servicios (CDS), Autos, Accesorios o Pintura automotriz</li>
+                                            <li>Las facturas anteriores siguen en Car Wash o CDS. Las nuevas usan el departamento que elijas al guardar</li>
+                                        </ul>
+                                    </li>
                                     <li><strong>Agregar productos/servicios</strong>
                                         <ul><li>Busca por nombre o navega por categorías</li>
                                         <li>Ajusta cantidades según necesidad</li></ul>
                                     </li>
-                                    <li><strong>Asignar trabajadores</strong>
-                                        <ul><li>Para el cálculo automático de comisiones</li></ul>
+                                    <li><strong>Asignar trabajadores si aplica</strong>
+                                        <ul>
+                                            <li>Car wash: elige a los lavadores del servicio</li>
+                                            <li>Mecánico: la comisión sale del servicio si tiene mecánico y costo configurados</li>
+                                            <li>El departamento de la factura no crea una comisión nueva</li>
+                                        </ul>
                                     </li>
                                     <li><strong>Aplicar descuentos (opcional)</strong></li>
                                     <li><strong>Registrar pagos</strong>
@@ -443,6 +453,43 @@
                         @endif
                     </div>
 
+                    <div class="help-card" id="ventas-por-departamento">
+                        <h5><i class="bi bi-diagram-3 text-primary"></i> Ventas por departamento</h5>
+                        <p><strong>Ruta:</strong> Ventas → Por departamento</p>
+                        <p>Sirve para ver quién vendió y en qué área, en el período que elijas.</p>
+                        <ol>
+                            <li>Entra a <strong>Ventas → Por departamento</strong></li>
+                            <li>Elige la fecha desde y hasta</li>
+                            @if($isAdmin)
+                            <li>Si quieres, filtra un vendedor. En blanco se ven todos</li>
+                            @else
+                            <li>Verás solo tus propias ventas</li>
+                            @endif
+                            <li>La tabla muestra el monto y la cantidad de facturas en cada departamento</li>
+                        </ol>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-3">
+                                <thead>
+                                    <tr>
+                                        <th>Departamento</th>
+                                        <th>Cuándo usarlo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>Car Wash</td><td>Lavados y detallado</td></tr>
+                                    <tr><td>Centro de Servicios (CDS)</td><td>Taller y servicios del centro</td></tr>
+                                    <tr><td>Autos</td><td>Venta de vehículos</td></tr>
+                                    <tr><td>Accesorios</td><td>Llantas, plumillas, cámaras y similares</td></tr>
+                                    <tr><td>Pintura automotriz</td><td>Trabajos de pintura</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="alert alert-info mb-0">
+                            <i class="bi bi-funnel"></i>
+                            También puedes filtrar la lista de facturas por departamento y por usuario en <strong>Ventas → Ventas</strong>.
+                        </div>
+                    </div>
+
                     <div class="help-card">
                         <h5><i class="bi bi-file-earmark-text text-primary"></i> Módulo de Cotizaciones ⭐</h5>
                         <div class="row">
@@ -463,7 +510,8 @@
                                         </ul>
                                     </li>
                                     <li><strong>Regeneración:</strong> Renueva vigencia sin perder datos</li>
-                                    <li><strong>PDF profesional:</strong> Con datos de empresa dinámicos</li>
+                                    <li><strong>PDF para el cliente:</strong> Muestra el nombre del producto. El código interno no sale en la cotización ni en la factura</li>
+                                    <li><strong>Departamento:</strong> El mismo de la venta (Car Wash, CDS, Autos, Accesorios o Pintura)</li>
                                 </ul>
                             </div>
                             <div class="col-md-4">
@@ -477,8 +525,8 @@
                         <h6>Flujo de trabajo con cotizaciones:</h6>
                         <ol>
                             <li>Cliente solicita cotización</li>
-                            <li>Creas cotización (Estado: Generado)</li>
-                            <li>Generas PDF para entregar</li>
+                            <li>Eliges el departamento y creas la cotización (Estado: Generado)</li>
+                            <li>Generas el PDF. El cliente ve el nombre del producto, no el código interno</li>
                             <li>Cliente revisa (15 días de vigencia)</li>
                             <li>Si aprueba: cambias estado a Aprobado</li>
                             <li>Si necesita más tiempo: Regeneras (nuevos 15 días)</li>
@@ -605,13 +653,21 @@
                             <li><strong>Reporte de Metas:</strong> Seguimiento de cumplimiento</li>
                         </ul>
 
+                        <h6>Cómo se calculan, sin cambiar el departamento:</h6>
+                        <ul>
+                            <li><strong>Mecánico:</strong> monto fijo del servicio, cuando el artículo es un servicio con mecánico y costo de mecánico</li>
+                            <li><strong>Car wash:</strong> monto del servicio para cada lavador asignado en la factura</li>
+                            <li><strong>Meta de ventas:</strong> porcentaje del vendedor cuando llega a la meta. Suma todas las ventas, de cualquier departamento</li>
+                        </ul>
+                        <p>Autos, Accesorios y Pintura son departamentos de la factura. Elegirlos no crea un tipo de comisión nuevo.</p>
+
                         <h6>Proceso de comisiones:</h6>
                         <ol>
-                            <li>Se realiza una venta con trabajadores asignados</li>
-                            <li>Sistema calcula comisión automáticamente</li>
-                            <li>Comisiones se acumulan hasta la fecha de pago</li>
-                            <li>Se crea lote de pago para el período</li>
-                            <li>Se procesan pagos individuales</li>
+                            <li>Se guarda la venta con su departamento</li>
+                            <li>El sistema calcula mecánico, car wash o meta según corresponda</li>
+                            <li>Las comisiones se acumulan hasta la fecha de pago</li>
+                            <li>En <strong>Gestión y Pagos</strong> puedes filtrar por tipo de comisión y por departamento de la factura</li>
+                            <li>Se crea un lote de pago y se procesan los pagos</li>
                         </ol>
                     </div>
 

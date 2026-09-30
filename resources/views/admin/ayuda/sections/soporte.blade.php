@@ -224,7 +224,24 @@
             <div id="collapseActualizaciones" class="accordion-collapse collapse" data-bs-parent="#soporteAccordion">
                 <div class="accordion-body">
                     <div class="help-card">
-                        <h5><i class="bi bi-star text-warning"></i> Última Actualización Mayor</h5>
+                        <h5><i class="bi bi-star text-warning"></i> Última Actualización</h5>
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                <h6><strong>Versión 1.7.5 - 30 de septiembre de 2026</strong></h6>
+                                <ul>
+                                    <li><strong>Departamentos de factura:</strong> Car Wash, Centro de Servicios, Autos, Accesorios y Pintura automotriz</li>
+                                    <li><strong>Reporte:</strong> Ventas → Por departamento, para ver quién vendió en cada área</li>
+                                    <li><strong>Comisiones:</strong> siguen siendo mecánico, car wash y meta. Se pueden filtrar por el departamento de la factura</li>
+                                    <li><strong>PDF al cliente:</strong> cotización y factura muestran el nombre del producto, sin el código interno</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="alert alert-success">
+                                    <i class="bi bi-book"></i>
+                                    <strong>Cómo usarlo:</strong> busca “departamento” en esta ayuda o abre Módulos → Ventas y Cotizaciones.
+                                </div>
+                            </div>
+                        </div>
                         <div class="row">
                             <div class="col-md-8">
                                 <h6><strong>Versión 1.6.0 - Septiembre 2025</strong></h6>
@@ -287,6 +304,19 @@
                                 </thead>
                                 <tbody>
                                     <tr class="table-info">
+                                        <td><strong>1.7.5</strong></td>
+                                        <td>Sep 30, 2026</td>
+                                        <td>
+                                            <strong>Ventas por departamento:</strong>
+                                            <ul class="mb-0">
+                                                <li>Cinco departamentos en ventas y cotizaciones</li>
+                                                <li>Reporte de quién vendió en cada área</li>
+                                                <li>Filtro de comisiones por departamento de la factura</li>
+                                                <li>PDF de cotización y factura sin código interno</li>
+                                            </ul>
+                                        </td>
+                                    </tr>
+                                    <tr>
                                         <td><strong>1.7.4</strong></td>
                                         <td>Ene 5, 2026</td>
                                         <td>
@@ -379,9 +409,9 @@
                         <div class="col-md-8">
                             <h5><i class="bi bi-info-circle text-primary"></i> Información del Sistema</h5>
                             <p class="mb-0">
-                                <strong>Sistema Jireh v1.7.4</strong> - Desarrollado por <a href="https://szystems.com" target="_blank" class="text-decoration-none">Szystems</a><br>
+                                <strong>Sistema Jireh v1.7.5</strong> - Desarrollado por <a href="https://szystems.com" target="_blank" class="text-decoration-none">Szystems</a><br>
                                 Plataforma: Laravel 8 | Base de datos: MySQL | Interfaz: Bootstrap 5<br>
-                                <small class="text-muted">Última actualización: Enero 5, 2026 - Corrección precios históricos en ventas</small>
+                                <small class="text-muted">Última actualización: 30 de septiembre de 2026 - Ventas por departamento y PDF sin código interno</small>
                             </p>
                         </div>
                         <div class="col-md-4 text-center">

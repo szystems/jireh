@@ -411,12 +411,21 @@
                                     <li><strong>Selecciona el cliente y vehículo</strong>
                                         <ul><li>Si no existe, créalo desde el botón "Nuevo Cliente"</li></ul>
                                     </li>
+                                    <li><strong>Elige el departamento</strong>
+                                        <ul>
+                                            <li>Car Wash, Centro de Servicios (CDS), Autos, Accesorios o Pintura automotriz</li>
+                                            <li>Ese dato permite ver después quién vendió y en qué área</li>
+                                        </ul>
+                                    </li>
                                     <li><strong>Agrega productos o servicios</strong>
                                         <ul><li>Busca por nombre o categoría</li>
                                         <li>Ajusta cantidad según necesidad</li></ul>
                                     </li>
-                                    <li><strong>Asigna trabajadores</strong>
-                                        <ul><li>Para calcular comisiones automáticamente</li></ul>
+                                    <li><strong>Asigna trabajadores si el servicio lo necesita</strong>
+                                        <ul>
+                                            <li>En un lavado, asigna a los trabajadores de car wash</li>
+                                            <li>El mecánico se toma del servicio cuando ese artículo ya tiene mecánico y costo</li>
+                                        </ul>
                                     </li>
                                     <li><strong>Aplica descuentos si es necesario</strong></li>
                                     <li><strong>Registra los pagos</strong>
@@ -445,13 +454,14 @@
                         <p>Si el cliente quiere una cotización antes de decidir:</p>
                         <ol>
                             <li>Ve a <strong>Cotizaciones</strong></li>
+                            <li>Elige el mismo departamento de la venta: Car Wash, CDS, Autos, Accesorios o Pintura</li>
                             <li>Crea una cotización con los productos</li>
                             <li>Genera el PDF para entregar al cliente</li>
-                            <li>Cuando el cliente apruebe, puedes regenerar la cotización</li>
+                            <li>Cuando el cliente apruebe, cambia el estado a Aprobado</li>
                         </ol>
                         <div class="alert alert-info">
                             <i class="bi bi-info-circle"></i>
-                            <strong>Funcionalidad avanzada:</strong> Las cotizaciones tienen estados (Generado/Aprobado) y vigencia automática de 15 días.
+                            <strong>Para el cliente:</strong> el PDF muestra el nombre del producto, por ejemplo “Filtro de aceite de motor Autox mediano”. El código interno se queda en el sistema y no sale en la cotización ni en la factura.
                         </div>
                     </div>
                 </div>

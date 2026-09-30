@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class AyudaController extends Controller
@@ -29,46 +28,25 @@ class AyudaController extends Controller
     }
 
     /**
-     * Mostrar guía de primeros pasos
+     * Las rutas antiguas abrían vistas que no existen. Ahora llevan a la pestaña correcta.
      */
     public function primerosPasos()
     {
-        $user = Auth::user();
-        $isAdmin = $user->role_as == 0;
-        
-        return view('admin.ayuda.primeros-pasos', compact('user', 'isAdmin'));
+        return redirect()->route('ayuda.index', ['tab' => 'primeros-pasos']);
     }
 
-    /**
-     * Mostrar documentación de módulos
-     */
     public function modulos()
     {
-        $user = Auth::user();
-        $isAdmin = $user->role_as == 0;
-        
-        return view('admin.ayuda.modulos', compact('user', 'isAdmin'));
+        return redirect()->route('ayuda.index', ['tab' => 'modulos']);
     }
 
-    /**
-     * Mostrar preguntas frecuentes
-     */
     public function faq()
     {
-        $user = Auth::user();
-        $isAdmin = $user->role_as == 0;
-        
-        return view('admin.ayuda.faq', compact('user', 'isAdmin'));
+        return redirect()->route('ayuda.index', ['tab' => 'faq']);
     }
 
-    /**
-     * Mostrar información de soporte
-     */
     public function soporte()
     {
-        $user = Auth::user();
-        $isAdmin = $user->role_as == 0;
-        
-        return view('admin.ayuda.soporte', compact('user', 'isAdmin'));
+        return redirect()->route('ayuda.index', ['tab' => 'soporte']);
     }
 }

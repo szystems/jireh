@@ -22,6 +22,24 @@
         </div>
     </div>
 
+    @php
+        $ayudaTab = request('tab', 'primeros-pasos');
+        $ayudaTabsValidas = ['primeros-pasos', 'modulos', 'faq', 'soporte'];
+        if (!in_array($ayudaTab, $ayudaTabsValidas, true)) {
+            $ayudaTab = 'primeros-pasos';
+        }
+    @endphp
+
+    <div class="row mb-3">
+        <div class="col-12">
+            <label class="form-label" for="ayudaBuscar">Buscar en la ayuda</label>
+            <input type="search" class="form-control" id="ayudaBuscar" placeholder="Ejemplo: departamento, cotización, comisión, contraseña">
+            <div id="ayudaSinResultados" class="alert alert-warning mt-2 d-none mb-0">
+                No hay coincidencias. Prueba con otra palabra, como departamento o cotización.
+            </div>
+        </div>
+    </div>
+
     <!-- Tabs principales del Centro de Ayuda -->
     <div class="row">
         <div class="col-12">
@@ -29,25 +47,25 @@
                 <div class="card-header">
                     <ul class="nav nav-tabs card-header-tabs" id="ayudaTabs" role="tablist">
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="primeros-pasos-tab" data-bs-toggle="tab" 
+                            <button class="nav-link {{ $ayudaTab === 'primeros-pasos' ? 'active' : '' }}" id="primeros-pasos-tab" data-bs-toggle="tab" 
                                     data-bs-target="#primeros-pasos" type="button" role="tab">
                                 <i class="bi bi-rocket-takeoff"></i> Primeros Pasos
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="modulos-tab" data-bs-toggle="tab" 
+                            <button class="nav-link {{ $ayudaTab === 'modulos' ? 'active' : '' }}" id="modulos-tab" data-bs-toggle="tab" 
                                     data-bs-target="#modulos" type="button" role="tab">
                                 <i class="bi bi-grid-3x3-gap"></i> Módulos
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="faq-tab" data-bs-toggle="tab" 
+                            <button class="nav-link {{ $ayudaTab === 'faq' ? 'active' : '' }}" id="faq-tab" data-bs-toggle="tab" 
                                     data-bs-target="#faq" type="button" role="tab">
                                 <i class="bi bi-question-circle"></i> FAQ
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="soporte-tab" data-bs-toggle="tab" 
+                            <button class="nav-link {{ $ayudaTab === 'soporte' ? 'active' : '' }}" id="soporte-tab" data-bs-toggle="tab" 
                                     data-bs-target="#soporte" type="button" role="tab">
                                 <i class="bi bi-headset"></i> Soporte
                             </button>
@@ -58,22 +76,22 @@
                 <div class="card-body">
                     <div class="tab-content" id="ayudaTabsContent">
                         <!-- Tab 1: Primeros Pasos -->
-                        <div class="tab-pane fade show active" id="primeros-pasos" role="tabpanel">
+                        <div class="tab-pane fade {{ $ayudaTab === 'primeros-pasos' ? 'show active' : '' }}" id="primeros-pasos" role="tabpanel">
                             @include('admin.ayuda.sections.primeros-pasos')
                         </div>
 
                         <!-- Tab 2: Módulos -->
-                        <div class="tab-pane fade" id="modulos" role="tabpanel">
+                        <div class="tab-pane fade {{ $ayudaTab === 'modulos' ? 'show active' : '' }}" id="modulos" role="tabpanel">
                             @include('admin.ayuda.sections.modulos')
                         </div>
 
                         <!-- Tab 3: FAQ -->
-                        <div class="tab-pane fade" id="faq" role="tabpanel">
+                        <div class="tab-pane fade {{ $ayudaTab === 'faq' ? 'show active' : '' }}" id="faq" role="tabpanel">
                             @include('admin.ayuda.sections.faq')
                         </div>
 
                         <!-- Tab 4: Soporte -->
-                        <div class="tab-pane fade" id="soporte" role="tabpanel">
+                        <div class="tab-pane fade {{ $ayudaTab === 'soporte' ? 'show active' : '' }}" id="soporte" role="tabpanel">
                             @include('admin.ayuda.sections.soporte')
                         </div>
                     </div>
@@ -205,25 +223,91 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Inicializar tooltips
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl);
     });
 
-    // Scroll suave para enlaces internos
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    var pestanasValidas = ['primeros-pasos', 'modulos', 'faq', 'soporte'];
+
+    function abrirPestana(id) {
+        var boton = document.getElementById(id + '-tab');
+        if (!boton || typeof bootstrap === 'undefined') {
+            return;
+        }
+        bootstrap.Tab.getOrCreateInstance(boton).show();
+    }
+
+    function abrirAcordeon(target) {
+        var collapse = target.classList.contains('accordion-collapse')
+            ? target
+            : (target.querySelector('.accordion-collapse') || target.closest('.accordion-collapse'));
+        if (collapse && typeof bootstrap !== 'undefined') {
+            bootstrap.Collapse.getOrCreateInstance(collapse, { toggle: false }).show();
+        }
+    }
+
+    var hash = (window.location.hash || '').replace('#', '');
+    if (pestanasValidas.indexOf(hash) !== -1) {
+        abrirPestana(hash);
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(function (anchor) {
         anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
-            if (target) {
-                target.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
+            var id = this.getAttribute('href');
+            if (!id || id === '#') {
+                return;
             }
+            var target = document.querySelector(id);
+            if (!target) {
+                return;
+            }
+            e.preventDefault();
+            var pane = target.closest('.tab-pane');
+            if (pane) {
+                abrirPestana(pane.id);
+            }
+            abrirAcordeon(target);
+            setTimeout(function () {
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 150);
         });
     });
+
+    var buscador = document.getElementById('ayudaBuscar');
+    var aviso = document.getElementById('ayudaSinResultados');
+    if (buscador) {
+        buscador.addEventListener('input', function () {
+            var consulta = buscador.value.trim().toLowerCase();
+            var coincidencias = 0;
+            var primera = null;
+
+            document.querySelectorAll('#ayudaTabsContent .accordion-item').forEach(function (item) {
+                var coincide = consulta === '' || item.innerText.toLowerCase().indexOf(consulta) !== -1;
+                item.classList.toggle('d-none', !coincide);
+                if (coincide) {
+                    coincidencias++;
+                    if (!primera) {
+                        primera = item;
+                    }
+                    if (consulta !== '') {
+                        abrirAcordeon(item);
+                    }
+                }
+            });
+
+            if (consulta !== '' && primera) {
+                var pane = primera.closest('.tab-pane');
+                if (pane) {
+                    abrirPestana(pane.id);
+                }
+            }
+
+            if (aviso) {
+                aviso.classList.toggle('d-none', coincidencias > 0 || consulta === '');
+            }
+        });
+    }
 });
 </script>
 @endsection

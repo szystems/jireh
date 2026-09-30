@@ -32,8 +32,11 @@
                                 <h6>Posibles causas y soluciones:</h6>
                                 <ol>
                                     <li><strong>Credenciales incorrectas:</strong>
-                                        <ul><li>Verifica email y contraseña</li>
-                                        <li>Contacta al administrador para resetear contraseña</li></ul>
+                                        <ul>
+                                            <li>Verifica email y contraseña</li>
+                                            <li>Si recuerdas la contraseña actual, cámbiala desde tu nombre de usuario → editar perfil</li>
+                                            <li>Si no la recuerdas, un administrador puede asignar una nueva en Usuarios</li>
+                                        </ul>
                                     </li>
                                     <li><strong>Cuenta desactivada:</strong>
                                         <ul><li>Solo el administrador puede reactivar tu cuenta</li></ul>
@@ -137,17 +140,33 @@
 
                     <div class="help-card">
                         <h5><i class="bi bi-currency-dollar text-primary"></i> "¿Cómo funcionan las comisiones?"</h5>
-                        <h6>Sistema automático:</h6>
+                        <p>Hay tres cálculos. El departamento de la factura no agrega otro.</p>
                         <ul>
-                            <li><strong>Asignación:</strong> Al realizar venta, asignas trabajadores</li>
-                            <li><strong>Cálculo:</strong> Se calcula automáticamente según porcentaje configurado</li>
-                            <li><strong>Acumulación:</strong> Las comisiones se acumulan hasta la fecha de pago</li>
+                            <li><strong>Mecánico:</strong> monto fijo del servicio, si el artículo tiene mecánico y costo de mecánico</li>
+                            <li><strong>Car wash:</strong> monto del servicio para cada lavador asignado</li>
+                            <li><strong>Meta de ventas:</strong> porcentaje del vendedor al llegar a la meta, sumando todas las áreas</li>
+                            <li><strong>Acumulación:</strong> quedan pendientes hasta que se pagan en un lote</li>
                             @if($isAdmin)
-                            <li><strong>Pago:</strong> El administrador crea lotes de pago periódicamente</li>
+                            <li><strong>Filtro:</strong> en Comisiones → Gestión y Pagos puedes filtrar por tipo y por departamento de la factura</li>
                             @else
-                            <li><strong>Consulta:</strong> Puedes ver tus comisiones en "Mis Comisiones"</li>
+                            <li><strong>Consulta:</strong> puedes ver tus comisiones en "Mis Comisiones"</li>
                             @endif
                         </ul>
+                    </div>
+
+                    <div class="help-card">
+                        <h5><i class="bi bi-diagram-3 text-primary"></i> "¿Cómo veo cuánto vendió cada persona en cada departamento?"</h5>
+                        <ol>
+                            <li>Abre <strong>Ventas → Por departamento</strong></li>
+                            <li>Elige desde y hasta</li>
+                            <li>La tabla muestra Car Wash, Centro de Servicios, Autos, Accesorios y Pintura</li>
+                        </ol>
+                        <p class="mb-0">Las facturas ya guardadas siguen en Car Wash o CDS. Autos, Accesorios y Pintura aparecen cuando la factura se guarda con ese departamento. También puedes filtrar la lista de ventas por departamento y por usuario.</p>
+                    </div>
+
+                    <div class="help-card">
+                        <h5><i class="bi bi-file-earmark-pdf text-danger"></i> "¿Por qué el PDF ya no muestra el código del producto?"</h5>
+                        <p class="mb-0">La cotización y la factura que se entregan al cliente muestran el nombre, por ejemplo “Filtro de aceite de motor Autox mediano”. El código interno sigue en artículos y en la pantalla de venta, para buscar el producto, y no se imprime porque confundía al cliente.</p>
                     </div>
 
                     <div class="help-card">
@@ -170,7 +189,7 @@
                                     <li>Reduce inventario</li>
                                     <li>Genera comisiones</li>
                                     <li>Registra pagos</li>
-                                    <li>Final e irreversible</li>
+                                    <li>Queda registrada y se puede consultar o corregir después</li>
                                 </ul>
                             </div>
                         </div>
@@ -266,7 +285,7 @@
                         <ol>
                             <li><strong>Inicio del día:</strong> Revisa dashboard para alertas</li>
                             <li><strong>Preparación:</strong> Verifica productos que se podrían agotar</li>
-                            <li><strong>Durante ventas:</strong> Registra inmediatamente, no acumules</li>
+                            <li><strong>Durante ventas:</strong> Elige el departamento correcto antes de guardar</li>
                             <li><strong>Final del día:</strong> Revisa ventas del día</li>
                             @if($isAdmin)
                             <li><strong>Semanal:</strong> Procesa comisiones y revisa reportes</li>
@@ -384,7 +403,8 @@
                     <div>
                         <h5 class="mb-1">¿No encontraste la respuesta?</h5>
                         <p class="mb-0">
-                            Si tu problema no está listado aquí, revisa la sección de <strong>Soporte</strong> 
+                            Si tu problema no está listado aquí, abre
+                            <a href="{{ route('ayuda.index', ['tab' => 'soporte']) }}">Soporte</a>
                             para contactar al equipo técnico o reportar el inconveniente.
                         </p>
                     </div>
