@@ -229,7 +229,7 @@
                             <div class="col-md-8">
                                 <h6><strong>Versión 1.7.5 - 30 de septiembre de 2026</strong></h6>
                                 <ul>
-                                    <li><strong>Departamentos de factura:</strong> Car Wash, Centro de Servicios, Autos, Accesorios y Pintura automotriz</li>
+                                    <li><strong>Departamentos de factura:</strong> Car Wash, Centro de Servicios, Autos, Accesorios y Pintura automotriz. El administrador agrega más en Ventas → Departamentos</li>
                                     <li><strong>Reporte:</strong> Ventas → Por departamento, para ver quién vendió en cada área</li>
                                     <li><strong>Comisiones:</strong> siguen siendo mecánico, car wash y meta. Se pueden filtrar por el departamento de la factura</li>
                                     <li><strong>PDF al cliente:</strong> cotización y factura muestran el nombre del producto, sin el código interno</li>
@@ -309,7 +309,7 @@
                                         <td>
                                             <strong>Ventas por departamento:</strong>
                                             <ul class="mb-0">
-                                                <li>Cinco departamentos en ventas y cotizaciones</li>
+                                                <li>Cinco departamentos en ventas y cotizaciones, y alta de departamentos nuevos</li>
                                                 <li>Reporte de quién vendió en cada área</li>
                                                 <li>Filtro de comisiones por departamento de la factura</li>
                                                 <li>PDF de cotización y factura sin código interno</li>

@@ -403,7 +403,8 @@
                                     </li>
                                     <li><strong>Elegir el departamento</strong>
                                         <ul>
-                                            <li>Car Wash, Centro de Servicios (CDS), Autos, Accesorios o Pintura automotriz</li>
+                                            <li>Se elige una sola vez en la factura, junto al vehículo. No se elige en cada artículo</li>
+                                            <li>Si no lo cambias, la venta queda en Car Wash</li>
                                             <li>Las facturas anteriores siguen en Car Wash o CDS. Las nuevas usan el departamento que elijas al guardar</li>
                                         </ul>
                                     </li>
@@ -487,10 +488,29 @@
                         <div class="alert alert-info mb-0">
                             <i class="bi bi-funnel"></i>
                             También puedes filtrar la lista de facturas por departamento y por usuario en <strong>Ventas → Ventas</strong>.
-                            @if($isAdmin)
-                                Para agregar otro, como una segunda agencia, entra a <strong>Ventas → Departamentos</strong>. Eso no mueve las facturas ni las comisiones ya guardadas.
-                            @endif
                         </div>
+                    </div>
+
+                    <div class="help-card" id="agregar-departamento">
+                        <h5><i class="bi bi-tags text-primary"></i> Agregar un departamento</h5>
+                        @if($isAdmin)
+                        <p><strong>Ruta:</strong> Ventas → Departamentos</p>
+                        <p>Sirve para crear áreas nuevas, por ejemplo una segunda agencia, sin cambiar las facturas ni las comisiones que ya están guardadas.</p>
+                        <ol>
+                            <li>Entra a <strong>Ventas → Departamentos</strong></li>
+                            <li>Dale a <strong>Agregar</strong></li>
+                            <li>En <strong>Nombre</strong> escribe el valor que se guarda en la factura, tal cual. Ejemplos: <code>CWAG2</code>, <code>CDSAG2</code>, <code>AUTOSAG2</code></li>
+                            <li>En <strong>Nombre visible</strong> escribe cómo se ve en pantalla. Ejemplo: Carwash agencia 2</li>
+                            <li>Guarda. El departamento aparece en el campo <strong>Departamento</strong> al crear o editar una venta y una cotización</li>
+                        </ol>
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            Si un departamento ya tiene facturas o cotizaciones, se puede cambiar el nombre visible o desactivarlo. No se puede renombrar ni borrar, para no mover las ventas anteriores.
+                        </div>
+                        <p class="mb-0">Elegir un departamento no crea un tipo de comisión. Siguen siendo tres: mecánico, car wash y meta de ventas.</p>
+                        @else
+                        <p class="mb-0">El departamento se elige al crear la venta o la cotización. Si no lo cambias, queda en Car Wash. Los departamentos nuevos los agrega un administrador en <strong>Ventas → Departamentos</strong>.</p>
+                        @endif
                     </div>
 
                     <div class="help-card">

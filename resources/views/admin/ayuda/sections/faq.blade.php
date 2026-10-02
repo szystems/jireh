@@ -154,6 +154,21 @@
                         </ul>
                     </div>
 
+                    <div class="help-card" id="faq-agregar-departamento">
+                        <h5><i class="bi bi-tags text-primary"></i> "¿Cómo agrego un departamento, por ejemplo de otra agencia?"</h5>
+                        @if($isAdmin)
+                        <ol>
+                            <li>Abre <strong>Ventas → Departamentos</strong> y dale a <strong>Agregar</strong></li>
+                            <li><strong>Nombre:</strong> el valor que se guarda en la factura. Escríbelo tal cual, por ejemplo <code>CWAG2</code>, <code>CDSAG2</code> o <code>AUTOSAG2</code></li>
+                            <li><strong>Nombre visible:</strong> cómo se ve en pantalla, por ejemplo Carwash agencia 2</li>
+                            <li>Al guardar, aparece en el campo Departamento de las ventas y cotizaciones nuevas</li>
+                        </ol>
+                        <p class="mb-0">Se elige una sola vez en la factura. Si no lo cambias, la venta queda en Car Wash. Las facturas y las comisiones ya guardadas no se mueven. Si el departamento ya tiene facturas, se puede desactivar o cambiar el nombre visible, pero no renombrarlo ni borrarlo.</p>
+                        @else
+                        <p class="mb-0">Al crear la venta o la cotización elige el departamento. Si no lo cambias, queda en Car Wash. Un administrador agrega departamentos nuevos en Ventas → Departamentos.</p>
+                        @endif
+                    </div>
+
                     <div class="help-card">
                         <h5><i class="bi bi-diagram-3 text-primary"></i> "¿Cómo veo cuánto vendió cada persona en cada departamento?"</h5>
                         <ol>
