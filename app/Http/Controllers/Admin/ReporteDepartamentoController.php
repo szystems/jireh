@@ -47,7 +47,7 @@ class ReporteDepartamentoController extends Controller
             )
             ->get();
 
-        $departamentos = Venta::DEPARTAMENTOS;
+        $departamentos = Venta::departamentosActivos();
         $vendedores = [];
 
         foreach ($filas as $fila) {
@@ -63,6 +63,9 @@ class ReporteDepartamentoController extends Controller
             }
 
             $tipo = $fila->tipo_venta ?: '';
+            if ($tipo !== '' && !array_key_exists($tipo, $departamentos)) {
+                $departamentos[$tipo] = Venta::etiquetaDepartamento($tipo);
+            }
             $vendedores[$id]['totales'][$tipo] = (float) $fila->total;
             $vendedores[$id]['facturas'][$tipo] = (int) $fila->facturas;
             $vendedores[$id]['total'] += (float) $fila->total;

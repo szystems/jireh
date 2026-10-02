@@ -269,7 +269,7 @@ class ComisionController extends Controller
         }
 
         // Departamento de la factura. No cambia el cálculo de la comisión.
-        if ($request->filled('departamento') && array_key_exists($request->departamento, Venta::DEPARTAMENTOS)) {
+        if ($request->filled('departamento') && array_key_exists($request->departamento, Venta::mapaEtiquetas())) {
             $query->whereHas('venta', function ($q) use ($request) {
                 $q->where('tipo_venta', $request->departamento);
             });

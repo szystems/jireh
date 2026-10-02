@@ -161,7 +161,7 @@
                             <li>Elige desde y hasta</li>
                             <li>La tabla muestra Car Wash, Centro de Servicios, Autos, Accesorios y Pintura</li>
                         </ol>
-                        <p class="mb-0">Las facturas ya guardadas siguen en Car Wash o CDS. Autos, Accesorios y Pintura aparecen cuando la factura se guarda con ese departamento. También puedes filtrar la lista de ventas por departamento y por usuario.</p>
+                        <p class="mb-0">Las facturas ya guardadas siguen en Car Wash o CDS. Autos, Accesorios y Pintura aparecen cuando la factura se guarda con ese departamento. El administrador puede agregar más en <strong>Ventas → Departamentos</strong> (por ejemplo una segunda agencia). Eso no cambia las facturas ni las comisiones anteriores. También puedes filtrar la lista de ventas por departamento y por usuario.</p>
                     </div>
 
                     <div class="help-card">

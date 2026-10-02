@@ -487,6 +487,9 @@
                         <div class="alert alert-info mb-0">
                             <i class="bi bi-funnel"></i>
                             También puedes filtrar la lista de facturas por departamento y por usuario en <strong>Ventas → Ventas</strong>.
+                            @if($isAdmin)
+                                Para agregar otro, como una segunda agencia, entra a <strong>Ventas → Departamentos</strong>. Eso no mueve las facturas ni las comisiones ya guardadas.
+                            @endif
                         </div>
                     </div>
 

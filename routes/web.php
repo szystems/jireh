@@ -25,6 +25,7 @@ use App\Http\Controllers\Admin\PagoSueldoController; // Nuevo controlador de pag
 use App\Http\Controllers\LotePagoController;
 use App\Http\Controllers\Admin\VentaController;
 use App\Http\Controllers\Admin\ReporteDepartamentoController;
+use App\Http\Controllers\Admin\DepartamentoController;
 use App\Http\Controllers\Admin\CotizacionController; // Nuevo controlador de cotizaciones
 use App\Http\Controllers\Admin\PagoController;
 use App\Http\Controllers\Admin\ReporteArticuloController;
@@ -245,6 +246,14 @@ Route::middleware(['auth'])->group(function () {
     //Ventas
     Route::get('ventas', [VentaController::class, 'index'])->name('admin.ventas.index'); // <- AÑADIR ESTA LÍNEA
     Route::get('ventas/por-departamento', [ReporteDepartamentoController::class, 'index'])->name('ventas.por_departamento');
+    Route::middleware('superAdmin')->group(function () {
+        Route::get('departamentos', [DepartamentoController::class, 'index']);
+        Route::get('add-departamento', [DepartamentoController::class, 'add']);
+        Route::post('insert-departamento', [DepartamentoController::class, 'insert']);
+        Route::get('edit-departamento/{id}', [DepartamentoController::class, 'edit']);
+        Route::post('update-departamento/{id}', [DepartamentoController::class, 'update']);
+        Route::get('delete-departamento/{id}', [DepartamentoController::class, 'destroy']);
+    });
     Route::get('add-venta', [VentaController::class, 'create']);
     Route::post('insert-venta', [VentaController::class, 'store']);
     Route::get('show-venta/{id}', [VentaController::class, 'show'])->name('ventas.show');

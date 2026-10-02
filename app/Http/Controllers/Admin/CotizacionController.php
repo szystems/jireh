@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Cotizacion;
 use App\Models\Venta;
-use Illuminate\Validation\Rule;
 use App\Models\DetalleCotizacion;
 use App\Models\Articulo;
 use App\Models\Cliente;
@@ -138,7 +137,7 @@ class CotizacionController extends Controller
             'vehiculo_id' => 'nullable|exists:vehiculos,id',
             'fecha_cotizacion' => 'required|date',
             'fecha_vencimiento' => 'required|date',
-            'tipo_cotizacion' => ['required', Rule::in(array_keys(Venta::DEPARTAMENTOS))],
+            'tipo_cotizacion' => Venta::reglaDepartamento(),
             'detalles' => 'required|array',
             'detalles.*.articulo_id' => 'required|exists:articulos,id',
             'detalles.*.cantidad' => 'required|numeric|min:0.01',
@@ -305,7 +304,7 @@ class CotizacionController extends Controller
             'fecha_cotizacion' => 'required|date',
             'fecha_vencimiento' => 'required|date',
             'estado' => 'required|in:vigente,vencida,aprobada,rechazada,convertida,Generado,Aprobado',
-            'tipo_cotizacion' => ['required', Rule::in(array_keys(Venta::DEPARTAMENTOS))],
+            'tipo_cotizacion' => Venta::reglaDepartamento($cotizacion->tipo_cotizacion),
         ]);
 
         // Validar nuevos detalles si existen

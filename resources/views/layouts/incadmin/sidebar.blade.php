@@ -202,7 +202,7 @@
 
                 <!-- Ventas -->
                 <li class="sidebar-dropdown">
-                    <a href="#" class="{{ Request::is('ventas','ventas/por-departamento','reportearticulos','inventario','descuentos','show-venta/*','show-descuento/*','admin/auditoria*') ? 'active-dropdown':''  }}" title="Gestión de Ventas">
+                    <a href="#" class="{{ Request::is('ventas','ventas/por-departamento','departamentos','add-departamento','edit-departamento/*','reportearticulos','inventario','descuentos','show-venta/*','show-descuento/*','admin/auditoria*') ? 'active-dropdown':''  }}" title="Gestión de Ventas">
                         <i class="bi bi-cash-stack"></i>
                         <span class="menu-text">Ventas</span>
                         <i class="bi bi-chevron-down menu-arrow"></i>
@@ -215,6 +215,11 @@
                             <li class="{{ Request::is('ventas/por-departamento') ? 'active-page-link':''  }}">
                                 <a href="{{ route('ventas.por_departamento') }}"><i class="bi bi-diagram-3"></i> Por departamento</a>
                             </li>
+                            @if(Auth::user()->role_as == 0)
+                            <li class="{{ Request::is('departamentos','add-departamento','edit-departamento/*') ? 'active-page-link':''  }}">
+                                <a href="{{ url('departamentos') }}"><i class="bi bi-tags"></i> Departamentos</a>
+                            </li>
+                            @endif
                             @if(Auth::user()->role_as != 1)
                                 <li class="{{ Request::is('reportearticulos') ? 'active-page-link':''  }}">
                                     <a href="{{ url('reportearticulos') }}"><i class="bi bi-bar-chart-line"></i> Artículos Vendidos</a>

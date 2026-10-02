@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Validation\Rule;
 use Carbon\Carbon;
 
 class Venta extends Model
@@ -23,13 +25,68 @@ class Venta extends Model
         'Pintura Automotriz' => 'Pintura automotriz',
     ];
 
+    /**
+     * Lista activa para formularios y reportes.
+     * Si la tabla aún no existe, usa la lista fija original.
+     */
+    public static function departamentosActivos(): array
+    {
+        if (!Schema::hasTable('departamentos')) {
+            return self::DEPARTAMENTOS;
+        }
+
+        $filas = Departamento::activos()->get();
+        if ($filas->isEmpty()) {
+            return self::DEPARTAMENTOS;
+        }
+
+        $lista = [];
+        foreach ($filas as $fila) {
+            $lista[$fila->nombre] = $fila->etiqueta ?: $fila->nombre;
+        }
+
+        return $lista;
+    }
+
+    public static function mapaEtiquetas(): array
+    {
+        static $mapa = null;
+        if ($mapa !== null) {
+            return $mapa;
+        }
+
+        $mapa = self::DEPARTAMENTOS;
+        if (Schema::hasTable('departamentos')) {
+            foreach (Departamento::orderBy('orden')->orderBy('nombre')->get() as $fila) {
+                $mapa[$fila->nombre] = $fila->etiqueta ?: $fila->nombre;
+            }
+        }
+
+        return $mapa;
+    }
+
     public static function etiquetaDepartamento(?string $valor): string
     {
         if ($valor === null || $valor === '') {
             return 'Sin departamento';
         }
 
-        return self::DEPARTAMENTOS[$valor] ?? $valor;
+        $mapa = self::mapaEtiquetas();
+
+        return $mapa[$valor] ?? $valor;
+    }
+
+    /**
+     * @return array<int, string|\Illuminate\Validation\Rules\In>
+     */
+    public static function reglaDepartamento(?string $valorActual = null): array
+    {
+        $nombres = array_keys(self::departamentosActivos());
+        if ($valorActual !== null && $valorActual !== '' && !in_array($valorActual, $nombres, true)) {
+            $nombres[] = $valorActual;
+        }
+
+        return ['required', Rule::in($nombres)];
     }
 
     protected $fillable = [

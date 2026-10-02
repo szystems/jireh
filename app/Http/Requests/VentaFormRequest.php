@@ -4,7 +4,6 @@ namespace App\Http\Requests;
 
 use App\Models\Venta;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class VentaFormRequest extends FormRequest
 {
@@ -30,7 +29,7 @@ class VentaFormRequest extends FormRequest
             'vehiculo_id' => 'required|exists:vehiculos,id',
             'numero_factura' => 'nullable|string|max:255',
             'fecha' => 'required|date',
-            'tipo_venta' => ['required', Rule::in(array_keys(Venta::DEPARTAMENTOS))],
+            'tipo_venta' => Venta::reglaDepartamento(),
             'usuario_id' => 'required|exists:users,id',
             'estado' => 'nullable|boolean',
             'estado_pago' => 'required|in:pagado,pendiente',
