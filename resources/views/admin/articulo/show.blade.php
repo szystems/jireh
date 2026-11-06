@@ -107,8 +107,9 @@
                                                     <span class="float-end">{{ $config->currency_simbol }} {{ number_format($articulo->precio_venta, 2) }}</span>
                                                 </div>
                                                 <div class="mb-0">
+                                                    @php $desglosePrecio = $articulo->desgloseRentabilidad($config->impuesto ?? 0); @endphp
                                                     <strong>Impuesto ({{ number_format($config->impuesto ?? 0, 2) }}%):</strong>
-                                                    <span class="float-end">{{ $config->currency_simbol }} {{ number_format(($articulo->precio_venta * ($config->impuesto ?? 0) / 100), 2) }}</span>
+                                                    <span class="float-end">{{ $config->currency_simbol }} {{ number_format($desglosePrecio['iva'], 2) }}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -122,11 +123,12 @@
                                             <div class="card-body p-0">
                                                 <div class="p-3">
                                                     @php
-                                                        $costosComisiones = 0;
-                                                        // El precio de venta INCLUYE IVA - calcular precio base sin IVA
-                                                        $impuestoPorcentaje = $config->impuesto ?? 0;
-                                                        $precioBaseSinIva = $articulo->precio_venta / (1 + ($impuestoPorcentaje / 100));
-                                                        $impuestoValor = $precioBaseSinIva * ($impuestoPorcentaje / 100);
+                                                        $desglose = $articulo->desgloseRentabilidad($config->impuesto ?? 0);
+                                                        $precioBaseSinIva = $desglose['precio_base'];
+                                                        $impuestoValor = $desglose['iva'];
+                                                        $costosComisiones = $desglose['comisiones'];
+                                                        $gananciaReal = $desglose['ganancia'];
+                                                        $margenReal = $desglose['margen'];
                                                     @endphp
                                                     
                                                     <table class="table table-sm">
@@ -148,28 +150,11 @@
                                                                 <td class="text-end text-danger">- {{ $config->currency_simbol }}.{{ number_format($impuestoValor, 2) }}</td>
                                                             </tr>
 
-                                                            @if($articulo->tipo == 'servicio')
-                                                                @php
-                                                                    $costosComisiones = ($articulo->costo_mecanico ?? 0) + ($articulo->comision_carwash ?? 0);
-                                                                    $costoTotal = $articulo->precio_compra + $impuestoValor + $costosComisiones;
-                                                                    $gananciaReal = $articulo->precio_venta - $costoTotal;
-
-                                                                    // Calcular el margen sobre el costo total
-                                                                    $margenReal = $costoTotal > 0 ? ($gananciaReal / $costoTotal) * 100 : 0;
-                                                                @endphp
-
-                                                                @if($costosComisiones > 0)
-                                                                    <tr>
-                                                                        <td class="text-start">Comisiones (Mecánico/CarWash)</td>
-                                                                        <td class="text-end text-danger">- {{ $config->currency_simbol }}.{{ number_format($costosComisiones, 2) }}</td>
-                                                                    </tr>
-                                                                @endif
-                                                            @else
-                                                                @php
-                                                                    $costoTotal = $articulo->precio_compra + $impuestoValor;
-                                                                    $gananciaReal = $articulo->precio_venta - $costoTotal;
-                                                                    $margenReal = $costoTotal > 0 ? ($gananciaReal / $costoTotal) * 100 : 0;
-                                                                @endphp
+                                                            @if($articulo->tipo == 'servicio' && $costosComisiones > 0)
+                                                                <tr>
+                                                                    <td class="text-start">Comisiones (Mecánico/CarWash)</td>
+                                                                    <td class="text-end text-danger">- {{ $config->currency_simbol }}.{{ number_format($costosComisiones, 2) }}</td>
+                                                                </tr>
                                                             @endif
 
                                                             <tr>

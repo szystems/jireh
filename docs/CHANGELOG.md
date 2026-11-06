@@ -6,6 +6,14 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
+## [v1.7.6] - 2026-11-05
+
+### 🐛 Corrección: margen de ganancia del artículo
+- El precio de venta sigue incluyendo IVA y la ganancia en quetzales no cambia.
+- El porcentaje ya no divide esa ganancia entre (compra + IVA). El IVA cobrado no es costo.
+- El margen es la ganancia sobre el costo pagado (compra + comisiones): 40% en el caso compra Q130 / venta Q203.84, no 34%.
+- Misma fórmula en el formulario, la ficha, el PDF del artículo y el listado PDF.
+
 ## [v1.7.4] - 2026-01-05
 
 ### 🐛 Corrección Crítica: Precios Históricos en Ventas

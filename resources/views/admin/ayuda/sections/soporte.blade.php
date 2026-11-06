@@ -304,6 +304,18 @@
                                 </thead>
                                 <tbody>
                                     <tr class="table-info">
+                                        <td><strong>1.7.6</strong></td>
+                                        <td>Nov 5, 2026</td>
+                                        <td>
+                                            <strong>Margen de ganancia sin contar el IVA como costo:</strong>
+                                            <ul class="mb-0">
+                                                <li>La ganancia en quetzales sigue igual</li>
+                                                <li>El porcentaje se calcula sobre el costo pagado, antes del IVA</li>
+                                                <li>Compra Q130 y venta Q203.84 marcan 40.00%, no 34%</li>
+                                            </ul>
+                                        </td>
+                                    </tr>
+                                    <tr>
                                         <td><strong>1.7.5</strong></td>
                                         <td>Sep 30, 2026</td>
                                         <td>
@@ -409,9 +421,9 @@
                         <div class="col-md-8">
                             <h5><i class="bi bi-info-circle text-primary"></i> Información del Sistema</h5>
                             <p class="mb-0">
-                                <strong>Sistema Jireh v1.7.5</strong> - Desarrollado por <a href="https://szystems.com" target="_blank" class="text-decoration-none">Szystems</a><br>
+                                <strong>Sistema Jireh v1.7.6</strong> - Desarrollado por <a href="https://szystems.com" target="_blank" class="text-decoration-none">Szystems</a><br>
                                 Plataforma: Laravel 8 | Base de datos: MySQL | Interfaz: Bootstrap 5<br>
-                                <small class="text-muted">Última actualización: 30 de septiembre de 2026 - Ventas por departamento y PDF sin código interno</small>
+                                <small class="text-muted">Última actualización: 5 de noviembre de 2026 - Margen de ganancia sobre el costo, sin contar el IVA como costo</small>
                             </p>
                         </div>
                         <div class="col-md-4 text-center">

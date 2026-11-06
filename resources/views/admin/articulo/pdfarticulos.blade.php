@@ -193,8 +193,7 @@
             <tbody>
                 @foreach($articulos as $articulo)
                     @php
-                        $margen = $articulo->precio_compra > 0 ?
-                            (($articulo->precio_venta - $articulo->precio_compra) / $articulo->precio_compra) * 100 : 0;
+                        $margen = $articulo->desgloseRentabilidad(isset($config) ? ($config->impuesto ?? 0) : 0)['margen'];
                     @endphp
                     <tr class="compact-row">
                         <td><span class="text-primary text-bold">{{ $articulo->codigo }}</span></td>

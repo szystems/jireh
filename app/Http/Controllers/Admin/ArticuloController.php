@@ -651,21 +651,14 @@ class ArticuloController extends Controller
             $data['costosComisiones'] = ($articulo->costo_mecanico ?? 0) + ($articulo->comision_carwash ?? 0);
         }
 
-        // Cálculo de IVA - el precio de venta INCLUYE IVA
+        // El precio de venta incluye IVA. El margen se mide sobre el costo
+        // pagado (compra + comisiones), sin meter el IVA en esa base.
         $impuesto = $config->impuesto ?? 0;
-        $precioBaseSinIva = $articulo->precio_venta / (1 + ($impuesto / 100));
-        $valorImpuesto = $precioBaseSinIva * ($impuesto / 100);
-
-        // Cálculos de rentabilidad considerando comisiones si es servicio
-        $costosComisiones = $articulo->tipo == 'servicio' ?
-                            ($articulo->costo_mecanico ?? 0) + ($articulo->comision_carwash ?? 0) : 0;
-
-        // Calcular costo total real
-        $costoTotal = $articulo->precio_compra + $valorImpuesto + $costosComisiones;
-        $gananciaReal = $articulo->precio_venta - $costoTotal;
-
-        // El margen se calcula sobre el costo total
-        $margen = $costoTotal > 0 ? ($gananciaReal / $costoTotal) * 100 : 0;
+        $desglose = $articulo->desgloseRentabilidad($impuesto);
+        $valorImpuesto = $desglose['iva'];
+        $costosComisiones = $desglose['comisiones'];
+        $gananciaReal = $desglose['ganancia'];
+        $margen = $desglose['margen'];
 
         // Información del estado del stock
         $data['estadoStock'] = 'Disponible';

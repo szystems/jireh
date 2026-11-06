@@ -312,38 +312,37 @@ database/factories/     # Generación datos prueba
 - Testing de flujos completos
 - Testing de autenticación
 
-## 📊 Lógica de Cálculos de Rentabilidad ⭐ **v1.7.3 (Sep 22, 2025)**
+## 📊 Lógica de Cálculos de Rentabilidad ⭐ **v1.7.6 (Nov 5, 2026)**
 
-### Implementación Corregida
-El sistema maneja cálculos de rentabilidad considerando que **el precio de venta incluye IVA**.
+### Implementación
+El precio de venta **incluye IVA**. El IVA cobrado se muestra en el desglose y se entera al fisco: no se suma al costo sobre el que se mide el margen. El margen es la ganancia sobre el costo pagado (compra + comisiones), el porcentaje que se arma antes de agregar el IVA.
 
 #### **Fórmulas Aplicadas:**
 ```php
 // 1. Calcular precio base sin IVA
 $precioBaseSinIva = $precioVenta / (1 + ($impuestoPorcentaje / 100));
 
-// 2. Calcular IVA sobre precio base
+// 2. Calcular IVA sobre precio base (solo para el desglose)
 $valorIVA = $precioBaseSinIva * ($impuestoPorcentaje / 100);
 
-// 3. Calcular costo total
-$costoTotal = $precioCompra + $valorIVA + $comisiones;
+// 3. Costo pagado. El IVA cobrado no entra aquí.
+$costo = $precioCompra + $comisiones;
 
-// 4. Calcular ganancia real
-$gananciaReal = $precioVenta - $costoTotal;
+// 4. Ganancia real
+$gananciaReal = $precioBaseSinIva - $costo;
 
-// 5. Calcular margen
-$margen = ($gananciaReal / $costoTotal) * 100;
+// 5. Margen sobre ese costo
+$margen = ($gananciaReal / $costo) * 100;
 ```
 
-#### **Ejemplo Práctico:**
+#### **Ejemplo (compra Q130, 40% y luego 12% de IVA):**
 ```
-Precio de venta (incluye IVA): Q 1,092.00
-Precio base sin IVA:          Q   975.00  (1,092 ÷ 1.12)
-Precio de compra:             Q   700.00
-IVA (12%):                    Q   117.00  (975 × 12%)
-Costo total:                  Q   817.00  (700 + 117)
-Ganancia real:                Q   275.00  (1,092 - 817)
-Margen:                       33.66%      (275/817)
+Precio de venta (incluye IVA): Q 203.84
+Precio base sin IVA:          Q 182.00  (203.84 ÷ 1.12)
+Precio de compra:             Q 130.00
+IVA (12%):                    Q  21.84  (182 × 12%)
+Ganancia real:                Q  52.00  (182 − 130)
+Margen:                         40.00%  (52 / 130)
 ```
 
 #### **Archivos Implementados:**
