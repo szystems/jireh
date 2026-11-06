@@ -119,6 +119,41 @@ class Articulo extends Model
     }
 
     /**
+     * Desglose de rentabilidad cuando el precio de venta ya incluye IVA.
+     *
+     * El IVA cobrado se entera al fisco: se informa en el desglose, pero no
+     * es costo del artículo. La ganancia es el precio sin IVA menos lo que
+     * sí se pagó (compra y, en servicios, comisiones). El margen es esa
+     * ganancia sobre ese costo: el porcentaje que se arma antes de sumar el IVA.
+     *
+     * @param  float|int|string  $impuestoPorcentaje
+     * @return array{precio_base: float, iva: float, comisiones: float, costo: float, ganancia: float, margen: float}
+     */
+    public function desgloseRentabilidad($impuestoPorcentaje)
+    {
+        $impuestoPorcentaje = (float) $impuestoPorcentaje;
+        $precioVenta = (float) $this->precio_venta;
+        $precioCompra = (float) $this->precio_compra;
+        $divisor = 1 + ($impuestoPorcentaje / 100);
+        $precioBase = $divisor != 0.0 ? $precioVenta / $divisor : $precioVenta;
+        $iva = $precioBase * ($impuestoPorcentaje / 100);
+        $comisiones = $this->tipo === 'servicio'
+            ? (float) ($this->costo_mecanico ?? 0) + (float) ($this->comision_carwash ?? 0)
+            : 0.0;
+        $costo = $precioCompra + $comisiones;
+        $ganancia = $precioBase - $costo;
+
+        return [
+            'precio_base' => $precioBase,
+            'iva' => $iva,
+            'comisiones' => $comisiones,
+            'costo' => $costo,
+            'ganancia' => $ganancia,
+            'margen' => $costo > 0 ? ($ganancia / $costo) * 100 : 0.0,
+        ];
+    }
+
+    /**
      * Verifica si el artículo es un servicio que requiere mecánico
      */
     public function requiereMecanico()

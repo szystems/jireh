@@ -1,5 +1,7 @@
 # 📊 Corrección de Cálculos de Rentabilidad - v1.7.3
 
+> **v1.7.6 (5 nov 2026):** la ganancia en quetzales de esta nota se mantiene. El porcentaje ya no se divide entre (compra + IVA). El IVA cobrado no es costo: el margen es ganancia / (compra + comisiones). En el ejemplo de Emilio (compra Q130, venta Q203.84) eso es 40.00%, no 34.25%.
+
 ## 🎯 Resumen de la Corrección
 
 **Fecha:** Septiembre 22, 2025  

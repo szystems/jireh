@@ -502,18 +502,16 @@ function calcularMargen() {
     // Solo aplicar costos de comisiones si es un servicio
     const costosComisiones = (tipoArticulo === 'servicio') ? (costoMecanico + comisionCarwash) : 0;
 
-    // El precio de venta INCLUYE IVA - calcular precio base sin IVA
-    const precioBaseSinIva = precioVenta / (1 + (impuestoPorcentaje / 100));
-
-    // Calcular el IVA sobre el precio base
+    // El precio de venta INCLUYE IVA. El IVA se entera al fisco: sale en el
+    // desglose, pero no es costo. La ganancia es el precio sin IVA menos
+    // compra y comisiones. El margen es esa ganancia sobre ese costo
+    // (el 40% que se arma antes de sumar el 12% de IVA).
+    const divisorIva = 1 + (impuestoPorcentaje / 100);
+    const precioBaseSinIva = divisorIva !== 0 ? precioVenta / divisorIva : precioVenta;
     const impuestoValor = precioBaseSinIva * (impuestoPorcentaje / 100);
-
-    // Calcular el costo total real (compra + IVA calculado)
-    const costoTotal = precioCompra + impuestoValor + costosComisiones;
-
-    // Calcular ganancia real
-    const gananciaReal = precioVenta - costoTotal;
-    const margenReal = costoTotal > 0 ? (gananciaReal / costoTotal) * 100 : 0;
+    const costoOperativo = precioCompra + costosComisiones;
+    const gananciaReal = precioBaseSinIva - costoOperativo;
+    const margenReal = costoOperativo > 0 ? (gananciaReal / costoOperativo) * 100 : 0;
 
     // Actualizar etiquetas en la tabla
     const tdPrecioVenta = document.getElementById('td-precio-venta');
@@ -616,8 +614,8 @@ function calcularMargen() {
         margenBarra.classList.add(colorClass);
         margenElement.classList.add(colorClass);
 
-        // Actualizar ancho de la barra de progreso (máximo 100%)
-        const anchoBarraPorcentaje = Math.min(margenReal, 100);
+        // Mismo redondeo que el porcentaje visible, para que 40.00% ocupe 40% de la barra.
+        const anchoBarraPorcentaje = Math.min(Math.max(Number(formatNumber(margenReal)), 0), 100);
         margenBarra.style.width = `${anchoBarraPorcentaje}%`;
     }
 }
